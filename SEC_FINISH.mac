@@ -1,0 +1,49 @@
+! sec_finish, sectName, sectID
+! sec_finish,     arg1,   arg2
+
+! Description:
+! Finalizes the creation of a custom BEAM188 cross-section shape. The steps performed by this
+! subroutine are the following:
+!   1. Write current mesh to external .SECT file
+!   2. Delete cross-section entities (mesh & solid model)
+!   3. Import created cross-section to model (only if arg2>0)
+!   4. Restore selection to its previous state
+! This subroutine undoes the preparatory steps performed by 'SEC_INIT'. The expected flow is:
+!   SEC_INIT
+!   <commands to draw and mesh a custom cross-section>
+!   SEC_FINISH
+! Not calling 'SEC_INIT' before 'SEC_FINISH' might result in errors.
+
+! Arguments:
+! arg1: name   -  cross-section's .SECT file name
+! arg2: secID  -  section ID:
+!                   [<= 0] do not import as BEAM188 cross-section
+!                   [>0]   BEAM188 cross-section ID
+
+! Local parameters:
+! -
+
+
+! Write to file
+secwrite,arg1,sect,,SEC_INIT_VAR_etnum
+
+! Revert model to previous state
+aclear,all
+adele ,all
+ldele ,all
+kdele ,all
+etdele,SEC_INIT_VAR_etnum
+
+! Import cross-section
+*if,arg2,gt,0,then
+    sectype,arg2,beam,mesh,arg1
+    secread,arg1,sect,,mesh
+*endif
+
+! Restore previous selection
+arestore
+lrestore
+krestore
+erestore
+nrestore
+csrestore

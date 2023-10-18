@@ -1,0 +1,76 @@
+! WRITECSA, format
+
+! WRITECSA_ARR_input
+! WRITECSA_ARR_title
+
+! AR20: arrayLength
+! AR21: entryCounter
+! AR22: nthValue
+! AR23: i
+! AR24: titleLength
+! AR25: j
+! AR26: nthStr
+! AR27: strLength
+
+*get,AR20,PARM,WRITECSA_ARR_input,DIM,X
+AR24=STRLENG(WRITECSA_ARR_title(1))
+*cfopen,vwriteFile,tmp
+AR21=0
+*vwrite,
+('*vwrite,')
+*vwrite,'(''
+(A2,\b)
+*vwrite,WRITECSA_ARR_title(1)
+%C ',\b)
+*do,AR23,1,AR20,1
+   AR22=WRITECSA_ARR_input(AR23)
+   *vwrite,AR23
+WRITECSA_VAR_value=WRITECSA_ARR_input(%I)
+   AR21=AR21+1
+   *if,AR21,EQ,10,THEN
+      *vwrite,
+      ('*vwrite,WRITECSA_VAR_value')
+      *vwrite,arg1
+      ('(',A8',',\b)
+      *vwrite,
+' ;')
+      *if,AR23,NE,AR20,THEN
+         *vwrite,
+         ('*vwrite,')
+         *vwrite,'(';'
+         (A3,\b)
+         *do,AR25,1,AR24,1
+            *vwrite,
+            (' ',\b)
+         *enddo
+         *vwrite,
+',\b)
+      *endif
+      AR21=0
+   *else
+      *if,AR23,NE,AR20,THEN
+         *vwrite,
+         ('*vwrite,WRITECSA_VAR_value')
+         *vwrite,arg1
+         ('(',A8',',\b)
+         *vwrite,
+' ; ',\b)
+      *else
+         *vwrite,
+         ('*vwrite,WRITECSA_VAR_value')
+         *vwrite,arg1
+         ('(',A8',',\b)
+         *vwrite,
+' ;')
+      *endif
+   *endif
+*enddo
+*cfclos
+
+/nopr
+/output,ohyeahbananas,txt
+/input,vwriteFile,tmp
+/output
+/delete,vwriteFile,tmp
+/gopr
+

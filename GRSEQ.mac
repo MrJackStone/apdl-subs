@@ -1,0 +1,152 @@
+! GRSEQ, xVarNum, yVarNum, --,   xRangeMode, yRangeMode, folderName
+! GRSEQ, arg1,    arg2,    arg3, arg4,       arg5,       arg6
+
+! Descrição:
+! Esta subrotina cria um gráfico animado a partir de duas variáveis representando abscissas e
+! ordenadas e salva a animação como arquivo .avi. O usuário controla a velocidade da animação
+! definindo um valor para a duração do quadro (tInterval) ou um valor para o tempo total de
+! animação (tTotal). Caso ambos os valores sejam definidos tInterval governará a velocidade da
+! animação.
+
+! Lista de argumentos:
+! arg1: xVarNum     -  número de variável que contém os valores da abscissa
+! arg2: yVarNum     -  número da variável que contém os valores da ordenada
+! arg3: --          -  [vazio]
+! arg4: xRangeMode  -  definição de limites do eixo X:
+!                         [0] não modificar os limites;
+!                         [1] aplicar limites estáticos automáticos com base nos dados da variável;
+!                         [2] utilizar limite dinâmico com base nos dados plotados;
+! arg5: yRangeMode  -  definição de limites do eixo Y:
+!                         [0] não modificar os limites;
+!                         [1] aplicar limites estáticos automáticos com base nos dados da variável;
+!                         [2] utilizar limite dinâmico com base nos dados plotados;
+! arg6: folderName  -  nome do diretório no qual as imagens serão armazenadas;
+
+! Lista de variáveis locais:
+! AR20: frameCount
+! AR21:
+! AR22: xMin
+! AR23: xMax
+! AR24: yMin
+! AR25: yMax
+! AR26: nthFrame
+! AR27: progress
+! AR28: subdirKey
+! AR29: parType
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! GRSEQ_ARR_xVector
+! GRSEQ_ARR_yVector
+! GRSEQ_ARR_tempX
+! GRSEQ_ARR_tempY
+! GRSEQ_VAR_frameNumber
+
+! Obter diretório atual
+*del,GRSEQ_STR_mainDir
+/inquire,GRSEQ_STR_mainDir,DIRECTORY
+
+! Criar diretório para armazenar as imagens
+AR28=0
+*get,AR29,PARM,arg6,TYPE
+*if,AR29,EQ,3,THEN
+   AR28=1
+   SUBDIR,arg6,0
+*endif
+
+! Limpar variáveis que serão utilizadas por esta subrotina
+VARDEL,199
+VARDEL,200
+
+! Transferir valores das variáveis (abscissas e ordenadas) para os vetores
+*del,GRSEQ_ARR_xVector
+*del,GRSEQ_ARR_yVector
+VGET,GRSEQ_ARR_xVector,arg1
+VGET,GRSEQ_ARR_yVector,arg2
+
+! Obter a dimensão dos vetores de dados
+*get,AR20,PARM,GRSEQ_ARR_xVector,DIM,X
+!!
+*if,AR20,GE,1000,THEN
+   AR20=999
+*endif
+!!
+
+! Obter valores mínimos e máximos de abscissas e ordenadas
+*vscfun,AR22,MIN,GRSEQ_ARR_xVector
+*vscfun,AR23,MAX,GRSEQ_ARR_xVector
+*vscfun,AR24,MIN,GRSEQ_ARR_yVector
+*vscfun,AR25,MAX,GRSEQ_ARR_yVector
+
+! Definir os limites do eixo X
+*if,arg4,EQ,1,THEN
+   /xrange,AR22,AR23
+*elseif,arg4,EQ,2,THEN
+   /xrange
+*endif
+! Definir os limites do eixo Y
+*if,arg5,EQ,1,THEN
+   /yrange,AR24,AR25
+*elseif,arg5,EQ,2,THEN
+   /yrange
+*endif
+
+! Exibir janela de progresso
+*abset,'Animating Results',BAR
+
+! Iniciar loop de geração dos quadros da animação
+*do,AR26,1,AR20,1
+
+    GRSEQ_VAR_frameNumber=AR26
+    /title,%GRSEQ_VAR_frameNumber%
+
+   ! Criar vetores temporários com os valores das abscissas e das ordenadas
+   *del,GRSEQ_ARR_tempX
+   *dim,GRSEQ_ARR_tempX,ARRAY,AR26
+   *del,GRSEQ_ARR_tempY
+   *dim,GRSEQ_ARR_tempY,ARRAY,AR26
+   *do,i,1,AR26,1
+      GRSEQ_ARR_tempX(i)=GRSEQ_ARR_xVector(i)
+      GRSEQ_ARR_tempY(i)=GRSEQ_ARR_yVector(i)
+   *enddo
+
+   ! Transferir conteúdo dos vetores temporários para variáveis
+   VPUT,GRSEQ_ARR_tempX,199,,,'X'
+   VPUT,GRSEQ_ARR_tempY,200,,,'Y'
+
+   ! Definir variável do eixo X
+   XVAR,199
+
+   ! Plotar variável do eixo Y
+   /show
+   PLVAR,200
+
+   *if,AR28,EQ,1,THEN
+      /cwd,'%SUBDIR_ARR_newFolderPath(1)%'
+      TAKEPIC,,800,,,1
+      /cwd,'%GRSEQ_STR_mainDir(1)%'
+   *else
+      TAKEPIC,,800,,,1
+   *endif
+
+   ! Atualizar barra de progresso
+   AR27=100*(AR26/AR20)
+   *abcheck,AR27
+
+*enddo
+
+! Fechar janela com barra de progresso
+*abfini
+
+! Apagar vetores
+*del,GRSEQ_ARR_xVector
+*del,GRSEQ_ARR_yVector
+*del,GRSEQ_ARR_tempX
+*del,GRSEQ_ARR_tempY
+*del,GRSEQ_STR_mainDir
+*del,GRSEQ_VAR_frameNumber
+
+
+
+
+
+

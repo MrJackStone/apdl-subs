@@ -1,0 +1,15 @@
+! LARROWYZ, x,y,z
+
+*get,AR30,KP,,NUM,MAXD
+AR20=AR30+1
+AR21=AR30+2
+AR22=AR30+3
+AR23=AR30+4
+K,AR20,arg1,arg2,arg3
+K,AR21,arg1,arg2+2,arg3
+K,AR22,arg1,arg2+0.5,arg3-0.3
+K,AR23,arg1,arg2+0.5,arg3+0.3
+L,AR20,AR21
+L,AR20,AR22
+L,AR20,AR23
+

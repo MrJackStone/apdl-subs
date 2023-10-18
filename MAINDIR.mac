@@ -1,0 +1,41 @@
+! MAINDIR, revert
+! MAINDIR,   arg1
+
+! Descrição:
+! Esta subrotina obtém o diretório principal do modelo ou redefine o diretório corrente como o
+! diretório principal previamente obtido.
+
+! Lista de argumentos:
+! arg1: revert  -  reverter o diretório corrente para o último diretório principal definido
+!                     [0] Não reverter (definir o diretório atual como o principal)
+!                     [1] Reverter diretório corrente para o último diretório principal
+
+! Lista de argumentos implícitos:
+! MAINDIR_STR_DirPath
+!    Vetor com os números das aberturas (contadas da esquerda para a direita) a fechar
+
+! Lista de variáveis locais:
+! AR20: parType
+
+! Lista de variáveis de saída:
+! MAINDIR_STR_DirPath
+!    Vetor com os números das aberturas (contadas da esquerda para a direita) a fechar
+
+
+*if,arg1,EQ,0,THEN
+   ! Obter diretório atual
+   *del,MAINDIR_STR_DirPath
+   /inquire,MAINDIR_STR_DirPath,DIRECTORY
+*elseif,arg1,EQ,1,THEN
+   ! Verificar se o diretório principal já havia sido definido
+   *get,AR20,PARM,MAINDIR_STR_DirPath,TYPE
+   *if,AR20,EQ,5,THEN
+      ! Reverter para o diretório original
+      /cwd,'%MAINDIR_STR_DirPath(1)%'
+   *else
+      ! Exibir aviso de erro
+      *msg,WARN
+MAINDIR ERROR: Main directory has not been previously set with MAINDIR,0. MAINDIR command ignored.
+   *endif
+*endif
+

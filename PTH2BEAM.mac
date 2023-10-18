@@ -1,0 +1,240 @@
+! pth2beam, topNode1, topNode2, botNode1, botNode2, pathNameRoot, dflKey, pathDiv,    W,    A, avgKey, lcEnv
+! pth2beam,     arg1,     arg2,     arg3,     arg4,         arg5,   arg6,    arg7, arg8, arg9,   ar10,  ar11
+
+! Description:
+! Calculates beam internal reactions based on SHELL181 stresses. Results are stored in a load case
+! envelope table, each quantity in a column, in the order presented below. The local coordinate
+! systems of the SHELL181 elements must be oriented such that the local X axis is aligned with the
+! virtual beam's axis.
+!
+! This subroutine has the following requirements:
+!
+!    • an element table named 'M11' (containing data from SMISC,4) must be defined (necessary to
+!      calculate off-plane bending moment values)
+!    • an element table named 'SM_11' (containing data from SMISC,34) must be defined (necessary to
+!      calculate in-plane bending moment and axial force values)
+!    • an element table named 'SM_12' (containing data from SMISC,36) must be defined (necessary to
+!      calculate in-plane shear force values)
+!    • all the virtual beam's nodes and (SHELL181) elements must be currently selected
+!
+! Results envelope table layout:
+!   ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+!   │ COL:      1       2       3       4      5      6      7      8        9       10       11       12       13       14       15       16       17       18       19       20 │
+!   │ VAL: MP_MIN  MP_MAX  MB_MIN  MB_MAX  N_MIN  N_MAX  V_MIN  V_MAX  DXT_MIN  DXT_MAX  DYT_MIN  DYT_MAX  DZT_MIN  DZT_MAX  DXB_MIN  DXB_MAX  DYB_MIN  DYB_MAX  DZB_MIN  DZB_MAX │
+!   └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+!
+!    Legend:
+!      First character:
+!          M    -  bending moment
+!          N    -  axial force
+!          V    -  shear force
+!          D    -  deflection
+!       Second character:
+!          P    -  in-plane value (SHELL181 plane)
+!          B    -  off-plane value (SHELL181 bending)
+!          X    -  deflection measured along X direction (UX DOF)
+!          Y    -  deflection measured along X direction (UY DOF)
+!          Z    -  deflection measured along X direction (UZ DOF)
+!       Third character:
+!          T    -  deflection at the top face of the beam
+!          B    -  deflection at the bottom face of the beam
+!       Suffix:
+!          MIN  -  minimum value (signed)
+!          MAX  -  maximum value (signed)
+
+! Arguments:
+! arg1: topNode1      -  node number marking beginning of the top face of the beam
+! arg2: topNode2      -  node number marking end of the top face of the beam
+! arg3: botNode1      -  node number marking beginning of the bottom face of the beam
+! arg4: botNode2      -  node number marking end of the bottom face of the beam
+! arg5: pathNameRoot  -  string used as path name prefix for inner calculations and as path name for
+!                        result envelopes
+!                        (recommended length: 6 characters; maximum length: 8 characters)
+! arg6: dflKey        -  deflection multiplier (+1 or -1), to fix plot direction
+! arg7: pathDiv       -  number of path divisions
+! arg8: W             -  cross-sectional maximum elastic bending module
+! arg9: A             -  cross-sectional area
+! ar10: avgKey        -  average key
+!                           [0] AVG  (default)
+!                           [1] NOAV
+! ar11: lcEnv         -  parameter name of table containing results envelope
+
+! Local parameters:
+! AR20: pthRoot
+! AR21: vPathName
+! AR22: parType
+! AR23: i
+! AR24: xt_1
+! AR25: xt_2
+! AR26: xb_1
+! AR27: xb_2
+! AR28: yt_1
+! AR29: yt_2
+! AR30: yb_1
+! AR31: yb_2
+! AR32: zt_1
+! AR33: zt_2
+! AR34: zb_1
+! AR35: zb_2
+! AR36: xm_1
+! AR37: xm_2
+! AR38: ym_1
+! AR39: ym_2
+! AR40: zm_1
+! AR41: zm_2
+! AR42: xDfl
+! AR43: yDfl
+! AR44: zDfl
+! AR45: colIdx
+! AR46: col
+! AR47: itemLabel
+! AR48:
+! AR49:
+! AR50:
+
+! Global parameters (erased at the end of this subroutine):
+! PTHS2MN_ARR_bendingMoment
+! PTHS2MN_ARR_axialForce
+! PTHS2V_ARR_shear
+! PTH2BEAM_ARR_m2
+! PTH2BEAM_ARR_cols
+! PTH2BEAM_ARR_column
+
+
+! Path names for in-plane results
+AR20=strsub(arg5,1,5)
+AR21=strcat(AR20,'_C')
+
+! Initialize envelope table
+*get,AR22,parm,%ar11%,type
+*if,AR22,ne,1,then
+    *del,%ar11%
+    *dim,%ar11%,,arg7+1,20
+    *do,AR23,1,18,1
+        *vfill,%ar11%(1,AR23),ramp,0,0
+    *enddo
+*endif
+
+*del,PTHS2MN_ARR_bendingMoment
+*del,PTHS2MN_ARR_axialForce
+*del,PTHS2V_ARR_shear
+*del,PTH2DFL_ARR_defl
+
+!! CREATE PATH TO MAP ENVELOPE RESULTS
+csbackup
+csys,0
+
+AR24=nx(arg1)
+AR25=nx(arg2)
+AR26=nx(arg3)
+AR27=nx(arg4)
+
+AR28=ny(arg1)
+AR29=ny(arg2)
+AR30=ny(arg3)
+AR31=ny(arg4)
+
+AR32=nz(arg1)
+AR33=nz(arg2)
+AR34=nz(arg3)
+AR35=nz(arg4)
+
+AR36=(AR24+AR26)/2
+AR37=(AR25+AR27)/2
+
+AR38=(AR28+AR30)/2
+AR39=(AR29+AR31)/2
+
+AR40=(AR32+AR34)/2
+AR41=(AR33+AR35)/2
+
+csrestore
+
+path,arg5,2,50,arg7
+ppath,1,,AR36,AR38,AR40
+ppath,2,,AR37,AR39,AR41
+pdef,'DUMMY',s,eqv,0
+
+
+!! IN-PLANE: BENDING MOMENT & AXIAL FORCE
+pths2mn, arg1, arg2, arg3, arg4, AR20, 'SM_11', arg7, arg8, arg9, ar10
+
+*voper, %ar11%(1, 1) , %ar11%(1, 1) , min , PTHS2MN_ARR_bendingMoment(1)
+*voper, %ar11%(1, 2) , %ar11%(1, 2) , max , PTHS2MN_ARR_bendingMoment(1)
+*voper, %ar11%(1, 5) , %ar11%(1, 5) , min , PTHS2MN_ARR_axialForce(1)
+*voper, %ar11%(1, 6) , %ar11%(1, 6) , max , PTHS2MN_ARR_axialForce(1)
+
+
+!! IN-PLANE: SHEAR FORCE
+pths2v,  arg1, arg2, arg3, arg4, AR21, 'SM_12', arg7,     , arg9, ar10
+
+*voper, %ar11%(1, 7) , %ar11%(1, 7) , min , PTHS2V_ARR_shear(1)
+*voper, %ar11%(1, 8) , %ar11%(1, 8) , max , PTHS2V_ARR_shear(1)
+
+
+!! DEFLECTIONS
+! X deflection, top face
+AR42=strcat(AR20,'_TX')
+pth2dfl,arg1,arg2,,,AR42,'X',arg7,,0,1,arg6
+*voper, %ar11%(1, 9) , %ar11%(1, 9) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,10) , %ar11%(1,10) , max , PTH2DFL_ARR_defl(1)
+
+! Y deflection, top face
+AR43=strcat(AR20,'_TY')
+pth2dfl,arg1,arg2,,,AR43,'Y',arg7,,0,1,arg6
+*voper, %ar11%(1,11) , %ar11%(1,11) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,12) , %ar11%(1,12) , max , PTH2DFL_ARR_defl(1)
+
+! Z deflection, top face
+AR44=strcat(AR20,'_TZ')
+pth2dfl,arg1,arg2,,,AR44,'Z',arg7,,0,1,arg6
+*voper, %ar11%(1,13) , %ar11%(1,13) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,14) , %ar11%(1,14) , max , PTH2DFL_ARR_defl(1)
+
+! X deflection, bottom face
+AR42=strcat(AR20,'_BX')
+pth2dfl,arg3,arg4,,,AR42,'X',arg7,,0,1,arg6
+*voper, %ar11%(1,15) , %ar11%(1,15) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,16) , %ar11%(1,16) , max , PTH2DFL_ARR_defl(1)
+
+! Y deflection, bottom face
+AR43=strcat(AR20,'_BY')
+pth2dfl,arg3,arg4,,,AR43,'Y',arg7,,0,1,arg6
+*voper, %ar11%(1,17) , %ar11%(1,17) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,18) , %ar11%(1,18) , max , PTH2DFL_ARR_defl(1)
+
+! Z deflection, bottom face
+AR44=strcat(AR20,'_BZ')
+pth2dfl,arg3,arg4,,,AR44,'Z',arg7,,0,1,arg6
+*voper, %ar11%(1,19) , %ar11%(1,19) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,20) , %ar11%(1,20) , max , PTH2DFL_ARR_defl(1)
+
+
+!! OFF-PLANE BENDING
+path,arg5
+pdef,'M2',etab,'M11',1
+pth2arr,'M2','PTH2BEAM_ARR_m2'
+*voper, %ar11%(1, 3) , %ar11%(1, 3) , min , PTH2BEAM_ARR_m2(1)
+*voper, %ar11%(1, 4) , %ar11%(1, 4) , max , PTH2BEAM_ARR_m2(1)
+
+
+!! MAP ENVELOPE TO PATH
+path,arg5
+
+*del,PTH2BEAM_ARR_cols
+*dim,PTH2BEAM_ARR_cols,char,20
+PTH2BEAM_ARR_cols( 1)= 'MP_MIN'  , 'MP_MAX'  , 'MB_MIN'  , 'MB_MAX'  , 'N_MIN'   , 'N_MAX'   , 'V_MIN'   , 'V_MAX'   , 'DXT_MIN' , 'DXT_MAX'
+PTH2BEAM_ARR_cols(11)= 'DYT_MIN' , 'DYT_MAX' , 'DZT_MIN' , 'DZT_MAX' , 'DXB_MIN' , 'DXB_MAX' , 'DYB_MIN' , 'DYB_MAX' , 'DZB_MIN' , 'DZB_MAX'
+AR45=4
+*do,AR46,1,20,1
+    *del,PTH2BEAM_ARR_column
+    *dim,PTH2BEAM_ARR_column,array,arg7+1
+    *vfun,PTH2BEAM_ARR_column(1),copy,%ar11%(1,AR46)
+
+    AR47=PTH2BEAM_ARR_cols(AR46)
+    AR45=AR45+1
+    arr2pth, 'PTH2BEAM_ARR_column', AR47, AR45
+*enddo
+
+
+

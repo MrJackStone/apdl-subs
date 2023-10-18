@@ -1,0 +1,36 @@
+! NSLCOMP, outputValues, outputNodes, outputCount, inputArray, multiplier
+! NSLCOMP,         arg1,        arg2,        arg3,       arg4,       arg5
+
+! List of all nodes
+nbackup
+nsel,s,node,,all
+*del,NSLCOMP_ARR_nnum
+*vget,NSLCOMP_ARR_nnum,node,,nlist
+nrestore
+
+! Node selection flag
+*del,NSLCOMP_ARR_selected
+*vget,NSLCOMP_ARR_selected,node,,nsel
+
+! Scale input value array
+*if,arg5,eq,0,then
+    AR20=1
+*else
+    AR20=arg5
+*endif
+*del,NSLCOMP_ARR_temp
+*voper, NSLCOMP_ARR_temp , %arg4% , mult , AR20
+
+! Compress input value array
+*del,%arg1%
+*vmask, NSLCOMP_ARR_selected
+*vfun , %arg1% , comp , NSLCOMP_ARR_temp
+
+! Compress node number array
+*del,%arg2%
+*vmask, NSLCOMP_ARR_selected
+*vfun , %arg2% , comp , NSLCOMP_ARR_nnum
+
+! Number of array positions
+*get,%arg3%,parm,%arg2%,dim,x
+

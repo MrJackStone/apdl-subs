@@ -1,0 +1,19 @@
+! VIEW1W
+
+! Description:
+! Activates single window isometric view
+
+! Delete all windows
+/window,ALL,DELE
+
+! Create single window
+!/window,1,FULL
+/window,1,-1,1.67,-1,1
+
+! Set isometric view
+/view,4,1,1,1
+
+! Set auto zoom
+/auto,all
+
+

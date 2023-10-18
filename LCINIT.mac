@@ -1,0 +1,88 @@
+! lcinit, combObj, combIdx, lsNum
+! lcinit,    arg1,    arg2,  arg3
+
+! Description:
+! Signals the activation of a load combination by assigning it a load step number and writing
+! its attributes to an external file named 'designld_report.log'.
+! This subroutine should be called before DESIGNLD is called for the first time every time a
+! different load combination is to be used.
+
+! Arguments:
+! arg1: combObj  -  name of array parameter that represents the load combinations
+! arg2: combIdx  -  selected combination's index (K-dimension of load combination array)
+! arg3: lsNum    -  number of load step that will be solved using this load combination
+
+! Local parameters:
+! AR21: hypothesisCount
+! AR22: combName
+! AR23: lsNum
+! AR24: nthHypothesis
+! AR25: hypothesisName
+! AR26: gammaOpt
+! AR27: psiOpt
+! AR28: combDescription
+
+! Global parameters (erased at the end of this subroutine)
+! LCINIT_VAR_time
+
+
+ctime,'LCINIT_VAR_time'
+
+%arg1%(3,1,arg2)=chrval(arg3)
+
+*get,AR21,parm,%arg1%,dim,y
+AR22=%arg1%(1,1,arg2)
+AR28=%arg1%(2,1,arg2)
+AR23=%arg1%(3,1,arg2)
+
+*cfopen,'designld_report','log',,append
+    *vwrite,
+    (' ')
+    *vwrite,
+    (' ')
+    *vwrite,
+    (' ')
+
+    *vwrite,LCINIT_VAR_time,chrval(arg2)
+*** %s NEW LOAD COMBINATION ACTIVATED: %s ***
+    *vwrite
+    (' ')
+
+    *vwrite,
+    ('ATTRIBUTES:')
+    *vwrite,chrval(arg2)
+   Index  ► %s
+    *vwrite,AR22
+   Name   ► %s
+    *vwrite,AR28
+   Desc.  ► %s
+    *vwrite,AR23
+   LS num ► %s
+   *vwrite
+   (' ')
+
+   *vwrite,
+   ('COEFFICIENTS:')
+   *do,AR24,2,AR21,1
+       AR25=%arg1%(1,AR24,arg2)
+       AR26=%arg1%(2,AR24,arg2)
+       AR27=%arg1%(3,AR24,arg2)
+       *if,strleng(AR25),eq,0,then
+           *exit
+       *endif
+       *vwrite,strsub(AR25,1,6),AR26,AR27
+   %-6s ►   gamma:%s   psi:%s
+   *enddo
+   *vwrite
+   (' ')
+
+   *vwrite
+   ('DESIGN LOADS:')
+   *vwrite,
+   ('   HYPNAM ► VARNAME                          = (   VALUE_K   ) * (   GAMMA) * (     PSI) =         VALUE_D')
+
+*cfclos
+
+*del,LCINIT_VAR_time
+
+

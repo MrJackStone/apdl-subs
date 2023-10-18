@@ -1,0 +1,351 @@
+! SCANSURF, aggOpt, item, comp, operation, csecPrefix
+! SCANSURF,   arg1, arg2, arg3,      arg4,       arg5
+
+! Description:
+! Scans the current active path calculating, at each path division point, the aggregated value of a
+! given result measured along the cross-section to the path at that particular division point. The
+! path can have many vertices. Each "cross-section" is, in fact, a surface created using the
+! working plane that intersects the current element selection.
+
+! Arguments:
+! arg1: aggOpt      -  cross-section aggregation option, determining how the values at a
+!                      virtual cross-section are reduced to the single point where it
+!                      intersects with the main path:
+!                         ['SINGLE'] Single result defined by ITEM and COMP
+!                         ['BEAM']   Set of beam-like results: (NX) axial force
+!                                                              (MY) bending moment about Y
+!                                                              (MZ) bending moment about Z
+!                                                              (VY) shear force along Y
+!                                                              (VZ) shear force along Z
+!                                                              (M)  vector sum of MY and MZ
+!                                                              (V)  vector sum of VY and VZ
+! arg2: item        -  label identifying item to be mapped onto surface, as per SUMAP
+!                      (valid only for arg1='SINGLE')
+! arg3: comp        -  component label of item, as per SUMAP
+!                      (valid only for arg1='SINGLE')
+! arg4: operation   -  aggregation operator to be applied to mapped results
+!                      (valid only for arg1='SINGLE')
+!                      Options:
+!                         ['CUM']  Accumulated value (integrated)
+!                         ['MAX']  Maximum value
+!                         ['MIN']  Minimum value
+!                         ['MEDI'] Median value
+!                         ['MEAN'] Mean value
+!                         ['VAR']  Variance
+!                         ['STDV'] Standard deviation
+!                         ['RMS']  Root-mean-square
+! arg5: csecPrefix  -  prefix applied to the name of the many surfaces created along the
+!                      length of the path, each representing a virtual "cross-section"
+!                      (best kept to a maximum length of 3 characters)
+
+! Local parameters:
+! AR21: upcaseAggOpt
+! AR22: pathVertexCount
+! AR23: dataPointCount
+! AR24: divsPerSegment
+! AR25: upcaseOperation
+! AR26: divPointOffset
+! AR28: baseResultName
+! AR29: surfaceNamePrefix
+! AR30: ithPathVertex
+! AR31: ithPointX
+! AR32: ithPointY
+! AR33: ithPointZ
+! AR36: previouslyActiveCS
+! AR38: aggCount
+! AR39: nthAgg
+! AR40: jthPathVertex
+! AR41: jthPointX
+! AR42: jthPointY
+! AR43: jthPointZ
+! AR44: NX
+! AR45: MY
+! AR46: MZ
+! AR47: VY
+! AR48: VZ
+! AR49: Moblq
+! AR50: Voblq
+! AR60: segmentLength
+! AR67: nodalDeltaX
+! AR70: mthVirtualSection
+! AR71: mthSurfName
+! AR72: cumulativeSectCount
+! AR73: mthXAlongSegment
+! AR74: prevRsys
+! AR81: aggCrossSectionValue
+! AR91: pathNthLabel
+! AR92: pathNthDataSetIndex
+
+! Output parameters:
+! SCANSURF_ARR_allSurfNames
+! SCANSURF_ARR_aggCsecValues
+
+! Global parameters (erased at the end of this subroutine):
+! SCANSURF_ARR_xAtDivs
+! SCANSURF_ARR_csecVals
+! SCANSURF_ARR_outputLabels
+! SCANSURF_VAR_nthCS
+! SCANSURF_VAR_mthCS
+
+
+! Mute warnings
+/uis,msgpop,3
+
+! Store active CS
+csbackup
+AR36=CSBackup_
+
+! For the active path:
+! Get the number of vertices
+*get,AR22,path,,node
+*if,AR22,eq,0,then
+    *msg,warn
+SCANSURF error: there are no active paths.%/&
+Create and activate a path to be used as basis for this command.%/&
+SCANSURF command is ignored.
+    *return,-1
+*endif
+! Calculate the number of divisions per path segment
+*get,AR23,path,,nval
+AR24=1+(AR23-1)/(AR22-1)
+
+! Aggregation option check & parameters
+*del,SCANSURF_ARR_outputLabels
+AR21=upcase(arg1)
+*if,AR21,eq,'SINGLE',then
+    ! Single result
+    AR38=1
+    AR28='%arg4%_%arg2%%arg3%'
+    *dim,SCANSURF_ARR_outputLabels,char,AR38
+    SCANSURF_ARR_outputLabels(1)=AR28
+*elseif,AR21,eq,'BEAM',then
+    ! Beam option
+    AR38=7
+    *dim,SCANSURF_ARR_outputLabels,char,AR38
+    SCANSURF_ARR_outputLabels(1)='NX','MY','MZ','VY','VZ','M','V'
+*else
+    *msg,warn,AR21
+SCANSURF error: invalid aggregation option (arg1=%C).%/&
+SCANSURF command is ignored.
+    *return,-1
+*endif
+
+! Get number of data set(s) to which aggregated cross-sectional data will be written
+pthfreeidx,'SCANSURF_VAR_firstIdx',AR38
+*if,SCANSURF_VAR_firstIdx,eq,0,then
+    *msg,warn
+SCANSURF error: path does not have space for all required result sets.%/&
+SCANSURF command is ignored.
+    *return,-1
+*endif
+*del,SCANSURF_ARR_dataSetIndices
+*dim,SCANSURF_ARR_dataSetIndices,,AR38
+*vfill,SCANSURF_ARR_dataSetIndices,ramp,SCANSURF_VAR_firstIdx,1
+
+! Check for valid operation
+*if,AR21,eq,'SINGLE',then
+    AR25=upcase(arg4)
+    *if,AR25,ne,'CUM',and,AR25,ne,'MAX',then
+        *if,AR25,ne,'MIN',and,AR25,ne,'MEDI',then
+            *if,AR25,ne,'MEAN',and,AR25,ne,'VAR',then
+                *if,AR25,ne,'STDV',and,AR25,ne,'RMS',then
+                    *msg,AR25
+SCANSURF error: invalid operator (arg4=%C).%/&
+SCANSURF command is ignored.
+                    *return,-1
+                *endif
+            *endif
+        *endif
+    *endif
+*endif
+
+! Cross-section name prefix
+*get,AR20,parm,arg5,type
+*if,AR20,eq,3,then
+    AR29=upcase(arg5)
+*else
+    AR29='CSC'
+*endif
+
+! Initialize loop parameters: local CS number, path division point offset, virtual cross-section count
+AR26=0
+AR72=0
+*del,SCANSURF_ARR_aggCsecValues
+*del,SCANSURF_ARR_allSurfNames
+*dim,SCANSURF_ARR_aggCsecValues,,AR23,AR38
+*dim,SCANSURF_ARR_allSurfNames,char,AR23
+
+! Calculate aggregated values at each division point for each path segment
+*do,AR30,1,AR22-1,1
+    ! Geometry of the path's current segment:
+    ! First vertex coordinates
+    *get,AR31,path,,point,AR30,x
+    *get,AR32,path,,point,AR30,y
+    *get,AR33,path,,point,AR30,z
+    ! Second vertex coordinates
+    AR40=AR30+1
+    *get,AR41,path,,point,AR40,x
+    *get,AR42,path,,point,AR40,y
+    *get,AR43,path,,point,AR40,z
+    ! Length
+    AR60=sqrt((AR41-AR31)**2+(AR42-AR32)**2+(AR43-AR33)**2)
+    ! Step increment
+    AR67=AR60/(AR24-1)
+
+    ! Create local coordinate system aligned with the path's segment
+    csnext,'SCANSURF_VAR_nthCS'
+    csby2p,SCANSURF_VAR_nthCS,AR31,AR32,AR33,AR41,AR42,AR43
+    csys,AR36
+
+    ! Calculate X coordinate in local CS for each division point along the path's segment
+    *del,SCANSURF_ARR_xAtDivs
+    *dim,SCANSURF_ARR_xAtDivs,,AR24
+    *vfill,SCANSURF_ARR_xAtDivs(1),ramp,0,AR67
+
+    ! For each division in the path's segment:
+    *do,AR70,1,AR24,1
+        ! Set virtual cross-section's surface name
+        AR72=AR72+1
+        AR71='%AR29%_%AR72%'
+
+        ! Calculate virtual cross-section's position in local CS
+        AR73=SCANSURF_ARR_xAtDivs(AR70)
+
+        ! Create local coordinate system for surface
+        wpcsys,-1,SCANSURF_VAR_nthCS
+        wpoffs,AR73
+        csnext,'SCANSURF_VAR_mthCS'
+        cswpla,SCANSURF_VAR_mthCS,cart
+
+        ! Create surface
+        wpcsys,-1,SCANSURF_VAR_mthCS
+        wprota,,,90
+        sucr,%AR71%,cplane
+        wprota,,,-90
+
+        ! Select current surface
+        susel,s,%AR71%
+
+        ! Map results onto surface
+        *if,AR21,eq,'SINGLE',then
+            ! Single result
+            sumap,%AR28%,arg1,arg2
+
+        *elseif,AR21,eq,'BEAM',then
+            ! Beam aggregation:
+
+            ! Map base results in local CS
+            *get,AR74,active,,rsys
+            rsys,SCANSURF_VAR_mthCS
+            sumap,'SX_L' ,s,x
+            sumap,'SXY_L',s,xy
+            sumap,'SXZ_L',s,xz
+            rsys,AR74
+
+            ! Calculate surface's local central-principal coordinates
+            sugatt, 'parms', SCANSURF_VAR_mthCS
+
+            ! Calculate quasi-infinitesimal forces in global CS
+            sucalc,'DFX','SX_L',mult,'DA'
+
+            ! Contributions for bending moment about local Y axis
+            sucalc,'DMY','DFX',mult,'LCZ'
+
+            ! Contributions for bending moment about local Z axis
+            sucalc,'DMZ','DFX',mult,'LCY'
+
+            !! how the hell does torsion work?
+        *endif
+
+        ! Select current surface
+        !!susel,s,%AR71%
+
+        ! Initialize array to store aggregated result(s) for this cross-section
+        *del,SCANSURF_ARR_csecAggregates
+        *dim,SCANSURF_ARR_csecAggregates,,AR38
+
+        ! Extract aggregated virtual cross-section value
+        *if,AR21,eq,'SINGLE',then
+            ! Single result option:
+            *if,AR25,eq,'CUM',then
+                ! Accumulated
+                sueval,AR81,%AR28%,intg
+                SCANSURF_ARR_csecAggregates(1)=AR81
+            *else
+                ! VSCFUN option
+                *del,SCANSURF_ARR_csecVals
+                suget,%AR71%,%AR28%,SCANSURF_ARR_csecVals,off
+                *vscfun,AR81,%AR25%,SCANSURF_ARR_csecVals
+                SCANSURF_ARR_csecAggregates(1)=AR81
+            *endif
+
+        *elseif,AR21,eq,'BEAM',then
+            ! Beam option:
+            ! Normal force (along local X axis)
+            sueval,AR44,'SX_L',intg
+            ! Bending moment about local Y axis
+            sueval,AR45,'DMY',sum
+            ! Bending moment about local Z axis
+            sueval,AR46,'DMZ',sum
+            ! Shear force along Y axis
+            sueval,AR47,'SXY_L',intg
+            ! Shear force along Z axis
+            sueval,AR48,'SXZ_L',intg
+            ! Resultant bending moment (vector sum)
+            AR49=sqrt(AR45**2+AR46**2)
+            ! Resultant shear force (vector sum)
+            AR50=sqrt(AR47**2+AR48**2)
+
+            ! Summary of beam internal results
+            SCANSURF_ARR_csecAggregates(1)=AR44,AR45,AR46,AR47,AR48,AR49,AR50 !! IX, IY, IXY
+        *endif
+
+        ! Average first segment's value with last value from previous segment
+        *if,AR30,gt,1,and,AR70,eq,AR24,then
+            *do,AR39,1,AR38,1
+                SCANSURF_ARR_csecAggregates(AR39)=(SCANSURF_ARR_csecAggregates(AR39)+SCANSURF_ARR_prevAggregates(AR39))/2
+            *enddo
+        *endif
+
+        ! Store aggregated value
+        *do,AR39,1,AR38,1
+            SCANSURF_ARR_aggCsecValues(AR70+AR26,AR39)=SCANSURF_ARR_csecAggregates(AR39)
+        *enddo
+
+        ! Store virtual cross-section name
+        SCANSURF_ARR_allSurfNames(AR70+AR26)=AR71
+    *enddo
+
+    ! Store this segment's last set of values
+    *del,SCANSURF_ARR_prevAggregates
+    *vfun,SCANSURF_ARR_prevAggregates,copy,SCANSURF_ARR_csecAggregates
+
+    ! Increment overall path division point offset
+    AR26=AR26+AR24-1
+*enddo
+
+! Transfer aggregated virtual cross-section data to path
+*do,AR39,1,AR38,1
+    *del,SCANSURF_ARR_aggColumn
+    *vfun,SCANSURF_ARR_aggColumn,copy,SCANSURF_ARR_aggCsecValues(1,AR39)
+    AR91=SCANSURF_ARR_outputLabels(AR39)
+    AR92=SCANSURF_ARR_dataSetIndices(AR39)
+    arr2pth,'SCANSURF_ARR_aggColumn',AR91,AR92
+*enddo
+
+! Restore previously active CS
+csrestore
+
+! Clear parameters
+*del,SCANSURF_ARR_xAtDivs
+*del,SCANSURF_ARR_csecVals
+*del,SCANSURF_VAR_nthCS
+*del,SCANSURF_VAR_mthCS
+
+! Restore warnings
+/uis,msgpop,2
+
+
+
+
+

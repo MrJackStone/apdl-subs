@@ -1,0 +1,70 @@
+! CMPADD, cmName, entType
+! CMPADD,   arg1,    arg2
+
+! Description:
+! Adds current selection to existing named selection component.
+
+! Arguments:
+! arg1: cmName   -  component name (string)
+! arg2: entType  -  entity type (string), used only if component is undefined.
+!                   Options: 'NODE', 'ELEM', 'KP', 'LINE', 'AREA', 'VOLU'
+
+! Local parameters:
+! AR20: cmType
+! AR21: cmKey
+! AR22: parmType
+! AR23: prefix
+
+! Global parameters (erased at the end of this subroutine):
+! CMADD_COMP_temp
+
+mar21=-7
+! Get selection component type
+*get,AR20,comp,%arg1%,type
+*if,AR20,eq,1,then
+    AR21='NODE'
+*elseif,AR20,eq,2,then
+    AR21='ELEM'
+*elseif,AR20,eq,6,then
+    AR21='KP'
+*elseif,AR20,eq,7,then
+    AR21='LINE'
+*elseif,AR20,eq,8,then
+    AR21='AREA'
+*elseif,AR20,eq,9,then
+    AR21='VOLU'
+*elseif,AR20,eq,0,then
+    *get,AR22,parm,%arg2%,type
+    *if,AR22,eq,3,then
+        AR21=arg2
+    *else
+        AR23=upcase(strsub(arg1,1,5))
+        *if,AR23,eq,'COMPN',then
+            AR21='NODE'
+        *elseif,AR23,eq,'COMPE',then
+            AR21='ELEM'
+        *elseif,AR23,eq,'COMPK',then
+            AR21='KP'
+        *elseif,AR23,eq,'COMPL',then
+            AR21='LINE'
+        *elseif,AR23,eq,'COMPA',then
+            AR21='AREA'
+        *elseif,AR23,eq,'COMPV',then
+            AR21='VOLU'
+        *else
+            AR21='ERROR'
+        *endif
+    *endif
+*endif
+mar21=ar21
+
+! Add to selection component
+cmsel,a,%arg1%
+cm,CMADD_COMP_temp,AR21
+cm,%arg1%,AR21
+
+! Restore previous selection
+cmsel,u,CMADD_COMP_temp
+cmdele,CMADD_COMP_temp
+*del,CMADD_COMP_temp
+

@@ -1,0 +1,54 @@
+! STEELLAW, E,    fy,   fu
+! STEELLAW, arg1, arg2, arg3
+
+! Descrição:
+! Esta subrotina gera os pares sigma-epsilon da lei tensão deformação do aço conforme a curva
+! apresentada em Maggi (2004) [1]. A curva é construída a partir de três parâmetros do material:
+! módulo de elasticidade, tensão de escoamento e tensão de ruptura.
+
+! Lista de argumentos:
+! arg1: E   -  módulo de elasticidade do aço
+! arg2: fy  -  tensão de escoamento do aço
+! arg3: fu  -  tensão de ruptura do aço
+
+! Lista de variáveis locais
+! AR20: epsilonY
+
+! Lista de variáveis de saída:
+! STEELLAW_ARR_eVector
+! STEELLAW_ARR_sVector
+
+! Referências bibliográficas:
+! [1] MAGGI, Y. I. (2004). Análise do Comportamento Estrutural de Ligações Parafusadas Viga-Pilar
+!     com Chapa de Topo Estendida. São Carlos. Tese (Doutorado). Escola de Engenharia de São
+!     Carlos, Universidade de São Paulo.
+
+! Calcular deformação ao final do trecho elástico
+AR20=arg2/arg1
+
+! Inicializar vetor de tensões
+STEELLAW_VAR_npt=5
+*del,STEELLAW_ARR_sVector
+*dim,STEELLAW_ARR_sVector,ARRAY,STEELLAW_VAR_npt!7
+! Preencher vetor de tensões
+STEELLAW_ARR_sVector(1)=arg2
+STEELLAW_ARR_sVector(2)=arg2
+STEELLAW_ARR_sVector(3)=arg2+(1/2)*(arg3-arg2)
+STEELLAW_ARR_sVector(4)=arg3
+STEELLAW_ARR_sVector(5)=arg3
+!STEELLAW_ARR_sVector(6)=arg2+(1/5)*(arg3-arg2)
+!STEELLAW_ARR_sVector(7)=0.1
+
+! Inicializar vetor de deformações
+*del,STEELLAW_ARR_eVector
+*dim,STEELLAW_ARR_eVector,ARRAY,STEELLAW_VAR_npt!7
+! Preencher vetor de deformações
+STEELLAW_ARR_eVector(1)=AR20
+STEELLAW_ARR_eVector(2)=9*AR20
+STEELLAW_ARR_eVector(3)=22*AR20
+STEELLAW_ARR_eVector(4)=60*AR20
+STEELLAW_ARR_eVector(5)=160*AR20
+!STEELLAW_ARR_eVector(6)=210*AR20
+!STEELLAW_ARR_eVector(7)=1.01*210*AR20
+
+

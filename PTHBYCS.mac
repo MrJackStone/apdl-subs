@@ -1,0 +1,32 @@
+! PTHBYCS, pthName, nDiv, csStart, csEnd
+! PTHBYCS,    arg1, arg2,    arg3,  arg4
+
+! Description:
+! Creates a path that starts at the origin of a CS and ends at the origin of another CS.
+
+! Arguments:
+! arg1: pthName  -  name of the path to be created
+! arg2: nDiv     -  number of divisions in the path to be created
+! arg3: csStart  -  coordinate system that marks the start point of the path
+! arg4: csEnd    -  coordinate system that marks the end point of the path
+
+! Local parameters:
+! AR21: x0
+! AR22: y0
+! AR23: z0
+! AR24: x1
+! AR25: y1
+! AR26: z1
+
+*get,AR21,cdsy,arg3,loc,x
+*get,AR22,cdsy,arg3,loc,y
+*get,AR23,cdsy,arg3,loc,z
+
+*get,AR24,cdsy,arg4,loc,x
+*get,AR25,cdsy,arg4,loc,y
+*get,AR26,cdsy,arg4,loc,z
+
+path,%arg1%,2,,arg2
+
+ppath,1,,AR21,AR22,AR23
+ppath,2,,AR24,AR25,AR26

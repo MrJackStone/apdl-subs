@@ -1,0 +1,101 @@
+! GERDAUQ, secID, name, refineKey, consultOnly
+! GERDAUQ, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de barras quadradas da Gerdau.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! GERDAUQ_VAR_num
+! GERDAUQ_VAR_b
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+GERDAUQ_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'Q6.35',THEN
+   GERDAUQ_VAR_b=0.00635
+*elseif,AR20,EQ,'Q7.94',THEN
+   GERDAUQ_VAR_b=0.00794
+*elseif,AR20,EQ,'Q9.53',THEN
+   GERDAUQ_VAR_b=0.00953
+*elseif,AR20,EQ,'Q12.7',THEN
+   GERDAUQ_VAR_b=0.01270
+*elseif,AR20,EQ,'Q15.88',THEN
+   GERDAUQ_VAR_b=0.01588
+*elseif,AR20,EQ,'Q19.05',THEN
+   GERDAUQ_VAR_b=0.01905
+*elseif,AR20,EQ,'Q22.23',THEN
+   GERDAUQ_VAR_b=0.02223
+*elseif,AR20,EQ,'Q25.4',THEN
+   GERDAUQ_VAR_b=0.02540
+*elseif,AR20,EQ,'Q28.58',THEN
+   GERDAUQ_VAR_b=0.02858
+*elseif,AR20,EQ,'Q31.75',THEN
+   GERDAUQ_VAR_b=0.03175
+*elseif,AR20,EQ,'Q38.1',THEN
+   GERDAUQ_VAR_b=0.03810
+*elseif,AR20,EQ,'Q44.45',THEN
+   GERDAUQ_VAR_b=0.04445
+*elseif,AR20,EQ,'Q50.8',THEN
+   GERDAUQ_VAR_b=0.05080
+*else
+   *msg,WARN
+GERDAUQ WARNING: Specified section not found. Command ignored.
+   GERDAUQ_VAR_b=-1
+*endif
+
+! Criar seção transversal
+*if,GERDAUQ_VAR_b,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,GERDAUQ_VAR_num,BEAM,RECT,arg2,AR22
+   SECDATA,GERDAUQ_VAR_b,GERDAUQ_VAR_b
+*endif
+

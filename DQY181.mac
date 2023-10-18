@@ -1,0 +1,33 @@
+! DQY181,Scale
+! DQY181,arg1
+
+! Lista de argumentos:
+! arg1: Scale (fator de escala do diagrama)
+
+! Lista de variáveis:
+! AR20: ScaleFactor
+! AR21: ETIndex
+! AR23: Index
+! AR24: ETName
+
+AR23=8
+AR24='DQY181'
+
+*if,arg1,EQ,0,THEN,
+   AR20=1
+*else
+   AR20=arg1
+*endif
+
+ETINDEX,AR24
+AR21=_OUTPUT
+*if,AR21,EQ,0,THEN
+   ETABLE,AR24,SMISC,AR23
+*else
+    ETABLE,REFL
+*endif
+
+DQY181_VAR_ETIndex=AR24
+PLETAB,DQY181_VAR_ETIndex,AVG
+
+

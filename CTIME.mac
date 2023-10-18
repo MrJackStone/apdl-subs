@@ -1,0 +1,36 @@
+! CTIME, strTime,   t0
+! CTIME,    arg1, arg2
+
+! Description:
+! Returns current time (CPU clock) or elapsed time (if t0 is given) as a string (HH:MM:SS).
+
+! Arguments:
+! arg1: parm  -  parameter name (string)
+! arg2: t0    -  previous time value to calculate elapsed time (if undefined current CPU time
+!                is returned)
+
+! Local parameters:
+! AR20: parType
+! AR21: tWall
+! AR22: cTime
+
+! Output parameters:
+! _output
+
+
+! Get current time on wall clock
+*get,AR21,active,,time,wall
+
+*if,arg2,gt,0,then
+    ! Calculate elapsed time
+    AR22=AR21-arg2
+*else
+    ! Calculate 24h time
+    AR22=mod(AR21,24)
+*endif
+
+! Convert time to string
+fhour, arg1, AR22
+
+_output=%arg1%
+

@@ -1,0 +1,6 @@
+! AFUNBACKUP
+! AFUNBACKUP
+
+*del,afunBackup_
+getafun,'afunBackup_'
+

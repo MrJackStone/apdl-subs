@@ -1,0 +1,29 @@
+! VIEW4W
+
+! Description:
+! Activates display in four windows (square), each with a given view.
+
+! Delete all windows
+/window,ALL,DELE
+
+! Create the four windows
+/window,1,-1,0.335,0,1
+/window,2,-1,0.335,-1,0
+/window,3,0.335,1.67,0,1
+/window,4,0.335,1.67,-1,0
+
+! Set view for each window
+! Window 1: XY plane
+/view,1,0,0,1
+! Window 2: YZ plane
+/view,2,1,0,0
+! Window 3: XZ plane
+/view,3,0,1,0
+! Window 4: isometric
+/view,4,1,1,1
+
+! Set auto zoom
+/auto,all
+
+
+

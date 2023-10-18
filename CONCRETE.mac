@@ -1,0 +1,131 @@
+! CONCRETE, matNum,   fc, dens, Poisson,   ft, linear, eRed
+! CONCRETE,   arg1, arg2, arg3,    arg4, arg5,   arg6, arg7
+
+! Arguments:
+! arg1: matNum   -  material number
+! arg2: fc       -  compressive strength
+! arg3: dens     -  concrete mass density (default: 2500)
+! arg4: Poisson  -  Poisson's coefficient (default: 0.3)
+! arg5: ft       -  tensile strength (default: 0.21*fck**(2/3))
+! arg6: linear   -  linear elastic key:
+!                      [0] OFF (nonlinear, Drucker-Prager)
+!                      [1] ON (linear elastic)
+! arg7: eRed     -  elastic modulus multiplier (for arg6=1 only)
+
+! Local parameters:
+! AR20: parType
+! AR21: massDensity
+! AR22: Poisson
+! AR23: eCU
+! AR24: Oci
+! AR25: Ocu
+! AR26: Ocr
+! AR27: Otr
+! AR28: Gft
+! AR29: fctm
+! AR30: fct
+! AR31: fcb
+! AR32: Eti
+! AR33: kcm
+! AR34: kcu
+! AR35: delt
+! AR36: delc
+
+! Standard values: mass density & Poisson's coefficient
+*get,AR20,PARM,arg3,TYPE
+*if,AR20,NE,0,OR,arg3,LE,0,THEN
+    AR21=2500
+*else
+    AR21=arg3
+*endif
+*get,AR20,PARM,arg4,TYPE
+*if,AR20,NE,0,OR,arg4,LE,0,THEN
+    AR22=0.2
+*else
+    AR22=arg4
+*endif
+
+*get,AR20,parm,arg6,type
+*if,AR20,eq,0,and,arg6,eq,1,then
+    ! Linear elastic material
+
+    ! Elastic modulus (NBR 6118)
+    AR37=4760*sqrt(arg2*1e-6)*1e6
+
+    ! Elastic modulus reduction
+    *get,AR20,parm,arg7,type
+    *if,AR20,eq,1,and,arg7,gt,0,then
+        AR37=AR37*arg7
+    *endif
+
+    ! Elastic properties
+    mp,ex,arg1,AR37
+    mp,dens,arg1,AR21
+    mp,prxy,arg1,AR22
+
+*else
+    ! Nonlinear model: Drucker-Prager
+
+    ! Tensile strength
+    *get,AR20,PARM,arg5,TYPE
+    *if,AR20,NE,0,OR,arg5,LE,0,THEN
+        AR29=0.3*arg2**(2/3)
+        AR30=0.7*AR29
+    *else
+        AR30=arg5
+    *endif
+
+    ! Deformation at peak compressive stress
+    AR23=2.5e-3
+
+    ! Exponential HSD constants:
+        ! Relative stress at start of nonlinear hardening
+        AR24=0.33
+        ! Residual relative stress at kcu
+        AR25=0.85
+        ! Residual compressive relative stress
+        AR26=0.20
+        ! Residual tensile relative stress
+        AR27=0.1
+        ! Mode I area-specific fracture energy (units: Force/Length)
+        AR28=100
+
+    ! Dilatancy constants:
+        ! Dilatancy factor in tension
+        AR35=0.25
+        ! Dilatancy factor in compression
+        AR36=1.00
+
+    ! Biaxial compressive resistance
+    AR31=1.2*arg2
+
+    ! Tangent initial elastic modulus
+    AR32=1.5*arg2/AR23
+    ! Plastic strain at uniaxial compressive strength
+    AR33=AR23-(arg2/AR32)
+    ! Plastic strain at transition from power law to exponential softening
+    AR34=1.75*AR23-AR25*(arg2/AR32)
+
+    ! Elastic properties
+    MP,EX,arg1,AR32
+    MP,PRXY,arg1,AR22
+    MP,DENS,arg1,AR21
+
+    ! Drucker-Prager
+    TB,CONC,arg1,,,DP
+    TBDATA,1,arg2,AR30,AR31
+
+    ! Dilatancy
+    TB,CONC,arg1,,,DILA
+    TBDATA,arg1,AR35,AR36
+
+    ! Exponential hardening/softening/dilatation (HSD2)
+    TB,CONC,arg1,,,HSD2
+    TBDATA,1,AR33,AR34,AR24,AR25,AR26
+    TBDATA,6,AR28,AR27
+
+*endif
+
+
+
+

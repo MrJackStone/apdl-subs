@@ -1,0 +1,19 @@
+! SETDEFA, parmName, value
+! SETDEFA,     arg1,  arg2
+
+! Description:
+! Attributes value to a parameter if the parameter is undefined.
+
+! Arguments:
+! arg1: parmName  -  parameter name (string)
+! arg2: value     -  default value
+
+! Local parameters:
+! AR20: parType
+
+
+*get,AR20,parm,%arg1%,type
+*if,AR20,eq,-1,then
+    %arg1%=arg2
+*endif
+

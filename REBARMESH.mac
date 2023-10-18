@@ -1,0 +1,118 @@
+! REBARMESH, width, height,  s_w,  s_h, cov_w, cov_h
+! REBARMESH,  arg1,   arg2, arg3, arg4,  arg5,  arg6
+
+! Description:
+! Creates evenly spaced perpendicular lines representing a 2D steel reinforcement bar mesh.
+
+! Arguments:
+! arg1: width   -  width along which the mesh will be distributed
+! arg2: height  -  heigth along which the mesh will be distributed
+! arg3: s_w     -  spacing in the width direction
+! arg4: s_h     -  spacing in the height direction
+! arg5: cov_w   -  concrete cover in the width direction
+! arg6: cov_h   -  concrete cover in the height direction
+
+! Local variables:
+! AR20: verRebarCount
+! AR21: firstX
+! AR22: xPrev
+! AR23: nthRebar
+! AR24: yMin
+! AR25: yMax
+! AR26: horRebarCount
+! AR27: firstY
+! AR28: yPrev
+! AR29: xMin
+! AR30: xMax
+! AR31: nthVer
+! AR32: xCoord
+! AR33: KMax
+! AR34: K1
+! AR35: K2
+! AR36: nthHor
+! AR37: yCoord
+
+! Global parameters (erased at the end of the subroutine):
+! REBARMESH_ARR_X
+! REBARMESH_ARR_Y
+
+! Output parameters:
+! REBARMESH_COMPL_verRebars: vertical lines (parallel to the Y axis) representing rebars
+! REBARMESH_COMPL_horRebars: horizontal lines (parallel to the X axis) representing rebars
+! REBARMESH_COMPK_verRebars: keypoints attached to vertical rebars
+! REBARMESH_COMPK_horRebars: keypoints attached to horizontal rebars
+
+! Back up currently selected entities
+KBACKUP
+LBACKUP
+
+! Calculate X position of each vertical rebar
+AR20=NINT(((arg1-2*arg5)/arg3)+0.5)
+AR21=(arg1-((AR20-1)*arg3))/2
+*del,REBARMESH_ARR_X
+*dim,REBARMESH_ARR_X,ARRAY,AR20
+AR22=AR21
+*do,AR23,1,AR20,1
+    REBARMESH_ARR_X(AR23)=AR22
+    AR22=AR22+arg3
+*enddo
+! Calculate Y extents of vertical rebars
+AR24=arg6
+AR25=arg2-arg6
+
+! Calculate Y position of each horizontal rebar
+AR26=NINT(((arg2-2*arg6)/arg4)+0.5)
+AR27=(arg2-((AR26-1)*arg4))/2
+*del,REBARMESH_ARR_Y
+*dim,REBARMESH_ARR_Y,ARRAY,AR26
+AR28=AR27
+*do,AR23,1,AR26,1
+    REBARMESH_ARR_Y(AR23)=AR28
+    AR28=AR28+arg4
+*enddo
+! Calculate X extents of horizontal rebars
+AR29=arg5
+AR30=arg1-arg5
+
+! Draw vertical rebars
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+*do,AR31,1,AR20,1
+    AR32=REBARMESH_ARR_X(AR31)
+    *get,AR33,KP,,NUM,MAXD
+    AR34=AR33+1
+    AR35=AR33+2
+    K,AR34,AR32,AR24,0
+    K,AR35,AR32,AR25,0
+    L,AR34,AR35
+*enddo
+CM,REBARMESH_COMPL_verRebars,LINE
+CM,REBARMESH_COMPK_verRebars,KP
+
+! Draw horizontal rebars
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+*do,AR36,1,AR26,1
+    AR37=REBARMESH_ARR_Y(AR36)
+    *get,AR33,KP,,NUM,MAXD
+    AR34=AR33+1
+    AR35=AR33+2
+    K,AR34,AR29,AR37,0
+    K,AR35,AR30,AR37,0
+    L,AR34,AR35
+*enddo
+CM,REBARMESH_COMPL_horRebars,LINE
+CM,REBARMESH_COMPK_horRebars,KP
+
+! Clear parameters
+*del,REBARMESH_ARR_X
+*del,REBARMESH_ARR_Y
+
+! Restore previous selection and add newly created entities to it
+KRESTORE
+LRESTORE
+CMSEL,A,REBARMESH_COMPL_verRebars
+CMSEL,A,REBARMESH_COMPL_horRebars
+CMSEL,A,REBARMESH_COMPK_verRebars
+CMSEL,A,REBARMESH_COMPK_horRebars
+

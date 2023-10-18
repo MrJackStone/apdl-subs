@@ -1,0 +1,139 @@
+! SEC_ICOMP2, bfInf, bfSup,    d, tfInf, tfSup,   tw, bEsq, bDir, hConc,   hF, stlMat, cncMat, name
+! SEC_ICOMP2,  arg1,  arg2, arg3,  arg4,  arg5, arg6, arg7, arg8,  arg9, ar10,   ar11,   ar12, ar13
+
+! Descrição:
+! Escreve uma seção transversal em formato de  viga mista (perfil I de aço com laje de concreto)
+! para um arquivo de um dado nome.
+
+! Lista de argumentos:
+! arg1: bfInf    -  largura da mesa inferior do perfil de aço
+! arg2: bfSup    -  largura da mesa superior do perfil de aço
+! arg3: d        -  altura externa do perfil de aço
+! arg4: tfInf    -  espessura da mesa inferior do perfil de aço
+! arg5: tfSup    -  espessura da mesa superior do perfil de aço
+! arg6: tw       -  espessura da alma do perfil de aço
+! arg7: bEsq     -  largura da laje de concreto à esquerda do eixo do perfil de aço
+! arg8: bDir     -  largura da laje de concreto à direita do eixo do perfil de aço
+! arg9: hConc    -  espessura da laje de concreto
+! ar10: hF       -  distância entre o topo da mesa superior do perfil de aço e a base da laje
+! ar11: stlMat   -  número do material aço
+! ar12: cncMat   -  número do material concreto
+! ar13: name     -  nome da seção transversal
+
+! Lista de variáveis locais:
+! AR20: MaxEType
+! AR21: NewEType
+! AR23: x0
+! AR29: COMPA_SteelBeam
+! AR30: COMPA_ConcSlab
+! AR31: MinThk
+
+! Armazenar seleção prévia
+VBACKUP
+ABACKUP
+LBACKUP
+KBACKUP
+EBACKUP
+NBACKUP
+
+! Desativar exibição automática
+/nopr
+IMMED,0
+/uis,REPLOT,0
+/uis,MSGPOP,3
+
+ASEL,U,AREA,,ALL
+LSEL,U,LINE,,ALL
+KSEL,U,KP,,ALL
+ESEL,U,ELEM,,ALL
+NSEL,U,NODE,,ALL
+
+/prep7
+
+*get,AR20,ETYP,0,NUM,MAX
+AR21=AR20+1
+ET,AR21,82
+
+! x0 (coordenada X do vértice inferior esquerdo da mesa inferior)
+AR23=-arg1/2
+
+RECTNG,AR23+0,AR23+arg1,0,arg4
+RECTNG,AR23+(arg1-arg6)/2,AR23+(arg1+arg6)/2,arg4,arg3-arg5
+RECTNG,AR23+(arg1-arg2)/2,AR23+(arg1+arg2)/2,arg3-arg5,arg3
+*if,ar10,EQ,0,THEN
+   RECTNG,AR23+(arg1/2)-arg7,AR23+(arg1/2)+arg8,arg3+ar10,arg3+ar10+arg9
+*endif
+
+! Fatiar áreas
+WPSLICEYZ,AR23+(arg1/2)-arg7
+WPSLICEYZ,AR23+(arg1-arg2)/2
+WPSLICEYZ,AR23+(arg1-arg6)/2
+WPSLICEYZ,AR23+(arg1+arg6)/2
+WPSLICEYZ,AR23+(arg1+arg2)/2
+WPSLICEYZ,AR23+(arg1/2)+arg8
+!WPSLICEXZ,arg3+ar10+(arg9/2)
+
+*if,ar10,GT,0,THEN
+   RECTNG,AR23+(arg1/2)-arg7,AR23+(arg1/2)+arg8,arg3+ar10,arg3+ar10+arg9
+*endif
+
+NUMMRG,KP
+
+! Áreas do perfil de aço
+ASEL,S,LOC,Y,0,arg3
+CM,AR29,AREA
+! Áreas da laje de concreto
+ASEL,S,LOC,Y,arg3,arg3+ar10+arg9
+CM,AR30,AREA
+
+CMSEL,S,AR29
+CMSEL,A,AR30
+
+*if,arg4,LE,arg5,THEN
+   AR31=arg4
+*else
+   AR31=arg5
+*endif
+LESIZE,ALL,AR31*4
+
+*if,ar10,GT,0,THEN
+   CMSEL,S,AR30
+   LSLA,S
+   LESIZE,ALL,arg9/2
+   CMSEL,A,AR29
+   LSLA,S
+*endif
+
+CMSEL,S,AR29
+AATT,ar11,,AR21
+CMSEL,S,AR30
+AATT,ar12,,AR21
+
+CMSEL,S,AR30
+CMSEL,A,AR29
+AMESH,ALL
+
+SECWRITE,ar13,SECT,,AR21
+
+ACLEAR,ALL
+ADELE,ALL
+LDELE,ALL
+KDELE,ALL
+ETDELE,AR21
+CMDELE,AR29
+CMDELE,AR30
+
+! Reativar exibição automática
+/gopr
+IMMED,1
+/uis,REPLOT,1
+/uis,MSGPOP,2
+
+! Restaurar seleção prévia
+VRESTORE
+ARESTORE
+LRESTORE
+KRESTORE
+ERESTORE
+NRESTORE
+

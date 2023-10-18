@@ -1,0 +1,47 @@
+! G_ANNOCHARWIDTH, parm
+! G_ANNOCHARWIDTH, arg1
+
+! Description:
+! Returns the width of a single annotation character (sets 'GLOBAL_annoCharWidth_ global' parameter)
+! using as basis the image export resolution setting ('GLOBAL_picRes_ global' parameter).
+
+! Arguments:
+! arg1: parm  -  parameter to which the output value is assigned (defaults to _OUTPUT)
+
+! Local parameters:
+! AR20: parType
+! AR21: boldMultiplier
+
+! Global output parameters:
+! GLOBAL_annoCharWidth_
+! _OUTPUT
+
+
+! Get current image export resolution
+g_picres
+
+! Get bold typeface setting
+g_annobold
+
+*if,GLOBAL_annoBold_,eq,1,then
+    AR21=1.12
+*else
+    AR21=1
+*endif
+
+*if,GLOBAL_picRes_,le,800,then
+    GLOBAL_annoCharWidth_=AR21*(0.0301)
+*elseif,GLOBAL_picRes_,le,885,then
+    GLOBAL_annoCharWidth_=AR21*(-3.43e-5*GLOBAL_picRes_+0.0575247)
+*else
+    GLOBAL_annoCharWidth_=AR21*(32.1714/GLOBAL_picRes_)
+*endif
+
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    %arg1%=GLOBAL_annoCharWidth_
+*else
+    _OUTPUT=GLOBAL_annoCharWidth_
+*endif
+
+

@@ -1,0 +1,22 @@
+! CNTRLIMS, min, max, absmax
+! CNTRLIMS, arg1, arg2, arg3
+
+*get,AR20,plnsol,,min
+*get,AR21,plnsol,,max
+AR22=(abs(AR20)>abs(AR21))
+
+*get,AR23,parm,arg1,type
+*if,AR23,eq,3,then
+    %arg1%=AR20
+*endif
+
+*get,AR23,parm,arg2,type
+*if,AR23,eq,3,then
+    %arg2%=AR21
+*endif
+
+*get,AR23,parm,arg3,type
+*if,AR23,eq,3,then
+    %arg3%=AR22
+*endif
+

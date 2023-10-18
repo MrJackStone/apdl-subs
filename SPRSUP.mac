@@ -1,0 +1,138 @@
+! sprsup,   lx,   ly,   lz,  mat, real, type, cmnName, cmeName, calcApportioned, coupledDOFs
+! sprsup, arg1, arg2, arg3, arg4, arg5, arg6,    arg7,    arg8,            arg9,        ar10
+
+! Description:
+! Creates spring supports connected to currently selected nodes.
+
+! Arguments:
+! arg1: lx               -  spring length along X direction
+! arg2: ly               -  spring length along Y direction
+! arg3: lz               -  spring length along Z direction
+! arg4: mat              -  material index
+! arg5: real             -  real constant index
+! arg6: type             -  element type index
+! arg7: cmnName          -  name of selection component containing created nodes
+! arg8: cmeName          -  name of selection component containing created elements
+! arg9: calcApportioned  -  determines whether or not to scale spring length based on nodal
+!                           apportioned areas:
+!                              [0] do not scale (all springs will have the same length)
+!                              [1] scale (length adjusted to keep stiffness constant)
+! ar10: coupledDOFs      -  determines which degrees of freedom to couple between each spring's
+!                           nodes:
+!                              [0] no coupling
+!                              [1] UX
+!                              [2] UY
+!                              [3] UX & UY
+!                              [4] UZ
+!                              [5] UX & UZ
+!                              [6] UY & UZ
+!                              [7] UX, UY & UZ
+
+! Local parameters:
+! AR20: COMPN_selected
+! AR21: nc
+! AR22: nnum
+! AR23: nthNode
+! AR24: nx
+! AR25: ny
+! AR26: nz
+! AR27: newNode
+! AR28: NDMX
+! AR29: parType
+! AR30: COMPN_temp
+! AR31: COMPE_temp
+! AR32: apportionedArea
+! AR33: COMPE_selected
+
+
+nbackup
+ebackup
+cm,AR20,node
+cm,AR33,elem
+nsel,u,node,,all
+esel,u,elem,,all
+cm,AR30,node
+cm,AR31,elem
+cmsel,s,AR20
+
+mat,arg4
+real,arg5
+type,arg6
+
+! Create support springs
+*get,AR21,node,,count
+AR22=0
+*do,AR23,1,AR21,1
+    cmsel,s,AR20
+    AR22=ndnext(AR22)
+
+    ! Calculate apportioned area
+    *if,arg9,eq,1,then
+        esel,s,elem,,all
+        nsle,a
+        AR32=arnode(AR22)
+        cmsel,s,AR31
+    *else
+        AR32=1
+    *endif
+
+    ! Create new node and element
+    AR24=nx(AR22)
+    AR25=ny(AR22)
+    AR26=nz(AR22)
+    *get,AR28,node,,num,maxd
+    AR27=AR28+1
+    n,AR27,AR24+(arg1/AR32),AR25+(arg2/AR32),AR26+(arg3/AR32)
+    e,AR22,AR27
+
+    ! Couple DOFs
+    *if,ar10,eq,1,then
+        safe_cp,'UX',AR27,AR22
+    *elseif,ar10,eq,2,then
+        safe_cp,'UY',AR27,AR22
+    *elseif,ar10,eq,3,then
+        safe_cp,'UX',AR27,AR22
+        safe_cp,'UY',AR27,AR22
+    *elseif,ar10,eq,4,then
+        safe_cp,'UZ',AR27,AR22
+    *elseif,ar10,eq,5,then
+        safe_cp,'UX',AR27,AR22
+        safe_cp,'UZ',AR27,AR22
+    *elseif,ar10,eq,6,then
+        safe_cp,'UY',AR27,AR22
+        safe_cp,'UZ',AR27,AR22
+    *elseif,ar10,eq,7,then
+        safe_cp,'UX',AR27,AR22
+        safe_cp,'UY',AR27,AR22
+        safe_cp,'UZ',AR27,AR22
+    *endif
+
+    nsel,s,node,,AR27
+    cmsel,a,AR30
+    cm,AR30,node
+    cm,AR31,elem
+*enddo
+cm,AR31,elem
+
+! Create nodal component (supported nodes)
+*get,AR29,parm,arg7,type
+*if,AR29,eq,3,then
+    cmsel,s,AR30
+    cm,%arg7%,node
+*endif
+
+! Create element component (springs)
+*get,AR29,parm,arg8,type
+*if,AR29,eq,3,then
+    cm,%arg8%,elem
+*endif
+
+! Restore previous selection and add created entities
+nrestore
+cmsel,a,AR30  !! this was commented until 01/12/22, don't know why
+elrestore
+cmsel,a,AR31  !! this was commented until 01/12/22, don't know why
+
+
+
+

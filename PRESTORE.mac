@@ -1,0 +1,23 @@
+! PRESTORE
+! PRESTORE
+
+*if,PBackup_,EQ,0,THEN
+   FINISH
+*elseif,PBackup_,EQ,17,THEN
+   /prep7
+*elseif,PBackup_,EQ,21,THEN
+   /solu
+*elseif,PBackup_,EQ,31,THEN
+   /post1
+*elseif,PBackup_,EQ,36,THEN
+   /post26
+*elseif,PBackup_,EQ,41,THEN
+   /opt
+*elseif,PBackup_,EQ,52,THEN
+   /aux2
+*elseif,PBackup_,EQ,62,THEN
+   /aux12
+*elseif,PBackup_,EQ,65,THEN
+   /aux15
+*endif
+

@@ -1,0 +1,114 @@
+! ORIENT,ETYPE,MAT,SECN,dx,dy,dz,ESize,EDiv
+! ORIENT,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8
+
+! Argument list:
+! arg1: EleNumber  -  element type number
+! arg2: MatNumber  -  material number
+! arg3: SecNumber  -  cross-section number
+! arg4: DeltaX     -  orientation offset in the X direction
+! arg5: DeltaY     -  orientation offset in the Y direction
+! arg6: DeltaZ     -  orientation offset in the Z direction
+! arg7: ElemSize   -  element size
+! arg8: ElemDiv    -  alternative mesh size definition: number of line divisions
+
+! Local variables:
+! AR20: IgnoredLines
+! AR21: OrientedLines
+! AR22: TempLines
+! AR23: LCount
+! AR24: LIndex
+! AR25: nthLine
+! AR26: ECount
+! AR27: xVal
+! AR28: yVal
+! AR29: zVal
+! AR30: KPMax
+! AR31: OriKp
+
+! Counters: oriented and ignored lines
+AR20=0
+AR21=0
+
+/prep7
+
+! Backup current selection (lines and keypoints)
+KBACKUP
+LBACKUP
+
+! Create line named selection component
+CM,AR22,LINE
+*get,AR23,LINE,0,COUNT
+
+! Orient each line:
+*if,AR23,GT,0,THEN
+
+   ! For each line:
+   *do,AR24,1,AR23,1
+
+      ! Get line number
+      *get,AR25,LINE,0,NUM,MIN
+      ! Remove from named selection component
+      LSEL,U,LINE,,AR25
+      CM,AR22,LINE
+
+      ! Get elements adjacent to line
+      *get,AR26,LINE,AR25,ATTR,NELM
+
+      ! If line is meshed:
+      *if,AR26,GT,0,THEN
+
+         ! Display message: line ignored
+         *msg,WARN,AR25
+Line %I is already meshed and was ignored.
+
+         ! Increment ignored line counter
+         AR20=AR20+1
+
+      *else
+
+         ! Select line to orient
+         LSEL,S,LINE,,AR25
+
+         ! Get initial coordinates
+         AR27=LX(AR25,0)
+         AR28=LY(AR25,0)
+         AR29=LZ(AR25,0)
+
+         ! Create orientation keypoint
+         KSEL,U,KP,,ALL
+         *get,AR30,KP,0,NUM,MAXD
+         K,AR30+1,AR27+arg4,AR28+arg5,AR29+arg6
+         *get,AR31,KP,0,NUM,MIN
+
+         ! Set line attributes
+         LATT,arg2,,arg1,,AR31,,arg3
+
+         ! Set line mesh size
+         *if,arg8,NE,0,THEN
+            LESIZE,AR25,,,arg8
+         *elseif,arg7,NE,0,THEN
+            LESIZE,AR25,arg7
+         *endif
+
+         ! Increment oriented line counter
+         AR21=AR21+1
+
+      *endif
+
+      ! Select remaining unprocessed lines
+      CMSEL,S,AR22
+
+   *enddo
+
+*endif
+
+! Restore previous selection (lines and keypoints)
+KRESTORE
+LRESTORE
+
+! Display conclusion message
+*msg,UI,AR21,AR20
+Operation concluded! %/&
+%I Line(s) oriented. %/&
+%I Line(s) ignored.
+

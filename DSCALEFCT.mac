@@ -1,0 +1,44 @@
+! DSCALEFCT, factor, refWindow, targetWindow
+! DSCALEFCT, arg1,   arg2,      arg3
+
+! Descrição:
+! Esta subrotina multiplica o valor do fator de escala da deformada (/DSCALE) por um número
+! fornecido.
+
+! Lista de argumentos:
+! arg1: factor        -  número a multiplicar pelo fator de escala atual
+! arg2: refWindow     -  número da janela da qual o multiplicador atual deve ser extraído
+! arg3: targetWindow  -  número da janela alvo do multiplicador
+
+! Lista de variáveis locais:
+! AR20: CurrentDSCALE
+! AR21: parType
+! AR22: referenceWindowNum
+! AR23: targetWindowNum
+
+! Obter janela de referência
+*get,AR21,PARM,arg2,TYPE
+*if,AR21,NE,0,THEN
+   AR22=1
+*else
+   AR22=arg2
+*endif
+
+! Obter janela alvo
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR23=0
+*else
+   AR23=arg3
+*endif
+
+! Obter fator de escala atual na janela de referência
+*get,AR20,GRAPH,AR22,DSCALE,DMULT
+
+! Aplicar o fator de escala atual às janelas especificadas
+*if,AR23,EQ,0,THEN
+   /dscale,ALL,AR20*arg1
+*else
+   /dscale,AR23,AR20*arg1
+*endif
+

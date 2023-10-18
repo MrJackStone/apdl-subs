@@ -1,0 +1,142 @@
+! DEFPOST, dwFirst, dwLast, llFirst, llLast,   KX,   KY,   KZ
+! DEFPOST,    arg1,   arg2,    arg3,   arg4, arg5, arg6, arg7
+
+! Element table envelopes
+allsel
+set,1
+
+etable,'UX',U,X
+etable,'UY',U,Y
+etable,'UZ',U,Z
+etable,'DW_UX',U,X
+etable,'DW_UY',U,Y
+etable,'DW_UZ',U,Z
+
+! SHELL181
+defetabs,181,,1
+defetabs,181,'DW_',1
+
+! BEAM188
+defetabs,188,,1
+defetabs,188,'DW_',1
+
+sabs,1
+smax,'DW_Q','DW_QX','DW_QY'
+sabs
+
+sadd,'ZEROS','UX','UX',1,-1
+
+*del,ETNames
+*dim,ETNames,CHAR,19
+ETNames(1)=  'MX', 'MY',  'NX',  'NY',  'QX',  'QY',  'UX',  'UY',  'UZ'
+ETNames(10)= 'Ni', 'Nj', 'QZi', 'QZj', 'QYi', 'QYj', 'MYi', 'MYj', 'MZi', 'MZj'
+
+etenv,arg3,arg4,'ETNames'
+
+*del,env_etnames
+*dim,env_etnames,char,19*4
+*do,nthET,1,19,1
+    baseName=ETNames(nthET)
+    env_etnames(nthET*4-3)=strcat('EMN_',baseName)
+    env_etnames(nthET*4-2)=strcat('EMX_',baseName)
+    env_etnames(nthET*4-1)=strcat('EAB_',baseName)
+    env_etnames(nthET*4-0)=strcat('DW_',baseName)
+*enddo
+
+*do,i,1,19*4,1
+    et_name=env_etnames(i)
+    str_length=strleng(et_name)
+    start_pos=str_length-1
+    last2chars=strsub(et_name,start_pos,2)
+    suf=upcase(last2chars)
+    *if,suf,eq,'UX',then
+        scale_et=0
+    *elseif,suf,eq,'UY',then
+        scale_et=0
+    *elseif,suf,eq,'UZ',then
+        scale_et=0
+    *else
+        scale_et=1
+    *endif
+    *if,scale_et,eq,1,then
+        sadd,et_name,et_name,,1e-3
+    *endif
+*enddo
+
+! Shell181 max shear
+smax,'EAB_Q','EAB_QX','EAB_QY'
+
+! BEAM188 max oblique bending moment
+smax,'M_y','EAB_MYi','EAB_MYj'
+smax,'M_z','EAB_MZi','EAB_MZj'
+sexp,'MY_sq','M_y',,2
+sexp,'MZ_sq','M_z',,2
+sadd,'M_sq','MY_sq','MZ_sq'
+sexp,'M_obl','M_sq',,0.5
+
+! BEAM188 max oblique shear force
+smax,'Q_y','EAB_QYi','EAB_QYj'
+smax,'Q_z','EAB_QZi','EAB_QZj'
+sexp,'QY_sq','Q_y',,2
+sexp,'QZ_sq','Q_z',,2
+sadd,'Q_sq','QY_sq','QZ_sq'
+sexp,'Q_obl','Q_sq',,0.5
+
+! BEAM188 max tension and compression
+smin, 'N_c0', 'EMN_Ni' , 'EMN_Nj'
+smin, 'N_c' , 'N_c0'    , 'ZEROS'
+smax, 'N_t0', 'EMX_Ni' , 'EMX_Nj'
+smax, 'N_t' , 'N_t0'    , 'ZEROS'
+
+! Displacements in mm
+sadd,'EMM_UX','EAB_UX',,1e3
+sadd,'EMM_UY','EAB_UY',,1e3
+sadd,'EMM_UZ','EAB_UZ',,1e3
+
+smax,'EMM_UXP', 'EMX_UX', 'ZEROS',1e3
+smin,'EMM_UXN', 'EMN_UX', 'ZEROS',1e3
+smax,'EMM_UYP', 'EMX_UY', 'ZEROS',1e3
+smin,'EMM_UYN', 'EMN_UY', 'ZEROS',1e3
+smax,'EMM_UZP', 'EMX_UZ', 'ZEROS',1e3
+smin,'EMM_UZN', 'EMN_UZ', 'ZEROS',1e3
+
+! Soil pressures
+! Sigma X
+*if,arg5,ne,0,then
+    *if,arg5,gt,0,then
+        ! Positive UX causes pressure
+        sadd,'SIGKPA_X','EMM_UXP',,abs(arg5)*1e-6
+    *elseif,arg5,lt,0,then
+        ! Negative UX causes pressure
+        sabs,1
+        sadd,'SIGKPA_X','EMM_UXN',,abs(arg5)*1e-6
+        sabs
+    *endif
+*endif
+
+! Sigma Y
+*if,arg6,ne,0,then
+    *if,arg6,gt,0,then
+        ! Positive UY causes pressure
+        sadd,'SIGKPA_Y','EMM_UYP',,abs(arg6)*1e-6
+    *elseif,arg6,lt,0,then
+        ! Negative UY causes pressure
+        sabs,1
+        sadd,'SIGKPA_Y','EMM_UYN',,abs(arg6)*1e-6
+        sabs
+    *endif
+*endif
+
+! Sigma Z
+*if,arg7,ne,0,then
+    *if,arg7,gt,0,then
+        ! Positive UZ causes pressure
+        sadd,'SIGKPA_Z','EMM_UZP',,abs(arg7)*1e-6
+    *elseif,arg7,lt,0,then
+        ! Negative UZ causes pressure
+        sabs,1
+        sadd,'SIGKPA_Z','EMM_UZN',,abs(arg7)*1e-6
+        sabs
+    *endif
+*endif
+

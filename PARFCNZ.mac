@@ -1,0 +1,38 @@
+! PARFCNZ,    a,    b,    c, name
+! PARFCNZ, arg1, arg2, arg3, arg4
+
+*del,_FNCNAME
+*del,_FNCMTID
+*del,_FNC_C1
+*del,_FNC_C2
+*del,_FNC_C3
+*del,_FNCCSYS
+*set,_FNCNAME,arg4
+*dim,_FNC_C1,,1
+*dim,_FNC_C2,,1
+*dim,_FNC_C3,,1
+*set,_FNC_C1(1),arg1
+*set,_FNC_C2(1),arg2
+*set,_FNC_C3(1),arg3
+*set,_FNCCSYS,0
+*dim,%_FNCNAME%,TABLE,6,7,1,,,,%_FNCCSYS%
+!
+! Begin of equation: coefA*{Z}^2+coefB*{Z}+coefC
+*set,%_FNCNAME%(0,0,1), 0.0, -999
+*set,%_FNCNAME%(2,0,1), 0.0
+*set,%_FNCNAME%(3,0,1), %_FNC_C1(1)%
+*set,%_FNCNAME%(4,0,1), %_FNC_C2(1)%
+*set,%_FNCNAME%(5,0,1), %_FNC_C3(1)%
+*set,%_FNCNAME%(6,0,1), 0.0
+*set,%_FNCNAME%(0,1,1), 1.0, -1, 0, 2, 0, 0, 4
+*set,%_FNCNAME%(0,2,1), 0.0, -2, 0, 1, 4, 17, -1
+*set,%_FNCNAME%(0,3,1),   0, -1, 0, 1, 17, 3, -2
+*set,%_FNCNAME%(0,4,1), 0.0, -2, 0, 1, 18, 3, 4
+*set,%_FNCNAME%(0,5,1), 0.0, -3, 0, 1, -1, 1, -2
+*set,%_FNCNAME%(0,6,1), 0.0, -1, 0, 1, -3, 1, 19
+*set,%_FNCNAME%(0,7,1), 0.0, 99, 0, 1, -1, 0, 0
+! End of equation: coefA*{Z}^2+coefB*{Z}+coefC
+
+
+
+

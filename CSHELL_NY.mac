@@ -1,0 +1,35 @@
+! CSHELL_NY
+! CSHELL_NY
+
+! Description:
+! Plots SHELL181 normal force along Y axis diagram (N22).
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR21: seqn_N22
+! AR23: unitScaleFactor
+! AR24: nameKey
+
+AR21=2
+
+AR23=1e-3
+AR24='NY'
+
+etable,'TMP_%AR24%',smisc,AR21
+
+sadd,'SHELL_%AR24%','TMP_%AR24%',,AR23
+
+etable,'TMP_%AR24%',eras
+
+*cfopen,shelldiagram_tmp,tmp
+    *vwrite,'SHELL_%AR24%','avg'
+pletab,%C,%C
+*cfclos
+/nopr
+/input,shelldiagram_tmp,tmp
+/delete,shelldiagram_tmp,tmp
+/gopr
+
+

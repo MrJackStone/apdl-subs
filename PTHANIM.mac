@@ -1,0 +1,170 @@
+! PTHANIM, firstSet, lastSet, baseScale, path_names, path_labels, path_build_macros, fName
+! PTHANIM,     arg1,    arg2,      arg3,       arg4,        arg5,              arg6,  arg7
+
+! Description:
+! Generates an animation spanning over multiple result sets of path result plots for one or more
+! paths.
+
+! Arguments:
+! arg1: firstSet           -  number of first result set to be included in the animation
+! arg2: lastSet            -  number of last result set to be included in the animation
+! arg3: baseScale          -  multiplier applied to all path plots
+! arg4: path_names         -  (name of) array containing the name of every path to be plotted
+! arg5: path_labels        -  (name of) array containing label to be plotted for each path
+! arg6: path_build_macros  -  (name of) array containing the names of input files to be used to
+!                             calculate the result to be plotted for each corresponding path
+
+! Local parameters:
+! AR20: parType
+! AR21: setCount
+! AR22: nthSet
+! AR23: pathCount
+! AR24: nthPath
+! AR25: pthName
+! AR26: pthLabel
+! AR27: pthBuildMacro
+! AR28: minValue
+! AR29: maxValue
+! AR30: absValue
+! AR31: nthSetAbsmaxValue
+! AR32: nthSetMaxValue
+! AR33: nthSetMinValue
+! AR34: overallAbsmax
+! AR35: overallMax
+! AR36: overallMin
+! AR37: scaleFactor
+! AR38: baseScaleMultiplier
+
+! Global parameters (erased at the end of this subroutine):
+! PTHANIM_ARR_nthPathAbsmax
+! PTHANIM_ARR_nthPathMax
+! PTHANIM_ARR_nthPathMin
+! PTHANIM_ARR_nthSetScale
+! PTHANIM_ARR_overallAbsmax
+! PTHANIM_ARR_overallMax
+! PTHANIM_ARR_overallMin
+
+
+! Backup paths
+pasave,all,'PTHANIM_FILE_backup',pth
+
+! Calculate number of result sets
+AR21=arg2-arg1+1
+
+! Number of paths to be plotted
+*get,AR23,parm,%arg4%,dim,x
+
+! Base path plot scale factor
+AR38=1
+*get,AR20,parm,arg3,type
+*if,AR20,eq,0,then
+    *if,arg3,ne,0,then
+        AR38=arg3
+    *endif
+*endif
+
+! Array to store limit values for each result set
+*del,PTHANIM_ARR_overallAbsmax
+*dim,PTHANIM_ARR_overallAbsmax,,AR21
+*del,PTHANIM_ARR_overallMax
+*dim,PTHANIM_ARR_overallMax,,AR21
+*del,PTHANIM_ARR_overallMin
+*dim,PTHANIM_ARR_overallMin,,AR21
+
+! Calculate and collect results for each path at each result set
+*do,AR22,arg1,arg2,1
+    set,,,,,,,AR22
+
+    ! Array to store limit values for each path
+    *del,PTHANIM_ARR_nthPathAbsmax
+    *dim,PTHANIM_ARR_nthPathAbsmax,,AR23
+    *del,PTHANIM_ARR_nthPathMax
+    *dim,PTHANIM_ARR_nthPathMax,,AR23
+    *del,PTHANIM_ARR_nthPathMin
+    *dim,PTHANIM_ARR_nthPathMin,,AR23
+
+    ! Calculate results for each path
+    *do,AR24,1,AR23,1
+
+        ! Path info: name, label, & building macro
+        AR25=%arg4%(AR24)
+        AR26=%arg5%(AR24)
+        AR27=%arg6%(AR24)
+
+        ! Calculate path
+        path,AR25
+        /input,%AR27%,mac
+
+        ! Collect path results
+        pth2arr,AR26,'PTHANIM_ARR_pathValues'
+        *vscfun,AR28,min,PTHANIM_ARR_pathValues
+        *vscfun,AR29,max,PTHANIM_ARR_pathValues
+        AR30=(abs(AR28)>abs(AR29))
+
+        ! Store limit values for path
+        PTHANIM_ARR_nthPathAbsmax(AR24)=AR30
+        PTHANIM_ARR_nthPathMax(AR24)=AR29
+        PTHANIM_ARR_nthPathMin(AR24)=AR28
+
+    *enddo
+
+    ! Calculate overall limit values considering all paths
+    *vscfun,AR31,max,PTHANIM_ARR_nthPathAbsmax
+    *vscfun,AR32,max,PTHANIM_ARR_nthPathMax
+    *vscfun,AR33,min,PTHANIM_ARR_nthPathMin
+
+    ! Store limit values for this result set
+    PTHANIM_ARR_overallAbsmax(AR22)=AR31
+    PTHANIM_ARR_overallMax(AR22)=AR32
+    PTHANIM_ARR_overallMin(AR22)=AR33
+
+    ! Save path to be plotted later
+    pasave,all,'PTHANIM_SET%AR22%',pth
+*enddo
+
+! Calculate overall limits considering all paths and all result sets
+*vscfun,AR34,max,PTHANIM_ARR_overallAbsmax
+*vscfun,AR35,max,PTHANIM_ARR_overallMax
+*vscfun,AR36,min,PTHANIM_ARR_overallMin
+
+! Calculate relative scale factors for each result set
+*del,PTHANIM_ARR_nthSetScale
+*voper,PTHANIM_ARR_nthSetScale,PTHANIM_ARR_overallAbsmax,div,AR34
+
+! Force color scale limits
+clims,AR36,AR35
+
+! Initialize animation
+/seg,DELET
+/seg,OFF
+/seg,MULTI,arg7,0.02
+
+! Create animation frames: plot path results for each result set
+*do,AR22,arg1,arg2,1
+    paresu,all,'PTHANIM_SET%AR22%',pth
+    AR37=PTHANIM_ARR_nthSetScale(AR22)
+    /device,vector,on
+    /edge,,1
+    eplot
+    /edge,,0
+    /device,vector,off
+    /noerase
+    mpathplot,AR38*AR37,1,'%arg4%','%arg5%'
+    /erase
+*enddo
+
+! Finish animation
+/seg,OFF
+anim,5,1,0.02
+finish
+
+! Clear global parameters
+*del,PTHANIM_ARR_nthPathAbsmax
+*del,PTHANIM_ARR_nthPathMax
+*del,PTHANIM_ARR_nthPathMin
+*del,PTHANIM_ARR_nthSetScale
+*del,PTHANIM_ARR_overallAbsmax
+*del,PTHANIM_ARR_overallMax
+*del,PTHANIM_ARR_overallMin
+
+

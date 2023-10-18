@@ -1,0 +1,40 @@
+! BEAM_ROTX, scale, kund, direction
+! BEAM_ROTX,  arg1, arg2,      arg3
+
+! Description:
+! Plots BEAM188 rotation about X diagram in mRad.
+
+! Arguments:
+! arg1: scale  -  scale factor (negative to invert)
+! arg2: kund   -  [0] Display on undeformed shape / [1] Display on deformed shape
+! arg3: direction  -  undocumented PLLS argument:
+!                        [0] Direction based on view
+!                        [1] Direction based on global CS
+
+! Local parameters:
+! AR21: DOFtype
+! AR22: DOFdir
+! AR23: unitScaleFactor
+! AR24: nameKey
+
+AR21='rot'
+AR22='x'
+AR23=1e3
+AR24='ROTZ'
+
+etable,'TMP_%AR24%',AR21,AR22
+
+sadd,'BEAM_%AR24%','TMP_%AR24%',,AR23
+
+etable,'TMP_%AR24%',eras
+
+*cfopen,beamdiagram_tmp,tmp
+    *vwrite,'BEAM_%AR24%','BEAM_%AR24%',arg1,arg2,arg3
+plls,%C,%C,%G,%I,%I
+*cfclos
+/nopr
+/input,beamdiagram_tmp,tmp
+/delete,beamdiagram_tmp,tmp
+/gopr
+
+

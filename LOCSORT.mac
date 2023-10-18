@@ -1,0 +1,112 @@
+! LOCSORT, outpurArr, entType,  dir
+! LOCSORT,      arg1,    arg2, arg3
+
+! Description:
+! Sorts selected nodes or keypoints in ascending X, Y, or Z coordinate order.
+
+! Arguments:
+! arg1: outputArr  -  name of the output parameter to which the node list will be written
+! arg2: entType    -  type of entity:
+!                        [0 or 'n'] NODE
+!                        [1 or 'k'] KEYPOINT
+! arg3: direction  -  coordinate used to sort entities:
+!                        [1 or 'x'] X coordinate
+!                        [2 or 'y'] Y coordinate
+!                        [3 or 'z'] Z coordinate
+
+! Local parameters:
+! AR20: parType
+! AR21: entityKey
+! AR22: directionKey
+! AR23: nodeCount
+! AR24: nodeNumber
+! AR25: maxValue
+! AR26: nthNode
+! AR27: index
+
+! Global parameters (erased at the end of this subroutine)
+! LOCSORT_ARR_coord
+! LOCSORT_ARR_ndNum
+
+
+! Check for valid entity type
+AR21='none'
+*get,AR20,parm,arg2,type
+*if,AR20,eq,0,then
+    *if,arg2,eq,0,then
+        AR21='NODE'
+    *elseif,arg2,eq,1,then
+        AR21='KP'
+    *endif
+
+*elseif,AR20,eq,3,then
+    *if,upcase(strsub(arg2,1,1)),eq,'N',then
+        AR21='NODE'
+    *elseif,upcase(strsub(arg2,1,1)),eq,'K',then
+        AR21='KP'
+    *endif
+*endif
+
+! Check for valid direction
+AR22='none'
+*get,AR20,parm,arg3,type
+*if,AR20,eq,0,then
+    *if,arg3,eq,1,then
+        AR22='X'
+    *elseif,arg3,eq,2,then
+        AR22='Y'
+    *elseif,arg3,eq,3,then
+        AR22='Z'
+    *endif
+*elseif,AR20,eq,3,then
+    *if,upcase(strsub(arg3,1,1)),eq,'X',then
+        AR22='X'
+    *elseif,upcase(strsub(arg3,1,1)),eq,'Y',then
+        AR22='Y'
+    *elseif,upcase(strsub(arg3,1,1)),eq,'Z',then
+        AR22='Z'
+    *endif
+*endif
+
+*if,AR22,eq,'none',or,AR21,eq,'none',then
+    ! Abort if invalid entity type or direction
+    *msg,error
+LOCSORT ERROR: Invalid entity type or direction. LOCSORT command is ignored.
+    *return,-1
+
+*else
+
+    ! Initialize arrays
+    *get,AR23,node,,count
+    *del,LOCSORT_ARR_coord
+    *dim,LOCSORT_ARR_coord,,AR23
+    *del,LOCSORT_ARR_ndNum
+    *dim,LOCSORT_ARR_ndNum,,AR23
+    *del,%arg1%
+    *dim,%arg1%,,AR23
+
+    ! Collect entity numbers and coordinates
+    AR24=0
+    *do,AR26,1,AR23,1
+        AR24=ndnext(AR24)
+        LOCSORT_ARR_ndNum(AR26)=AR24
+        *get,n_val,AR21,AR24,loc,AR22
+        LOCSORT_ARR_coord(AR26)=n_val
+    *enddo
+    *vscfun,AR25,max,LOCSORT_ARR_coord
+
+    ! Sort node numbers
+    *do,AR26,1,AR23,1
+        *vscfun,AR27,lmin,LOCSORT_ARR_coord
+        %arg1%(AR26)=LOCSORT_ARR_ndNum(AR27)
+        LOCSORT_ARR_coord(AR27)=abs(2*AR25)
+    *enddo
+
+*endif
+
+! Clear array parameters
+*del,LOCSORT_ARR_coord
+*del,LOCSORT_ARR_ndNum
+
+
+

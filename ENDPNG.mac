@@ -1,0 +1,38 @@
+! ENDPNG, name, blackBg
+! ENDPNG, arg1,    arg2
+
+! Description:
+! Reverts display to default device, closing PNG file opened by 'GO2PNG' subroutine.
+
+! Argument list:
+! arg1: name  -  name of the image file generated
+
+! Local variable list:
+! AR20: parType
+
+*if,arg2,NE,1,THEN
+    /cmap,_TEMPCMAP_,CMP
+    /delete,_TEMPCMAP_,CMP
+    /show,CLOSE
+    /rgb,INDEX, 0, 0, 0, 0
+    /rgb,INDEX, 60, 60, 60,13
+    /rgb,INDEX, 80, 80, 80,14
+    /rgb,INDEX,100,100,100,15
+*else
+    /delete,_TEMPCMAP_,CMP
+    /show,CLOSE
+*endif
+
+*get,AR20,PARM,arg1,TYPE
+*if,AR20,EQ,3,THEN
+   ! Rename file
+   *del,ENDPNG_FileName
+   *get,ENDPNG_FileName,ACTIVE,0,JOBNAM
+   /rename,'%ENDPNG_FileName%000','png',,'%arg1%','png'
+*endif
+
+
+
+
+
+

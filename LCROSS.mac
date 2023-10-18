@@ -1,0 +1,52 @@
+! LCROSS
+
+! Description:
+! Reselects (from current selection) lines crossing the working plane.
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: LC
+! AR21: LNum
+! AR22: Kb
+! AR23: Ke
+! AR24: zb
+! AR25: ze
+! AR26: nthLine
+
+! Global parameters (erased at the end on this subroutine):
+! LCROSS_COMPL_selection
+! LCROSS_COMPL_crossing
+
+*get,AR27,active,,csys
+*get,AR28,cdsy,,num,max
+cswpla,AR28+1,cart
+csys,AR28+1
+
+CM,LCROSS_COMPL_selection,LINE
+*get,AR20,LINE,,COUNT
+
+LSEL,U,LINE,,ALL
+CM,LCROSS_COMPL_crossing,LINE
+
+AR21=0
+*do,AR26,1,AR20,1
+    CMSEL,S,LCROSS_COMPL_selection
+    AR21=LSNEXT(AR21)
+    *get,AR22,LINE,AR21,KP,1
+    *get,AR23,LINE,AR21,KP,2
+    AR24=KZ(AR22)
+    AR25=KZ(AR23)
+    *if,AR24*AR25,LT,0,THEN
+        CMSEL,S,LCROSS_COMPL_crossing
+        LSEL,A,LINE,,AR21
+        CM,LCROSS_COMPL_crossing,LINE
+    *endif
+*enddo
+
+CMSEL,S,LCROSS_COMPL_crossing
+
+CMDELE,LCROSS_COMPL_crossing
+CMDELE,LCROSS_COMPL_selection
+csys,AR27

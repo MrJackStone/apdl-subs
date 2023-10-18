@@ -1,0 +1,180 @@
+! NDLFUN, firstNode, secondNode, xValueBeg, xValueEnd, yValueBeg, yValueEnd, zValueBeg, zValueEnd, reselectElems
+! NDLFUN, arg1,      arg2,       arg3,      arg4,      arg5,      arg6,      arg7,      arg8,      arg9
+
+! Descrição
+! Esta subrotina faz a aplicação de uma carga trapezoidal linear distribuída como forças nodais nos
+! nós selecionados. As cargas podem ser aplicadas nas direções X, Y e/ou Z. A função que descreve o
+! trapézio é determinada por meio da atribuição de um valor inicial a um nó inicial e da atribuição
+! de um valor final a um nó final. Os nós selecionados (sobre os quais as cargas serão aplicadas)
+! devem formar uma corrente ininterrupta (isto é, devem estar conectados a nós adjacentes por meio
+! de elementos em comum).
+
+! Lista de argumentos:
+! arg1: firstNode      -  primeiro nó do alinhamento de nós ao qual será atribuído o valor inicial
+!                         da distribuição trapezoidal;
+! arg2: secondNode     -  número do segundo nó, ao qual será atribuído o valor final da distribuição
+!                         (não pode ter posição igual à do firstNode);
+! arg3: xValueBeg      -  valor da carga distribuída na direção X no nó inicial;
+! arg4: xValueEnd      -  valor da carga distribuída na direção X no nó final;
+! arg5: yValueBeg      -  valor da carga distribuída na direção Y no nó inicial;
+! arg6: yValueEnd      -  valor da carga distribuída na direção Y no nó final;
+! arg7: zValueBeg      -  valor da carga distribuída na direção Z no nó inicial;
+! arg8: zValueEnd      -  valor da carga distribuída na direção Z no nó final;
+! arg9: reselectElems  -  tipo de seleção de elementos adjacentes:
+!                            [0] From full (S);
+!                            [1] Reselect (R);
+
+! Lista de variáveis locais:
+! AR20: totalDist
+! AR21: NodeCount
+! AR22: nthNode
+! AR23: thisNode
+! AR24: prevNode
+! AR25: nextNode
+! AR26: infLength
+! AR27: nodeDist
+! AR28: xLoad
+! AR29: yLoad
+! AR30: zLoad
+! AR31: xNF
+! AR32: yNF
+! AR33: zNF
+! AR34: distToler
+! AR35: totalXDist
+! AR36: totalYDist
+! AR37: totalZDist
+! AR38: dX
+! AR39: dY
+! AR40: dZ
+! AR41: xDFactor
+! AR42: yDFactor
+! AR43: zDFactor
+! AR44: xi
+! AR45: yi
+! AR46: zi
+! AR47: prevX
+! AR48: prevY
+! AR49: prevZ
+! AR50: xRectCenter
+! AR51: yRectCenter
+! AR52: zRectCenter
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! NDLFUN_ARR_Nodes
+
+! Salvar seleção
+NBACKUP
+EBACKUP
+
+! Calcular distância total entre os nós inicial e final
+AR20=DISTND(arg1,arg2)
+! Calcular as coordenadas do nó inicial
+AR44=NX(arg1)
+AR45=NY(arg1)
+AR46=NZ(arg1)
+
+! Definir tolerância para determinação de distância igual a zero
+AR34=AR20/1e4
+
+! Calcular as componentes em X, Y e Z da distância entre os nós inicial e final
+AR35=NX(arg2)-NX(arg1)
+*if,ABS(AR35),LT,AR34,THEN
+   AR35=0
+*endif
+AR36=NY(arg2)-NY(arg1)
+*if,ABS(AR36),LT,AR34,THEN
+   AR36=0
+*endif
+AR37=NZ(arg2)-NZ(arg1)
+*if,ABS(AR37),LT,AR34,THEN
+   AR37=0
+*endif
+
+*if,AR20,GT,0,THEN
+
+   ! Gerar corrente de nós
+   NDSTR, arg1, arg9
+   *del,NDLFUN_ARR_Nodes
+   *vfun,NDLFUN_ARR_Nodes,COPY,NDSTR_ARR_NodeList
+
+   *get,AR21,NODE,,COUNT
+   *do,AR22,1,AR21,1
+
+      ! Obter número do nó analisado
+      AR23=NDLFUN_ARR_Nodes(AR22)
+      ! Obter número do nó prévio
+      *if,AR22,EQ,1,THEN
+         AR24=NDLFUN_ARR_Nodes(1)
+         AR47=NX(AR24)
+         AR48=NY(AR24)
+         AR49=NZ(AR24)
+      *else
+         AR24=NDLFUN_ARR_Nodes(AR22-1)
+      *endif
+      ! Obter número do nó seguinte
+      *if,AR22,EQ,AR21,THEN
+         AR25=NDLFUN_ARR_Nodes(AR21)
+      *else
+         AR25=NDLFUN_ARR_Nodes(AR22+1)
+      *endif
+
+      ! Calcular comprimento de influência
+      AR26=DISTND(AR24,AR25)/2
+
+      ! Calcular a distância relativa do nó na direção de variação da carga distribuída
+      AR38=(NX(AR25)+NX(AR23))/2
+      AR50=((AR38+AR47)/2)-AR44
+      AR47=AR38
+      *if,AR35,NE,0,THEN
+         AR41=AR50/AR35
+      *else
+         AR41=0
+      *endif
+      AR39=(NY(AR25)+NY(AR23))/2
+      AR51=((AR39+AR48)/2)-AR45
+      AR48=AR39
+      *if,AR36,NE,0,THEN
+         AR42=AR51/AR36
+      *else
+         AR42=0
+      *endif
+      AR40=(NZ(AR25)+NZ(AR23))/2
+      AR52=((AR40+AR49)/2)-AR46
+      AR49=AR40
+      *if,AR37,NE,0,THEN
+         AR43=AR52/AR37
+      *else
+         AR43=0
+      *endif
+      AR27=SQRT(AR41**2+AR42**2+AR43**2)
+
+      ! Calcular valores das funções de distribuição no nó
+      AR28=arg3+(arg4-arg3)*AR27
+      AR29=arg5+(arg6-arg5)*AR27
+      AR30=arg7+(arg8-arg7)*AR27
+
+      ! Calcular forças nodais
+      AR31=AR28*AR26
+      AR32=AR29*AR26
+      AR33=AR30*AR26
+
+      ! Aplicar forças nodais
+      F,AR23,FX,AR31
+      F,AR23,FY,AR32
+      F,AR23,FZ,AR33
+
+   *enddo
+
+*else
+   *msg,ERROR
+   'NDLFUN ERROR: Distance between first & second nodes equal to zero.'
+*endif
+
+! Excluir variáveis globais
+*del,NDLFUN_ARR_Nodes
+
+! Restaurar seleção
+NRESTORE
+ERESTORE
+
+

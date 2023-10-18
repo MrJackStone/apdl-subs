@@ -1,0 +1,39 @@
+! DSPNDIST, parm, nodeNum, xOffset, yOffset
+! DSPNDIST, arg1,    arg2,    arg3,    arg4
+
+! Description:
+! Calculates the distance between a node's displaced position (in the X-Y plane) and a reference
+! point defined by given X and Y coordinates. Reference point coordinates must be relative to the
+! active CSYS/RSYS.
+
+! Arguments:
+! arg1: parm     -  name of the parameter (STR) to which the distance will be attributed
+! arg2: nodeNum  -  number of the node for which displaced distance will be calculated
+! arg3: xOffset  -  X coordinate of the reference point
+! arg4: yOffset  -  Y coordinate of the reference point
+
+! Local parameters:
+! AR20: relativeX
+! AR21: relativeY
+! AR22: parType
+! AR23: parName
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! %arg1% or '_OUTPUT'
+
+
+AR20=NX(arg2)+UX(arg2)-arg3
+AR21=NY(arg2)+UY(arg2)-arg4
+
+*get,AR22,PARM,arg1,TYPE
+*if,AR22,NE,3,THEN
+    AR23='_OUTPUT'
+*else
+    AR23=arg1
+*endif
+
+%AR23%=SQRT((AR20**2)+(AR21**2))
+

@@ -1,0 +1,115 @@
+! MXLAMBDA, hideResultsWindow
+! MXLAMBDA,              arg1
+
+! Descrição:
+! Esta subrotina obtém o valor de lambda (fator de carga) máximo alcançado durante uma análise.
+
+! Lista de argumentos:
+! -
+
+! Lista de variáveis locais:
+! AR20: LastLoadStep
+! AR21: ConvCheck
+! AR22: lastSBSTNum
+! AR23: arrSize
+! AR24: dataSets
+! AR25: parType
+! AR26: resetPost26
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! MXLAMBDA_ARR_temp
+
+! Lista de variáveis de saída:
+! MXLAMBDA_ARR_lambdas
+! MXLAMBDA_VAR_lastConverged
+! MXLAMBDA_VAR_maxlambda
+! MXLAMBDA_VAR_lastlambda
+! MXLAMBDA_VAR_lastLS
+! MXLAMBDA_VAR_lastNSET
+! MXLAMBDA_VAR_maxNSET
+
+PBACKUP
+NBACKUP
+EBACKUP
+
+! Verificar se o último substep convergiu
+/post1
+NSEL,U,NODE,,ALL
+ESEL,U,ELEM,,ALL
+SUBSET,LAST
+*get,MXLAMBDA_VAR_lastLS,ACTIVE,,SET,LSTP
+*get,AR21,ACTIVE,,SOLU,CNVG
+*get,AR22,ACTIVE,,SET,SBST
+*if,AR21,EQ,0,OR,AR22,EQ,999999,THEN
+   MXLAMBDA_VAR_lastConverged=0
+*else
+   MXLAMBDA_VAR_lastConverged=1
+*endif
+
+! Criar variável auxiliar no Time-History
+/post26
+RESET
+TIMERANGE
+/uis,MSGPOP,3
+*get,AR24,VARI,,NSETS
+*get,AR25,PARM,AR24,TYPE
+AR26=0
+*if,AR25,NE,0,OR,AR24,EQ,0,THEN
+   NUMVAR,200
+   AR26=1
+*endif
+SOLU,100,NCMSS,,'dummy'
+
+! Transferir valores de lambda para vetor
+*del,MXLAMBDA_ARR_temp
+VGET,MXLAMBDA_ARR_temp,1
+
+! Remover último ponto caso o último substep não tenha convergido
+*del,MXLAMBDA_ARR_lambdas
+*if,MXLAMBDA_VAR_lastConverged,EQ,0,THEN
+   *get,AR23,PARM,MXLAMBDA_ARR_temp,DIM,X
+   *dim,MXLAMBDA_ARR_lambdas,ARRAY,AR23-1
+   *vfun,MXLAMBDA_ARR_lambdas,COPY,MXLAMBDA_ARR_temp
+*else
+   *vfun,MXLAMBDA_ARR_lambdas,COPY,MXLAMBDA_ARR_temp
+*endif
+
+! Obter valor máximo do fator de carga
+*vscfun,MXLAMBDA_VAR_maxlambda,MAX,MXLAMBDA_ARR_lambdas
+! Obter número do set (NSET) no qual ocorre o valor máximo do fator de carga
+*vscfun,MXLAMBDA_VAR_maxNSET,LMAX,MXLAMBDA_ARR_lambdas
+! Obter número do último set
+*vscfun,MXLAMBDA_VAR_lastNSET,LAST,MXLAMBDA_ARR_lambdas
+! Obter valor do fator de carga no último set
+MXLAMBDA_VAR_lastlambda=MXLAMBDA_ARR_lambdas(MXLAMBDA_VAR_lastNSET)
+
+! Excluir variável auxiliar
+VARDEL,100
+
+! Exibir mensagem de término de processamento
+*if,arg1,ne,1,then
+    *msg,UI,MXLAMBDA_VAR_lastLS,MXLAMBDA_VAR_maxlambda,MXLAMBDA_VAR_maxNSET,MXLAMBDA_VAR_lastlambda,MXLAMBDA_VAR_lastNSET
+MXLAMBDA summary: %/&
+Last load step: %I %/&
+Max lambda: %G %/&
+Max lambda NSET: %I %/&
+Last lambda: %G %/&
+Last lambda NSET: %I
+*endif
+
+! Limpar variáveis globais
+*del,MXLAMBDA_ARR_temp
+
+! Resetar /post26
+*if,AR26,EQ,1,THEN
+   RESET
+*endif
+
+PRESTORE
+NRESTORE
+ELRESTORE
+
+
+
+
+

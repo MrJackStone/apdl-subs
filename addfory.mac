@@ -1,0 +1,13 @@
+! addfory
+
+*get,NC,NODE,,COUNT
+nthNode=0
+totFor=0
+*do,i,1,NC,1
+   nthNode=NDNEXT(nthNode)
+   *get,yFor,NODE,nthNode,F,FY
+   totFor=totFor+yFor
+*enddo
+
+_OUTPUT=totFor
+

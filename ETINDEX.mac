@@ -1,0 +1,50 @@
+! ETINDEX,ETName
+! ETINDEX,arg1
+
+! Lista de argumentos:
+! arg1: ETName (lowercase)
+
+! Lista de variáveis:
+! AR20: ETName
+! AR21: ETCount
+! AR22: ETInd
+! AR23: FLAG
+! AR24: Key
+! AR25: Name
+
+! Obter o nome da Element Table desejada
+AR20=UPCASE(arg1)
+
+! Obter o número de Element Tables definidas
+*get,AR21,ETAB,0,NCOL,MAX
+
+! Inicializar variáveis
+AR22=1
+AR23=1
+AR24=0
+
+*if,AR21,NE,0,THEN
+   *dowhile,AR23
+      ! Obter o nome da enésima ETABLE
+      *get,AR25,ETAB,AR22,LAB
+      ! Caso o nome da ETABLE seja igual ao procurado:
+      *if,AR25,EQ,AR20,THEN
+         ! Obter o número de índice da enésima Element Table
+         AR24=AR22
+         ! Interromper loop
+         AR23=0
+      *else
+         ! Incrementar índice de Element Table
+         AR22=AR22+1
+         ! Caso o índice incrementado seja maior que o máximo:
+         *if,AR22,GT,AR21,THEN
+            ! Interromper loop
+            AR23=0
+         *endif
+      *endif
+   *enddo
+*endif
+
+_OUTPUT=
+_OUTPUT=AR24
+

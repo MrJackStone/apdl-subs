@@ -1,0 +1,78 @@
+! KSORT, dir,  order
+! KSORT, arg1, arg2
+
+! Lista de argumentos:
+! arg1: dir    -  direção do eixo: ['X'], ['Y'] ou ['Z']
+! arg2: order  -  ordem de organização: ['A'] ascendente; ['D'] descendente
+
+! Lista de variáveis locais:
+! AR20: dirKey
+! AR21: KCount
+! AR22: nthKP
+! AR23: KPNum
+! AR24: coord
+! AR25: nthLoop
+! AR26: thisKP
+! AR27: nextKP
+! AR28: thisCoord
+! AR29: nextCoord
+! AR30: flipKey
+! AR31: orderKey
+
+! Lista de variáveis de saída:
+! KSORT_ARR_KPList
+! KSORT_ARR_CoordList
+
+! Direção da coordenada
+AR20=UPCASE(arg1)
+! Ordem de organização
+AR31=UPCASE(arg2)
+
+! Inicializar vetores
+*get,AR21,KP,,COUNT
+*del,KSORT_ARR_KPList
+*dim,KSORT_ARR_KPList,ARRAY,AR21
+*del,KSORT_ARR_CoordList
+*dim,KSORT_ARR_CoordList,ARRAY,AR21
+AR23=0
+
+! Preencher vetores de números de keypoint e coordenadas
+*do,AR22,1,AR21,1
+   AR23=KPNEXT(AR23)
+   KSORT_ARR_KPList(AR22)=AR23
+   *if,AR20,EQ,'X',THEN
+      AR24=KX(AR23)
+   *elseif,AR20,EQ,'Y',THEN
+      AR24=KY(AR23)
+   *elseif,AR20,EQ,'Z',THEN
+      AR24=KZ(AR23)
+   *endif
+   KSORT_ARR_CoordList(AR22)=AR24
+*enddo
+
+! Organizar vetor de keypoints em função da coordenada especificada
+*do,AR25,1,AR21,1
+   *do,AR22,1,AR21-AR25,1
+      AR26=KSORT_ARR_KPList(AR22)
+      AR27=KSORT_ARR_KPList(AR22+1)
+      AR28=KSORT_ARR_CoordList(AR22)
+      AR29=KSORT_ARR_CoordList(AR22+1)
+      AR30=0
+      *if,AR31,EQ,'A',THEN
+         *if,AR29,LT,AR28,THEN
+            AR30=1
+         *endif
+      *elseif,AR31,EQ,'D',THEN
+         *if,AR29,GT,AR28,THEN
+            AR30=1
+         *endif
+      *endif
+      *if,AR30,EQ,1,THEN
+         KSORT_ARR_KPList(AR22)=AR27
+         KSORT_ARR_KPList(AR22+1)=AR26
+         KSORT_ARR_CoordList(AR22)=AR29
+         KSORT_ARR_CoordList(AR22+1)=AR28
+      *endif
+   *enddo
+*enddo
+

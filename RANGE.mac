@@ -1,0 +1,120 @@
+! RANGE, output, from,   to, increment, count, offset, includeLast
+! RANGE,   arg1, arg2, arg3,      arg4,  arg5,   arg6,        arg7
+
+! Description:
+! Creates an array with a range of evenly spaced numbers. arg2 through arg5 overdetermine the range,
+! therefore only three of them need to be defined. These four scenarios are available, in order of
+! precedence:
+!    A) FROM-TO-INCREMENT     Defined: arg2, arg3, arg4 ; Undefined: arg5 (optional)
+!    B) FROM-TO-COUNT         Defined: arg2, arg3, arg5 ; Undefined: arg4 (mandatory)
+!    C) FROM-INCREMENT-COUNT  Defined: arg2, arg4, arg5 ; Undefined: arg3 (mandatory)
+!    D) TO-INCREMENT-COUNT    Defined: arg3, arg4, arg5 ; Undefined: arg2 (mandatory)
+! For a parameter to be considered 'undefined' it must be passed as a string (for arg2 to arg5)
+! or as zero (for arg4 and arg5 only).
+
+! Arguments:
+! arg1: output       -  name of the output array parameter
+! arg2: from         -  first number, to count from
+! arg3: to           -  last number, to count to
+! arg4: increment    -  difference between consecutive numbers
+! arg5: count        -  length of the array
+! arg6: offset       -  value added to every element in the array
+! arg7: includeLast  -  key that determines whether the upper limit ('to' + 'offset') should be
+!                       included in the output array (used only in case 'A')
+
+! Local parameters:
+! AR20: parType
+! AR22: fromDefined
+! AR23: toDefined
+! AR24: incrementDefined
+! AR25: countDefined
+! AR26: offsetDefined
+! AR27: includeLastDefined
+! AR32: calculatedStartingNumber
+! AR34: calculatedIncrement
+! AR35: calculatedCount
+! AR36: appliedOffset
+
+
+! 'From' defined:
+AR22=0
+*get,AR20,parm,arg2,type
+*if,AR20,eq,0,then
+    AR22=1
+*endif
+
+! 'To' defined:
+AR23=0
+*get,AR20,parm,arg3,type
+*if,AR20,eq,0,then
+    AR23=1
+*endif
+
+! 'Increment' defined:
+AR24=0
+*get,AR20,parm,arg4,type
+*if,AR20,eq,0,and,arg4,ne,0,then
+    AR24=1
+*endif
+
+! 'Count' defined:
+AR25=0
+*get,AR20,parm,arg5,type
+*if,AR20,eq,0,and,arg5,ne,0,then
+    AR25=1
+*endif
+
+! Apply offset
+AR36=0
+*get,AR20,parm,arg6,type
+*if,AR20,eq,0,and,arg6,ne,0,then
+    AR36=arg6
+*endif
+
+! Include last element
+AR27=0
+*get,AR20,parm,arg7,type
+*if,AR20,eq,0,and,arg7,ne,0,then
+    AR27=1
+*endif
+
+
+*del,%arg1%
+
+! Case A: from-to-increment
+*if,AR22*AR23*AR24,eq,1,then
+    AR32=arg2+AR36
+    AR35=AR27+((arg3-arg2)/arg4)
+    *dim,%arg1%,,AR35
+    *vfill,%arg1%,ramp,AR32,arg4
+    *if,AR27,eq,1,then
+        %arg1%(AR35)=arg3+AR36
+    *endif
+
+! Case B: from-to-count
+*elseif,AR22*AR23*AR25,eq,1,then
+    AR32=arg2+AR36
+    AR34=(arg3-arg2)/arg5
+    *dim,%arg1%,,arg5
+    *vfill,%arg1%,ramp,AR32,AR34
+
+! Case C: from-increment-count
+*elseif,AR22*AR24*AR25,eq,1,then
+    AR32=arg2+AR36
+    *dim,%arg1%,,arg5
+    *vfill,%arg1%,ramp,AR32,arg4
+
+! Case D: to-increment-count
+*elseif,AR23*AR24*AR25,eq,1,then
+    AR32=AR36+arg3-(arg4*(arg5-1))
+    *dim,%arg1%,,arg5
+    *vfill,%arg1%,ramp,AR32,arg4
+
+*else
+    *msg,warn
+RANGE error: insufficient parameters given for range definition.%/&
+RANGE command is ignored.
+    *return,-1
+
+*endif
+

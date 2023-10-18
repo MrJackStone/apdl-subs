@@ -1,0 +1,85 @@
+! COMPARE, parm, oper, argCount, num1, num2, num3, num4, num5, num6, num7, num8, num8, num9, num10, num11, num12, num13, num14, num15
+! COMPARE, arg1, arg2,     arg3, arg4, arg5, arg6, arg7, arg8, arg9, ar10, ar11, ar12, ar13,  ar14,  ar15,  ar16,  ar17,  ar18,  ar19
+
+! Description:
+! Applies a comparison operator to a selected number of arguments and stores the result in
+! the parameter %arg1%.
+
+! Arguments:
+! arg1:      parm        -  parameter name (string) to which the resulting value will be written
+! arg2:      oper        -  comparison operator (string) to be applied to the numerical values
+!                           Available operators:
+!                              'MIN'      -  returns the smallest value (signed)
+!                              'MAX'      -  returns the largest value (signed)
+!                              'MEAN'     -  returns the mean of all values
+!                              'SUM'      -  returns the sum of all values
+!                              'ABSMAX'   -  returns the largest absolute value
+!                              'ABSMIN'   -  returns the smallest absolute value
+!                              'SABSMAX'  -  use ABS to calculate MAX, but return signed value
+!                              'SABSMIN'  -  use ABS to calculate MIN, but return signed value
+! arg3:      argCount    -  number of arguments to be included in the comparison
+! arg4-ar19: num1-num15  -  numerical values to be compared
+
+! Local parameters:
+! AR20: upcaseOperator
+! AR21: minValue
+! AR22: maxValue
+
+! Global parameters (erased at the end of this subroutine)
+! COMPARE_ARR_ARGS
+! COMPARE_ARR_VALUES
+
+*del,COMPARE_ARR_ARGS
+*dim,COMPARE_ARR_ARGS,ARRAY,16
+COMPARE_ARR_ARGS(1) = arg4, arg5, arg6, arg7, arg8, arg9, ar10, ar11, ar12, ar13
+COMPARE_ARR_ARGS(11)= ar14, ar15, ar16, ar17, ar18, ar19
+
+*del,COMPARE_ARR_VALUES
+*dim,COMPARE_ARR_VALUES,ARRAY,arg3
+*vfun,COMPARE_ARR_VALUES,COPY,COMPARE_ARR_ARGS
+
+AR20=UPCASE(arg2)
+
+*if,AR20,EQ,'MIN',THEN
+    *vscfun,%arg1%,MIN,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'MAX',THEN
+    *vscfun,%arg1%,MAX,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'MEAN',THEN
+    *vscfun,%arg1%,MEAN,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'SUM',THEN
+    *vscfun,%arg1%,SUM,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'ABSMIN',THEN
+    *vabs,,1
+    *vscfun,%arg1%,MIN,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'ABSMAX',THEN
+    *vabs,,1
+    *vscfun,%arg1%,MAX,COMPARE_ARR_VALUES
+
+*elseif,AR20,EQ,'SABSMIN',THEN
+    *vscfun,AR21,MIN,COMPARE_ARR_VALUES
+    *vscfun,AR22,MAX,COMPARE_ARR_VALUES
+    *if,ABS(AR21),GT,ABS(AR22),THEN
+        %arg1%=AR21
+    *else
+        %arg1%=AR22
+    *endif
+
+*elseif,AR20,EQ,'SABSMAX',THEN
+    *vscfun,AR21,MIN,COMPARE_ARR_VALUES
+    *vscfun,AR22,MAX,COMPARE_ARR_VALUES
+    *if,ABS(AR21),LT,ABS(AR22),THEN
+        %arg1%=AR21
+    *else
+        %arg1%=AR22
+    *endif
+
+*endif
+
+*del,COMPARE_ARR_VALUES
+*del,COMPARE_ARR_ARGS
+

@@ -1,0 +1,127 @@
+! CLEANPLOT, plotCommand, argument1, argument2, argument3, argument4, argument5, argument6, argument7, scale, window
+! CLEANPLOT,        arg1,      arg2,      arg3,      arg4,      arg5,      arg6,      arg7,      arg8,  arg9,   ar10
+
+!    /plopts,info,0
+!    %arg1%,%arg2%,%arg3%,%arg4%,%arg5%,%arg6%,%arg7%
+!    /plopts,info,3
+!    /focus,all,1e6,,,1
+!
+!    *if,arg9,ne,0,then
+!        AR20=arg9
+!        *get,AR21,graph,1,contour,vmin
+!        *get,AR22,graph,1,contour,vinc
+!        *get,AR23,graph,1,contour,ncont
+!        AR24=AR21+(AR23-1)*AR22
+!        clims,AR21*AR20,AR24*AR20
+!    *endif
+!    /replot
+!
+!    /focus,all,-1e6,,,1
+!    /plopts,info,0
+!
+
+
+ar31='%C'
+
+*get,AR99,parm,arg2,type
+*if,AR99,ne,0,then
+    ar32='%C'
+*else
+    ar32='%G'
+*endif
+
+*get,AR99,parm,arg3,type
+*if,AR99,ne,0,then
+    ar33='%C'
+*else
+    ar33='%G'
+*endif
+
+*get,AR99,parm,arg4,type
+*if,AR99,ne,0,then
+    ar34='%C'
+*else
+    ar34='%G'
+*endif
+
+*get,AR99,parm,arg5,type
+*if,AR99,ne,0,then
+    ar35='%C'
+*else
+    ar35='%G'
+*endif
+
+*get,AR99,parm,arg6,type
+*if,AR99,ne,0,then
+    ar36='%C'
+*else
+    ar36='%G'
+*endif
+
+*get,AR99,parm,arg7,type
+*if,AR99,ne,0,then
+    ar37='%C'
+*else
+    ar37='%G'
+*endif
+
+*get,AR99,parm,arg8,type
+*if,AR99,ne,0,then
+    ar38='%C'
+*else
+    ar38='%G'
+*endif
+
+! Write meta-file
+*cfopen,cleanplot_tmp1,tmp
+    *vwrite,
+    ('*cfopen,cleanplot_tmp2,tmp')
+    *vwrite,
+    ('*vwrite,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8')
+    *vwrite,ar31,ar32,ar33,ar34,ar35,ar36,ar37,ar38
+    (A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2)
+    *vwrite,
+    ('*cfclos')
+*cfclos
+
+! Run meta-file
+/input,cleanplot_tmp1,tmp
+
+/plopts,info,0
+/nopr
+/input,cleanplot_tmp2,tmp
+/plopts,info,3
+/focus,all,1e6,,,1
+
+*if,arg9,ne,0,then
+    ! Window number
+    AR26=1
+    *get,AR25,parm,ar10,type
+    *if,AR25,eq,0,then
+        *if,ar10,ne,0,then
+            AR26=ar10
+        *endif
+    *endif
+
+    AR20=arg9
+    *get,AR21,graph,AR26,contour,vmin
+    *get,AR22,graph,AR26,contour,vinc
+    *get,AR23,graph,AR26,contour,ncont
+    AR24=AR21+(AR23-1)*AR22
+    clims,AR21*AR20,AR24*AR20
+
+    mAR21=AR21
+    mAR22=AR22
+    mAR23=AR23
+    mAR24=AR24
+*endif
+/nopr
+/input,cleanplot_tmp2,tmp
+
+/focus,all,-1e6,,,1
+/plopts,info,0
+
+/delete,cleanplot_tmp1,tmp
+/delete,cleanplot_tmp2,tmp
+/gopr
+

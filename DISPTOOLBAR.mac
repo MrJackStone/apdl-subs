@@ -1,0 +1,44 @@
+! DISPTOOLBAR
+! DISPTOOLBAR
+
+! Descrição:
+! Esta subrotina criar botões com opções de exibição na barra de atalhos.
+
+! Set Display Toolbar
+/nopr
+*abbr,POST,ABBRES,NEW,POSTTOOLBAR,MAC
+*abbr,PWR,Fnc_/GRAPHICS
+*abbr,KPL,KPLOT
+*abbr,LPL,LPLOT
+*abbr,APL,APLOT
+*abbr,VPL,VPLOT
+*abbr,NPL,NPLOT
+*abbr,EPL,EPLOT
+*abbr,GPL,GPLOT
+*abbr,TRI_0,/triad,OFF
+*abbr,TRI_1,/triad,ON
+*abbr,NUM_0,/number,0
+*abbr,NUM_1,/number,1
+*abbr,K#_1,/pnum,KP,ON
+*abbr,K#_0,/pnum,KP,OFF
+*abbr,ESHP_1,/ESHAPE,1
+*abbr,ESHP_0,/ESHAPE,0
+*abbr,GLN_ON ,/GLINE,ALL,0
+*abbr,GLN_OFF,/GLINE,ALL,-1
+*abbr,VCT_ON,/DEVICE,VECTOR,1
+*abbr,VCT_OFF,/DEVICE,VECTOR,0
+*abbr,HID_ON,/TYPE,,3
+*abbr,HID_OFF,/TYPE,,0
+*abbr,EDGE_0,/EDGE,ALL,0
+*abbr,EDGE_1,/EDGE,ALL,1
+*abbr,V1W,VIEW1W
+*abbr,V4W,VIEW4W
+*abbr,NOERA,/noerase
+*abbr,ERA,/erase
+*abbr,PIC,TAKEPIC
+*abbr,RPL,/REPLOT
+*abbr,ASL,ALLSEL
+/go
+
+
+

@@ -1,0 +1,39 @@
+! DMFY188,Scale,undoc
+! DMFY188,arg1,arg2
+
+! Lista de argumentos:
+! arg1: Scale (fator de escala do diagrama)
+
+! Lista de variáveis:
+! AR20: ScaleFactor
+! AR21: ETIndex
+! AR23: Index
+! AR24: ETName
+
+AR23=2
+AR24='DMFY188'
+
+AR27=15
+AR25='DMFY188i'
+AR26='DMFY188j'
+
+*if,arg1,EQ,0,THEN
+   AR20=1
+*else
+   AR20=arg1
+*endif
+
+ETINDEX,AR24
+AR21=_OUTPUT
+*if,AR21,EQ,0,THEN
+   ETABLE,AR24,SMISC,AR23
+*else
+   ETABLE,REFL
+*endif
+
+DMFY188_VAR_ETIndex=AR24
+!PLLS,DMFY188_VAR_ETIndex,DMFY188_VAR_ETIndex,AR20,1
+
+ETABLE,AR25,SMISC,AR23
+ETABLE,AR26,SMISC,AR27
+PLLS,AR25,AR26,AR20,1,arg2

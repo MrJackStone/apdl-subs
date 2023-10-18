@@ -1,0 +1,40 @@
+! ARR2STRARR, output, input, format, precision
+! ARR2STRARR,   arg1,  arg2,   arg3,      arg4
+
+! Description:
+! Converts the numeric values of an array (up to 2D) into strings that follow a chosen format.
+
+! Arguments;
+! arg1: output     -  name of output parameter
+! arg2: input      -  name of input parameter (array of numbers)
+! arg3: format     -  type of number formatting, out of the following options:
+!                        ['F'] Float
+!                        ['E'] Exponential
+!                        ['I'] Integer
+! arg4: precision  -  number of digits after decimal point (not used for arg3='I')
+
+! Local parameters:
+! AR21: xDimension
+! AR22: yDimension
+! AR23: nthX
+! AR24: nthY
+! AR25: number
+
+! Global parameters (erased at the end of this subroutine):
+! ARR2STRARR_VAR_stringNumber
+
+*get,AR21,parm,%arg2%,dim,x
+*get,AR22,parm,%arg2%,dim,y
+
+*del,%arg1%
+*dim,%arg1%,string,248,AR21,AR22
+
+*do,AR23,1,AR21,1
+    *do,AR24,1,AR22,1
+        AR25=%arg2%(AR23,AR24)
+        num2str,'ARR2STRARR_VAR_stringNumber',AR25,arg3,arg4
+        %arg1%(1,AR23,AR24)=ARR2STRARR_VAR_stringNumber
+    *enddo
+*enddo
+
+*del,ARR2STRARR_VAR_stringNumber

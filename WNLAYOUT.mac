@@ -1,0 +1,43 @@
+! WNLAYOUT, wnCount, botTitle, topTitle
+! WNLAYOUT,    arg1,     arg2,     arg3
+
+/window,all,dele
+
+*if,arg2,eq,1,then
+    ! With title at the bottom:
+    AR20=-0.920
+*else
+    ! Without title at the bottom:
+    AR20=-1.000
+*endif
+
+*if,arg3,eq,1,then
+    ! With title at the top:
+    AR21=0.920
+*else
+    ! Without title at the top:
+    AR21=1.000
+*endif
+
+*if,arg1,eq,2,then
+    /window,2, -1.000, 0.335,   AR20,   AR21
+    /window,3,  0.335, 1.670,   AR20,   AR21
+
+    *if,arg2,eq,1,then
+        ! With title at the bottom:
+        /window,4, -1.000, 1.670, -1.000,   AR20
+    *endif
+
+    *if,arg3,eq,1,then
+        ! With title at the top:
+        /window,1, -1.000, 1.670,   AR21,  1.000
+    *endif
+
+    /window,1,off
+    /window,4,off
+*endif
+
+/angle,all,0
+
+
+

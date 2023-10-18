@@ -1,0 +1,21 @@
+! NBACKUP
+
+! Description:
+! Creates a node named selection component to serve as a backup of currently selected nodes.
+! Usually followed by 'NRESTORE' command to restore backed up nodal selection.
+
+! Arguments:
+! -
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! NBackup_  -  node named selection component
+
+*del,NBackup_
+CM,NBackup_,NODE
+

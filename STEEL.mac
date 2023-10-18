@@ -1,0 +1,80 @@
+! STEEL, matNum,    E,   fy,   Et,   fu, dens, Poisson, linear
+! STEEL,   arg1, arg2, arg3, arg4, arg5, arg6,    arg7,   arg8
+
+! Arguments
+! arg1: matNum   -  material number
+! arg2: E        -  steel elastic modulus (default: 2e11)
+! arg3: fy       -  steel yield stress
+! arg4: Et       -  steel tangent modulus
+! arg5: fu       -  steel ultimate stress
+! arg6: dens     -  mass density (default: 7850)
+! arg7: Poisson  -  Poisson's coefficient (default: 0.3)
+! arg8: linear   -  define linear material (E, Poisson, dens) only:
+!                      [0] No (defines non-linear material)
+!                      [1] Yes (defines linear material)
+
+! Local parameters:
+! AR20: parType
+! AR21: E
+! AR22: massDensity
+! AR23: Poisson
+! AR24: Et
+! AR25: nthPt
+! AR26: stress
+! AR27: strain
+
+! Default values: elastic modulus, mass density, and Poisson's coefficient
+*get,AR20,PARM,arg2,TYPE
+*if,AR20,NE,0,OR,arg2,LE,0,THEN
+    AR21=2e11
+*else
+    AR21=arg2
+*endif
+*get,AR20,PARM,arg6,TYPE
+*if,AR20,NE,0,OR,arg6,LE,0,THEN
+    AR22=7850
+*else
+    AR22=arg6
+*endif
+*get,AR20,PARM,arg7,TYPE
+*if,AR20,NE,0,OR,arg7,LE,0,THEN
+    AR23=0.3
+*else
+    AR23=arg7
+*endif
+
+! Elastic properties
+MP,EX,arg1,AR21
+MP,PRXY,arg1,AR23
+MP,DENS,arg1,AR22
+
+*get,AR20,parm,arg8,type
+*if,AR20,ne,0,or,arg8,ne,1,then
+
+    ! Tangent modulus
+    *get,AR20,PARM,arg4,TYPE
+    *if,AR20,NE,0,OR,arg4,LE,0,THEN
+        AR24=0
+    *else
+        AR24=arg4
+    *endif
+
+    ! Plastic definitions (BISO or MISO)
+    *get,AR20,PARM,arg5,TYPE
+    *if,AR20,NE,0,OR,arg5,LE,0,THEN
+        TB,BISO,arg1
+        TBDATA,1,arg3,AR24
+    *else
+        !TB,MISO
+        STEELLAW,AR21,arg3,arg5
+        TB,PLASTIC,arg1,,STEELLAW_VAR_npt,MISO
+        *do,AR25,1,STEELLAW_VAR_npt,1
+            AR26=STEELLAW_ARR_sVector(AR25)
+            AR27=STEELLAW_ARR_eVector(AR25)-STEELLAW_ARR_eVector(1)
+            TBPT,DEFI,AR27,AR26
+        *enddo
+    *endif
+*endif
+
+
+

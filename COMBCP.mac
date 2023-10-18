@@ -1,0 +1,46 @@
+! COMBCP,keep,delete
+
+! AR20: DOFKey_CP1
+! AR21: CP2NCount
+! AR22: nthNode
+! AR23: NodeNum
+! AR24: DOFKey_CP2
+! AR25: DOFname
+
+
+*get,AR20,CP,arg1,DOF
+*get,AR24,CP,arg2,DOF
+
+*if,AR20,eq,AR24,then
+
+    *if,AR20,EQ,1,THEN
+      AR25='UX'
+   *elseif,AR20,EQ,2,THEN
+      AR25='UY'
+   *elseif,AR20,EQ,3,THEN
+      AR25='UZ'
+   *elseif,AR20,EQ,4,THEN
+      AR25='ROTX'
+   *elseif,AR20,EQ,5,THEN
+      AR25='ROTY'
+   *elseif,AR20,EQ,6,THEN
+      AR25='ROTZ'
+   *endif
+
+    *get,AR21,CP,arg2,NTERM
+
+    *do,AR22,1,AR21,1
+        *get,AR23,CP,arg2,TERM,AR22,NODE
+        *if,ndinqr(AR23,1),eq,-1,then
+            nsel,a,node,,AR23
+            CP,arg1,AR25,AR23
+            nsel,u,node,,AR23
+        *else
+            CP,arg1,AR25,AR23
+        *endif
+    *enddo
+
+    CPDELE,arg2
+
+*endif
+

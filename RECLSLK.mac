@@ -1,0 +1,70 @@
+! RECLSLK, kpPool, linePool
+! RECLSLK,   arg1,     arg2
+
+! Description:
+! Recursively selects lines adjacent to keypoints (and vice-versa) until all connected lines/kps
+! in the chosen pool have been selected. The selection pool for keypoints and lines can be
+! restricted to a selection component (arg1 and arg2, respectively) or can include all existing
+! entities.
+
+! Arguments:
+! arg1: kpPool    -  name of keypoint selection component that constitutes the pool of keypoints
+!                    (leave blank to use all existing keypoints)
+! arg2: linePool  -  name of line selection component that constitutes the pool of lines
+!                    (leave blank to use all existing lines)
+
+! Local parameters:
+! AR20: parType
+! AR21: useKPPool
+! AR22: useLinePool
+! AR23: prevLineCount
+! AR24: lineCount
+! AR25: forceLoop
+
+
+! Determine whether to select KPs from a set or from all KPs
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    AR21=1
+*else
+    AR21=0
+*endif
+
+! Determine whether to select lines from a set or from all lines
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+    AR22=1
+*else
+    AR22=0
+*endif
+
+! Initialize previous selected line counter register
+AR23=0
+
+! Force loop
+AR25=1
+
+! Recursively select lines adjacent to keypoints and vice-versa
+*dowhile,AR25
+    ! Select lines
+    lslk,s
+    *if,AR22,eq,1,then
+        cmsel,r,%arg2%
+    *endif
+    *get,AR24,line,,count
+
+    ! Select KPs
+    ksll,s
+    *if,AR21,eq,1,then
+        cmsel,r,%arg1%
+    *endif
+
+    ! Break loop if no new lines were added to selection
+    *if,AR24,le,AR23,then
+        *exit
+    *endif
+
+    ! Update previous selected line counter register
+    AR23=AR24
+*enddo
+

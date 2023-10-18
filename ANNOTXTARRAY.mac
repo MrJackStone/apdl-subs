@@ -1,0 +1,100 @@
+! ANNOTXTARRAY, text_strings,   x0,   y0, spacing, direction, cellWidth, alignment
+! ANNOTXTARRAY,         arg1, arg2, arg3,    arg4,      arg5,      arg6,      arg7
+
+! Description:
+! Creates an array (along horizontal or vertical direction) of annotations.
+
+! Arguments:
+! arg1: text_strings  -  name of array or chars with text to be written
+! arg2: x0            -  X coordinate (in window display units) of first text annotation
+! arg3: y0            -  Y coordinate (in window display units) of first text annotation
+! arg4: spacing       -  distance between annotations
+! arg5: direction     -  direction along which the array of annotations is distributed:
+!                           ['X'] annotations distributed along a horizontal line
+!                           ['Y'] annotations distributed along a vertical line
+! arg6: cellWidth     -  width of the virtual cell in which the annotation will be aligned
+!                        (required only if arg7 > 0)
+! arg7: alignment     -  text alignment inside cell:
+!                           [0] left-justified
+!                           [1] centered
+!                           [2] right-justified
+
+! Local parameters:
+! AR21: cellCount
+! AR22: nthCell
+! AR23: textValue
+! AR24: charCount
+! AR25: calculatedWidth
+! AR26: widthDifference
+! AR27: leftPadding
+! AR32: xCoord
+! AR33: yCoord
+
+! Global parameters (erased at the end of this subroutine):
+! ANNOTXTARRAY_ARR_X
+! ANNOTXTARRAY_ARR_Y
+! ANNOTXTARRAY_VAR_charWidth
+
+
+! Get number of text annotations
+*get,AR21,parm,%arg1%,dim,y
+
+! Calculate X-Y coordinates of each annotation
+*del,ANNOTXTARRAY_ARR_X
+*dim,ANNOTXTARRAY_ARR_X,,AR21
+*del,ANNOTXTARRAY_ARR_Y
+*dim,ANNOTXTARRAY_ARR_Y,,AR21
+*if,upcase(arg5),eq,'X',then
+    *vfill,ANNOTXTARRAY_ARR_X,ramp,arg2,arg4
+    *vfill,ANNOTXTARRAY_ARR_Y,ramp,arg3,0
+*elseif,upcase(arg5),eq,'Y',then
+    *vfill,ANNOTXTARRAY_ARR_X,ramp,arg2,0
+    *vfill,ANNOTXTARRAY_ARR_Y,ramp,arg3,arg4
+*else
+    *msg,warn
+ANNOTXTARRAY error: invalid direction (arg5).%/&
+ANNOTXTARRAY command is ignored.
+    *return,-1
+*endif
+
+! Get character width
+g_annocharwidth,'ANNOTXTARRAY_VAR_charWidth'
+
+! Create array of text annotations
+*do,AR22,1,AR21,1
+
+    ! Text content !(from last to first)
+    !AR23=%arg1%(1,AR21-AR22+1)
+    AR23=%arg1%(1,AR22)
+
+    ! Calculate difference between text width and cell width
+    AR24=strleng(AR23)
+    AR25=AR24*ANNOTXTARRAY_VAR_charWidth
+    AR26=arg6-AR25
+
+    ! Calculate padding to align text
+    *if,arg7,eq,1,then
+        ! Centered
+        AR27=AR26/2
+    *elseif,arg7,eq,2,then
+        ! Right justified
+        AR27=AR26
+    *else
+        ! Left justified (default)
+        AR27=0
+    *endif
+
+    ! Calculate X and Y coordinates of text annotation
+    AR32=ANNOTXTARRAY_ARR_X(AR22)+AR27
+    AR33=ANNOTXTARRAY_ARR_Y(AR22)
+
+    ! Create text annotation
+    anno,AR32,AR33,AR23
+
+*enddo
+
+! Clear parameters
+*del,ANNOTXTARRAY_ARR_X
+*del,ANNOTXTARRAY_ARR_Y
+*del,ANNOTXTARRAY_VAR_charWidth
+

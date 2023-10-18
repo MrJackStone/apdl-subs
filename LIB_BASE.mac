@@ -1,0 +1,77 @@
+! BANANAS, secID, name, refineKey, consultOnly
+! BANANAS, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de chapas da Gerdau.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! BANANAS_VAR_num
+! BANANAS_VAR_b
+! BANANAS_VAR_t
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+BANANAS_VAR_num=AR24
+
+! Determinar geometria da seção
+
+*else
+   *msg,WARN
+BANANAS WARNING: Specified section not found. Command ignored.
+   BANANAS_VAR_b=-1
+*endif
+
+! Criar seção transversal
+*if,BANANAS_VAR_b,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,BANANAS_VAR_num,BEAM,RECT,arg2,AR22
+   SECDATA,BANANAS_VAR_b,BANANAS_VAR_t
+*endif
+

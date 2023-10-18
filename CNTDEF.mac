@@ -1,0 +1,184 @@
+! CNTDEF, targeCMsuf, contaCMsuf, targeEType, contaEType, surfBehavior, friction, keyoptArray, rcArray
+! CNTDEF, arg1,       arg2,       arg3,       arg4,       arg5,         arg6,     arg7,        arg8
+
+! Description:
+! Creates contact pair between two nodal/element selection components (one for target, one for
+! contact).
+
+! Arguments:
+! arg1: targeCMsuf    -  sufix (string) of node & element components (presumes component names
+!                        begin with 'COMPN_' and 'COMPE_') of target region
+! arg2: contaCMsuf    -  sufix (string) of node & element components (presumes component names
+!                        begin with 'COMPN_' and 'COMPE_') of contact region
+! arg3: targeEType    -  target element type number (169, 170)
+! arg4: contaEType    -  contact element type number (171, 172, etc.)
+! arg5: surfBehavior  -  surface behavior, keyopt(12) (ranges from 0 t0 6)
+!                        DEFAULT: Standard (0)
+! arg6: friction      -  friction coefficient
+! arg7: keyoptArray   -  name (string) of an array containing values for contact element keyoption
+!                        values (optional, overrides defaults)
+! arg8: rcArray       -  name (string) of an array containing values for contact pair real constant
+!                        values (optional, overrides defaults)
+
+! Local parameters:
+! AR20: rcCount
+! AR21: etCount
+! AR22: matCount
+! AR23: parType
+! AR24: rcArrLength
+! AR25: nthRCindex
+! AR26: nthRCvalue
+! AR27: koArrLength
+! AR28: nthKOindex
+! AR29: nthKOvalue
+! AR30: realConstNum
+! AR31: targeETnum
+! AR32: contaETnum
+! AR33: matNum
+! AR34: COMPN_target
+! AR35: COMPE_target
+! AR36: COMPN_contact
+! AR37: COMPE_contact
+! AR38: cmName_target
+! AR39: cmName_contact
+
+! Global parameters (erased at the end of this subroutine):
+! CNTDEF_ARR_rc
+
+
+ebackup
+nbackup
+
+!!
+!! A. ELEMENT TYPES
+!!
+! Create element types
+*get,ar21,etyp,,num,max
+
+! Target element type
+ar31=ar21+1
+et,ar31,arg3
+
+! Contact element type
+ar32=ar21+2
+et,ar32,arg4
+
+! Contact element keyoptions (default values)
+keyopt, ar32,  1, 0 ! Degrees of freedom:      [0] UX, UY
+keyopt, ar32,  2, 0 ! Contact algorithm:       [0] Augmented Lagrangian
+keyopt, ar32,  3, 0 ! Contact stiffness units: [0] FORCE/LENGTH³
+keyopt, ar32,  4, 1 !! Contact detection:       [0] On Gauss point
+keyopt, ar32,  5, 3 !! CNOF/ICONT:              [0] No automated adjustment
+keyopt, ar32,  6, 0 ! Stiffness variation:     [0] Default range
+keyopt, ar32,  7, 0 ! Time increment control:  [0] No control
+keyopt, ar32,  8, 0 ! Symmetric behavior:      [0] Both pairs active, each with its own characteristics
+keyopt, ar32,  9, 0 ! Initial penetration/gap: [0] Include both
+keyopt, ar32, 10, 0 ! Stiffness update:        [0] Each iteration
+keyopt, ar32, 11, 0 ! Beam/shell thk. effect:  [0] Exclude
+keyopt, ar32, 12, 0 ! Surface behavior:        [0] Standard
+keyopt, ar32, 14, 0 ! Fluid pres. penetration: [0] Default
+keyopt, ar32, 15, 0 ! Stabilization damping:   [0] Default
+keyopt, ar32, 18, 0 ! Sliding behavior:        [0] Finite sliding
+
+! Replace default CONTA keyopt values with provided ones
+*get,ar23,parm,%arg7%,type
+*if,ar23,eq,1,then
+    *get,ar27,parm,%arg7%,dim,x
+    ar27=(ar27<18)
+    *do,ar28,1,ar27,1
+        ar29=%arg7%(ar28)
+        *if,ar29,ne,0,then
+            keyopt, ar32, ar28, ar29
+        *endif
+    *enddo
+*endif
+!
+!
+!
+!!
+!! B. REAL CONSTANTS
+!!
+*get,ar20,rcon,,num,max
+ar30=ar20+1
+
+! Initialize array with default real constant values
+*del,CNTDEF_ARR_rc
+*dim,CNTDEF_ARR_rc,,13
+!                  R1 [01],   R2 [02],   FKN [03],     FTOLN [04], ICONT [05], PINB [06]
+CNTDEF_ARR_rc(1) = 0,         0,         1,            0.1,        0,          0
+!                  PZER [07], CZER [08], TAUMAX [09],  CNOF [10],  FKOP [11],  FKT [12]
+CNTDEF_ARR_rc(7) = 0,         0,         1e20,         0,          1,          1
+!                  COHE [13]
+CNTDEF_ARR_rc(13)= 0
+
+! Replace default RC values with provided ones
+*get,ar23,parm,%arg8%,type
+*if,ar23,eq,1,then
+    *get,ar24,parm,%arg8%,dim,x
+    ar24=(ar24<13)
+    *do,ar25,1,ar24,1
+        ar26=%arg8%(ar25)
+        *if,ar26,ne,0,then
+            CNTDEF_ARR_rc(ar25)=ar26
+        *endif
+    *enddo
+*endif
+
+! Create real constant set
+!        R1 [01],          R2 [02],          FKN [03],         FTOLN [04],       ICONT [05],       PINB [06]
+r, ar30, CNTDEF_ARR_rc(1), CNTDEF_ARR_rc(2), CNTDEF_ARR_rc(3), CNTDEF_ARR_rc(4), CNTDEF_ARR_rc(5), CNTDEF_ARR_rc(6)
+!        PZER [07],        CZER [08],        TAUMAX [09],      CNOF [10],         FKOP [11],         FKT [12]
+rmore,   CNTDEF_ARR_rc(7), CNTDEF_ARR_rc(8), CNTDEF_ARR_rc(9), CNTDEF_ARR_rc(10), CNTDEF_ARR_rc(11), CNTDEF_ARR_rc(12)
+!        COHE [13]
+rmore,   CNTDEF_ARR_rc(13)
+!
+!
+!
+!!
+!! C. MATERIAL
+!!
+*get,ar22,mat,,num,max
+ar33=ar22+1
+mp,mu,ar33,arg6
+!
+!
+!
+!!
+!! D. CREATE ELEMENTS
+!!
+! Set current RC set & material, same for CONTA & TARGE
+real,ar30
+mat,ar33
+
+! TARGE elements & nodes
+ar34=strcat('COMPN_',arg1)
+ar35=strcat('COMPE_',arg1)
+ar38=strcat(ar35,'_TARGE')
+type,ar31
+cmsel,s,ar34
+cmsel,s,ar35
+esurf
+esel,r,type,,ar31
+cm,%ar38%,elem
+
+! select CONTA elements & nodes
+ar36=strcat('COMPN_',arg1)
+ar37=strcat('COMPE_',arg1)
+ar39=strcat(ar37,'_TARGE')
+type,ar32
+cmsel,s,ar36
+cmsel,s,ar37
+esurf
+esel,r,type,,ar31
+cm,%ar39%,elem
+!
+!
+!
+!!
+!! E. FINISH
+!!
+elrestore
+nrestore
+*del,CNTDEF_ARR_rc
+
+

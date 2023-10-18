@@ -1,0 +1,10 @@
+! SILENT_LSSOLVE, first, last, increment
+! SILENT_LSSOLVE,  arg1, arg2,      arg3
+
+KEYW,pr_sgui,1
+LSSOLVE,arg1,arg2,arg3
+KEYW,pr_sgui,0
+FINISH
+
+*msg,UI,'Solution is done!'
+%C

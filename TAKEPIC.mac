@@ -1,0 +1,112 @@
+! TAKEPIC, FileName, FileSize, VectorMode, graphMode, fileExt
+! TAKEPIC, arg1,     arg2,     arg3,       arg4,      arg5
+
+! Description:
+! Captures the image currently displayed on the screen. Resolution, file name, vector display
+! and file format can be set using the arguments.
+
+! Argument list:
+! arg1: FileName    -  name of the output file
+! arg2: FileSize    -  image resolution (default = 2400)
+! arg3: VectorMode  -  vector display (wireframe):
+!                         [0] No change;
+!                         [1] Force wireframe;
+!                         [2] Force raster;
+! arg4: graphMode   -  graphical display type (command /graphics):
+!                         [0] No change;
+!                         [1] FULL;
+!                         [2] PowerGraphics;
+! arg5: fileExt     -  image file format
+!                         [0] PNG
+!                         [1] JPEG
+
+! Local variable list:
+! AR20: ArgType
+! AR21: WireframeOn
+! AR22: ParmType
+! AR23: imgExt
+
+! Image file format
+AR23='PNG'
+*get,AR22,PARM,arg5,TYPE
+*if,AR22,EQ,0,THEN
+   *if,arg5,EQ,1,THEN
+      AR23='JPEG'
+   *endif
+*endif
+
+! Graphical display definition
+*get,AR20,PARM,arg4,TYPE
+*if,AR20,EQ,0,THEN
+   *if,arg4,EQ,1,THEN
+      /graphics,FULL
+   *elseif,arg4,EQ,2,THEN
+      /graphics,POWER
+   *endif
+*endif
+
+! Vector display definition
+*get,AR21,GRAPH,,DISPLAY
+*get,AR22,PARM,arg3,TYPE
+*if,AR22,EQ,0,THEN
+   *if,arg3,EQ,1,THEN
+      AR21=1
+   *elseif,arg3,EQ,2,THEN
+      AR21=0
+   *endif
+*endif
+
+! Change graphical output
+*if,AR23,EQ,'PNG',THEN
+   /show,PNG,,AR21
+*elseif,AR23,EQ,'JPEG',THEN
+   /show,JPEG,,AR21
+*endif
+! Settings:
+!   Compression off
+PNGR,COMP,ON,-1
+!   Orientation: horizontal
+PNGR,ORIENT,HORIZ
+!   Colored image
+PNGR,COLOR,2
+!   Bitmap text
+PNGR,TMOD,1
+! Image resolution
+*if,arg2,GT,0,THEN
+   /gfile,arg2
+*else
+   /gfile,2400
+*endif
+! Create temporary color map
+/cmap,_TEMPCMAP_,CMP,,SAVE
+! Invert display
+/rgb,INDEX,100,100,100, 0
+/rgb,INDEX, 80, 80, 80,13
+/rgb,INDEX, 60, 60, 60,14
+/rgb,INDEX, 0, 0, 0,15
+! Draw image (creates the file)
+/replot
+! Delete temporary color map
+/cmap,_TEMPCMAP_,CMP
+/delete,_TEMPCMAP_,CMP
+! Reset graphical output
+/show,CLOSE,,AR21
+! Reset display colors
+/rgb,INDEX, 0, 0, 0, 0
+/rgb,INDEX, 60, 60, 60,13
+/rgb,INDEX, 80, 80, 80,14
+/rgb,INDEX,100,100,100,15
+
+*get,AR20,PARM,arg1,TYPE
+*if,AR20,EQ,3,THEN
+   ! Rename file
+   *del,TAKEPIC_FileName
+   *get,TAKEPIC_FileName,ACTIVE,0,JOBNAM
+   *if,AR23,EQ,'PNG',THEN
+      /rename,'%TAKEPIC_FileName%000','png',,'%arg1%','png'
+   *elseif,AR23,EQ,'JPEG',THEN
+      /rename,'%TAKEPIC_FileName%000','jpg',,'%arg1%','jpg'
+   *endif
+*endif
+
+

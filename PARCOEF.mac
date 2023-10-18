@@ -1,0 +1,50 @@
+! PARCOEF,   x1,   x2,   x3,   y1,   y2,   y3
+! PARCOEF, arg1, arg2, arg3, arg4, arg5, arg6
+
+! Descrição:
+! Esta subrotina calcula os coeficientes 'a', 'b' e 'c' de uma parábola que passa pelos três
+! pontos fornecidos (x1, y1), (x2, y2) e (x3, y3).
+
+! Lista de argumentos:
+! arg1: x1  -  coordenada X do ponto 1
+! arg2: x2  -  coordenada X do ponto 2
+! arg3: x3  -  coordenada X do ponto 3
+! arg4: y1  -  coordenada Y do ponto 1
+! arg5: y2  -  coordenada Y do ponto 2
+! arg6: y3  -  coordenada Y do ponto 3
+
+! Lista de argumentos implícitos:
+! -
+
+! Lista de variáveis locais:
+! AR20: denom
+! AR21: a_num
+! AR22: b_num
+! AR23: c_num
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! -
+
+! Lista de variáveis de saída:
+! PARABCOEF_VAR_a: valor do coeficiente 'a'
+! PARABCOEF_VAR_b: valor do coeficiente 'b'
+! PARABCOEF_VAR_c: valor do coeficiente 'c'
+
+AR20=(arg1-arg2)*(arg1-arg3)*(arg2-arg3)
+
+AR21=arg3*(arg5-arg4)+arg2*(arg4-arg6)+arg1*(arg6-arg5)
+AR22=arg1**2*(arg5-arg6)+arg3**2*(arg4-arg5)+arg2**2*(arg6-arg4)
+AR23=arg4*(arg2**2*arg3-arg3**2*arg2)+arg5*(arg3**2*arg1-arg1**2*arg3)+arg6*(arg1**2*arg2-arg2**2*arg1)
+
+*del,PARCOEF_VAR_a
+*del,PARCOEF_VAR_b
+*del,PARCOEF_VAR_c
+m21=ar21
+m22=ar22
+m23=ar23
+PARCOEF_VAR_a=AR21/AR20
+PARCOEF_VAR_b=AR22/AR20
+PARCOEF_VAR_c=AR23/AR20
+
+
+

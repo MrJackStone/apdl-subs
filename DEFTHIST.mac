@@ -1,0 +1,11 @@
+! DEFTHIST
+
+/post26
+numvar,200
+filldata,191,,,,1,1
+realvar,191,191
+
+! nsol
+! ansol
+! esol
+! rforce

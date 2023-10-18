@@ -1,0 +1,7 @@
+! KBACKUP
+
+*del,KBackup_
+
+! Created named component with currently selected keypoints
+CM,KBackup_,KP
+

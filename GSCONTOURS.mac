@@ -1,0 +1,61 @@
+! GSCONTOURS, contNum, startShade, endShade
+! GSCONTOURS,    arg1,       arg2,     arg3
+
+! Descrição:
+! Cria mapa de cores em escala de cinza para plotar contornos de soluções.
+
+! Lista de argumentos:
+! arg1: contNum     -  número total de contornos (padrão: 100)
+! arg2: startShade  -  intensidade mínima (padrão: 25)
+! arg3: endShade    -  intensidade máxima (padrão: 95)
+
+! Lista de argumentos implícitos:
+! -
+
+! Lista de variáveis locais:
+! AR20: nthColor
+! AR21: parType
+! AR22: intensityIncrement
+! AR23: redIntensity
+! AR24: greenIntensity
+! AR25: blueIntensity
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! -
+
+! Lista de variáveis de saída:
+! -
+
+*get,AR21,PARM,arg1,TYPE
+*if,AR21,NE,0,THEN
+   arg1=100
+*elseif,arg1,LE,0,THEN
+   arg1=100
+*elseif,arg1,GE,128,THEN
+   arg1=127
+*endif
+
+*get,AR21,PARM,arg2,TYPE
+*if,AR21,NE,0,THEN
+   arg2=25
+*elseif,arg2,LE,0,THEN
+   arg2=25
+*endif
+
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   arg3=95
+*elseif,arg3,LE,0,THEN
+   arg3=95
+*endif
+
+/contour,1,arg1,AUTO
+AR22=(arg3-arg2)/arg1
+*do,AR20,1,arg1+1
+   AR23=arg3-AR22*(AR20-1)
+   AR24=arg3-AR22*(AR20-1)
+   AR25=arg3-AR22*(AR20-1)
+	/rgb,CNTR,100*AR23,AR24,AR25,AR20,,,arg1
+*enddo
+
+!/replot

@@ -1,0 +1,56 @@
+! SAFE_CP,  DOF, N1_keep, N2_dele
+! SAFE_CP, arg1,    arg2,    arg3
+
+! Description:
+! Safely creates coupled set between two given nodes, combining previously defined overlapping
+! nodal couplings. If both nodes belong to coupled sets all couplings are moved to the coupled
+! set of 'N1_keep' and the coupled set of 'N2_dele' is deleted.
+
+! Arguments:
+! arg1: DOF      -  name of the DOF to be coupled (string)
+! arg2: N1_keep  -  number of the first node to couple
+! arg3: N2_dele  -  number of the second node to couple
+
+! Local parameters:
+! AR20: N1_cpNum
+! AR21: N2_cpNum
+
+
+/uis,msgpop,3
+
+! Get coupled sets including N1 and N2
+*get,AR20,NODE,arg2,CPS,arg1
+*get,AR21,NODE,arg3,CPS,arg1
+
+! Case 1: N1 is in coupled set
+*if,AR20,gt,0,THEN
+
+    ! Case 1a: N2 is also in a coupled set
+    *if,AR21,gt,0,THEN
+        *if,AR20,ne,AR21,then
+            ! If coupled sets are different: move N2 to N1's coupled set
+            COMBcp,AR20,AR21
+        *endif
+
+    ! Case 1b: N2 is NOT in coupled set
+    *else
+        ! Add N2 to N1's coupling set
+        CP,AR20,arg1,arg3
+    *endif
+
+! Case 2: N1 is NOT in coupled set
+*else
+
+    ! Case 2a: N2 is in coupled set
+    *if,AR21,gt,0,THEN
+        ! Add N1 to N2's coupling set
+        CP,AR21,arg1,arg2
+
+    ! Case 2b: N2 is NOT in coupled set
+    *else
+        ! Create new coupled set with N1 and N2
+        CP,NEXT,arg1,arg3,arg2
+    *endif
+
+*endif
+

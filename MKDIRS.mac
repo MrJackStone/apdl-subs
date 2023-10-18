@@ -1,0 +1,90 @@
+! MKDIRS, folderSuf
+! MKDIRS, arg1
+
+! Description:
+! Creates two nested directories inside the current directory, one for results and one for images.
+
+! Arguments:
+! arg1: folderSuf  -  results folder name, behavior controlled by type:
+!                        CHARACTER: appends arg1 to 'RES_'
+!                        SCALAR:    appends jobname to 'RES_'
+!                        UNDEFINED: 'RES'
+
+! Local parameters:
+! AR20: parType
+
+! Output parameters:
+! PATH_main
+! PATH_res
+! PATH_img
+
+! Global parameters (erased at the end of this subroutine)
+! MKDIRS_STR_resName
+! MKDIRS_STR_resPath
+! MKDIRS_STR_imgName
+! MKDIRS_STR_imgPath
+! MKDIRS_STR_current
+
+
+! Initialize string arrays
+*del,MKDIRS_STR_resName
+*dim,MKDIRS_STR_resName,string,248
+*del,MKDIRS_STR_resPath
+*dim,MKDIRS_STR_resPath,string,248
+*del,MKDIRS_STR_imgName
+*dim,MKDIRS_STR_imgName,string,248
+*del,MKDIRS_STR_imgPath
+*dim,MKDIRS_STR_imgPath,string,248
+
+! Get current directory (main directory)
+/inquire,MKDIRS_STR_current,DIRECTORY
+
+! Set results folder name
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    ! Append argument to root folder name
+    MKDIRS_STR_resName(1)=strcat('RES_',arg1)
+*elseif,AR20,eq,0,then
+    ! Append jobname to root folder name
+    getjname
+    MKDIRS_STR_resName(1)=strcat('RES_',GETJNAME_ARR_jobname(1))
+*else
+    ! No suffix
+    MKDIRS_STR_resName(1)='RES'
+*endif
+
+! Set image folder name
+MKDIRS_STR_imgName(1)='IMG'
+
+! Set folder paths
+MKDIRS_STR_resPath(1)=strcat(MKDIRS_STR_current(1),strcat('\',MKDIRS_STR_resName(1)))
+MKDIRS_STR_imgPath(1)=strcat(MKDIRS_STR_resPath(1),strcat('\',MKDIRS_STR_imgName(1)))
+
+! Create folder for results
+/syp,mkdir,MKDIRS_STR_resName(1)
+/cwd,MKDIRS_STR_resPath(1)
+
+! Create folder for images
+/syp,mkdir,MKDIRS_STR_imgName(1)
+
+! Revert to main directory
+/cwd,MKDIRS_STR_current(1)
+
+! Set output parameters
+*del,PATH_main
+*del,PATH_res
+*del,PATH_img
+*dim,PATH_main,string,248
+*dim,PATH_res,string,248
+*dim,PATH_img,string,248
+PATH_main(1)=MKDIRS_STR_current(1)
+PATH_res(1)=MKDIRS_STR_resPath(1)
+PATH_img(1)=MKDIRS_STR_imgPath(1)
+
+! Clear parameters
+*del,MKDIRS_STR_resName
+*del,MKDIRS_STR_resPath
+*del,MKDIRS_STR_imgName
+*del,MKDIRS_STR_imgPath
+*del,MKDIRS_STR_current
+

@@ -1,0 +1,48 @@
+! DISTPRES, etabName, uDOF, baseStf, scale, validU
+! DISTPRES,     arg1, arg2,    arg3,  arg4,   arg5
+
+! Description:
+! Creates an element table with values representing elastic base (typically soil) reaction.
+
+! Arguments:
+! arg1: etabName  -  name of the element table created
+! arg2: uDOF      -  degree of freedom indicating displacement direction (string): 'X', 'Y', or 'Z'
+! arg3: baseStf   -  elastic base stiffness (force/length²)
+! arg4: scale     -  scale factor to be applied to resulting element table (usually conversion from
+!                    Pa to kPa or sign inversion)
+! arg5: validU    -  indicates direction in which displacement values result in reaction:
+!                       [0]  both directions
+!                       [1]  positive DOF direction only
+!                       [-1] negative DOF direction only
+
+! Local parameters:
+! AR20: tempVarName
+! AR21: parType
+! AR22: etabScale
+
+
+AR20=strcat('UDP_',arg1)
+
+*get,AR21,parm,arg4,type
+*if,AR21,ne,0,or,arg4,eq,0,then
+    AR22=1
+*else
+    AR22=arg4
+*endif
+
+etable,AR20,U,arg2
+
+sabs,1
+sadd,'ZEROS',AR20,AR20,1,-1,
+sabs,0
+
+*if,arg5,eq,1,then
+    ! Positive U values only
+    smax,AR20,AR20,'ZEROS',1,1
+*elseif,arg5,eq,-1,then
+    ! Negative U values only
+    smin,AR20,AR20,'ZEROS',1,1
+*endif
+
+sadd,%arg1%,AR20,,arg3*AR22
+

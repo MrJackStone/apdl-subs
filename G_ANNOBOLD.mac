@@ -1,0 +1,55 @@
+! G_ANNOBOLD, status
+! G_ANNOBOLD,   arg1
+
+! Description:
+! Sets the global parameter ('GLOBAL_annobold_') that stores the bold typeface setting used when
+! creating new annotations. When no argument is passed (arg1=0) the current value of the global
+! parameter is returned. If the global parameter is undefined and arg1=0, GLOBAL_annobold_ will be
+! set to its default value of -1.
+
+! Arguments:
+! arg1: status  -  key that determines whether bold annotations are on or off:
+!                     [-1] bold off
+!                     [ 1] bold on
+!                     [ 0] return current value without changing it
+
+! Global output parameters:
+! _OUTPUT
+! GLOBAL_annobold_
+
+
+!    parverify,'G_ANNOBOLD_VAR_parmCheck',GLOBAL_annobold_,'SCALAR'
+!    *if,G_ANNOBOLD_VAR_parmCheck,eq,1,then
+!        *if,abs(GLOBAL_annobold_),eq,1,then
+!            GLOBAL_annobold_=arg1
+!        *else
+!            GLOBAL_annobold_=-1
+!        *endif
+!    *else
+!        GLOBAL_annobold_=-1
+!    *endif
+!    _OUTPUT=GLOBAL_annobold_
+!
+
+*if,arg1,eq,0,then
+    ! Check value
+    *get,AR20,parm,GLOBAL_annobold_,type
+    *if,AR20,eq,0,then
+        *if,abs(GLOBAL_annobold_),ne,1,then
+            GLOBAL_annobold_=-1
+        *endif
+    *else
+        GLOBAL_annobold_=-1
+    *endif
+*elseif,arg1,eq,1,then
+    ! Assign bold on
+    GLOBAL_annobold_=1
+*elseif,arg1,eq,-1,then
+    ! Assign bold off
+    GLOBAL_annobold_=-1
+*else
+    ! Default: assign bold off
+    GLOBAL_annobold_=-1
+*endif
+_OUTPUT=GLOBAL_annobold_
+

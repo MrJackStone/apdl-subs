@@ -1,0 +1,45 @@
+! BATCH_SLICEXZ, yPosArray, relative, sepo
+! BATCH_SLICEXZ,      arg1,     arg2, arg3
+
+! Description:
+! Performs many XZ plane area slicing operations at given Y locations.
+
+! Arguments
+! arg1: yPosArray  -  name of the array parameter (string) containing slicing Y coordinates
+! arg2: relative   -  controls relative or absolute location behavior:
+!                        [0] ABSOLUTE: interpret Y as global cartesian coordinates
+!                        [1] RELATIVE: interpret Y as increments from current working plane location
+! arg3: sepo       -  create merged (0) or separated (1) entities at slicing interfaces
+
+! Local parameters:
+! AR20: sliceCount
+! AR21: nthSlice
+! AR22: yCoord
+
+
+*get,AR20,parm,%arg1%,dim,x
+
+*do,AR21,1,AR20,1
+    AR22=%arg1%(AR21)
+
+    *if,arg2,eq,1,then
+        ! Move working plane from its current position
+        wpoffs,,AR22
+        wprota,,90
+        *if,arg3,eq,1,then
+            asbw,all,sepo,delete
+        *else
+            asbw,all,,delete
+        *endif
+        wprota,,-90
+        wpoffs,,-AR22
+
+    *else
+        ! Position working plane using global cartesian coordinates
+        wpslicexz,AR22,arg3
+
+    *endif
+*enddo
+
+
+

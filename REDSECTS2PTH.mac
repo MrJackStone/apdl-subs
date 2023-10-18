@@ -1,0 +1,178 @@
+! SCANPATH, item, comp, pathAvglab, cumOpt, csecPrefix, planeDefiningNodes
+! SCANPATH, arg1, arg2,       arg3,   arg4,       arg5,               arg6
+
+! Description:
+! Scans the current active path calculating, at each path division point, the aggregated value of a
+! given result measured along the cross-section to the path at that particular division point. The
+! path can have many vertices. Each path segment (defined by two vertices) needs to be given a node
+! that defines the segment's plane, on which all the cross-sections of that segment lie. Each
+! "cross-section" is, in fact, a path itself, and it extends in width to the limits of the nodes
+! currently selected.
+
+! Arguments:
+! arg1: item                -  path item (as defined in PDEF) to be aggregated along a cross-section
+! arg2: comp                -  path comp (as defined in PDEF) to be aggregated along a cross-section
+! arg3: aggOpt              -  cross-section aggregation option, determining how the values at a
+!                              virtual cross-section are reduced to the single point where it
+!                              intersects with the main path:
+!                                 [0] Accumulated value (integrate along cross-section length)
+!                                 [1] Maximum value
+!                                 [2] Minimum value
+! arg4: csecPrefix          -  prefix applied to the name of the many paths created along the length
+!                              of the path, each representin a virtual "cross-section"
+! arg5: planeDefiningNodes  -  node number (for paths of a single segment) or name of an array of
+!                              nodes (for paths with one or more segments) that define the virtual
+!                              cross-section's plane for each path segment
+
+sectCount=20
+
+*del,MPATHPLOT_ARR_pathNames
+*dim,MPATHPLOT_ARR_pathNames,char,sectCount
+*del,MPATHPLOT_ARR_labels
+*dim,MPATHPLOT_ARR_labels,char,sectCount
+*del,sect_cum_sy
+*dim,sect_cum_sy,,sectCount
+
+*get,pathNodeCount,path,,node
+*get,dataPointCount,path,,nval
+divsPerSegment=(dataPointCount-1)/(pathNodeCount-1)
+
+*get,parType,parm,arg6,type
+*if,parType,eq,0,then
+    *del,SCANPATH_ARR_planeNodes
+    *dim,SCANPATH_ARR_planeNodes,,1
+    SCANPATH_ARR_planeNodes(1)=arg6
+*elseif,parType,eq,3,then
+    *get,parType,parm,%arg6%,type
+    *if,parType,eq,1,then
+        *get,arrLength,parm,%arg6%,dim,x
+        *if,arrLength,ne,pathNodeCount-1,then
+            *return,-1
+        *else
+            *del,SCANPATH_ARR_planeNodes
+            *dim,SCANPATH_ARR_planeNodes,,arrLength
+            *vfun,SCANPATH_ARR_planeNodes,copy,%arg6%
+        *endif
+    *else
+        *return,-1
+    *endif
+*else
+    *return,-1
+*endif
+
+
+
+
+
+*get,maxCS,cdsy,,num,max
+nextCS=(maxCS>10)+1
+
+segmentOffset=0
+
+*do,ithPathNode,1,pathNodeCount-1,1
+    ! Coordinates of points defining path & plane
+    jthPathNode=ithPathNode+1
+    planeNode=SCANPATH_ARR_planeNodes(ithPathNode)
+    *get,ithPointX,path,,point,ithPathNode,x
+    *get,ithPointY,path,,point,ithPathNode,y
+    *get,ithPointZ,path,,point,ithPathNode,z
+    *get,jthPointX,path,,point,jthPathNode,x
+    *get,jthPointY,path,,point,jthPathNode,y
+    *get,jthPointZ,path,,point,jthPathNode,z
+    kthPointX=nx(planeNode)
+    kthPointY=ny(planeNode)
+    kthPointZ=nz(planeNode)
+
+    projectedDeltaX=kthPointX-ithPointX
+    projectedDeltaY=kthPointY-ithPointY
+    posang,'inPlaneRotation',projectedDeltaX,projectedDeltaY
+    projectedDistance=sqrt(projectedDeltaX**2+projectedDeltaY**2)
+    perpendicularDistance=kthPointZ-ithPointZ
+    posang,'offPlaneRotation',projectedDistance,perpendicularDistance
+    local,nextCS,cart,ithPointX,ithPointY,ithPointZ,inPlaneRotation,,-offPlaneRotation
+
+    ! Local coordinate system aligned with path
+    deltaX=jthPointX-ithPointX
+    deltaY=jthPointY-ithPointY
+    deltaZ=jthPointZ-ithPointZ
+    posang,'thetaXY',deltaX,deltaY
+    posang,'thetaYZ',deltaY,deltaZ
+    posang,'thetaXZ',deltaX,deltaZ
+    local,nextCS,cart,ithPointX,ithPointY,ithPointZ,thetaXY,thetaYZ,thetaXZ
+    csys,nextCS
+    nextCS=nextCS+1
+
+    csys,0 !!
+
+    ! Length dimension
+    *get,xmax,node,,mxloc,x
+    *get,xmin,node,,mnloc,x
+    deltaX=(xmax-xmin)/(divsPerSegment-1)
+
+    ! Width dimension
+    *get,ymax,node,,mxloc,y
+    *get,ymin,node,,mnloc,y
+    !ymed=(ymax+ymin)/2
+
+    localYi=ymin
+    localYj=ymax
+
+    *del,xs
+    *dim,xs,,divsPerSegment
+    *vfill,xs(1),ramp,xmin,deltaX
+
+    *do,nthSec,1,divsPerSegment,1
+        pthName='P%nthSec%'
+
+        localX=xs(nthSec)
+        loc2glo,localX,localYi,0,nextCS,'globalX1','globalY1','globalZ1'
+        loc2glo,localX,localYj,0,nextCS,'globalX2','globalY2','globalZ2'
+
+        path,%pthName%,2
+        ppath,1,,globalX1,globalY1,globalZ1
+        ppath,2,,globalX2,globalY2,globalZ2
+        pdef,'SY',s,y,noav
+        pcalc,intg,'CUM_SY','SY','S'
+
+        pth2arr,'CUM_SY','cum_sy'
+        *get,dim,parm,'cum_sy',dim,x
+        sect_cum_sy(nthSec+segmentOffset)=cum_sy(dim)
+
+        MPATHPLOT_ARR_pathNames(nthSec)=pthName
+        MPATHPLOT_ARR_labels(nthSec)='CUM_SY'
+    *enddo
+
+    segmentOffset=segmentOffset+divsPerSegment
+*enddo
+
+dsys,
+
+*vfun
+!mpathplot
+
+!    /device,vector,on
+!    /edge,,1
+!    /auto,1
+!    eplot
+!    /device,vector,off
+!    /user,1
+!    /noerase
+!    mpathplot,0.002
+!    /erase
+!    clims
+!
+path,'AXIAL'!,2,,sectCount-1
+!ppath,1,,xmed,ymin,0
+!ppath,2,,xmed,ymax,0
+
+pdef,'dummy',s,y,noav
+
+arr2pth,'sect_cum_sy','CUM_SY',5
+plpagm,'CUM_SY',5e-3,node !!
+! ARR2PTH, valuesArrName, itemName, tableColIndex
+
+
+
+
+
+

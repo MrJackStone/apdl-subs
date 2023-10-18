@@ -1,0 +1,335 @@
+! SEC_GIRDER,  bfs,  bfi,    d,  tfs,  tfi,   tw,   hs,   hi,   hw, name
+! SEC_GIRDER, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ar10
+
+! Descrição:
+! Escreve uma seção transversal em formato de I monossimétrico com abas inclinadas para um arquivo
+! de um dado nome.
+
+! Lista de variáveis locais:
+! AR20: MaxKP
+! AR21: MaxEType
+! AR22: NewEType
+! AR23: abortKey
+! AR24: check1
+! AR25: check2
+! AR26: x1
+! AR27: x2
+! AR28: x3
+! AR29: x4
+! AR30: x5
+! AR31: x6
+! AR32: y1
+! AR33: y2
+! AR34: y3
+! AR35: y4
+! AR36: y5
+! AR37: y6
+! AR38: minSize
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! SEC_GIRDER_KPs
+! SEC_GIRDER_LINEs
+
+! Lista de variáveis de saída
+! SEC_GIRDER_VAR_abort
+! SEC_GIRDER_VAR_bfs
+! SEC_GIRDER_VAR_bfi
+! SEC_GIRDER_VAR_d
+! SEC_GIRDER_VAR_tfs
+! SEC_GIRDER_VAR_tfi
+! SEC_GIRDER_VAR_tw
+! SEC_GIRDER_VAR_hs
+! SEC_GIRDER_VAR_hi
+! SEC_GIRDER_VAR_hw
+
+! Armazenar seleção prévia
+ABACKUP
+LBACKUP
+KBACKUP
+EBACKUP
+NBACKUP
+
+! Desativar exibição automática
+/nopr
+IMMED,0
+/uis,REPLOT,0
+/uis,MSGPOP,3
+
+ASEL,U,AREA,,ALL
+LSEL,U,LINE,,ALL
+KSEL,U,KP,,ALL
+ESEL,U,ELEM,,ALL
+NSEL,U,NODE,,ALL
+
+*get,AR20,KP,0,NUM,MAXD
+*get,AR21,ETYP,0,NUM,MAX
+
+AR22=AR21+1
+
+ET,AR22,82
+
+! Controle de geometria incompleta
+AR23=0
+
+! Espessura das mesas superior e inferior
+*if,arg4,NE,0,AND,arg5,EQ,0,THEN
+   arg4=ABS(arg4)
+   arg5=arg4
+*elseif,arg5,NE,0,AND,arg4,EQ,0,THEN
+   arg5=ABS(arg5)
+   arg4=arg5
+*elseif,arg4,EQ,0,AND,arg5,EQ,0,THEN
+   AR24=ABS(arg3)*ABS(arg7)*ABS(arg8)*ABS(arg9)
+   *if,AR24,EQ,0,THEN
+      AR23=1
+   *else
+      AR25=(ABS(arg3)-(ABS(arg7)+ABS(arg8)+ABS(arg9)))/2
+      *if,AR25,GT,0,THEN
+         arg4=ABS(AR25)
+         arg5=ABS(AR25)
+      *else
+         AR23=1
+      *endif
+   *endif
+*else
+   arg4=ABS(arg4)
+   arg5=ABS(arg5)
+*endif
+
+! Determinar geometria completa
+*if,arg3,NE,0,THEN
+   arg3=ABS(arg3)
+   ! hs
+   *if,arg7,NE,0,THEN
+      arg7=ABS(arg7)
+      ! hi
+      *if,arg8,NE,0,THEN
+         arg8=ABS(arg8)
+         ! hw
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+         *else !(hw=ARG9=0)
+            arg9=arg3-arg4-arg5-arg7-arg8
+         *endif
+      *else !(hi=ARG8=0)
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg8=arg7
+         *else !(hw=ARG9=0)
+            arg8=arg7
+            arg9=arg3-arg4-arg5-arg7-arg8
+         *endif
+      *endif
+   *else !(hs=ARG7=0)
+      ! hi
+      *if,arg8,NE,0,THEN
+         arg8=ABS(arg8)
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg7=arg8
+         *else !(hw=ARG9=0)
+            arg7=arg8
+            arg9=arg3-arg4-arg5-arg7-arg8
+         *endif
+      *else !(hi=ARG8=0)
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg7=(arg3-arg4-arg5-arg9)/2
+            arg8=arg7
+         *else !(hw=ARG9=0)
+            AR23=1
+         *endif
+      *endif
+   *endif
+*else !(d=ARG3=0)
+   ! hs
+   *if,arg7,NE,0,THEN
+      arg7=ABS(arg7)
+      ! hi
+      *if,arg8,NE,0,THEN
+         arg8=ABS(arg8)
+         ! hw
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg3=arg4+arg5+arg7+arg8+arg9
+         *else !(hw=ARG9=0)
+            AR23=1
+         *endif
+      *else !(hi=ARG8=0)
+         ! hw
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg8=arg7
+            arg3=arg4+arg5+arg7+arg8+arg9
+         *else !(hw=ARG9=0)
+            AR23=1
+         *endif
+      *endif
+   *else !(hs=ARG7=0)
+      ! hi
+      *if,arg8,NE,0,THEN
+         arg8=ABS(arg8)
+         ! hw
+         *if,arg9,NE,0,THEN
+            arg9=ABS(arg9)
+            arg7=arg8
+            arg3=arg4+arg5+arg7+arg8+arg9
+         *else !(hw=ARG9=0)
+            AR23=1
+         *endif
+      *else !(hi=ARG8=0)
+            AR23=1
+      *endif
+   *endif
+*endif
+
+
+*if,AR23,EQ,0,THEN
+
+   *del,SEC_GIRDER_KPs
+   *dim,SEC_GIRDER_KPs,ARRAY,12
+
+   SEC_GIRDER_KPs(1)=AR20+1
+   SEC_GIRDER_KPs(2)=AR20+2
+   SEC_GIRDER_KPs(3)=AR20+3
+   SEC_GIRDER_KPs(4)=AR20+4
+   SEC_GIRDER_KPs(5)=AR20+5
+   SEC_GIRDER_KPs(6)=AR20+6
+   SEC_GIRDER_KPs(7)=AR20+7
+   SEC_GIRDER_KPs(8)=AR20+8
+   SEC_GIRDER_KPs(9)=AR20+9
+   SEC_GIRDER_KPs(10)=AR20+10
+   SEC_GIRDER_KPs(11)=AR20+11
+   SEC_GIRDER_KPs(12)=AR20+12
+
+   AR26=0
+   AR27=arg2
+   AR28=(arg2+arg6)/2
+   AR29=(arg2+arg1)/2
+   AR30=(arg2-arg1)/2
+   AR31=(arg2-arg6)/2
+
+   AR32=0
+   AR33=arg5
+   AR34=AR33+arg8
+   AR35=AR34+arg9
+   AR36=AR35+arg7
+   AR37=arg3
+
+   K,SEC_GIRDER_KPs(1),AR26,AR32
+   K,SEC_GIRDER_KPs(2),AR27,AR32
+   K,SEC_GIRDER_KPs(3),AR27,AR33
+   K,SEC_GIRDER_KPs(4),AR28,AR34
+   K,SEC_GIRDER_KPs(5),AR28,AR35
+   K,SEC_GIRDER_KPs(6),AR29,AR36
+   K,SEC_GIRDER_KPs(7),AR29,AR37
+   K,SEC_GIRDER_KPs(8),AR30,AR37
+   K,SEC_GIRDER_KPs(9),AR30,AR36
+   K,SEC_GIRDER_KPs(10),AR31,AR35
+   K,SEC_GIRDER_KPs(11),AR31,AR34
+   K,SEC_GIRDER_KPs(12),AR26,AR33
+
+   *del,SEC_GIRDER_LINEs
+   *dim,SEC_GIRDER_LINEs,ARRAY,28
+
+   L,SEC_GIRDER_KPs(1),SEC_GIRDER_KPs(2)
+   *get,SEC_GIRDER_LINEs(1),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(2),SEC_GIRDER_KPs(3)
+   *get,SEC_GIRDER_LINEs(2),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(3),SEC_GIRDER_KPs(4)
+   *get,SEC_GIRDER_LINEs(3),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(4),SEC_GIRDER_KPs(5)
+   *get,SEC_GIRDER_LINEs(4),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(5),SEC_GIRDER_KPs(6)
+   *get,SEC_GIRDER_LINEs(5),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(6),SEC_GIRDER_KPs(7)
+   *get,SEC_GIRDER_LINEs(6),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(7),SEC_GIRDER_KPs(8)
+   *get,SEC_GIRDER_LINEs(7),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(8),SEC_GIRDER_KPs(9)
+   *get,SEC_GIRDER_LINEs(8),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(9),SEC_GIRDER_KPs(10)
+   *get,SEC_GIRDER_LINEs(9),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(10),SEC_GIRDER_KPs(11)
+   *get,SEC_GIRDER_LINEs(10),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(11),SEC_GIRDER_KPs(12)
+   *get,SEC_GIRDER_LINEs(11),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(12),SEC_GIRDER_KPs(1)
+   *get,SEC_GIRDER_LINEs(12),LINE,0,NUM,MAX
+
+   L,SEC_GIRDER_KPs(12),SEC_GIRDER_KPs(3)
+   *get,SEC_GIRDER_LINEs(13),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(11),SEC_GIRDER_KPs(4)
+   *get,SEC_GIRDER_LINEs(14),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(10),SEC_GIRDER_KPs(5)
+   *get,SEC_GIRDER_LINEs(15),LINE,0,NUM,MAX
+   L,SEC_GIRDER_KPs(9),SEC_GIRDER_KPs(6)
+   *get,SEC_GIRDER_LINEs(16),LINE,0,NUM,MAX
+
+   AL,SEC_GIRDER_LINEs(1),SEC_GIRDER_LINEs(2),SEC_GIRDER_LINEs(13),SEC_GIRDER_LINEs(12)
+   AL,SEC_GIRDER_LINEs(13),SEC_GIRDER_LINEs(3),SEC_GIRDER_LINEs(14),SEC_GIRDER_LINEs(11)
+   AL,SEC_GIRDER_LINEs(14),SEC_GIRDER_LINEs(4),SEC_GIRDER_LINEs(15),SEC_GIRDER_LINEs(10)
+   AL,SEC_GIRDER_LINEs(15),SEC_GIRDER_LINEs(5),SEC_GIRDER_LINEs(16),SEC_GIRDER_LINEs(9)
+   AL,SEC_GIRDER_LINEs(16),SEC_GIRDER_LINEs(6),SEC_GIRDER_LINEs(7),SEC_GIRDER_LINEs(8)
+
+   *if,arg4,LT,arg3,THEN
+      *if,arg4,LT,arg6,THEN
+         AR38=arg4
+      *else
+         AR38=arg6
+      *endif
+   *else
+      *if,arg3,LT,arg6,THEN
+         AR38=arg3
+      *else
+         AR38=arg6
+      *endif
+   *endif
+   LESIZE,ALL,AR38/2
+
+   AATT,,,AR22
+   AMESH,ALL
+
+   SECWRITE,ar10,SECT,,AR22
+
+   ACLEAR,ALL
+   ADELE,ALL
+   LDELE,ALL
+   KDELE,ALL
+   ETDELE,AR22
+
+   *del,SEC_GIRDER_KPs
+   *del,SEC_GIRDER_LINEs
+
+*else
+
+   *msg,ERROR
+   ('SEC_GIRDER ERROR: Incomplete geometry definition.')
+
+*endif
+
+! Transferir valores para as variáveis de saída
+SEC_GIRDER_VAR_abort=AR23
+SEC_GIRDER_VAR_bfs=arg1
+SEC_GIRDER_VAR_bfi=arg2
+SEC_GIRDER_VAR_d=arg3
+SEC_GIRDER_VAR_tfs=arg4
+SEC_GIRDER_VAR_tfi=arg5
+SEC_GIRDER_VAR_tw=arg6
+SEC_GIRDER_VAR_hs=arg7
+SEC_GIRDER_VAR_hi=arg8
+SEC_GIRDER_VAR_hw=arg9
+
+! Reativar exibição automática
+/gopr
+IMMED,1
+/uis,REPLOT,1
+/uis,MSGPOP,2
+
+! Restaurar seleção prévia
+ARESTORE
+LRESTORE
+KRESTORE
+ERESTORE
+NRESTORE
+

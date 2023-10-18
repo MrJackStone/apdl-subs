@@ -1,0 +1,24 @@
+! CSNEXT, output
+! CSNEXT,   arg1
+
+! Description:
+! Returns a valid number to which no coordinate system is yet assigned.
+
+! Arguments:
+! arg1: output  -  name of the parameter to which the result will be assigned (defaults to _OUTPUT)
+
+! Local parameters:
+! AR21: maxCS
+! AR22: outputParm
+
+parverify,'CSNEXT_VAR_check',arg1,'CHAR'
+*if,CSNEXT_VAR_check,eq,1,then
+    AR22=arg1
+*else
+    AR22='_OUTPUT'
+*endif
+
+*get,AR21,cdsy,,num,max
+*del,%AR22%
+%AR22%=((AR21+1)>11)
+

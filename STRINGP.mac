@@ -1,0 +1,11 @@
+! STRINGP, input, output
+! STRINGP,  arg1,   arg2
+
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    %arg2%=1
+*else
+    %arg2%=0
+*endif
+
+

@@ -1,0 +1,68 @@
+! sec_rail, depth, footWidth, toeHeight, footSlope, webThickness, headWidth, headDepth, name, secID
+! sec_rail,  arg1,      arg2,      arg3,      arg4,         arg5,      arg6,      arg7, arg8,  arg9
+
+! Description:
+! Writes a flat-footed rail-shaped cross-section to and external .SECT file.
+
+! Arguments:
+! arg1: depth        -  height of the rail
+! arg2: footWidth    -  width at the bottom (foot) of the rail
+! arg3: toeHeight    -  height of the flat foot at the edge
+! arg4: footSlope    -  slope of the top flace of the rail's foot (set to zero for parallel faces)
+! arg5: webThickness -  thickness of the web
+! arg6: headWidth    -  width of the head of the rail
+! arg7: headDepth    -  height of the head of the rail
+! arg8: name         -  cross-section's .SECT file name
+! arg9: secID        -  section ID:
+!                         [<= 0] do not import as BEAM188 cross-section
+!                         [>0]   BEAM188 cross-section ID
+
+! Local parameters:
+! AR22: kpMaxd
+! AR23: tfAtWeb
+! AR24: nthLine
+! AR25: ki
+! AR26: kj
+
+
+! Initialize section builder
+sec_init
+
+! Calculate flange thickness at intersection with web
+AR23=arg3+arg4*((arg2-arg5)/2)
+
+! Draw keypoints
+*get,AR22,kp,,num,maxd
+numstr,kp,AR22
+
+k,,     0,        0, 0
+k,,arg2/2,        0, 0
+k,,arg2/2,     arg3, 0
+k,,arg5/2,     AR23, 0
+k,,arg5/2,arg1-arg7, 0
+k,,arg6/2,arg1-arg7, 0
+k,,arg6/2,     arg1, 0
+k,,     0,     arg1, 0
+
+! Draw and reflect lines
+AR25=AR22+1
+*do,AR24,1,7,1
+  AR26=AR25+1
+  lstr,AR25,AR26
+  AR25=AR26
+*enddo
+
+lsymm,'X',all
+
+! Create area
+ksll,s
+nummrg,kp
+al,all
+
+! Mesh area
+lesize,all,arg5
+aatt,,,SEC_INIT_VAR_etnum
+amesh,all
+
+! Finalize section builder
+sec_finish, arg8, arg9

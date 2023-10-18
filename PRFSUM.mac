@@ -1,0 +1,21 @@
+! PRFSUM,  dir
+! PRFSUM, arg1
+
+
+*get,AR20,node,,count
+
+*dim,PRFSUM_ARR_f,,AR20
+AR21=0
+
+*do,AR22,1,AR20,1
+    AR21=ndnext(AR21)
+    *get,AR23,node,AR21,f,F%arg1%
+    PRFSUM_ARR_f(AR22)=AR23
+
+*enddo
+*vscfun,AR24,sum,PRFSUM_ARR_f
+
+*del,PRFSUM_ARR_f
+
+*msg,ui,AR24
+Total force: %g

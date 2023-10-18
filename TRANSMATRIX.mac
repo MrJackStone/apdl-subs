@@ -1,0 +1,82 @@
+! TRANSMATRIX, translation, rotation, localCS
+! TRANSMATRIX,        arg1,     arg2,    arg3
+
+! Description:
+! Calculates the rotation matrix and translation vector to transform between the global cartesian
+! coordinate system and a local cartesian CS. The transformation vector (V) and matrix (M) are
+! defined as follows:
+!
+!          ┌ Lx ┐
+!    {L} = │ Ly │          coordinates of a point in local CS
+!          └ Lz ┘
+!
+!          ┌ Gx ┐
+!    {G} = │ Gy │          coordinates of a point in global CS
+!          └ Gz ┘
+!
+!          ┌ u1  v1  w1 ┐  coordinates of the local CS X,Y,Z unit vectors (u, v, w, respectively)
+!    [M] = │ u2  v2  w2 │  measured in the global CS
+!          └ u3  v3  w3 ┘  Note: the transposed of M is equal to the inverse of M
+!
+!          ┌ x0 ┐
+!    {V} = │ y0 │          coordinates of the origin of the local CS measured in the global CS
+!          └ z0 ┘
+!
+!    {G} = [M] · {L}       matrix M transforms LOCAL to GLOBAL rotations
+!
+!    {L} = [M]'· {G}       matrix M' transforms GLOBAL to LOCAL rotations
+!
+!    {G} = {L} + {V}       vector V performs translation from LOCAL to GLOBAL
+!
+!    {L} = {G} - {V}       vector -V performs translation from GLOBAL to LOCAL
+!
+!    The rotation matrix M can also be calculated as the product of three rotation matrices in
+!    the following specific order:
+!
+!                              XY rotation       YZ rotation         ZX rotation
+!          ┌ u1  v1  w1 ┐   ┌ cos  -sin  0 ┐   ┌ 1   0     0  ┐   ┌  cos  0  sin ┐
+!    [M] = │ u2  v2  w2 │ = │ sin   cos  0 │ · │ 0  cos  -sin │ · │   0   1   0  │
+!          └ u3  v3  w3 ┘   └  0     0   1 ┘   └ 0  sin   cos ┘   └ -sin  0  cos ┘
+!
+
+! Arguments:
+! arg1: translation  -  name of parameter to which translation vector will be assigned
+! arg2: rotation     -  name of parameter to which rotation matrix will be assigned
+! arg3: localCS      -  number of local coordinate system to be transformed
+
+! Local parameters:
+! AR31: x0
+! AR32: y0
+! AR33: z0
+
+! Global parameters (erased at the end of this subroutine):
+! TRANSMATRIX_ARR_unitVectors
+
+
+! Origin of local CS in global CS reference frame
+*get,AR31,cdsy,arg3,loc,x
+*get,AR32,cdsy,arg3,loc,y
+*get,AR33,cdsy,arg3,loc,z
+
+*del,%arg1%
+*dim,%arg1%,,3
+%arg1%(1)=AR31,AR32,AR33
+
+! Calculate local to global transformation (rotation + translation) matrix
+*del,TRANSMATRIX_ARR_unitVectors
+*dim,TRANSMATRIX_ARR_unitVectors,,3,3
+TRANSMATRIX_ARR_unitVectors(1,1)=1, 0, 0
+TRANSMATRIX_ARR_unitVectors(1,2)=0, 1, 0
+TRANSMATRIX_ARR_unitVectors(1,3)=0, 0, 1
+
+*del,%arg2%
+*dim,%arg2%,,3,3
+*vfun,%arg2%(1,1),global,TRANSMATRIX_ARR_unitVectors(1,1),arg3
+
+! Subtract translations from transformation matrix to get rotation matrix
+*voper,%arg2%(1,1),%arg2%(1,1),sub,AR31
+*voper,%arg2%(1,2),%arg2%(1,2),sub,AR32
+*voper,%arg2%(1,3),%arg2%(1,3),sub,AR33
+
+! Transpose rotation matrix to get appropriate output
+*mfun,%arg2%,tran,%arg2%

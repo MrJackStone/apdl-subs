@@ -1,0 +1,162 @@
+! SEC_ICOMPINV,bfInf,bfSup,d   ,tfInf,tfSup,tw  ,bEsq,bDir,hConc,steelMat,concMat,name
+! SEC_ICOMPINV,arg1 ,arg2 ,arg3,arg4 ,arg5 ,arg6,arg7,arg8,arg9 ,ar10    ,ar11   ,ar12
+
+! Descrição:
+! Escreve uma seção transversal em formato de I com laje de concreto
+! abaixo do perfil (invertida) para um arquivo de um dado nome.
+
+! Lista de variáveis locais:
+! AR20: MaxEType
+! AR21: NewEType
+! AR22: KTotal
+! AR23: x0
+! AR24: MinY
+! AR25: MaxY
+! AR26: KMaxD
+! AR27: LMaxD
+! AR28: i
+! AR29: COMPA_SteelBeam
+! AR30: COMPA_ConcSlab
+! AR31: MinThk
+! AR32: ThisLine
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! SEC_ICOMP_KPs
+
+! Armazenar seleção prévia
+VBACKUP
+ABACKUP
+LBACKUP
+KBACKUP
+EBACKUP
+NBACKUP
+
+! Desativar exibição automática
+/nopr
+IMMED,0
+/uis,REPLOT,0
+/uis,MSGPOP,3
+
+ASEL,U,AREA,,ALL
+LSEL,U,LINE,,ALL
+KSEL,U,KP,,ALL
+ESEL,U,ELEM,,ALL
+NSEL,U,NODE,,ALL
+
+/prep7
+
+*get,AR20,ETYP,0,NUM,MAX
+AR21=AR20+1
+ET,AR21,82
+
+AR22=12
+
+*get,AR26,KP,0,NUM,MAXD
+NUMSTR,KP,AR26+1
+*get,AR27,LINE,0,NUM,MAXD
+NUMSTR,LINE,AR27+1
+
+! x0 (coordenada X do vértice inferior esquerdo da mesa inferior)
+AR23=-arg1/2
+
+RECTNG,AR23+0,AR23+arg1,arg9,arg4+arg9
+RECTNG,AR23+(arg1-arg6)/2,AR23+(arg1+arg6)/2,arg4+arg9,arg3-arg5+arg9
+RECTNG,AR23+(arg1-arg2)/2,AR23+(arg1+arg2)/2,arg3-arg5+arg9,arg3+arg9
+RECTNG,AR23+(arg1/2)-arg7,AR23+(arg1/2)+arg8,0,arg9
+
+AR24=-(arg3+arg9)
+AR25=-2*(AR24)
+
+*get,AR26,KP,0,NUM,MAXD
+NUMSTR,KP,AR26+1
+
+*del,SEC_ICOMP_KPs
+*dim,SEC_ICOMP_KPs,ARRAY,AR22
+*do,AR28,1,AR22,1
+   SEC_ICOMP_KPs(AR28)=AR26+AR28
+*enddo
+
+K,SEC_ICOMP_KPs(1),AR23+(arg1-arg2)/2,AR24,0
+K,SEC_ICOMP_KPs(2),AR23+(arg1-arg2)/2,AR25,0
+
+K,SEC_ICOMP_KPs(3),AR23+(arg1/2)-arg7,AR24,0
+K,SEC_ICOMP_KPs(4),AR23+(arg1/2)-arg7,AR25,0
+
+K,SEC_ICOMP_KPs(5),AR23+(arg1-arg6)/2,AR24,0
+K,SEC_ICOMP_KPs(6),AR23+(arg1-arg6)/2,AR25,0
+
+K,SEC_ICOMP_KPs(7),AR23+(arg1+arg6)/2,AR24,0
+K,SEC_ICOMP_KPs(8),AR23+(arg1+arg6)/2,AR25,0
+
+K,SEC_ICOMP_KPs(9),AR23+(arg1+arg2)/2,AR24,0
+K,SEC_ICOMP_KPs(10),AR23+(arg1+arg2)/2,AR25,0
+
+K,SEC_ICOMP_KPs(11),AR23+(arg1/2)+arg8,AR24,0
+K,SEC_ICOMP_KPs(12),AR23+(arg1/2)+arg8,AR25,0
+
+*do,AR28,1,AR22/2,1
+   *get,AR27,LINE,0,NUM,MAXD
+   NUMSTR,LINE,AR27+1
+   L,SEC_ICOMP_KPs(AR28*2-1),SEC_ICOMP_KPs(AR28*2)
+   *get,AR32,LINE,0,NUM,MAX
+   ASBL,ALL,AR32,,DELETE,DELETE
+*enddo
+
+NUMMRG,KP
+
+! Áreas do perfil de aço
+ASEL,S,LOC,Y,arg9,arg3+arg9
+CM,AR29,AREA
+! Áreas da laje de concreto
+ASEL,S,LOC,Y,0,arg9
+CM,AR30,AREA
+
+NUMSTR,DEFA
+CMSEL,S,AR29
+CMSEL,A,AR30
+
+*if,arg4,LE,arg5,THEN
+   AR31=arg4
+*else
+   AR31=arg5
+*endif
+LESIZE,ALL,AR31*4
+
+CMSEL,S,AR29
+AATT,ar10,,AR21
+CMSEL,S,AR30
+AATT,ar11,,AR21
+
+CMSEL,S,AR30
+CMSEL,A,AR29
+AMESH,ALL
+
+SECWRITE,ar12,SECT,,AR21
+
+ACLEAR,ALL
+ADELE,ALL
+LDELE,ALL
+KDELE,ALL
+ETDELE,AR21
+CMDELE,AR29
+CMDELE,AR30
+
+*del,SEC_ICOMP_KPs
+
+! Reativar exibição automática
+/gopr
+IMMED,1
+/uis,REPLOT,1
+/uis,MSGPOP,2
+
+! Restaurar seleção prévia
+VRESTORE
+ARESTORE
+LRESTORE
+KRESTORE
+ERESTORE
+NRESTORE
+
+
+
+

@@ -1,0 +1,443 @@
+! DEFLECT,KPB,KPE,Dir,DType,TanNode,Key
+! DEFLECT,arg1,arg2,arg3,arg4
+
+! Dir:
+!   'X'      : flecha na direção X
+!   'Y'      : flecha na direção Y
+!   'Z'      : flecha na direção Z
+!   'ALL' (0): flecha total (soma vetorial)
+! DType:
+!   'SEC' (0): flecha secante
+!   'TAN'    : flecha tangente
+! TanNode:
+!   0     (0): nó inicial
+!   1        : nó final
+! Key:
+!   'MIN'    : retornar valor mínimo
+!   'MAX'    : retornar valor máximo
+!   'ALL' (0): retornar todos os valores
+
+! Atribuir valor dos argumentos às variáveis
+! Número dos keypoints inicial e final do alinhamento
+KPB=arg1
+KPE=arg2
+! Direção
+*get,A3Type,PARM,arg3,TYPE
+*if,A3Type,EQ,0,THEN
+   Dir='ALL'
+*elseif,A3Type,EQ,3,THEN
+   Dir=UPCASE(arg3)
+*endif
+! Tipo de flecha
+*get,A4Type,PARM,arg4,TYPE
+*if,A4Type,EQ,0,THEN
+   DType='SEC'
+*elseif,A4Type,EQ,3,THEN
+   DType=UPCASE(arg4)
+*endif
+! Nó de referência (flecha tangencial)
+TanNode=arg5
+! Resultados a retornar
+*get,A6Type,PARM,arg6,TYPE
+*if,A6Type,EQ,0,THEN
+   Key='ALL'
+*elseif,A6Type,EQ,3,THEN
+   Key=UPCASE(arg6)
+*endif
+
+! Salvar seleção
+LBACKUP
+KBACKUP
+EBACKUP
+NBACKUP
+
+! Selecionar elementos e nós adjacentes às linhas
+KSLL,S
+ESLL,S
+NSLE,S,ACTIVE
+CM,LineNodes,NODE
+CM,LineElements,ELEM
+! Obter número de elementos selecionados
+*get,ECount,ELEM,0,COUNT
+
+! Caso haja elementos selecionados:
+*if,ECount,GT,0,THEN
+
+   ! Obter o nó adjacente ao keypoint inicial da linha
+   KSEL,S,KP,,KPB
+   CMSEL,S,LineNodes
+   NSLK,R
+   *get,SelectedNodesCount,NODE,0,COUNT
+   *if,SelectedNodesCount,LE,0,THEN
+         *msg,ERROR,
+Não há nó adjacente a KPB que pertença a elemento adjacente às linhas selecionadas.
+   *else
+      *get,FirstNode,NODE,0,NUM,MIN
+   *endif
+
+   ! Obter o nó adjacente ao keypoint final da linha
+   KSEL,S,KP,,KPE
+   CMSEL,S,LineNodes
+   NSLK,R
+   *get,SelectedNodesCount,NODE,0,COUNT
+   *if,SelectedNodesCount,LE,0,THEN
+         *msg,ERROR,
+Não há nó adjacente a KPE que pertença a elemento adjacente às linhas selecionadas.
+   *else
+      *get,LastNode,NODE,0,NUM,MIN
+   *endif
+
+   ! Selecionar os nós adjacentes à linha
+   CMSEL,S,LineNodes
+
+   ! Coordenadas do primeiro nó
+   X1Nodal=NX(FirstNode)
+   Y1Nodal=NY(FirstNode)
+   Z1Nodal=NZ(FirstNode)
+   X1=X1Nodal
+   Y1=Y1Nodal
+   Z1=Z1Nodal
+   ! Coordenadas do último nó
+   X2Nodal=NX(LastNode)
+   Y2Nodal=NY(LastNode)
+   Z2Nodal=NZ(LastNode)
+   X2=X2Nodal
+   Y2=Y2Nodal
+   Z2=Z2Nodal
+   ! Deslocamento do primeiro nó
+   N1DeltaX=UX(FirstNode)
+   N1DeltaY=UY(FirstNode)
+   N1DeltaZ=UZ(FirstNode)
+   ! Deslocamento do último nó
+   N2DeltaX=UX(LastNode)
+   N2DeltaY=UY(LastNode)
+   N2DeltaZ=UZ(LastNode)
+
+   ! Definir posição final dos nós inicial e final
+   *if,Dir,EQ,'X',THEN
+      X1=X1+N1DeltaX
+      X2=X2+N2DeltaX
+   *elseif,Dir,EQ,'Y',THEN
+      Y1=Y1+N1DeltaY
+      Y2=Y2+N2DeltaY
+   *elseif,Dir,EQ,'Z',THEN
+      Z1=Z1+N1DeltaZ
+      Z2=Z2+N2DeltaZ
+   *elseif,Dir,EQ,'ALL',THEN
+      X1=X1+N1DeltaX
+      Y1=Y1+N1DeltaY
+      Z1=Z1+N1DeltaZ
+      X2=X2+N2DeltaX
+      Y2=Y2+N2DeltaY
+      Z2=Z2+N2DeltaZ
+   *endif
+
+   ! Caso seja requisitada a flecha tangente:
+   *if,DType,EQ,'TAN',THEN
+      ! Caso a linha de referência seja tangente ao primeiro nó:
+      *if,TanNode,EQ,0,THEN
+         ! Rotações do nó inicial da linha
+         ROT1X=ROTX(FirstNode)
+         ROT1Y=ROTY(FirstNode)
+         ROT1Z=ROTZ(FirstNode)
+         ! Posição relativa do nó 2 (em sua posição original) em relação ao nó 1 (deslocado)
+         X2=X2Nodal-X1
+         Y2=Y2Nodal-Y1
+         Z2=Z2Nodal-Z1
+         ! Translação e rotação do nó 2:
+         *if,Dir,EQ,'X',THEN
+            ! Translação (componente X) segundo vetor deslocamento do nó 1
+            X2=X2+N1DeltaX
+            ! Rotação em Y
+            X2=X2*COS(ROT1Y)-Z2*SIN(ROT1Y)
+            ! Rotação em Z
+            X2=X2*COS(ROT1Z)+Y2*SIN(ROT1Z)
+         *elseif,Dir,EQ,'Y',THEN
+            ! Translação (componente Y) segundo vetor deslocamento do nó 1
+            Y2=Y2+N1DeltaY
+            ! Rotação em X
+            Y2=Y2*COS(ROT1X)-Z2*SIN(ROT1X)
+            ! Rotação em Z
+            Y2=-X2*SIN(ROT1Z)+Y2*COS(ROT1Z)
+         *elseif,Dir,EQ,'Z',THEN
+            ! Translação (componente Z) segundo vetor deslocamento do nó 1
+            Z2=Z2+N1DeltaZ
+            ! Rotação em X
+            Z2=-Y2*SIN(ROT1X)+Z2*SIN(ROT1X)
+            ! Rotação em Y
+            Z2=X2*SIN(ROT1Y)+Z2*COS(ROT1Y)
+         *elseif,Dir,EQ,'ALL',THEN
+            ! Translação (todas as componentes) segundo vetor deslocamento do nó 1
+            X2=X2+N1DeltaX
+            Y2=Y2+N1DeltaY
+            Z2=Z2+N1DeltaZ
+            ! Rotação em X
+            Y2=Y2*COS(ROT1X)-Z2*SIN(ROT1X)
+            Z2=-Y2*SIN(ROT1X)+Z2*SIN(ROT1X)
+            ! Rotação em Y
+            X2=X2*COS(ROT1Y)-Z2*SIN(ROT1Y)
+            Z2=X2*SIN(ROT1Y)+Z2*COS(ROT1Y)
+            ! Rotação em Z
+            X2=X2*COS(ROT1Z)+Y2*SIN(ROT1Z)
+            Y2=-X2*SIN(ROT1Z)+Y2*COS(ROT1Z)
+         *endif
+         ! Recalcular posição absoluta do nó final
+         X2=X2+X1
+         Y2=Y2+Y1
+         Z2=Z2+Z1
+      ! Caso a linha de referência seja tangente ao último nó:
+      *elseif,TanNode,EQ,1,THEN
+         ! Rotações do nó final da linha
+         ROT2X=ROTX(LastNode)
+         ROT2Y=ROTY(LastNode)
+         ROT2Z=ROTZ(LastNode)
+         ! Posição relativa do nó 1 (em sua posição original) em relação ao nó 2 (deslocado)
+         X1=X1Nodal-X2
+         Y1=Y1Nodal-Y2
+         Z1=Z1Nodal-Z2
+         ! Translação e rotação do nó 1:
+         *if,Dir,EQ,'X',THEN
+            ! Translação (componente X) segundo vetor deslocamento do nó 2
+            X1=X1+N2DeltaX
+            ! Rotação em Y
+            X1=X1*COS(ROT2Y)-Z1*SIN(ROT2Y)
+            ! Rotação em Z
+            X1=X1*COS(ROT2Z)+Y1*SIN(ROT2Z)
+         *elseif,Dir,EQ,'Y',THEN
+            ! Translação (componente Y) segundo vetor deslocamento do nó 2
+            Y1=Y1+N2DeltaY
+            ! Rotação em X
+            Y1=Y1*COS(ROT2X)-Z1*SIN(ROT2X)
+            ! Rotação em Z
+            Y1=-X1*SIN(ROT2Z)+Y1*COS(ROT2Z)
+         *elseif,Dir,EQ,'Z',THEN
+            ! Translação (componente Z) segundo vetor deslocamento do nó 2
+            Z1=Z1+N2DeltaZ
+            ! Rotação em X
+            Z1=-Y1*SIN(ROT2X)+Z1*SIN(ROT2X)
+            ! Rotação em Y
+            Z1=X1*SIN(ROT2Y)+Z1*COS(ROT2Y)
+         *elseif,Dir,EQ,'ALL',THEN
+            ! Translação (todas as componentes) segundo vetor deslocamento do nó 2
+            X1=X1+N2DeltaX
+            Y1=Y1+N2DeltaY
+            Z1=Z1+N2DeltaZ
+            ! Rotação em X
+            Y1=Y1*COS(ROT2X)-Z1*SIN(ROT2X)
+            Z1=-Y1*SIN(ROT2X)+Z1*SIN(ROT2X)
+            ! Rotação em Y
+            X1=X1*COS(ROT2Y)-Z1*SIN(ROT2Y)
+            Z1=X1*SIN(ROT2Y)+Z1*COS(ROT2Y)
+            ! Rotação em Z
+            X1=X1*COS(ROT2Z)+Y1*SIN(ROT2Z)
+            Y1=-X1*SIN(ROT2Z)+Y1*COS(ROT2Z)
+         *endif
+         ! Recalcular posição absoluta do nó final
+         X1=X1+X2
+         Y1=Y1+Y2
+         Z1=Z1+Z2
+      *endif
+   *endif
+
+   ! Selecionar os nós sobre a linha
+   CMSEL,S,LineNodes
+   ! Obter o número de nós sobre a linha
+   *get,NCount,NODE,0,COUNT
+
+   ! Inicializar o vetor de número de nós sobre a linha
+   *del,OrderedNodes
+   *dim,OrderedNodes,,NCount
+
+   ! Caso o keypoint de referência seja o primeiro da linha:
+   *if,TanNode,EQ,0,THEN
+      ! Atribuir à primeira posição do vetor o número do nó adjacente ao keypoint inicial da linha
+      OrderedNodes(1)=FirstNode
+   ! Caso o keypoint de referência seja o último da linha:
+   *elseif,TanNode,EQ,1,THEN
+      ! Atribuir à primeira posição do vetor o número do nó adjacente ao keypoint final da linha
+      OrderedNodes(1)=LastNode
+   *endif
+
+   ! Selecionar o nó associado ao keypoint de referência
+   NSEL,S,NODE,,OrderedNodes(1)
+   ! Criar componente para armazenar os nós já listados no vetor de número de nós
+   CM,ListedNodes,NODE
+
+   ! Para cada nó (exceto 1):
+   *do,i,2,NCount,1
+      ! Selecionar o nó cujo número ocupa a última posição preenchida do vetor
+      NSEL,S,NODE,,OrderedNodes(i-1)
+      ! Selecionar elementos adjacentes ao nó
+      ESLN,S
+      ! Filtrar para que restem apenas os elementos que são adjacentes à linha
+      CMSEL,R,LineElements
+      ! Selecionar nós ativos adjacentes aos elementos
+      NSLE,S,ACTIVE
+      ! Remover da seleção os nós já listados
+      CMSEL,U,ListedNodes
+      ! Obter o número do nó de menor número dentre os selecionados
+      !   (nesse momento deve haver apenas um nó selecionado)
+      *get,SelectedNodesCount,NODE,0,COUNT
+      *if,SelectedNodesCount,LE,0,THEN
+         *msg,ERROR,
+Descontinuidade nodal detectada no alinhamento entre KPB e KPE para as linhas selecionadas.
+      *else
+         *get,nthNode,NODE,0,NUM,MIN
+      *endif
+      ! Adicionar o número de nó obtido ao vetor de nós
+      OrderedNodes(i)=nthNode
+      ! Selecionar componente de nós listados
+      CMSEL,S,ListedNodes
+      ! Adicionar nó obtido ao componente de nós listados
+      NSEL,A,NODE,,nthNode
+      CM,ListedNodes,NODE
+   *enddo
+
+   ! Calcular as distâncias em x, y e z
+   DeltaX12=X2-X1
+   DeltaY12=Y2-Y1
+   DeltaZ12=Z2-Z1
+   ! Calcular o denominador da fórmula da distância de ponto a reta
+   Denom=SQRT(DeltaX12**2+DeltaY12**2+DeltaZ12**2)
+
+   ! Inicializar o vetor de resultados
+   *del,U_NValue
+   *dim,U_NValue,,NCount
+
+   ! Para cada elemento:
+   *do,i,1,NCount,1
+      ! Obter o número do nó na posição i do vetor
+      NNum=OrderedNodes(i)
+      ! Obter as coordenadas do nó
+      NX=NX(NNum)
+      NY=NY(NNum)
+      NZ=NZ(NNum)
+      ! Obter os deslocamentos do nó
+      NDeltaX=UX(NNum)
+      NDeltaY=UY(NNum)
+      NDeltaZ=UZ(NNum)
+      ! Definir posição final do nó
+      *if,Dir,EQ,'X',THEN
+         NX=NX+NDeltaX
+      *elseif,Dir,EQ,'Y',THEN
+         NY=NY+NDeltaY
+      *elseif,Dir,EQ,'Z',THEN
+         NZ=NZ+NDeltaZ
+      *elseif,Dir,EQ,'ALL',THEN
+         NX=NX+NDeltaX
+         NY=NY+NDeltaY
+         NZ=NZ+NDeltaZ
+      *endif
+      ! Calcular as distâncias do nó inicial do elemento ao nó inicial da linha
+      DeltaX1P=X1-NX
+      DeltaY1P=Y1-NY
+      DeltaZ1P=Z1-NZ
+      ! Calcular o valor dos termos da fórmula da distância de ponto a reta
+      TERMO1=(DeltaY12*DeltaZ1P-DeltaZ12*DeltaY1P)**2
+      TERMO2=(DeltaZ12*DeltaX1P-DeltaX12*DeltaZ1P)**2
+      TERMO3=(DeltaX12*DeltaY1P-DeltaY12*DeltaX1P)**2
+      ! Calcular distância da reta formada pelos nós inicial e final da linha
+      !   ao nó desejado após a aplicação dos deslocamentos requeridos
+      U_NValue(i)=SQRT(TERMO1+TERMO2+TERMO3)/Denom
+   *enddo
+
+   ! Determinar qual valor retornar
+   *if,Key,EQ,'MIN',THEN
+      ! Retornar o valor mínimo
+      *vscfun,MinVal,MIN,U_NValue
+      _OUTPUT=
+      _OUTPUT=MinVal
+   *elseif,Key,EQ,'MAX',THEN
+      ! Retornar o valor máximo
+      *vscfun,MaxVal,MAX,U_NValue
+      _OUTPUT=
+      _OUTPUT=MaxVal
+   *elseif,Key,EQ,'ALL',THEN
+      ! Retornar todos os valores
+      *del,_OUTPUT
+      *dim,_OUTPUT,,NCount
+      *voper,_OUTPUT,U_NValue,ADD
+   *endif
+
+! Caso não haja elementos selecionados:
+*else
+
+   ! Retornar texto indicando que não há elementos adjacentes à linha
+   _OUTPUT=
+   _OUTPUT='No elements'
+
+*endif
+
+! Excluir componente
+CMDELE,LineNodes
+CMDELE,LineElements
+CMDELE,ListedNodes
+
+! Excluir parâmetros
+*del,A3Type
+*del,A4Type
+*del,A6Type
+*del,DeltaX12
+*del,DeltaX1P
+*del,DeltaY12
+*del,DeltaY1P
+*del,DeltaZ12
+*del,DeltaZ1P
+*del,Denom
+*del,Dir
+*del,DType
+*del,ECount
+*del,FirstNode
+*del,i
+*del,Key
+*del,KPB
+*del,KPE
+*del,LastNode
+*del,MaxVal
+*del,MinVal
+*del,N1DeltaX
+*del,N1DeltaY
+*del,N1DeltaZ
+*del,N2DeltaX
+*del,N2DeltaY
+*del,N2DeltaZ
+*del,NCount
+*del,NDeltaX
+*del,NDeltaY
+*del,NDeltaZ
+*del,NNum
+*del,nthNode
+*del,NX
+*del,NY
+*del,NZ
+*del,OrderedNodes
+*del,ROT1X
+*del,ROT1Y
+*del,ROT1Z
+*del,ROT2X
+*del,ROT2Y
+*del,ROT2Z
+*del,SelectedNodesCount
+*del,TanNode
+*del,TERMO1
+*del,TERMO2
+*del,TERMO3
+*del,U_NValue
+*del,X1
+*del,X1Nodal
+*del,X2
+*del,X2Nodal
+*del,Y1
+*del,Y1Nodal
+*del,Y2
+*del,Y2Nodal
+*del,Z1
+*del,Z1Nodal
+*del,Z2
+*del,Z2Nodal
+
+! Restaurar seleção
+LRESTORE
+KRESTORE
+ERESTORE
+NRESTORE

@@ -1,0 +1,81 @@
+! STLTHSX, createTable, matNum
+! STLTHSX,        arg1,   arg2
+
+! Descrição:
+! Esta subrotina cria um vetor com temperaturas (de 20°C a 1200°C) e valores correspondentes
+! da deformação térmica do aço estrutural. Dependendo dos valores dos argumentos (arg1 e arg2)
+! os valores podem ser inseridos numa tabela de temperatura e até atribuídos a um material.
+
+! Lista de argumentos:
+! arg1: createTable  -  determina se a tabela de temperaturas será ou não criada
+!                          [0] Não criar tabela (preencher apenas vetor)
+!                          [1] Criar tabela (comando MPTEMP)
+! arg2: matNum       -  número do material a que será atribuída a propriedade de deformação térmica
+!                          [0]   Não atribuir a um material
+!                          [n>0] Atribuir ao material número n (se arg1=1)
+
+! Lista de variáveis locais:
+! AR20: nthTemp
+! AR21: ptIndex
+! AR22: parType
+! AR23: nthPt
+
+! Lista de variáveis de saída:
+!   STLTHSX_ARR_TempStrain
+
+! Inicializar vetor de temperaturas e deformações térmicas
+*del,STLTHSX_ARR_TempStrain
+*dim,STLTHSX_ARR_TempStrain,ARRAY,100,2
+
+! Temperatura inicial: 20°C
+STLTHSX_ARR_TempStrain(1,1)=20
+! Deformação térmica inicial: 0 (zero)
+STLTHSX_ARR_TempStrain(1,2)=0
+
+! Temperaturas: 100°C < T < 750°C
+AR20=90
+*do,AR21,2,66
+   AR20=AR20+10
+   STLTHSX_ARR_TempStrain(AR21,1)=AR20
+   STLTHSX_ARR_TempStrain(AR21,2)=1.2E-5*AR20+0.4E-8*(AR20**2)-2.416E-4
+*enddo
+
+! Temperaturas: T = 750°C & T = 860°C
+STLTHSX_ARR_TempStrain(67,1)=750
+STLTHSX_ARR_TempStrain(67,2)=1.1E-2
+STLTHSX_ARR_TempStrain(68,1)=860
+STLTHSX_ARR_TempStrain(68,2)=1.1E-2
+
+! Temperaturas: 860°C < T < 1200°C
+AR20=860
+*do,AR21,69,99
+   AR20=AR20+10
+   STLTHSX_ARR_TempStrain(AR21,1)=AR20
+   STLTHSX_ARR_TempStrain(AR21,2)=2E-5*AR20-6.2E-3
+*ENDDO
+
+! Temperatura final: 1200°C
+STLTHSX_ARR_TempStrain(100,1)=1200
+STLTHSX_ARR_TempStrain(100,2)=2E-5*1200-6.2E-3
+
+*get,AR22,PARM,arg1,TYPE
+*if,AR22,EQ,0,THEN
+   *if,arg1,EQ,1,THEN
+      ! Criar tabela de temperaturas
+      *do,AR23,1,100
+         MPTEMP,AR23,STLTHSX_ARR_TempStrain(AR23,1)
+      *enddo
+      *get,AR22,PARM,arg2,TYPE
+      *if,AR22,EQ,0,THEN
+         *if,arg2,GT,0,THEN
+            ! Definir propriedade do material
+            *do,AR23,1,100
+               MPDATA,THSX,arg2,AR23,STLTHSX_ARR_TempStrain(AR23,2)
+            *enddo
+         *endif
+      *endif
+   *endif
+*endif
+
+
+

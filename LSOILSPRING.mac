@@ -1,0 +1,37 @@
+! LSOILSPRING,    K, length,    E, typeNum, matNum, realNum, tenskey
+! LSOILSPRING, arg1,   arg2, arg3,    arg4,   arg5,    arg6,    arg7
+
+! AR20: parType
+! AR21: springLength
+! AR22: elasticModulus
+! AR23: crossSectionalArea
+
+
+! Default length: 1.0
+*get,AR20,parm,arg2,type
+*if,AR20,eq,0,and,arg2,ne,0,then
+    AR21=arg2
+*else
+    AR21=1
+*endif
+
+! Default elastic modulus 1e10
+*get,AR20,parm,arg3,type
+*if,AR20,eq,0,and,arg3,ne,0,then
+    AR22=arg3
+*else
+    AR22=1e10
+*endif
+
+! Calculate cross-sectional area
+AR23=(arg1*AR21)/AR22
+
+! Attributes: element type, material, real constant
+et,arg4,LINK180
+
+mp,   ex, arg5, AR22
+mp, prxy, arg5,  0.2
+
+r,arg6,AR23,,arg7
+
+

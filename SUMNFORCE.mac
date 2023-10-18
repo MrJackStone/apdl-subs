@@ -1,0 +1,54 @@
+! SUMNFORCE, resultParam, direction
+! SUMNFORCE,        arg1,      arg2
+
+! Description:
+! Adds up all nodal forces along a given direction for selected nodes.
+
+! Arguments:
+! arg1: resultParam  -  name of parameter (string) to which result will be attributed
+! arg2: direction    -  nodal force direction/key (string): FX, FY, FZ, MX, MY, MZ
+
+! Local parameters:
+! AR21: nc
+! AR22: totalF
+! AR23: nodeNum
+! AR24: nthNode
+! AR25: ec
+! AR26: elemNum
+! AR27: nthForce
+! AR28: nthElem
+
+! Global parameters (erased at the end of this subroutine):
+! SUMNFORCE_COMPN_selected
+
+
+nbackup
+ebackup
+
+cm,SUMNFORCE_COMPN_selected,node
+
+*get,AR21,node,,count
+AR22=0
+AR23=0
+
+*do,AR24,1,AR21,1
+    cmsel,s,SUMNFORCE_COMPN_selected
+    AR23=ndnext(AR23)
+    nsel,s,node,,AR23
+    esln,s
+    *get,AR25,elem,,count
+    AR26=0
+    *do,AR28,1,AR25,1
+        AR26=elnext(AR26)
+        *get,AR27,elem,AR26,efor,AR23,%arg2%
+        AR22=AR22+AR27
+    *enddo
+*enddo
+
+%arg1%=AR22
+
+*del,SUMNFORCE_COMPN_selected
+cmdele,SUMNFORCE_COMPN_selected
+
+nrestore
+erestore

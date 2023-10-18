@@ -1,0 +1,39 @@
+! ACEN, xcParmName, ycParmName
+! ACEN,       arg1,       arg2
+
+! Description:
+! Calculates X and Y coordinates of the point at the center of the rectangle that bounds the
+! keypoints attached to the selected areas.
+
+! Arguments:
+! arg1: xcParmName  -  name of the parameter (STR) to which the X coordinate will be assigned
+! arg2: ycParmName  -  name of the parameter (STR) to which the Y coordinate will be assigned
+
+! Local parameters:
+! AR20: xMin
+! AR21: xMax
+! AR22: yMin
+! AR23: yMax
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! -
+
+NBACKUP
+LBACKUP
+
+LSLA,S
+NSLA,S,1
+*get,AR20,NODE,,MNLOC,X
+*get,AR21,NODE,,MXLOC,X
+*get,AR22,NODE,,MNLOC,Y
+*get,AR23,NODE,,MXLOC,Y
+%arg1%=(AR21+AR20)/2
+%arg2%=(AR23+AR22)/2
+
+LRESTORE
+NRESTORE
+
+

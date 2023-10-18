@@ -1,0 +1,113 @@
+! ARRUNIQ, inputArray, outputArray, sort
+! ARRUNIQ,       arg1,        arg2, arg3
+
+! Description:
+! Removes repeated elements from a sorted array.
+
+! Arguments:
+! arg1: inputArray   -  name of array parameter to be operated on
+! arg2: outputArray  -  name of array parameter to which resulting list will be written
+! arg3: sort         -  array sorting key:
+!                          [0] do not sort (default)
+!                          [1] sort ascending
+!                          [2] sort descending
+
+! Implicit arguments
+! ARRUNIQ_ARR_input  -  name of array parameter to be operated on
+!                       (alternative to passing arg1 as STRING)
+
+! Local parameters:
+! AR20: inputLength
+! AR21: outputLength
+! AR22: lastEntry
+! AR23: nthEntry
+! AR24: newEntry
+! AR25: parmType
+! AR26: inputParmName
+! AR27: outputParmName
+
+! Global parameters (erased at the end of this subroutine):
+! ARRUNIQ_ARR_tempArray
+
+! Output parameters:
+! ARRUNIQ_ARR_OUTPUT
+! ARRUNIQ_ARR_sorted
+
+
+! Set input array parameter name
+*get,AR25,PARM,arg1,TYPE
+*if,AR25,EQ,3,THEN
+    AR26=arg1
+*else
+    AR26='ARRUNIQ_ARR_input'
+*endif
+
+! Set output array parameter name
+*get,AR25,PARM,arg2,TYPE
+*if,AR25,EQ,3,THEN
+    AR27=arg2
+*else
+    AR27='ARRUNIQ_ARR_OUTPUT'
+*endif
+
+! Set sorted input parameter name
+AR28='ARRUNIQ_ARR_sorted'
+*del,%AR28%
+
+! Sort input array
+*get,AR25,parm,arg3,type
+*if,AR25,eq,0,then
+    *if,arg3,eq,1,then
+        *vfun,%AR28%,asort,%AR26%
+    *elseif,arg3,eq,2,then
+        *vfun,%AR28%,dsort,%AR26%
+    *else
+        *vfun,%AR28%,copy,%AR26%
+    *endif
+*else
+    *vfun,%AR28%,copy,%AR26%
+*endif
+
+! Get input array size
+*get,AR20,PARM,%AR28%,DIM,X
+
+! Initialize output array
+AR21=1
+*del,%AR27%
+*dim,%AR27%,ARRAY,AR21
+AR22=%AR28%(1)
+%AR27%(1)=AR22
+
+! Loop through input array values, starting from the second one:
+*do,AR23,2,AR20,1
+
+   ! Get value in next position
+   AR24=%AR28%(AR23)
+
+   ! If value is different from previous one:
+   *if,AR24,NE,AR22,THEN
+
+      ! Increment output array length
+      AR21=AR21+1
+
+      ! Fill temporary array with output values
+      *del,ARRUNIQ_ARR_tempArray
+      *dim,ARRUNIQ_ARR_tempArray,ARRAY,AR21
+      *vfun,ARRUNIQ_ARR_tempArray,COPY,%AR27%
+
+      ! Append new value to output array
+      *del,%AR27%
+      *dim,%AR27%,ARRAY,AR21
+      *vfun,%AR27%,COPY,ARRUNIQ_ARR_tempArray
+      %AR27%(AR21)=AR24
+
+      ! Update previous element value
+      AR22=AR24
+
+   *endif
+
+*enddo
+
+! Clear parameters
+*del,ARRUNIQ_ARR_tempArray
+

@@ -1,0 +1,70 @@
+! CNCTHSX, createTable, matNum
+! CNCTHSX,        arg1,   arg2
+
+! Descrição:
+! Esta subrotina cria um vetor com temperaturas (de 20°C a 1200°C) e valores correspondentes
+! da deformação térmica do concreto estrutural. Dependendo dos valores dos argumentos (arg1 e arg2)
+! os valores podem ser inseridos numa tabela de temperatura e até atribuídos a um material.
+
+! Lista de argumentos:
+! arg1: createTable  -  determina se a tabela de temperaturas será ou não criada
+!                          [0] Não criar tabela (preencher apenas vetor)
+!                          [1] Criar tabela (comando MPTEMP)
+! arg2: matNum       -  número do material a que será atribuída a propriedade de deformação térmica
+!                          [0]   Não atribuir a um material
+!                          [n>0] Atribuir ao material número n (se arg1=1)
+
+! Lista de variáveis locais:
+! AR20: nPt
+! AR21: deltaTemp
+! AR22: index
+! AR23: temp
+! AR24: nthPt
+! AR25: parType
+
+! Lista de variáveis de saída:
+!   CNCTHSX_ARR_ThermStrain
+!   CNCTHSX_ARR_Temps
+
+! Número de pontos para a discretização da curva
+AR20=20
+
+! Inicializar vetores de temperaturas e deformações
+*del,CNCTHSX_ARR_ThermStrain
+*dim,CNCTHSX_ARR_ThermStrain,ARRAY,AR20
+*del,CNCTHSX_ARR_Temps
+*dim,CNCTHSX_ARR_Temps,ARRAY,AR20
+
+! Calcular incremento de temperatura (com base no número de pontos da curva)
+AR21=(700-20)/(AR20-2)
+AR22=0
+
+! Calcular temperaturas e respectivas deformações
+*do,AR23,20,700,AR21
+   AR22=AR22+1
+   CNCTHSX_ARR_Temps(AR22)=AR23
+   CNCTHSX_ARR_ThermStrain(AR22)=-1.8e-4+9e-5*AR23+2.3e-11*(AR23**3)
+*enddo
+CNCTHSX_ARR_Temps(AR20)=1200
+CNCTHSX_ARR_ThermStrain(AR20)=14e-3
+
+*get,AR25,PARM,arg1,TYPE
+*if,AR25,EQ,0,THEN
+   *if,arg1,EQ,1,THEN
+      ! Criar tabela de temperaturas
+      MPTEMP
+      *do,AR24,1,AR22,1
+         MPTEMP,AR24,CNCTHSX_ARR_Temps(AR24)
+      *enddo
+      *get,AR25,PARM,arg2,TYPE
+      *if,AR25,EQ,0,THEN
+         *if,arg2,GT,0,THEN
+            ! Definir propriedade do material: expansão térmica
+            *do,AR24,1,AR22,1
+               MPDATA,THSX,arg2,AR24,CNCTHSX_ARR_ThermStrain(AR24)
+            *enddo
+         *endif
+      *endif
+   *endif
+*endif
+

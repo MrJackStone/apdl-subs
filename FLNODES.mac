@@ -1,0 +1,119 @@
+! FLNODES,FX,FY,FZ,AppendKey
+! FLNODES,arg1,arg2,arg3,arg4
+
+! Descrição:
+! Converte um carregamento uniformemente distribuído sobre uma
+! linha em um carregamento equivalente de forças concentradas
+! a serem aplicadas nos nós anexos à linha. Cargas distintas
+! podem ser declaradas para cada uma das três direções do
+! sistema de coordenadas de cada nó. O argumento AppendKey
+! controla se as novas forças nodais serão aplicadas substituindo
+! ou incrementando forças de mesma direção previamente existentes
+! nos nós (0: substituir cargas; 1: acumular cargas).
+
+! Lista de argumentos:
+! arg1: FX
+! arg2: FY
+! arg3: FZ
+! arg4: AppendKey
+
+! Lista de variáveis locais:
+! AR20: TempLines
+! AR21: LCount
+! AR22: LIndex
+! AR23: nthLine
+! AR24: NCount
+! AR25: NIndex
+! AR26: nthNode
+! AR27: NodeFX
+! AR28: NodeFY
+! AR29: NodeFZ
+! AR30: NodalEqFX
+! AR31: NodalEqFY
+! AR32: NodalEqFZ
+! AR33: LineLength
+
+
+! Armazenar seleção prévia
+LBACKUP
+NBACKUP
+EBACKUP
+
+! Criar componente temporário
+CM,AR20,LINE
+! Obter quantidade de linhas selecionadas
+*get,AR21,LINE,0,COUNT
+
+! Para cada linha selecionada:
+*do,AR22,1,AR21,1
+   ! Obter número da primeira linha (linha de menor número)
+   *get,AR23,LINE,0,NUM,MIN
+   ! Selecionar linha, elementos adjacentes à linha e nós ativos
+   !    adjacentes aos elementos
+   LSEL,S,LINE,,AR23
+   ESLL,S
+   NSLE,S,ACTIVE
+   ! Obter o comprimento da linha
+   *get,AR33,LINE,AR23,LENG
+   ! Obter número de nós selecionados
+   *get,AR24,NODE,0,COUNT
+   ! Caso haja nós adjacentes à linha:
+   *if,AR24,GT,0,THEN
+      ! Calcular força a ser aplicada em cada nó
+      AR30=arg1*AR33/AR24
+      AR31=arg2*AR33/AR24
+      AR32=arg3*AR33/AR24
+      ! Para cada nó selecionado:
+      *do,AR25,1,AR24,1
+         ! Obter número do primeiro nó (nó de menor número)
+         *get,AR26,NODE,0,NUM,MIN
+         ! Caso tenha sido ativada a opção de acumular cargas:
+         *if,arg4,EQ,1,THEN
+            ! Caso deseje-se aplicar força (diferente de 0) em X:
+            *if,arg1,NE,0,THEN
+               ! Obter valor da força em X já aplicada no nó
+               *get,AR27,NODE,AR26,F,FX
+               ! Aplicar soma dos valores da força existente com a nova força
+               F,AR26,FX,AR27+AR30
+            *endif
+            ! Caso deseje-se aplicar força (diferente de 0) em Y:
+            *if,arg2,NE,0,THEN
+               ! Obter valor da força em Y já aplicada no nó
+               *get,AR28,NODE,AR26,F,FY
+               ! Aplicar soma dos valores da força existente com a nova força
+               F,AR26,FY,AR28+AR31
+            *endif
+            ! Caso deseje-se aplicar força (diferente de 0) em Z:
+            *if,arg3,NE,0,THEN
+               ! Obter valor da força em Z já aplicada no nó
+               *get,AR29,NODE,AR26,F,FZ
+               ! Aplicar soma dos valores da força existente com a nova força
+               F,AR26,FZ,AR29+AR32
+            *endif
+            ! Caso tenha sido ativada a opção de substituir as cargas:
+         *else
+            ! Aplicar forças desejadas (valor diferente de 0)
+            *if,arg1,NE,0,THEN
+               F,AR26,FX,AR30
+            *endif
+            *if,arg2,NE,0,THEN
+               F,AR26,FY,AR31
+            *endif
+            *if,arg3,NE,0,THEN
+               F,AR26,FZ,AR32
+            *endif
+         *endif
+         ! Remover da seleção o nó analisado
+         NSEL,U,NODE,,AR26
+      *enddo
+   *endif
+   ! Redefinir o componente temporário de linhas
+   CMSEL,S,AR20
+   LSEL,U,LINE,,AR23
+   CM,AR20,LINE
+*enddo
+
+! Restaurar seleção prévia
+LRESTORE
+NRESTORE
+ELRESTORE

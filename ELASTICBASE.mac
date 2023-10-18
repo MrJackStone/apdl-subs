@@ -1,0 +1,194 @@
+! ELASTICBASE, outputObject, direction, stiffness, tenskey, refLength, refElasticModulus, refArea, coupledDOFs, cmnName, cmeName
+! ELASTICBASE,         arg1,      arg2,      arg3,    arg4,      arg5,              arg6,    arg7,        arg8,    arg9,    ar10
+
+! Description:
+! Creates an elastic base of a given stiffness composed of discrete spring elements aligned with
+! global X, Y, or Z axis.
+
+! Arguments:
+! arg1: outputObject       -  name of array parameter to which the following data will be written:
+!                                POS CONTENTS
+!                                (1) material ID assigned to spring elements
+!                                (2) real constant set ID assigned to spring elements
+!                                (3) element type ID assigned to spring elements
+!                                (4) adopted length
+!                                (5) adopted elastic modulus
+!                                (6) adopted cross-sectional area
+!                                (7) average apportioned area
+! arg2: direction          -  direction of the spring elements (must be 'X', 'Y', or 'Z')
+! arg3: stiffness          -  elastic base's stiffness per unit area (N/m²)
+! arg4: tenskey            -  LINK180's TENSKEY option:
+!                                [ 0] Tension & compression (default)
+!                                [ 1] Tension only (tendon)
+!                                [-1] Compression only (strut)
+! arg5: refLength          -  spring element length for average apportioned area (defaults to 1
+!                             length unit). The sign of this number determines whether the spring
+!                             is created "ahead" of the reference nodes (i.e., towards an increasing
+!                             value of the chosen XYZ coordinate) or "behind" them (towards a
+!                             decreasing value of the coordinate)
+! arg6: refElasticModulus  -  elastic modulus of the material assigned to the springs. This value
+!                             can be zero, in which case it is automaticall calculated based on the
+!                             cross-sectional area
+! arg7: refArea            -  cross-sectional area of the spring elements created. This value is
+!                             only used if arg6 (refElasticModulus) is zero
+! arg8: coupledDOFs        -  determines which degrees of freedom to couple between each spring's
+!                             nodes:
+!                                [0] no coupling
+!                                [1] UX
+!                                [2] UY
+!                                [3] UX & UY
+!                                [4] UZ
+!                                [5] UX & UZ
+!                                [6] UY & UZ
+!                                [7] UX, UY & UZ
+! arg9: cmnName            -  name of nodal selection component containing created nodes
+!                             (defaults to ELASTICBASE_COMPN_new)
+! ar10: cmeName            -  name of element selection component containing created elements
+!                             (defaults to ELASTICBASE_COMPE_new)
+
+! Local parameters:
+! AR20: parType
+! AR21: maxType
+! AR22: maxReal
+! AR23: maxMat
+! AR24: meanApportionedArea
+! AR25: adoptedLength
+! AR26: adoptedElasticModulus
+! AR27: adoptedArea
+! AR29: nodeComponent
+! AR30: elementComponent
+! AR31: newType
+! AR32: newReal
+! AR33: newMat
+! AR34: meanUnitAxialStiffness
+! AR41: xLength
+! AR42: yLength
+! AR43: zLength
+
+! Global parameters (erased at the end of this subroutine):
+! ELASTICBASE_ARR_appoStats
+
+
+! Define name of node selection component
+*get,AR20,parm,arg9,type
+*if,AR20,eq,3,then
+    AR29=arg9
+*else
+    AR29='ELASTICBASE_COMPN_new'
+*endif
+
+! Define name of element selection component
+*get,AR20,parm,ar10,type
+*if,AR20,eq,3,then
+    AR30=ar10
+*else
+    AR30='ELASTICBASE_COMPE_new'
+*endif
+
+! New element type, real constant set, and material numbers
+*get,AR21,etyp,,num,max
+AR31=AR21+1
+*get,AR22,rcon,,num,max
+AR32=AR22+1
+*get,AR23,mat,,num,max
+AR33=AR23+1
+
+! Calculate mean apportioned area
+apportionedstats,'ELASTICBASE_ARR_appoStats'
+AR24=ELASTICBASE_ARR_appoStats(4)
+
+! Calculate adopted length for spring elements
+*if,arg5,eq,0,then
+    AR25=1
+*else
+    AR25=arg5
+*endif
+AR25=AR25*AR24
+
+! Calculate axial stiffness per unit area for calculated length
+AR34=abs(AR25)*arg3
+
+! Calculate adopted elastic modulus and cross-sectional area
+*if,arg6,ne,0,then
+    ! When elastic modulus is given
+    AR26=abs(arg6)
+    AR27=AR34/AR26
+*else
+    *if,arg7,ne,0,then
+        ! When cross-sectional area is given
+        AR27=abs(arg7)
+        AR26=AR34/AR27
+    *else
+        ! When neither elastic modulus nor cross-sectional area are given
+        AR27=AR24/10
+        AR26=AR34/AR27
+    *endif
+*endif
+
+! Determine spring direction
+AR41=0
+AR42=0
+AR43=0
+*if,upcase(arg2),eq,'X',then
+    AR41=AR25
+*elseif,upcase(arg2),eq,'Y',then
+    AR42=AR25
+*elseif,upcase(arg2),eq,'Z',then
+    AR43=AR25
+*else
+    *msg,warn
+ELASTICBASE error: invalid direction. arg2 must be X, Y, or Z.%/&
+ELASTICBASE command is ignored.
+    *return,-1
+*endif
+
+! Create new attribute set: element type, real constant set, material
+et,AR31,link180
+r,AR32,AR27,,arg4
+mp,ex,AR33,AR26
+mp,prxy,AR33,0.3
+
+! Create discrete springs connected to current node selection
+sprsup,AR41,AR42,AR43,AR33,AR32,AR31,AR29,AR30,1,arg8
+
+! Apply displacement restriction in uncoupled directions
+cmsel,s,%AR29%
+*if,arg8,eq,1,then
+    ! Couple UX
+    d,%AR29%,uy,0
+    d,%AR29%,uz,0
+*elseif,arg8,eq,2,then
+    ! Couple UY
+    d,%AR29%,ux,0
+    d,%AR29%,uz,0
+*elseif,arg8,eq,3,then
+    ! Couple UX, UY
+    d,%AR29%,uz,0
+*elseif,arg8,eq,4,then
+    ! Couple UZ
+    d,%AR29%,ux,0
+    d,%AR29%,uy,0
+*elseif,arg8,eq,5,then
+    ! Couple UX, UZ
+    d,%AR29%,uy,0
+*elseif,arg8,eq,6,then
+    ! Couple UY, UZ
+    d,%AR29%,ux,0
+*elseif,arg8,eq,7,then
+    ! No constraints
+*else
+    ! No coupling
+    d,%AR29%,ux,0
+    d,%AR29%,uy,0
+    d,%AR29%,uz,0
+*endif
+
+! Assign attribute numbers to output object
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    *del,%arg1%
+    *dim,%arg1%,,7
+    %arg1%(1)=AR33,AR32,AR31,AR25,AR26,AR27,AR24
+*endif
+
+*del,ELASTICBASE_ARR_appoStats

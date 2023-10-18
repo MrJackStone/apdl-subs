@@ -1,0 +1,26 @@
+! CDATE, strTime
+! CDATE,    arg1
+
+! Description:
+! Returns current date as a formatted string DD/MM/YY
+
+! Arguments:
+! arg1: parm  -  parameter name (string)
+
+! Local parameters:
+! AR20: numDate
+! AR21: strDate
+! AR21: strYear
+! AR22: strMonth
+! AR23: strDay
+
+
+*get,AR20,active,,dbase,ldate
+
+AR21=chrval(AR20)
+
+AR22=strsub(AR21,3,2)
+AR23=strsub(AR21,5,2)
+AR24=strsub(AR21,7,2)
+
+%arg1%=strcat(strcat(AR24,'/'),strcat(strcat(AR23,'/'),AR22))

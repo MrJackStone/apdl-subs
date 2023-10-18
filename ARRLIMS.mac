@@ -1,0 +1,61 @@
+! ARRLIMS, outputParm
+! ARRLIMS,       arg1
+
+! Description:
+! Calculates maximum and minimum values for each column of the given 2-D arrays.
+
+! Arguments:
+! arg1: outputParm  -  name of output parameter to which min/max values will be written
+
+! Implicit arguments:
+! ARRLIMS_ARR_names  -  array of characters, each position containing the name of a 2-D array
+!                       parameter (all must have an equal number of columns)
+
+! Local parameters:
+! AR20: arrcount
+! AR21: totDim
+! AR22: nthArr
+! AR23: arrName
+! AR24: arrDim
+! AR25: colCount
+! AR26: idx1
+! AR27: nthCol
+! AR28: minval
+! AR29: maxval
+
+! Output parameters:
+! ARRLIMS_ARR_allRows  -  2-D array combining all input array rows
+
+
+*get,AR20,parm,ARRLIMS_ARR_names,dim,y
+
+AR21=0
+*do,AR22,1,AR20,1
+    AR23=ARRLIMS_ARR_names(1,AR22)
+    *get,AR24,parm,%AR23%,dim,x
+    AR21=AR21+AR24
+    *get,AR25,parm,%AR23%,dim,y
+*enddo
+
+*del,ARRLIMS_ARR_allRows
+*dim,ARRLIMS_ARR_allRows,,AR21,AR25
+
+AR26=1
+*do,AR22,1,AR20,1
+    AR23=ARRLIMS_ARR_names(1,AR22)
+    *get,AR24,parm,%AR23%,dim,x
+    *do,AR27,1,AR25,1
+        *vfun,ARRLIMS_ARR_allRows(AR26,AR27),copy,%AR23%(1,AR27)
+    *enddo
+    AR26=AR26+AR24
+*enddo
+
+*del,%arg1%
+*dim,%arg1%,,2,AR25
+*do,AR27,1,AR25,1
+    *vscfun,AR28,min,ARRLIMS_ARR_allRows(1,AR27)
+    *vscfun,AR29,max,ARRLIMS_ARR_allRows(1,AR27)
+    %arg1%(1,AR27)=AR28
+    %arg1%(2,AR27)=AR29
+*enddo
+

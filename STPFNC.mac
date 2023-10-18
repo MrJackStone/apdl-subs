@@ -1,0 +1,173 @@
+! STPFNC, regimeVariable, loadName, coordinateSystem
+! STPFNC,           arg1,     arg2,             arg3
+
+! Description:
+! Creates a multi-regime function in which each regime has a constant value (stepped function).
+
+! Arguments:
+! arg1: regimeVariable    -  quantity used as regime variable:
+!                            [1] TIME  [6]  TFLUID    [11] SPHT  [16] EMIS  [21] OMEGS  [26] DJV
+!                            [2] X     [7]  VELOCITY  [12] KXX   [17] Xr    [22] OMEGF
+!                            [3] Y     [8]  PRESSURE  [13] KYY   [18] Yr    [23] SLIP
+!                            [4] Z     [9]  TSURF     [14] KZZ   [19] Zr    [24] FREQ
+!                            [5] TEMP  [10] DENS      [15] VISC  [20] GAP   [25] DJU
+! arg2: loadName          -  name of the tabular BC (default: 'STPFNC')
+! arg3: coordinateSystem  -  CSYS in which to apply the tabular BC (default: active CSYS)
+
+! Implicit arguments:
+! STPFNC_ARR_LIMITS  -  array with values delimiting each regime
+! STPFNC_ARR_VALUES  -  array with values of the function for each regime
+
+! Local variables:
+! AR20: functionName
+! AR21: CSYS
+! AR22: parmType
+! AR23: LregimeCount
+! AR24: VregimeCount
+! AR26: nthRegime
+! AR27: nthLimit
+! AR28: nthValue
+! AR29: regimeVarID
+! AR30: regVarUpcase
+
+! Global variables (erased locally):
+! -
+
+! Output variables:
+! STPFNC_Name  -  name of the function created
+
+
+! Generate valid regime variable identifier
+*get,AR22,PARM,arg1,TYPE
+*if,AR22,EQ,0,THEN
+    *if,arg1,GT,0,AND,arg1,LE,25,THEN
+        AR29=NINT(arg1)
+    *else
+        AR29=0
+    *endif
+*elseif,AR22,EQ,3,THEN
+    AR30=UPCASE(arg1)
+    *if,AR30,EQ,'TIME',THEN
+        AR29=1
+    *elseif,AR30,EQ,'X',THEN
+        AR29=2
+    *elseif,AR30,EQ,'Y',THEN
+        AR29=3
+    *elseif,AR30,EQ,'Z',THEN
+        AR29=4
+    *elseif,AR30,EQ,'TEMP',THEN
+        AR29=5
+    *elseif,AR30,EQ,'TFLUID',THEN
+        AR29=6
+    *elseif,AR30,EQ,'VELOCITY',THEN
+        AR29=7
+    *elseif,AR30,EQ,'PRESSURE',THEN
+        AR29=8
+    *elseif,AR30,EQ,'TSURF',THEN
+        AR29=9
+    *elseif,AR30,EQ,'DENS',THEN
+        AR29=10
+    *elseif,AR30,EQ,'SPHT',THEN
+        AR29=11
+    *elseif,AR30,EQ,'KXX',THEN
+        AR29=12
+    *elseif,AR30,EQ,'KYY',THEN
+        AR29=13
+    *elseif,AR30,EQ,'KZZ',THEN
+        AR29=14
+    *elseif,AR30,EQ,'VISC',THEN
+        AR29=15
+    *elseif,AR30,EQ,'EMIS',THEN
+        AR29=16
+    *elseif,AR30,EQ,'XR',THEN
+        AR29=17
+    *elseif,AR30,EQ,'YR',THEN
+        AR29=18
+    *elseif,AR30,EQ,'ZR',THEN
+        AR29=19
+    *elseif,AR30,EQ,'GAP',THEN
+        AR29=20
+    *elseif,AR30,EQ,'OMEGS',THEN
+        AR29=21
+    *elseif,AR30,EQ,'OMEGF',THEN
+        AR29=22
+    *elseif,AR30,EQ,'SLIP',THEN
+        AR29=23
+    *elseif,AR30,EQ,'FREQ',THEN
+        AR29=24
+    *elseif,AR30,EQ,'DJU',THEN
+        AR29=25
+    *elseif,AR30,EQ,'DJV',THEN
+        AR29=26
+    *else
+        AR29=0
+    *endif
+*endif
+
+
+*if,AR29,EQ,0,THEN
+
+    STPFNC_Name=0
+    *msg,WARN
+STPFNC warning: invalid regime variable. Command is ignored.
+
+*else
+
+    ! Generate valid tabular BC name
+    *get,AR22,PARM,arg2,TYPE
+    *if,AR22,EQ,3,THEN
+        AR20=STRSUB(arg2,1,8)
+    *else
+        AR20='STPFNC'
+    *endif
+
+    ! Get coordinate system number
+    *get,AR22,PARM,arg3,TYPE
+    *if,AR22,NE,0,THEN
+        *get,AR21,ACTIVE,,CSYS
+    *else
+        AR21=arg3
+    *endif
+
+    ! Check array inputs
+    *get,AR23,PARM,STPFNC_ARR_LIMITS,DIM,X
+    *get,AR24,PARM,STPFNC_ARR_VALUES,DIM,X
+    *if,AR23,EQ,AR24+1,AND,AR23,GT,1,THEN
+
+        ! Fill function table
+        *dim,%AR20%,TABLE,6,3,AR23,,,,AR21
+        *do,AR26,1,AR23,1
+            AR27=STPFNC_ARR_LIMITS(AR26)
+            *set,%AR20%(0,0,AR26), AR27, -999
+            *set,%AR20%(2,0,AR26), 0.0
+            *set,%AR20%(4,0,AR26), 0.0
+            *set,%AR20%(5,0,AR26), 0.0
+            *set,%AR20%(6,0,AR26), 0.0
+            *set,%AR20%(0,2,AR26),   0
+            *set,%AR20%(0,3,AR26),   0
+
+            *if,AR26,EQ,1,THEN
+                *set,%AR20%(3,0,AR26), 0
+                *set,%AR20%(0,1,AR26), 1.0, 99, 0, 1, AR29, 0, 0
+            *else
+                AR28=STPFNC_ARR_VALUES(AR26-1)
+                *set,%AR20%(3,0,AR26), AR28
+                *set,%AR20%(0,1,AR26), 1.0, 99, 0, 1, 17, 0, 0
+            *endif
+
+        *enddo
+
+        ! Set output variable: name of the function
+        STPFNC_Name=AR20
+
+    *else
+
+        STPFNC_Name=0
+        ! In case of invalid input for limits or values: exit with warning message
+        *msg,WARN
+    STPFNC error: invalid input arrays. Command is ignored.
+
+    *endif
+
+*endif
+

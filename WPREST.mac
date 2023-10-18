@@ -1,0 +1,8 @@
+! WPREST
+
+! Descrição:
+! Esta subrotina retorna o Working Plane para sua posição original (alinhado com X, Y, Z globais).
+
+CSYS,0
+WPAVE,0,0,0
+WPCSYS,,0

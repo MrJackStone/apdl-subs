@@ -1,0 +1,8 @@
+! mpoprestore
+! mpoprestore
+
+! Description:
+! Restores the value of /uis,MSGPOP, previously stored by MPOPBACKUP.
+
+/uis,msgpop,MPOPBACKUP_
+*del,MPOPBACKUP_,,nopr

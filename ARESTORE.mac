@@ -1,0 +1,7 @@
+! ARESTORE
+
+! Select last backed up area named selection component
+CMSEL,S,ABackup_
+CMDELE,ABackup_
+*del,ABackup_
+

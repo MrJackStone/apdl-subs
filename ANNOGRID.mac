@@ -1,0 +1,65 @@
+! annogrid, xllc, yllc, row_heights, col_widths
+! annogrid, arg1, arg2,        arg3,       arg4
+
+! Description:
+! Draws a rectangular grid with arbitrarily spaced vertical and horizontal lines.
+
+! Arguments:
+! arg1: xllc  -  X coordinate of the lower left corner of the grid, in window display units
+! arg2: yllc  -  Y coordinate of the lower left corner of the grid, in window display units
+! arg3: row_heights  -  name of array with the height of each row
+! arg4: col_widths   -  name of array with the width of each column
+
+! Local parameters:
+! AR21: xMax
+! AR22: yMax
+! AR23: rowCount
+! AR24: colCount
+! AR31: xPrev
+! AR32: yPrev
+! AR33: totalHeight
+! AR34: totalWidth
+! AR43: nthRow
+! AR44: nthCol
+! AR53: nthRowHeight
+! AR54: nthColWidth
+! AR63: nthX
+! AR64: nthY
+
+
+! Get grid's number of rows and columns
+*get,AR23,parm,%arg3%,dim,x
+*get,AR24,parm,%arg4%,dim,x
+
+! Calculate size of grid
+*vscfun,AR33,sum,%arg3%
+*vscfun,AR34,sum,%arg4%
+
+AR21=arg1+AR34
+AR22=arg2+AR33
+
+! Draw outer boundary
+/anum,,7
+p4gon,arg1,arg2,AR21,AR22
+/polygon
+
+! Draw horizontal grid lines
+AR32=arg2
+*do,AR43,2,AR23,1
+    AR53=%arg3%(AR43)
+    AR64=AR32+AR53
+    /anum,,4
+    /line,arg1,AR64,AR21,AR64
+    AR32=AR64
+*enddo
+
+! Draw vertical grid lines
+AR31=arg1
+*do,AR44,1,AR24,1
+    AR54=%arg4%(AR44)
+    AR63=AR31+AR54
+    /anum,,4
+    /line,AR63,arg2,AR63,AR22
+    AR31=AR63
+*enddo
+

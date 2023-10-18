@@ -1,0 +1,86 @@
+! Create component with selected nodes
+CM,COMPN_tempDCP,NODE
+
+! Get total number of coupled sets
+*get,CPCount,CP,,MAX
+
+*do,nthCP,1,CPCount,1
+   CMSEL,S,COMPN_tempDCP
+   ! Determine which DOF is coupled
+   *del,DOFnum
+   *get,DOFnum,CP,nthCP,DOF
+   *get,pType,PARM,DOFnum,TYPE
+   *if,pType,EQ,0,THEN
+      ! Get number of nodes in the coupling set
+      *get,CPNodeCount,CP,nthCP,NTERM
+      *del,NodeList
+      *dim,NodeList,ARRAY,CPNodeCount
+      *do,nthNode,1,CPNodeCount,1
+         *get,NodeNum,CP,nthCP,TERM,nthNode,NODE
+         NodeList(nthNode)=NodeNum
+      *enddo
+      ! Check if DOFs are restricted in any of the nodes within the coupled set
+      releaseUX=0
+      releaseUY=0
+      releaseUZ=0
+      releaseRX=0
+      releaseRY=0
+      releaseRZ=0
+      NSEL,U,NODE,,ALL
+      *do,nthNode,1,CPNodeCount,1
+         NodeNum=NodeList(nthNode)
+         NSEL,A,NODE,,NodeNum
+         *get,UXstatus,NODE,NodeNum,D,UX
+         *get,UYstatus,NODE,NodeNum,D,UY
+         *get,UZstatus,NODE,NodeNum,D,UZ
+         *get,RXstatus,NODE,NodeNum,D,ROTX
+         *get,RYstatus,NODE,NodeNum,D,ROTY
+         *get,RZstatus,NODE,NodeNum,D,ROTZ
+         *if,UXstatus,EQ,0,THEN
+            releaseUX=1
+         *endif
+         *if,UYstatus,EQ,0,THEN
+            releaseUY=1
+         *endif
+         *if,UZstatus,EQ,0,THEN
+            releaseUZ=1
+         *endif
+         *if,RXstatus,EQ,0,THEN
+            releaseRX=1
+         *endif
+         *if,RYstatus,EQ,0,THEN
+            releaseRY=1
+         *endif
+         *if,RZstatus,EQ,0,THEN
+            releaseRZ=1
+         *endif
+      *enddo
+      ! Delete coupled set if it conflicts with DOF restriction
+      *if,DOFnum,EQ,1,AND,releaseUX,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,UX,0
+      *endif
+      *if,DOFnum,EQ,2,AND,releaseUY,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,UY,0
+      *endif
+      *if,DOFnum,EQ,3,AND,releaseUZ,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,UZ,0
+      *endif
+      *if,DOFnum,EQ,4,AND,releaseRX,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,ROTX,0
+      *endif
+      *if,DOFnum,EQ,5,AND,releaseRY,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,ROTY,0
+      *endif
+      *if,DOFnum,EQ,6,AND,releaseRZ,EQ,1,THEN
+         CPDELE,nthCP
+         D,ALL,ROTZ,0
+      *endif
+   *endif
+*enddo
+
+

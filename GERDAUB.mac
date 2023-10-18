@@ -1,0 +1,185 @@
+! GERDAUB, secID, name, refineKey, consultOnly
+! GERDAUB, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de barras redondas da Gerdau.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! GERDAUB_VAR_num
+! GERDAUB_VAR_d
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+GERDAUB_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'B6.3',THEN
+   GERDAUB_VAR_d=0.00630
+*elseif,AR20,EQ,'B8',THEN
+   GERDAUB_VAR_d=0.00800
+*elseif,AR20,EQ,'B10',THEN
+   GERDAUB_VAR_d=0.01000
+*elseif,AR20,EQ,'B12.5',THEN
+   GERDAUB_VAR_d=0.01250
+*elseif,AR20,EQ,'B16',THEN
+   GERDAUB_VAR_d=0.01600
+*elseif,AR20,EQ,'B20',THEN
+   GERDAUB_VAR_d=0.02000
+*elseif,AR20,EQ,'B25',THEN
+   GERDAUB_VAR_d=0.02500
+*elseif,AR20,EQ,'B32',THEN
+   GERDAUB_VAR_d=0.03200
+*elseif,AR20,EQ,'B40',THEN
+   GERDAUB_VAR_d=0.04000
+*elseif,AR20,EQ,'B6.35',THEN
+   GERDAUB_VAR_d=0.00635
+*elseif,AR20,EQ,'B7.94',THEN
+   GERDAUB_VAR_d=0.00794
+*elseif,AR20,EQ,'B9.53',THEN
+   GERDAUB_VAR_d=0.00953
+*elseif,AR20,EQ,'B12.7',THEN
+   GERDAUB_VAR_d=0.01270
+*elseif,AR20,EQ,'B14.29',THEN
+   GERDAUB_VAR_d=0.01429
+*elseif,AR20,EQ,'B15.88',THEN
+   GERDAUB_VAR_d=0.01588
+*elseif,AR20,EQ,'B17.46',THEN
+   GERDAUB_VAR_d=0.01746
+*elseif,AR20,EQ,'B19.05',THEN
+   GERDAUB_VAR_d=0.01905
+*elseif,AR20,EQ,'B20.64',THEN
+   GERDAUB_VAR_d=0.02064
+*elseif,AR20,EQ,'B22.23',THEN
+   GERDAUB_VAR_d=0.02223
+*elseif,AR20,EQ,'B23.81',THEN
+   GERDAUB_VAR_d=0.02381
+*elseif,AR20,EQ,'B25.4',THEN
+   GERDAUB_VAR_d=0.02540
+*elseif,AR20,EQ,'B16.99',THEN
+   GERDAUB_VAR_d=0.01699
+*elseif,AR20,EQ,'B28.58',THEN
+   GERDAUB_VAR_d=0.02858
+*elseif,AR20,EQ,'B30.16',THEN
+   GERDAUB_VAR_d=0.03016
+*elseif,AR20,EQ,'B31.75',THEN
+   GERDAUB_VAR_d=0.03175
+*elseif,AR20,EQ,'B33.34',THEN
+   GERDAUB_VAR_d=0.03334
+*elseif,AR20,EQ,'B34.93',THEN
+   GERDAUB_VAR_d=0.03493
+*elseif,AR20,EQ,'B36.51',THEN
+   GERDAUB_VAR_d=0.03651
+*elseif,AR20,EQ,'B38.1',THEN
+   GERDAUB_VAR_d=0.03810
+*elseif,AR20,EQ,'B39.69',THEN
+   GERDAUB_VAR_d=0.03969
+*elseif,AR20,EQ,'B41.28',THEN
+   GERDAUB_VAR_d=0.04128
+*elseif,AR20,EQ,'B42.86',THEN
+   GERDAUB_VAR_d=0.04286
+*elseif,AR20,EQ,'B44.45',THEN
+   GERDAUB_VAR_d=0.04445
+*elseif,AR20,EQ,'B46.4',THEN
+   GERDAUB_VAR_d=0.04640
+*elseif,AR20,EQ,'B47.63',THEN
+   GERDAUB_VAR_d=0.04763
+*elseif,AR20,EQ,'B50.8',THEN
+   GERDAUB_VAR_d=0.05080
+*elseif,AR20,EQ,'B52.39',THEN
+   GERDAUB_VAR_d=0.05239
+*elseif,AR20,EQ,'B53.98',THEN
+   GERDAUB_VAR_d=0.05398
+*elseif,AR20,EQ,'B57.15',THEN
+   GERDAUB_VAR_d=0.05715
+*elseif,AR20,EQ,'B58.74',THEN
+   GERDAUB_VAR_d=0.05874
+*elseif,AR20,EQ,'B60.33',THEN
+   GERDAUB_VAR_d=0.06033
+*elseif,AR20,EQ,'B61.91',THEN
+   GERDAUB_VAR_d=0.06191
+*elseif,AR20,EQ,'B63.5',THEN
+   GERDAUB_VAR_d=0.06350
+*elseif,AR20,EQ,'B65.08',THEN
+   GERDAUB_VAR_d=0.06508
+*elseif,AR20,EQ,'B66.68',THEN
+   GERDAUB_VAR_d=0.06668
+*elseif,AR20,EQ,'B69.85',THEN
+   GERDAUB_VAR_d=0.06985
+*elseif,AR20,EQ,'B71.44',THEN
+   GERDAUB_VAR_d=0.07144
+*elseif,AR20,EQ,'B73.03',THEN
+   GERDAUB_VAR_d=0.07303
+*elseif,AR20,EQ,'B76.2',THEN
+   GERDAUB_VAR_d=0.07620
+*elseif,AR20,EQ,'B79.38',THEN
+   GERDAUB_VAR_d=0.07938
+*elseif,AR20,EQ,'B82.55',THEN
+   GERDAUB_VAR_d=0.08255
+*elseif,AR20,EQ,'B88.9',THEN
+   GERDAUB_VAR_d=0.08890
+*elseif,AR20,EQ,'B95.35',THEN
+   GERDAUB_VAR_d=0.09535
+*elseif,AR20,EQ,'B101.6',THEN
+   GERDAUB_VAR_d=0.10160
+*elseif,AR20,EQ,'B103.19',THEN
+   GERDAUB_VAR_d=0.10319
+*else
+   *msg,WARN
+GERDAUB WARNING: Specified section not found. Command ignored.
+   GERDAUB_VAR_d=-1
+*endif
+
+! Criar seção transversal
+*if,GERDAUB_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,GERDAUB_VAR_num,BEAM,CSOLID,arg2,AR22
+   SECDATA,GERDAUB_VAR_d
+*endif
+

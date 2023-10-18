@@ -1,0 +1,42 @@
+! BEAM_MZ, scale, kund, direction
+! BEAM_MZ,  arg1, arg2,      arg3
+
+! Description:
+! Plots BEAM188 bending moment about Z axis diagram.
+
+! Arguments:
+! arg1: scale  -  scale factor (negative to invert)
+! arg2: kund   -  [0] Display on undeformed shape / [1] Display on deformed shape
+! arg3: direction  -  undocumented PLLS argument:
+!                        [0] Direction based on view
+!                        [1] Direction based on global CS
+
+! Local parameters:
+! AR21: seqn_iNode
+! AR22: seqn_jNode
+! AR23: unitScaleFactor
+! AR24: nameKey
+
+AR21=3
+AR22=16
+AR23=1e-3
+AR24='MZ'
+
+etable,'TMP_%AR24%I',smisc,AR21
+etable,'TMP_%AR24%J',smisc,AR22
+
+sadd,'BEAM_%AR24%I','TMP_%AR24%I',,AR23
+sadd,'BEAM_%AR24%J','TMP_%AR24%J',,AR23
+
+etable,'TMP_%AR24%I',eras
+etable,'TMP_%AR24%J',eras
+
+*cfopen,beamdiagram_tmp,tmp
+    *vwrite,'BEAM_%AR24%I','BEAM_%AR24%J',arg1,arg2,arg3
+plls,%C,%C,%G,%I,%I
+*cfclos
+/nopr
+/input,beamdiagram_tmp,tmp
+/delete,beamdiagram_tmp,tmp
+/gopr
+

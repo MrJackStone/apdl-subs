@@ -1,0 +1,144 @@
+! ndsort, dir, order, nodeNumbersParm, xCoordParm, yCoordParm, zCoordParm
+! ndsort, arg1, arg2,            arg3,       arg4,       arg5,       arg6
+
+! Description:
+! Sorts selected nodes (in ascending or descending order) in an array based on the value of one
+! nodal coordinate.
+
+! Arguments:
+! arg1: dir    -  chosen coordinate: 'X', 'Y' or 'Z' (defaults to 'X')
+! arg2: order  -  sorting order: 'A' (ascending, default) or 'D' (descending)
+
+! Local parameters:
+! AR20: parType
+! AR21: sortCartesianDirection
+! AR22: nodeCount
+! AR23: sortOrder
+
+! Global parameters (erased at the end of this subroutine):
+! NDSORT_TBL_data
+
+! Output parameters:
+! %arg3% (defaults to 'NDSORT_ARR_nodes')
+! %arg4% (defaults to 'NDSORT_ARR_xcoord')
+! %arg5% (defaults to 'NDSORT_ARR_ycoord')
+! %arg6% (defaults to 'NDSORT_ARR_zcoord')
+
+
+! Back up current environment
+mpopbackup
+obackup
+/uis,msgpop,3
+
+! Set argument defaults
+AR23='A'
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+  AR23=upcase(arg2)
+*endif
+
+AR21='X'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR21=upcase(arg1)
+*endif
+
+! Get names for output parameters
+AR93='NDSORT_ARR_nodes'
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+  AR93=arg3
+*endif
+
+AR94='NDSORT_ARR_xcoord'
+*get,AR20,parm,arg4,type
+*if,AR20,eq,3,then
+  AR94=arg4
+*endif
+
+AR95='NDSORT_ARR_ycoord'
+*get,AR20,parm,arg5,type
+*if,AR20,eq,3,then
+  AR95=arg5
+*endif
+
+AR96='NDSORT_ARR_zcoord'
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  AR96=arg6
+*endif
+
+! Count selected nodes, initialize related arrays
+*get,AR22,node,,count
+
+*del,NDSORT_TBL_data,,nopr
+*del,%AR93%,,nopr
+*del,%AR94%,,nopr
+*del,%AR95%,,nopr
+*del,%AR96%,,nopr
+*dim,NDSORT_TBL_data,table,AR22-1,3
+*dim,%AR93%,,AR22
+*dim,%AR94%,,AR22
+*dim,%AR95%,,AR22
+*dim,%AR96%,,AR22
+
+! Change listing formatting settings to remove headers
+/page,nc,,-1,,1
+/header,off,off,off,off,off,off
+
+! Write node listing to external file
+/output,'NDSORT_OUTPUT','tmp'
+nlist,,,,coord,arg1
+orestore
+
+! Restore listing fomatting defaults
+/page,defa
+/header,defa
+
+! Read nodal listing data from external file
+*tread,NDSORT_TBL_data,'NDSORT_OUTPUT','tmp'
+/delete,'NDSORT_OUTPUT','tmp'
+
+! Transfer listing data from table to arrays
+*vfun,%AR93%(1),copy,NDSORT_TBL_data(0,0)
+*vfun,%AR94%(1),copy,NDSORT_TBL_data(0,1)
+*vfun,%AR95%(1),copy,NDSORT_TBL_data(0,2)
+*vfun,%AR96%(1),copy,NDSORT_TBL_data(0,3)
+
+! Reverse order if descending sort was requested
+*if,AR23,eq,'D',then
+  arrreverse,,%AR93%
+  arrreverse,,%AR94%
+  arrreverse,,%AR95%
+  arrreverse,,%AR96%
+*endif
+
+! Clean up
+*del,NDSORT_TBL_data,,nopr
+mpoprestore
+
+/eof
+
+! Remove the eof above for backwards compatibility
+*del,NDSORT_ARR_NDList,,nopr
+*del,NDSORT_ARR_CoordList,,nopr
+*dim,NDSORT_ARR_NDList,,AR22
+*dim,NDSORT_ARR_CoordList,,AR22
+
+*vfun,NDSORT_ARR_NDList,copy,%AR93%(1)
+
+*if,upcase(arg1),eq,'X',then
+  *vfun,NDSORT_ARR_CoordList,copy,%AR94%(1)
+*elseif,upcase(arg1),eq,'Y',then
+  *vfun,NDSORT_ARR_CoordList,copy,%AR95%(1)
+*elseif,upcase(arg1),eq,'Z',then
+  *vfun,NDSORT_ARR_CoordList,copy,%AR96%(1)
+*endif
+
+mpopbackup
+/msgpop,uis,0
+*msg,warn
+NDSORT warn: you are using a DEPRECATED version of NDSORT!%/&
+***** Repent, sinner! *****
+/wait,3
+mpoprestore

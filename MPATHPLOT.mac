@@ -1,0 +1,151 @@
+! MPATHPLOT, baseScale, manualClim, path_names, path_labels
+! MPATHPLOT,      arg1,       arg2,       arg3,        arg4
+
+! Arguments:
+! arg1: baseScale  -  scale factor applied to plotted path results
+! arg2: manualClim -  controls auto contour limits:
+!                        [0] calculate auto contour limits
+!                        [1] do not change contour definitions
+
+! Local parameters:
+! AR20: parType
+! AR21: pathCount
+! AR22: nthPath
+! AR23: pathName
+! AR24: pathLabel
+! AR25: minVal
+! AR26: maxVal
+! AR27: absmax
+! AR28: nameCount
+! AR30: absPeak
+! AR31: nthAbs
+! AR34: pathScale
+! AR35: partName
+! AR38: plotScale
+
+! Implicit arguments:
+! MPATHPLOT_ARR_pathNames  -  names of the paths to be plotted
+! MPATHPLOT_ARR_labels     -  label to be plotted for each path
+
+! Output parameters:
+! MPATHPLOT_VAR_minScale
+! MPATHPLOT_VAR_maxScale
+
+! Global parameters (erased at the end of this subroutine):
+! MPATHPLOT_ARR_min
+! MPATHPLOT_ARR_max
+! MPATHPLOT_ARR_absmax
+! MPATHPLOT_ARR_scales
+
+
+*get,AR20,PARM,arg1,TYPE
+*if,AR20,NE,0,OR,arg1,eq,0,THEN
+    AR38=1
+*elseif,arg1,lt,0,then
+    AR38=1
+*else
+    AR38=arg1
+*endif
+
+! Use path names/labels directly passed as params instead of default implicit array arguments
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+    *get,AR20,parm,%arg3%,type
+    *if,AR20,eq,4,then
+        *get,AR28,parm,%arg3%,dim,x
+        *del,MPATHPLOT_ARR_pathNames
+        *dim,MPATHPLOT_ARR_pathNames,char,AR28
+        *do,AR22,1,AR28,1
+            MPATHPLOT_ARR_pathNames(AR22)=%arg3%(AR22)
+        *enddo
+    *endif
+*endif
+*get,AR20,parm,arg4,type
+*if,AR20,eq,3,then
+    *get,AR20,parm,%arg4%,type
+    *if,AR20,eq,4,then
+        *get,AR28,parm,%arg4%,dim,x
+        *del,MPATHPLOT_ARR_labels
+        *dim,MPATHPLOT_ARR_labels,char,AR28
+        *do,AR22,1,AR28,1
+            MPATHPLOT_ARR_labels(AR22)=%arg4%(AR22)
+        *enddo
+    *endif
+*endif
+
+! Get number of paths to be plotted
+*get,AR21,PARM,MPATHPLOT_ARR_pathNames,DIM,X
+
+*del,MPATHPLOT_ARR_min
+*del,MPATHPLOT_ARR_max
+*del,MPATHPLOT_ARR_absmax
+*del,MPATHPLOT_ARR_scales
+*dim,MPATHPLOT_ARR_min,ARRAY,AR21
+*dim,MPATHPLOT_ARR_max,ARRAY,AR21
+*dim,MPATHPLOT_ARR_absmax,ARRAY,AR21
+*dim,MPATHPLOT_ARR_scales,ARRAY,AR21
+
+! Get value envelopes for each path
+*do,AR22,1,AR21,1
+    AR23=MPATHPLOT_ARR_pathNames(AR22)
+    AR24=MPATHPLOT_ARR_labels(AR22)
+    PATH,AR23
+    PTHLIMS,AR24
+    AR25=PTHLIMS_MIN_OUTPUT
+    AR26=PTHLIMS_MAX_OUTPUT
+    AR27=PTHLIMS_ABS_OUTPUT
+    MPATHPLOT_ARR_min(AR22)=AR25
+    MPATHPLOT_ARR_max(AR22)=AR26
+    MPATHPLOT_ARR_absmax(AR22)=AR27
+*enddo
+
+! Calculate overall extremes
+*vscfun,MPATHPLOT_VAR_minScale,MIN,MPATHPLOT_ARR_min
+*vscfun,MPATHPLOT_VAR_maxScale,MAX,MPATHPLOT_ARR_max
+*if,arg1,lt,0,then
+    AR30=abs(arg1)
+*else
+    *vscfun,AR30,MAX,MPATHPLOT_ARR_absmax
+*endif
+
+*if,arg2,ne,1,then
+    CLIMS,MPATHPLOT_VAR_minScale,MPATHPLOT_VAR_maxScale
+*endif
+
+! Calculate plot scales
+*do,AR22,1,AR21,1
+    *if,AR30,eq,0,then
+        MPATHPLOT_ARR_scales(AR22)=0
+    *else
+        AR31=MPATHPLOT_ARR_absmax(AR22)
+        MPATHPLOT_ARR_scales(AR22)=AR38*AR31/AR30
+    *endif
+*enddo
+
+! Plot paths
+*do,AR22,1,AR21,1
+    AR23=MPATHPLOT_ARR_pathNames(AR22)
+    AR24=MPATHPLOT_ARR_labels(AR22)
+    AR34=MPATHPLOT_ARR_scales(AR22)
+    AR25=MPATHPLOT_ARR_min(AR22)
+    AR26=MPATHPLOT_ARR_max(AR22)
+
+    PATH,AR23
+    PLPAGM,AR24,AR34
+*enddo
+
+! Clear parameters
+!*del,MPATHPLOT_ARR_min
+!*del,MPATHPLOT_ARR_max
+!*del,MPATHPLOT_ARR_absmax
+!*del,MPATHPLOT_ARR_scales
+
+
+
+
+
+
+
+
+
+

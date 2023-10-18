@@ -1,0 +1,45 @@
+! LNZORI, zDir
+! LNZORI, arg1
+
+! Description:
+! Orients all selected lines based on their Z component along the direction specified by arg1
+! (zDir), which must be either a positive or negative value.
+
+! Argument list:
+! arg1: zDir  -  desired orientation for the Z component of the lines (positive or negative)
+
+! Local variables
+! AR20: LCount
+! AR21: nthLine
+! AR22: K1
+! AR23: K2
+! AR25: K1y
+! AR26: K2y
+! AR27: yDistKey
+
+! Count selected lines
+*get,AR20,LINE,,COUNT
+AR36=0
+
+! Orient each line
+*do,AR21,1,AR20,1
+
+   ! Get line number
+   AR36=LSNEXT(AR36)
+
+   ! Get the line's keypoints
+   *get,AR22,LINE,AR36,KP,1
+   *get,AR23,LINE,AR36,KP,2
+
+   ! Get Z coordinate of the keypoints
+   AR25=KZ(AR22)
+   AR26=KZ(AR23)
+   AR27=(AR26-AR25)*arg1
+
+   ! Reverse lines, if necessary
+   *if,AR27,LT,0,THEN
+      LREVERSE,AR36
+   *endif
+
+*enddo
+

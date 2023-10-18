@@ -1,0 +1,111 @@
+! PTHDFLCT, name, nSets, nDiv,   n1,   n2, direction
+! PTHDFLCT, arg1,  arg2, arg3, arg4, arg5,      arg6
+
+! AR20: parType
+! AR21: nSets
+! AR22: nDiv
+! AR23: dirKey
+! AR24: DOFkey
+! AR25: getKey
+! AR26: dofLabel
+! AR27: n1_U
+! AR28: n2_U
+! AR29: pathLength
+! AR30: maxDeflection
+! AR31: minDeflection
+! AR32: absMax
+
+! Number of sets
+*get,AR20,parm,arg2,type
+*if,AR20,eq,0,then
+    AR21=(nint(arg2)>30)
+*else
+    AR21=30
+*endif
+
+! Number of divisions
+*get,AR20,parm,arg3,type
+*if,AR20,eq,0,then
+    AR22=(nint(arg3)>20)
+*else
+    AR22=20
+*endif
+
+! Set direction along which deflection will be measured
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+    AR23=upcase(arg6)
+    *if,AR23,eq,'X',then
+        AR24='UX'
+        AR25='X'
+    *elseif,AR23,eq,'Y',then
+        AR24='UY'
+        AR25='Y'
+    *elseif,AR23,eq,'Z',then
+        AR24='UZ'
+        AR25='Z'
+    *elseif,AR23,eq,'SUM',then
+        AR24='SUM'
+        AR25='SUM'
+    *else
+        *msg,WARN
+PTHDFLCT ERROR: Invalid direction. PTHDFLCT command is ignored.
+        *return
+    *endif
+*elseif,AR20,eq,0,then
+    *if,arg6,eq,1,then
+        AR24='UX'
+        AR25='X'
+    *elseif,arg6,eq,2,then
+        AR24='UY'
+        AR25='Y'
+    *elseif,arg6,eq,3,then
+        AR24='UZ'
+        AR25='Z'
+    *else
+        AR24='SUM'
+        AR25='SUM'
+    *endif
+*endif
+
+! Create path
+path,arg1,2,AR21,AR22
+ppath,1,arg4
+ppath,2,arg5
+
+! Map chosen DOF to path
+AR26=strcat('DFL_',AR24)
+pdef,AR26,U,AR24,noav
+
+! Create unit result set
+unitpth,'DFL_unit'
+
+! Get displacements at first and last path nodes
+*get,AR27,node,n1,U,AR25
+*get,AR28,node,n2,U,AR25
+
+! Calculate path length
+AR29=distnd(n1,n2)
+
+! Calculate relative deflection.
+!    Formula: d(s) = U(s) - r(s)
+!
+!             r(s) = U1 + s*(U2 - U1)/L
+!
+!             s:    path axis variable (ranges from 0 to path length)
+!             d(s): relative deflection
+!             U(s): DOF value for chosen direction
+!             r(s): reference line
+!             U1:   DOF displacement at first path node
+!             U2:   DOF displacement at last path node
+!             L:    path length
+pcalc , mult , 'DFL_tmp1' , 'S'        , 'DFL_unit' , AR28-AR27
+pcalc ,  div , 'DFL_tmp2' , 'DFL_tmp1' , 'DFL_unit' , 1/AR29
+pcalc ,  add , 'DFL_R'    , 'DFL_tmp2' , 'DFL_unit' , 1            , AR27
+pcalc ,  add , 'DFL_D'    , AR26   , 'DFL_R'    , 1            , -1
+
+*get,AR30,path,,max
+*get,AR31,path,,min
+
+AR32=(abs(AR30)>abs(AR31))
+

@@ -1,0 +1,18 @@
+! LINFCNY,    a,    b, name
+! LINFCNY, arg1, arg2, arg3
+
+*del,%arg3%
+*dim,%arg3%,TABLE,6,3,1,,,,0
+
+! Begin of equation: coefA*{Y}+coefB
+*set,%arg3%(0,0,1), 0.0, -999
+*set,%arg3%(2,0,1), 0.0
+*set,%arg3%(3,0,1), arg1
+*set,%arg3%(4,0,1), arg2
+*set,%arg3%(5,0,1), 0.0
+*set,%arg3%(6,0,1), 0.0
+*set,%arg3%(0,1,1), 1.0, -1, 0, 1, 17, 3,  3
+*set,%arg3%(0,2,1), 0.0, -2, 0, 1, -1, 1, 18
+*set,%arg3%(0,3,1),   0, 99, 0, 1, -2, 0,  0
+! End of equation: coefA*{Y}+coefB
+

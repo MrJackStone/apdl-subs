@@ -1,0 +1,40 @@
+! SUBDIR, folderName, setCurrent
+! SUBDIR, arg1,       arg2
+
+! Descrição:
+! Cria uma pasta dentro do diretório corrente, podendo ou não defini-la como corrente.
+
+! Lista de argumentos:
+! arg1: folderName  -  nome da pasta a ser criada
+! arg2: setCurrent  -  definir como corrente:
+!                         [0] Não definir como corrente (apenas cria a pasta)
+!                         [1] Definir como corrente
+
+! Lista de variáveis:
+! -
+
+! Lista de variáveis de saída:
+!    SUBDIR_ARR_currDir
+!       String array contendo o diretório de partida
+!    SUBDIR_ARR_newFolderPath
+!       Caminho do diretório criado
+
+! Obter diretório atual
+*del,SUBDIR_ARR_currDir
+/inquire,SUBDIR_ARR_currDir,DIRECTORY
+
+! Definir caminho do novo diretório
+*del,SUBDIR_ARR_newFolderPath
+*dim,SUBDIR_ARR_newFolderPath,STRING,248
+SUBDIR_ARR_newFolderPath(1)=STRCAT(SUBDIR_ARR_currDir(1),'\')
+SUBDIR_ARR_newFolderPath(1)=STRCAT(SUBDIR_ARR_newFolderPath(1),arg1)
+
+! Criar novo diretório
+/syp,mkdir,arg1
+
+! Definir novo diretório como corrente
+*if,arg2,EQ,1,THEN
+   /cwd,'%SUBDIR_ARR_newFolderPath(1)%'
+*endif
+
+

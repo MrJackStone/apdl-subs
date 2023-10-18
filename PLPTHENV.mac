@@ -1,0 +1,171 @@
+! PLPTHENV, wnum, xmin, xmax, ymin, ymax, lblRoot, plotTitle, cntrScale, basePScale, precision, cntrLoc, bgPlot, imgName, imgRes, supPNG
+! PLPTHENV, arg1, arg2, arg3, arg4, arg5,    arg6,      arg7,      arg8,       arg9,      ar10,    ar11,   ar12,    ar13,   ar14,   ar15
+
+! Description:
+! Simultaneously plots MIN-MAX envelopes for chosen paths using a single overall contour scale.
+
+! Arguments:
+! arg1: wnum        -  number of window created for plotting operations performed here
+! arg2: xmin        -  minimum X coordinate of plotting window [-1; 1.67]
+! arg3: xmax        -  maximum X coordinate of plotting window [-1; 1.67]
+! arg4: ymin        -  minimum Y coordinate of plotting window [-1; 1]
+! arg5: ymax        -  maximum Y coordinate of plotting window [-1; 1]
+! arg6: lblRoot     -  label root (string, up to 4 characters) to which '_MIN' and '_MAX' will be
+!                      concatenated to form envelope path labels
+! arg7: plotTitle   -  plot title, displayed as text inside box at the bottom of the plotting window
+! arg8: cntrScale   -  value to be used to multiply automatically generated contour scale
+!                      (used to convert units in displayed contour scale, eg. from N to kN)
+! arg9: basePScale  -  base path scale, which uniformly multiplies all plotted path values
+!                      (usually manually calibrated to generate good sized diagrams)
+! ar10: precision   -  number of digits displayed after decimal separator
+! ar11: cntrLoc     -  contour scale position:
+!                         [0] not shown
+!                         [1] bottom
+!                         [2] top
+!                         [3] left
+!                         [4] right
+! ar12: bgPlot      -  special string indicating what to plot as background for path diagrams:
+!                         1st char (entity type): [_,N,E,K,L,A,V,G,R]
+!                         2nd char (gline):       [_,0,1]
+!                         3rd char (vector):      [_,0,1]
+!                         (see 'OPLOT' subroutine for complete information on string format)
+! ar13: imgName     -  name of the generated output image file
+! ar14: imgRes      -  output image file resolution
+! ar15: supPNG      -  key to suppress generation of output image file:
+!                         [0] generate PNG file (default)
+!                         [1] suppress PNG generation (does not call 'GO2PNG' and 'ENDPNG')
+
+! Implicit arguments:
+! PLPTHENV_ARR_paths  -  array of chars, each position containing the name of a path to be plotted
+
+! Local parameters:
+! AR20: yBox
+! AR21: xText
+! AR22: yText
+! AR23: pathCount
+! AR24: minLabel
+! AR25: maxLabel
+! AR26: nthPath
+! AR27: pthName
+! AR28: xFocus
+! AR29: yFocus
+! AR30: zFocus
+! AR31: xCenter
+! AR32: cntrWidth
+! AR33: xmin
+! AR34: xmax
+! AR35:
+
+
+! Plotting window coordinates
+AR20=arg4+0.04 !0.07
+AR21=arg2+0.01
+AR22=arg4+0.01 !0.02
+
+! Create full lists of path names and envelope labels
+*get,AR23,parm,PLPTHENV_ARR_paths,dim,x
+*del,MPATHPLOT_ARR_pathNames
+*dim,MPATHPLOT_ARR_pathNames,char,2*AR23
+*del,MPATHPLOT_ARR_labels
+*dim,MPATHPLOT_ARR_labels,char,2*AR23
+AR24=strcat(upcase(arg6),'_MIN')
+AR25=strcat(upcase(arg6),'_MAX')
+*do,AR26,1,AR23,1
+    AR27=PLPTHENV_ARR_paths(AR26)
+    MPATHPLOT_ARR_pathNames(2*AR26-1)=AR27
+    MPATHPLOT_ARR_pathNames(2*AR26)=AR27
+    MPATHPLOT_ARR_labels(2*AR26-1)=AR24
+    MPATHPLOT_ARR_labels(2*AR26)=AR25
+*enddo
+
+! Create and initialize plotting window
+/window,arg1,arg2,arg3,AR20,arg5
+wincln,arg1
+
+! Capture plot to file
+*if,ar15,ne,1,then
+    /auto,arg1
+    oplot, arg1, ar12
+    /user,arg1
+    go2png,ar14
+*endif
+
+    ! Background plot
+    oplot, arg1, ar12
+    /device,vector,off
+    /gline,arg1,0
+    /noerase
+
+    ! Draw window title
+    /polygon,4,arg2,arg4,arg3,arg4,arg3,AR20,arg2,AR20
+    /pspec,0,1,1
+    /tspec,15,3,4!/tspec,15,1,4
+    *cfopen,temp,tmp
+        *vwrite,AR21,AR22,arg7
+/tlabel,%f,%f,%c
+    *cfclos
+    /nopr
+    /input,temp,tmp
+    /delete,temp,tmp
+    /gopr
+
+    ! Plot paths (without scale)
+    /udoc,arg1,cntr,0
+    /udoc,arg1,type,off
+    /udoc,arg1,typ2,off
+    mpathplot,arg9,0
+
+    ! Set contour scale position
+    *if,ar11,eq,0,then
+        /udoc,arg1,cntr,off
+    *elseif,ar11,eq,1,then
+        AR31=(arg2+arg3)/2                 !!
+        AR32=1                          !!
+        AR33=AR31-(AR32/2)                 !!
+        AR34=AR31+(AR32/2)                 !!
+        /window,arg1,AR33,AR34,AR20,arg5   !!
+        /plopts,frame,off                  !!
+        /udoc,arg1,cntr,bottom
+    *elseif,ar11,eq,2,then
+        AR31=(arg2+arg3)/2                 !!
+        AR32=1                          !!
+        AR33=AR31-(AR32/2)                 !!
+        AR34=AR31+(AR32/2)                 !!
+        /window,arg1,AR33,AR34,AR20,arg5   !!
+        /plopts,frame,off                  !!
+        /udoc,arg1,cntr,top
+    *elseif,ar11,eq,3,then
+        /udoc,arg1,cntr,left
+    *elseif,ar11,eq,4,then
+        /udoc,arg1,cntr,right
+    *endif
+
+    ! Store current focal point
+    *get,AR28,graph,arg1,focus,x
+    *get,AR29,graph,arg1,focus,y
+    *get,AR30,graph,arg1,focus,z
+
+    ! Plot paths (with contour scale)
+    /gformat,f,1,ar10
+    /plopts,leg3,1
+    /plopts,info,3
+    /focus,arg1,1e6,1e6
+    *if,arg8,ne,0,then
+        ! Apply scale factor to contour scale
+        clims,MPATHPLOT_VAR_minScale*arg8,MPATHPLOT_VAR_maxScale*arg8
+    *endif
+    mpathplot,arg9,1
+    /window,arg1,arg2,arg3,AR20,arg5 !!
+    /focus,arg1,AR28,AR29,AR30
+
+! Finish image capture
+*if,ar15,ne,1,then
+    endpng,ar13
+    /erase
+*endif
+
+! Restore display defaults
+/plopts,frame,on
+clims
+
+

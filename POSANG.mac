@@ -1,0 +1,30 @@
+! POSANG, outputName, deltaX, deltaY
+! POSANG,       arg1,   arg2,   arg3
+
+*if,arg2,eq,0,then
+    *if,arg3,gt,0,then
+        AR20=90
+    *elseif,arg3,lt,0,then
+        AR20=270
+    *else
+        AR20=0
+    *endif
+*else
+    *afun,deg
+    *if,arg2,gt,0,and,arg3,ge,0,then
+        ! 1st quadrant
+        AR20=atan(arg3/arg2)
+    *elseif,arg2,lt,0,and,arg3,ge,0,then
+        ! 2nd quadrant
+        AR20=atan(arg3/arg2)+180
+    *elseif,arg2,lt,0,and,arg3,lt,0,then
+        ! 3rd quadrant
+        AR20=atan(arg3/arg2)+180
+    *elseif,arg2,gt,0,and,arg3,lt,0,then
+        ! 4th quadrant
+        AR20=atan(arg3/arg2)+360
+    *endif
+    *afun,rad
+*endif
+
+%arg1%=AR20

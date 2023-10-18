@@ -1,0 +1,90 @@
+! GERDAU2L, secID, name, refineKey, consultOnly, compType, spacing
+! GERDAU2L, arg1,  arg2, arg3,      arg4,        arg5,     arg6
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de cantoneiras de abas iguais da
+! Gerdau. A seção transversal é composta por duas cantoneiras iguais em configuração "T" ou "U".
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! arg5: compType     -  tipo de composição: ['T'] em "T"; ['U'] em "U"
+! arg6: spacing      -  distância (interna) entre os perfis
+
+! Lista de variáveis locais:
+! AR20: sectionName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! GERDAU2L_VAR_num
+! GERDAU2L_VAR_b
+! GERDAU2L_VAR_t
+! GERDAU2L_VAR_e
+
+AR20=STRCAT('2',arg2)
+
+! Obter geometria de uma cantoneira
+GERDAUL,,arg2,,1
+
+! Gerar seção composta
+*if,UPCASE(arg5),EQ,'T',THEN
+   ! Seção composta em "T"
+   SEC_2LT, GERDAUL_VAR_b, GERDAUL_VAR_t, arg6, AR20
+*elseif,UPCASE(arg5),EQ,'U',THEN
+   ! Seção composta em "U"
+   SEC_2LU, GERDAUL_VAR_b, GERDAUL_VAR_t, arg6, AR20
+*endif
+
+! Gerar variáveis de saída
+GERDAU2L_VAR_b=GERDAUL_VAR_b
+GERDAU2L_VAR_t=GERDAUL_VAR_t
+GERDAU2L_VAR_e=arg6
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+GERDAU2L_VAR_num=AR24
+
+! Criar seção transversal
+*if,AR25,EQ,1,THEN
+   SECTYPE,GERDAU2L_VAR_num,BEAM,MESH,AR20,AR22
+   SECREAD,AR20,SECT,,MESH
+*endif
+
+

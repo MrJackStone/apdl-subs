@@ -1,0 +1,339 @@
+! pthenv, option, pathEnvDataParm, resultSetIdentifier
+! pthenv,   arg1,            arg2,                arg3
+
+! Description:
+! Calculates envelopes for given labels of the given paths. Each time this subroutine is called,
+! the envelope data for the specified paths and labels is updated. Envelope data is stored in
+! arrays and written to each of the given paths using generated labels. Use option (arg1) 'CLEAR'
+! to delete all envelope arrays related to the given path names and labels.
+!
+! The following envelopes are calculated:
+!    KEY    ARRAY NAME                  LABEL NAME   DESCRIPTION
+!    MAX    <pathName>_ENVMAX_<label>   <label>+     maximum value
+!    MIN    <pathName>_ENVMIN_<label>   <label>-     minimum value
+!    ABS    <pathName>_ENVAMX_<label>   <label>*     maximum absolute value
+!    ABS    <pathName>_ENVAMN_<label>   <label>&     minimum absolute value
+!    DIFF   <pathName>_ENVDIF_<label>   <label>%     maximum difference (MAX - MIN)
+!    LMAX   <pathName>_ENVMXL_<label>   <label>@     result set corresponding to a maximum value
+!    LMIN   <pathName>_ENVMNL_<label>   <label>#     result set corresponding to a minimum value
+!
+! A result set should be read before calling this subroutine and the paths and their labels should
+! already be defined.
+
+! Arguments:
+! arg1: option               -  available options:
+!                                  ['CLEAR']   clear envelope history for given paths and labels
+!                                  ['UPDATE']  include active results into envelopes (default)
+! arg2: pathEnvDataParm      -  name of the CHAR array paramter containing path data. This array is
+!                               of the format ARRAY(i,j) and should be formatted as follows:
+!                                  j: represents a path
+!                                  i: when i=1, stores the path's name
+!                                     when i>1, stores a path label, used to calculate envelopes
+! arg3: resultSetIdentifier  -  number identifying the result set used to perform the current
+!                               envelope update (optional). Tipically this is the number of the
+!                               result set that was read prior to calling this subroutine.
+
+! Local parameters:
+! AR20: parType
+! AR21: pathCount
+! AR22: nthPath
+! AR23: pathName
+! AR24: pathDivs
+! AR25: maxLabelCount
+! AR26: nthLabel
+! AR27: pathLabel
+! AR28: charCount
+! AR29: chrSetNum
+! AR30: sthLabelValues
+! AR31: arrayNameRoot_max
+! AR32: arrayNameRoot_min
+! AR33: arrayNameRoot_amx
+! AR34: arrayNameRoot_amn
+! AR35: arrayNameRoot_dif
+! AR36: arrayNameRoot_mxl
+! AR37: arrayNameRoot_mnl
+! AR41: arrayName_max
+! AR42: arrayName_min
+! AR43: arrayName_amx
+! AR44: arrayName_amn
+! AR45: arrayName_dif
+! AR46: arrayName_mxl
+! AR47: arrayName_mnl
+! AR51: labelName_max
+! AR52: labelName_min
+! AR53: labelName_amx
+! AR54: labelName_amn
+! AR55: labelName_dif
+! AR56: labelName_mxl
+! AR57: labelName_mnl
+
+! Global parameters (erased at the end of this subroutine):
+! PTHENV_ARR_maxLocMask
+! PTHENV_ARR_minLocMask
+! PTHENV_ARR_setNum
+! PTHENV_ARR_diff
+! PTHENV_VAR_labelIdxMax
+! PTHENV_VAR_labelIdxMin
+! PTHENV_VAR_labelIdxAmx
+! PTHENV_VAR_labelIdxAmn
+! PTHENV_VAR_labelIdxDif
+! PTHENV_VAR_labelIdxMxl
+! PTHENV_VAR_labelIdxMnl
+
+! Output parameters:
+! <pathName>_ENVMAX_<pathLabel>
+! <pathName>_ENVMIN_<pathLabel>
+! <pathName>_ENVAMX_<pathLabel>
+! <pathName>_ENVAMN_<pathLabel>
+! <pathName>_ENVDIF_<pathLabel>
+! <pathName>_ENVMXL_<pathLabel>
+! <pathName>_ENVMNL_<pathLabel>
+! <pathName>_<pathLabel>_S<setNumber>
+
+
+! Get path data size
+*get,AR21,parm,%arg2%,dim,y
+*get,AR25,parm,%arg2%,dim,x
+
+AR29=chrval(arg3)
+
+! Check if 'CLEAR' option has been selected
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    *if,upcase(arg1),eq,'CLEAR',then
+
+        ! Loop over each path:
+        *do,AR22,1,AR21,1
+
+            ! Calculate root of array envelope names
+            AR23=%arg2%(1,AR22)
+            AR31='%AR23%_ENVMAX'
+            AR32='%AR23%_ENVMIN'
+            AR33='%AR23%_ENVAMX'
+            AR34='%AR23%_ENVAMN'
+            AR35='%AR23%_ENVDIF'
+            AR36='%AR23%_ENVMXL'
+            AR37='%AR23%_ENVMNL'
+
+            ! Loop over each label:
+            *do,AR26,2,AR25,1
+                ! Calculate name of arrays that store envelope data
+                AR27=%arg2%(AR26,AR22)
+                AR41='%AR31%_%AR27%'
+                AR42='%AR32%_%AR27%'
+                AR43='%AR33%_%AR27%'
+                AR44='%AR34%_%AR27%'
+                AR45='%AR35%_%AR27%'
+                AR46='%AR36%_%AR27%'
+                AR47='%AR37%_%AR27%'
+
+                ! Delete arrays storing envelopes
+                *del,%AR41%
+                *del,%AR42%
+                *del,%AR43%
+                *del,%AR44%
+                *del,%AR45%
+                *del,%AR46%
+                *del,%AR47%
+            *enddo
+        *enddo
+
+        *msg,warn,arg2
+PTHENV note: envelope data for '%s' deleted.
+        *return,-1
+
+    *endif
+*endif
+
+! Loop over each path for which envelopes are to be calculated:
+*do,AR22,1,AR21,1
+
+    ! Activate path
+    AR23=%arg2%(1,AR22)
+    path,AR23
+    *get,AR24,path,,nval
+
+    ! Calculate root of array envelope names
+    AR31='%AR23%_ENVMAX'
+    AR32='%AR23%_ENVMIN'
+    AR33='%AR23%_ENVAMX'
+    AR34='%AR23%_ENVAMN'
+    AR35='%AR23%_ENVDIF'
+    AR36='%AR23%_ENVMXL'
+    AR37='%AR23%_ENVMNL'
+
+    ! Loop over each label for which envelopes are to be calculated:
+    *do,AR26,2,AR25,1
+        ! Get label name
+        AR27=%arg2%(AR26,AR22)
+
+        ! Proceed if path label is not blank:
+        AR28=strleng(AR27)
+        *if,AR28,gt,0,then
+
+            ! Get path data for current label
+            AR30='%AR23%_%AR27%_S%AR29%'
+            pth2arr, AR27, AR30
+
+            ! Calculate name of arrays that store envelope data
+            AR41='%AR31%_%AR27%'
+            AR42='%AR32%_%AR27%'
+            AR43='%AR33%_%AR27%'
+            AR44='%AR34%_%AR27%'
+            AR45='%AR35%_%AR27%'
+            AR46='%AR36%_%AR27%'
+            AR47='%AR37%_%AR27%'
+
+            ! Calculate labels to which envelope data will be written
+            AR51=strcat(strsub(AR27,1,7),'+')
+            AR52=strcat(strsub(AR27,1,7),'-')
+            AR53=strcat(strsub(AR27,1,7),'*')
+            AR54=strcat(strsub(AR27,1,7),'&')
+            AR55=strcat(strsub(AR27,1,7),'%')
+            AR56=strcat(strsub(AR27,1,7),'@')
+            AR57=strcat(strsub(AR27,1,7),'#')
+
+            ! Initialize envelope arrays
+            *get,AR20,parm,%AR41%,type
+            *if,AR20,ne,1,then
+                *dim,%AR41%,,AR24
+                *vfun,%AR41%,copy,%AR30%
+            *endif
+
+            *get,AR20,parm,%AR42%,type
+            *if,AR20,ne,1,then
+                *dim,%AR42%,,AR24
+                *vfun,%AR42%,copy,%AR30%
+            *endif
+
+            *get,AR20,parm,%AR43%,type
+            *if,AR20,ne,1,then
+                *dim,%AR43%,,AR24
+                *vabs,1
+                *vfun,%AR43%,copy,%AR30%
+                *vabs
+            *endif
+
+            *get,AR20,parm,%AR44%,type
+            *if,AR20,ne,1,then
+                *dim,%AR44%,,AR24
+                *vabs,1
+                *vfun,%AR44%,copy,%AR30%
+                *vabs
+            *endif
+
+            *get,AR20,parm,%AR45%,type
+            *if,AR20,ne,1,then
+                *dim,%AR45%,,AR24
+            *endif
+
+            *get,AR20,parm,%AR46%,type
+            *if,AR20,ne,1,then
+                *dim,%AR46%,,AR24
+            *endif
+
+            *get,AR20,parm,%AR47%,type
+            *if,AR20,ne,1,then
+                *dim,%AR47%,,AR24
+            *endif
+
+            ! Fill array with copies of the number identifying this result set
+            *dim,PTHENV_ARR_setNum,,AR24
+            *vfill,PTHENV_ARR_setNum,ramp,arg3,0
+
+            ! Calculate max envelope
+            *voper,%AR41%,%AR41%,max,%AR30%
+
+            ! Calculate location corresponding to max value
+            *del,PTHENV_ARR_maxLocMask
+            *voper,PTHENV_ARR_maxLocMask,%AR30%,ge,%AR41%
+            *vmask,PTHENV_ARR_maxLocMask
+            *vfun,AR46,copy,PTHENV_ARR_setNum
+
+            ! Calculate min envelope
+            *voper,%AR42%,%AR42%,min,%AR30%
+
+            ! Calculate location corresponding to min value
+            *del,PTHENV_ARR_minLocMask
+            *voper,PTHENV_ARR_minLocMask,%AR30%,le,%AR42%
+            *vmask,PTHENV_ARR_minLocMask
+            *vfun,AR47,copy,PTHENV_ARR_setNum
+
+            ! Calculate absolute max envelope
+            *vabs,1,1,1,1
+            *voper,%AR43%,%AR43%,max,%AR30%
+            *vabs
+
+            ! Calculate absolute min envelope
+            *vabs,1,1,1,1
+            *voper,%AR44%,%AR44%,min,%AR30%
+            *vabs
+
+            ! Calculate difference envelope
+            *vabs,1
+            *del,PTHENV_ARR_diff
+            *voper,PTHENV_ARR_diff,%AR41%,sub,%AR42%
+            *vabs,0
+            *voper,%AR45%,%AR45%,max,PTHENV_ARR_diff
+
+            ! Transfer envelope data from arrays to path
+            pthlabelidx,'PTHENV_VAR_labelIdxMax',AR51
+            *if,PTHENV_VAR_labelIdxMax,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxMax',7
+            *endif
+            arr2pth,AR41,AR51,PTHENV_VAR_labelIdxMax
+
+            pthlabelidx,'PTHENV_VAR_labelIdxMin',AR52
+            *if,PTHENV_VAR_labelIdxMin,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxMin',6
+            *endif
+            arr2pth,AR42,AR52,PTHENV_VAR_labelIdxMin
+
+            pthlabelidx,'PTHENV_VAR_labelIdxAmx',AR53
+            *if,PTHENV_VAR_labelIdxAmx,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxAmx',5
+            *endif
+            arr2pth,AR43,AR53,PTHENV_VAR_labelIdxAmx
+
+            pthlabelidx,'PTHENV_VAR_labelIdxAmn',AR54
+            *if,PTHENV_VAR_labelIdxAmn,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxAmn',4
+            *endif
+            arr2pth,AR44,AR54,PTHENV_VAR_labelIdxAmn
+
+            pthlabelidx,'PTHENV_VAR_labelIdxDif',AR55
+            *if,PTHENV_VAR_labelIdxDif,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxDif',3
+            *endif
+            arr2pth,AR45,AR55,PTHENV_VAR_labelIdxDif
+
+            pthlabelidx,'PTHENV_VAR_labelIdxMxl',AR56
+            *if,PTHENV_VAR_labelIdxMxl,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxMxl',2
+            *endif
+            arr2pth,AR46,AR56,PTHENV_VAR_labelIdxMxl
+
+            pthlabelidx,'PTHENV_VAR_labelIdxMnl',AR57
+            *if,PTHENV_VAR_labelIdxMnl,eq,0,then
+                pthfreeidx,'PTHENV_VAR_labelIdxMnl',1
+            *endif
+            arr2pth,AR47,AR57,PTHENV_VAR_labelIdxMnl
+
+        *endif
+    *enddo
+
+*enddo
+
+! Clear parameters
+*del,PTHENV_ARR_maxLocMask
+*del,PTHENV_ARR_minLocMask
+*del,PTHENV_ARR_setNum
+*del,PTHENV_ARR_diff
+*del,PTHENV_VAR_labelIdxMax
+*del,PTHENV_VAR_labelIdxMin
+*del,PTHENV_VAR_labelIdxAmx
+*del,PTHENV_VAR_labelIdxAmn
+*del,PTHENV_VAR_labelIdxDif
+*del,PTHENV_VAR_labelIdxMxl
+*del,PTHENV_VAR_labelIdxMnl
+

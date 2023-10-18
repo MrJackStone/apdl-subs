@@ -1,0 +1,153 @@
+! BOUSSINESQ, parmNF, parmNN, selCount, force,   QX,   QY,   QZ, stressDir, gravDir, N_set
+! BOUSSINESQ,   arg1,   arg2,     arg3,  arg4, arg5, arg6, arg7,      arg8,    arg9,  ar10
+
+! arg8: stressDir  -  stress increase direction key: 'H' or 'V' (for horizontal and vertical)
+
+*if,ar10,eq,0,then
+
+    ! Node numbers
+    *del,NLIST_num
+    *vget,NLIST_num,node,,nlist
+
+    ! X, Y, Z coordinates
+    *del,NLIST_x
+    *del,NLIST_y
+    *del,NLIST_z
+    *vget,NLIST_x,node,,loc,x
+    *vget,NLIST_y,node,,loc,y
+    *vget,NLIST_z,node,,loc,z
+
+
+    ! Total number of nodes
+    *get,NLIST_count,parm,NLIST_num,dim,x
+
+    ! Nodal apportioned area
+    *del,NLIST_apportioned
+    *dim,NLIST_apportioned,,NLIST_count
+    *do,nthNode,1,NLIST_count,1
+        nodenum=NLIST_num(nthNode)
+        NLIST_apportioned(nthNode)=arnode(nodenum)
+    *enddo
+*endif
+
+pi=acos(-1)
+
+! Initialize arrays
+*del, deltaX
+*del, deltaY
+*del, deltaZ
+*del, deltaXSquared
+*del, deltaYSquared
+*del, deltaZSquared
+*del, Rsquared
+*del, Rdist
+*del, tmp
+*del, pressures
+*del, forces
+*del, dynImpact
+*del, NLIST_nsel
+*del, dist
+
+*del, %arg1%
+*del, %arg2%
+
+! Calculate distances
+*voper,deltaX,arg5,sub,NLIST_x
+*voper,deltaY,arg6,sub,NLIST_y
+*voper,deltaZ,arg7,sub,NLIST_z
+
+! Square distances
+*vfun, deltaXSquared , pwr , deltaX , 2
+*vfun, deltaYSquared , pwr , deltaY , 2
+*vfun, deltaZSquared , pwr , deltaZ , 2
+
+! Calculate parameters that depend upon direction of gravitational acceleration
+*if,upcase(arg9),eq,'X',then
+    ! Gravity along X axis:
+
+    ! Dynamic impact coefficient
+    *voper, dynImpact , deltaX    , mult ,-0.2353
+    ! Plan projection radial distance
+    *voper, Rsquared , deltaYSquared,      add , deltaZSquared
+    *vfun ,    Rdist ,          sqrt, Rsquared
+    ! Vertical distance
+    *vfun, Vdist, copy, deltaX
+
+*elseif,upcase(arg9),eq,'Y',then
+    ! Gravity along Y axis:
+
+    ! Dynamic impact coefficient
+    *voper, dynImpact , deltaY    , mult ,-0.2353
+    ! Plan projection radial distance
+    *voper, Rsquared , deltaXSquared,      add , deltaZSquared
+    *vfun ,    Rdist ,          sqrt, Rsquared
+    ! Vertical distance
+    *vfun, Vdist, copy, deltaY
+
+*elseif,upcase(arg9),eq,'Z',then
+    ! Gravity along Z axis:
+
+    ! Dynamic impact coefficient
+    *voper, dynImpact , deltaZ    , mult ,-0.2353
+    ! Plan projection radial distance
+    *voper, Rsquared , deltaXSquared,      add , deltaYSquared
+    *vfun ,    Rdist ,          sqrt, Rsquared
+    ! Vertical distance
+    *vfun, Vdist, copy, deltaZ
+
+*endif
+
+! Calculate impact coefficients (according to AREMA Chapter 8)
+*voper, dynImpact , dynImpact , add  , 1.7060
+*voper, dynImpact , dynImpact , max  , 1
+*voper, dynImpact , dynImpact , min  , 1.6
+
+
+*if,upcase(arg8),eq,'V',then
+
+    ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
+    *voper, tmp , Rdist ,  div , Vdist
+    *vfun , tmp ,   pwr ,  tmp , 2
+    *voper, tmp ,   tmp ,  add , 1
+    *vfun , tmp ,   pwr ,  tmp , 5/2
+    *voper, tmp ,   tmp , mult , Vdist
+    *voper, tmp ,   tmp , mult , Vdist
+    *voper, tmp ,   tmp , mult , 2*PI
+    *vfun , tmp ,   pwr ,  tmp , -1
+
+    ! Calculate nodal pressure
+    *voper, pressures ,       tmp , mult , 3*arg4
+
+*elseif,upcase(arg8),eq,'H',then
+
+    ! Radial distance (3D space)
+    *voper, tmp  , deltaXSquared , add , deltaYSquared
+    *voper, tmp  ,           tmp , add , deltaZSquared
+    *vfun , dist ,          sqrt , tmp
+
+    ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
+    *vfun ,       tmp , pwr , dist , 5
+    *voper,       tmp , tmp , mult , 2*PI
+    *vfun ,       tmp , pwr ,  tmp , -1
+    *voper,       tmp , tmp , mult , Vdist ![deltaY]
+    *voper,       tmp , tmp , mult , Rsquared ![deltaXSquared]
+
+    ! Calculate nodal pressure
+    *voper, pressures , tmp , mult , 6*arg4
+
+*endif
+
+! Calculate nodal forces and apply dynamic impact coefficient
+*voper,    forces , pressures , mult , NLIST_apportioned
+*voper,    forces ,    forces , mult , dynImpact
+
+! Selected nodes
+*vget,NLIST_nsel,node,,nsel
+
+*vmask, NLIST_nsel
+*vfun ,     %arg1% , comp , forces
+*vmask, NLIST_nsel
+*vfun ,     %arg2% , comp , NLIST_num
+
+*get,%arg3%,parm,%arg2%,dim,x
+

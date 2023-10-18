@@ -1,0 +1,159 @@
+! IBEAM,  L,     bf,    dm,    x0,    y0,    z0
+! IBEAM,  arg1,  arg2,  arg3,  arg4,  arg5,  arg6
+
+! Descrição:
+! Criar solid model de uma viga de seção transversal tipo perfil I duplamente simétrico.
+
+! Lista de variáveis locais:
+! AR28: COMPK_NEW
+! AR29: COMPL_NEW
+! AR30: COMPA_NEW
+! AR31: MaxKP
+! AR32: MaxLN
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! IBEAM_ARR_LNUMS
+! IBEAM_ARR_KPNUMS
+
+! Lista de variáveis de saída:
+! IBEAM_COMPA_ALMA
+!    Componente contendo todas as áreas da alma da peça
+! IBEAM_COMPA_MESAS
+!    Componente contendo todas as áreas das mesas da peça
+
+/prep7
+
+
+!!                                                                                                                                            !!
+!! 1.   SOLID MODEL                                                                                                                           !!
+!!                                                                                                                                            !!
+
+SELTOL,1e-8
+
+! Desativar exibição de mensagens de aviso
+/uis,MSGPOP,3
+
+! Fazer backup das entidades do solid model atualmente selecionadas
+KBACKUP
+LBACKUP
+ABACKUP
+
+! Remover keypoints, linhas e áreas existentes da seleção
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+ASEL,U,AREA,,ALL
+
+! Criar componentes de keypoints, linhas e áreas novas
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+*get,AR31,KP,0,NUM,MAXD
+
+*del,IBEAM_ARR_KPNUMS
+*dim,IBEAM_ARR_KPNUMS,ARRAY,18
+*vfill,IBEAM_ARR_KPNUMS,RAMP,AR31+1,1
+NUMSTR,KP,AR31+1
+
+! Keypoints da seção transversal (face 1)
+K,IBEAM_ARR_KPNUMS(1), arg4, arg5,      arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(2), arg4, arg5,      arg6
+K,IBEAM_ARR_KPNUMS(3), arg4, arg5,      arg6+arg2/2
+K,IBEAM_ARR_KPNUMS(4), arg4, arg5+arg3, arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(5), arg4, arg5+arg3, arg6
+K,IBEAM_ARR_KPNUMS(6), arg4, arg5+arg3, arg6+arg2/2
+
+! Keypoints da seção transversal (face 2)
+K,IBEAM_ARR_KPNUMS(7),  arg4+arg1, arg5,      arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(8),  arg4+arg1, arg5,      arg6
+K,IBEAM_ARR_KPNUMS(9),  arg4+arg1, arg5,      arg6+arg2/2
+K,IBEAM_ARR_KPNUMS(10), arg4+arg1, arg5+arg3, arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(11), arg4+arg1, arg5+arg3, arg6
+K,IBEAM_ARR_KPNUMS(12), arg4+arg1, arg5+arg3, arg6+arg2/2
+
+CM,AR28,KP
+
+*get,AR32,LINE,0,NUM,MAXD
+
+*del,IBEAM_ARR_LNUMS
+*dim,IBEAM_ARR_LNUMS,ARRAY,22
+*vfill,IBEAM_ARR_LNUMS,RAMP,AR32+1,1
+NUMSTR,LINE,AR32+1
+
+! Linhas da seção transversal (face 1)
+L, IBEAM_ARR_KPNUMS(1), IBEAM_ARR_KPNUMS(2)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(3)
+L, IBEAM_ARR_KPNUMS(4), IBEAM_ARR_KPNUMS(5)
+L, IBEAM_ARR_KPNUMS(5), IBEAM_ARR_KPNUMS(6)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(5)
+
+! Linhas da seção transversal (face 2)
+L, IBEAM_ARR_KPNUMS(7),  IBEAM_ARR_KPNUMS(8)
+L, IBEAM_ARR_KPNUMS(8),  IBEAM_ARR_KPNUMS(9)
+L, IBEAM_ARR_KPNUMS(10), IBEAM_ARR_KPNUMS(11)
+L, IBEAM_ARR_KPNUMS(11), IBEAM_ARR_KPNUMS(12)
+L, IBEAM_ARR_KPNUMS(8),  IBEAM_ARR_KPNUMS(11)
+
+! Linhas longitudinais
+L, IBEAM_ARR_KPNUMS(3), IBEAM_ARR_KPNUMS(9)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(8)
+L, IBEAM_ARR_KPNUMS(1), IBEAM_ARR_KPNUMS(7)
+L, IBEAM_ARR_KPNUMS(6), IBEAM_ARR_KPNUMS(12)
+L, IBEAM_ARR_KPNUMS(5), IBEAM_ARR_KPNUMS(11)
+L, IBEAM_ARR_KPNUMS(4), IBEAM_ARR_KPNUMS(10)
+
+CM,AR29,LINE
+
+! Áreas das mesas e alma do perfil
+AL, IBEAM_ARR_LNUMS(2),  IBEAM_ARR_LNUMS(11), IBEAM_ARR_LNUMS(7),  IBEAM_ARR_LNUMS(12)
+AL, IBEAM_ARR_LNUMS(1),  IBEAM_ARR_LNUMS(12), IBEAM_ARR_LNUMS(6),  IBEAM_ARR_LNUMS(13)
+AL, IBEAM_ARR_LNUMS(4),  IBEAM_ARR_LNUMS(14), IBEAM_ARR_LNUMS(9),  IBEAM_ARR_LNUMS(15)
+AL, IBEAM_ARR_LNUMS(3),  IBEAM_ARR_LNUMS(15), IBEAM_ARR_LNUMS(8),  IBEAM_ARR_LNUMS(16)
+AL, IBEAM_ARR_LNUMS(12), IBEAM_ARR_LNUMS(10), IBEAM_ARR_LNUMS(15), IBEAM_ARR_LNUMS(5)
+
+CM,AR30,AREA
+
+! Fatiar horizontalmente áreas no meio da altura
+CMSEL,S,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+WPSLICEXZ,arg5+arg3/2
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+
+!!                                                                                                                                            !!
+!! 2.   SAÍDA                                                                                                                                 !!
+!!                                                                                                                                            !!
+
+! Definir componente de saída das mesas
+ASEL,S,LOC,Y,arg5
+ASEL,A,LOC,Y,arg5+arg3
+CM,IBEAM_COMPA_MESAS,AREA
+
+! Definir componente de saída da alma
+ASEL,INVE
+ASEL,R,LOC,Z,arg6
+CM,IBEAM_COMPA_ALMA,AREA
+
+! Restaurar seleção prévia
+KRESTORE
+LRESTORE
+ARESTORE
+
+! Selecionar novas entidades criadas
+CMSEL,A,IBEAM_COMPA_ALMA
+CMSEL,A,IBEAM_COMPA_MESAS
+CMSEL,A,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+
+! Excluir componentes
+CMDELE,AR28
+CMDELE,AR29
+CMDELE,AR30
+
+*del,IBEAM_ARR_LNUMS
+*del,IBEAM_ARR_KPNUMS
+

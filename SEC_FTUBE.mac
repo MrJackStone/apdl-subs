@@ -1,0 +1,661 @@
+! SEC_FTUBE,Width,Height,Thk ,OuterRad,InnerRad,SteelMat,ConcMat,Name
+! SEC_FTUBE,arg1 ,arg2  ,arg3,arg4    ,arg5    ,arg6    ,arg7   ,arg8
+
+! Descrição:
+! Escreve uma seção transversal em formato de tubo de aço com cantos
+! arredondados preenchido com concreto para um arquivo de um dado nome.
+
+! Lista de variáveis locais:
+! AR20: MaxEType
+! AR21: NewEType
+! AR22: x0
+! AR23: y0
+! AR24: z0
+! AR25: KMax
+! AR26: xMax
+! AR27: yMax
+! AR28: Rad
+! AR29: MinDim
+! AR30: ElementSize
+! AR31: L1
+! AR32: L2
+! AR33: L3
+! AR34: L4
+! AR35: L5
+! AR36: L6
+! AR37: L7
+! AR38: L8
+! AR39: L9
+! AR40: L10
+! AR41: L11
+! AR42: L12
+! AR43: CML_OuterLines
+! AR44: CML_InnerLines
+! AR45: CML_ConLines
+! AR46: CML_InsideLines
+! AR47: CMA_OutsideAreas
+! AR48: CMA_InsideAreas
+! AR49: i
+! AR50: CMK_AllKPs
+! AR51: ModInnerRad
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! SEC_FTUBE_KPt
+! SEC_FTUBE_KCn
+! SEC_FTUBE_OuterKPs
+! SEC_FTUBE_OuterCNs
+! SEC_FTUBE_InnerKPs
+! SEC_FTUBE_InnerCNs
+! SEC_FTUBE_OuterLines
+! SEC_FTUBE_InnerLines
+! SEC_FTUBE_ConLines
+! SEC_FTUBE_InsideLines
+
+! Armazenar seleção prévia
+VBACKUP
+ABACKUP
+LBACKUP
+KBACKUP
+EBACKUP
+NBACKUP
+
+! Desativar exibição automática
+/nopr
+IMMED,0
+/uis,REPLOT,0
+/uis,MSGPOP,3
+
+ASEL,U,AREA,,ALL
+LSEL,U,LINE,,ALL
+KSEL,U,KP,,ALL
+ESEL,U,ELEM,,ALL
+NSEL,U,NODE,,ALL
+
+/prep7
+
+*get,AR20,ETYP,0,NUM,MAX
+AR21=AR20+1
+ET,AR21,82
+
+AR22=0
+AR23=0
+AR24=0
+
+! Definir raio interno automático caso valor fonecido seja negativo
+*if,arg5,LT,0,THEN
+   AR51=arg4-arg3
+*else
+   AR51=arg5
+*endif
+
+! Desenhar a geometria da seção transversal
+!   RE: Raio Externo
+!   RI: Raio Interno
+!   Caso RE <= 0:
+!      - desenhar os contornos externo e interno
+!        como retângulos (sem cantos arredondados)
+!   Caso RE > 0, RI <= 0:
+!      - desenhar o contorno externo como um
+!        retângulo com os cantos arredondados
+!        e o contorno interno como retângulo
+!        sem cantos arredondados
+!   Caso RE > 0, RI > 0:
+!      - desenhar os contornos externo e interno
+!        como retângulos com cantos arredondados
+*if,arg4,LE,0,THEN
+
+   ! Obter número máximo de keypoint
+   *get,AR25,KP,0,NUM,MAXD
+
+   ! Inicializar vetores de keypoints internos
+   *del,SEC_FTUBE_KPt
+   *del,SEC_FTUBE_OuterKPs
+   *dim,SEC_FTUBE_KPt,ARRAY,8
+   *dim,SEC_FTUBE_OuterKPs,ARRAY,8
+   *do,AR49,1,8,1
+      SEC_FTUBE_KPt(AR49)=AR25+AR49
+      SEC_FTUBE_OuterKPs(AR49)=AR25+AR49
+   *enddo
+
+   ! Definir perímetro do retângulo externo
+   AR26=arg1/2
+   AR27=arg2/2
+   AR28=arg4
+
+   ! Criar keypoints da face externa do tubo
+   K,SEC_FTUBE_KPt(1),AR22-AR26,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(2),AR22+AR26,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(3),AR22+AR26,AR23+AR27,AR24
+   K,SEC_FTUBE_KPt(4),AR22-AR26,AR23+AR27,AR24
+   CM,AR50,KP
+
+   LSEL,U,LINE,,ALL
+
+   ! Criar linhas da face externa do tubo
+   L,SEC_FTUBE_KPt(1),SEC_FTUBE_KPt(2)
+   *get,AR31,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(2),SEC_FTUBE_KPt(3)
+   *get,AR32,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(3),SEC_FTUBE_KPt(4)
+   *get,AR33,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(4),SEC_FTUBE_KPt(1)
+   *get,AR34,LINE,0,NUM,MAX
+
+   CM,AR43,LINE
+
+   *del,SEC_FTUBE_OuterLines
+   *dim,SEC_FTUBE_OuterLines,ARRAY,4
+   SEC_FTUBE_OuterLines(1)=AR31,AR32,AR33,AR34
+
+   ! Obter número máximo de keypoint
+   *get,AR25,KP,0,NUM,MAXD
+
+   ! Inicializar vetores de keypoints internos
+   *del,SEC_FTUBE_KPt
+   *del,SEC_FTUBE_InnerKPs
+   *dim,SEC_FTUBE_KPt,ARRAY,4
+   *dim,SEC_FTUBE_InnerKPs,ARRAY,4
+   *do,AR49,1,4,1
+      SEC_FTUBE_KPt(AR49)=AR25+AR49
+      SEC_FTUBE_InnerKPs(AR49)=AR25+AR49
+   *enddo
+
+   ! Definir perímetro do retângulo interno
+   AR26=(arg1/2)-arg3
+   AR27=(arg2/2)-arg3
+   AR28=AR51
+
+   ! Criar keypoints da face interna do tubo
+   K,SEC_FTUBE_KPt(1),AR22-AR26,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(2),AR22+AR26,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(3),AR22+AR26,AR23+AR27,AR24
+   K,SEC_FTUBE_KPt(4),AR22-AR26,AR23+AR27,AR24
+   CM,AR50,KP
+
+   LSEL,U,LINE,,ALL
+
+   ! Criar linhas da face interna do tubo
+   L,SEC_FTUBE_KPt(1),SEC_FTUBE_KPt(2)
+   *get,AR31,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(2),SEC_FTUBE_KPt(3)
+   *get,AR32,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(3),SEC_FTUBE_KPt(4)
+   *get,AR33,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(4),SEC_FTUBE_KPt(1)
+   *get,AR34,LINE,0,NUM,MAX
+
+   CM,AR44,LINE
+
+   *del,SEC_FTUBE_InnerLines
+   *dim,SEC_FTUBE_InnerLines,ARRAY,4
+   SEC_FTUBE_InnerLines(1)=AR31,AR32,AR33,AR34
+
+   LSEL,U,LINE,,ALL
+
+   ! Criar linhas conectando as faces interna e externa do tubo
+   L,SEC_FTUBE_OuterKPs(1),SEC_FTUBE_InnerKPs(1)
+   *get,AR31,LINE,0,NUM,MAX
+   L,SEC_FTUBE_OuterKPs(2),SEC_FTUBE_InnerKPs(2)
+   *get,AR32,LINE,0,NUM,MAX
+   L,SEC_FTUBE_OuterKPs(3),SEC_FTUBE_InnerKPs(3)
+   *get,AR33,LINE,0,NUM,MAX
+   L,SEC_FTUBE_OuterKPs(4),SEC_FTUBE_InnerKPs(4)
+   *get,AR34,LINE,0,NUM,MAX
+
+   CM,AR45,LINE
+
+   *del,SEC_FTUBE_ConLines
+   *dim,SEC_FTUBE_ConLines,ARRAY,4
+   SEC_FTUBE_ConLines(1)=AR31,AR32,AR33,AR34
+
+   ASEL,U,AREA,,ALL
+   CMSEL,S,AR43
+   CMSEL,A,AR44
+   CMSEL,A,AR45
+
+   ! Criar áreas do tubo
+   AL,SEC_FTUBE_ConLines(1),SEC_FTUBE_OuterLines(1),SEC_FTUBE_ConLines(2),SEC_FTUBE_InnerLines(1)
+   AL,SEC_FTUBE_ConLines(2),SEC_FTUBE_OuterLines(2),SEC_FTUBE_ConLines(3),SEC_FTUBE_InnerLines(2)
+   AL,SEC_FTUBE_ConLines(3),SEC_FTUBE_OuterLines(3),SEC_FTUBE_ConLines(4),SEC_FTUBE_InnerLines(3)
+   AL,SEC_FTUBE_ConLines(4),SEC_FTUBE_OuterLines(4),SEC_FTUBE_ConLines(1),SEC_FTUBE_InnerLines(4)
+
+   CM,AR47,AREA
+   ASEL,U,AREA,,ALL
+
+   ! Criar áreas da região interna do tubo
+   AL,SEC_FTUBE_InnerLines(1),SEC_FTUBE_InnerLines(2),SEC_FTUBE_InnerLines(3),SEC_FTUBE_InnerLines(4)
+
+   CM,AR48,AREA
+
+*else
+
+   ! Obter número máximo de keypoint
+   *get,AR25,KP,0,NUM,MAXD
+
+   ! Inicializar vetores de keypoints internos
+   *del,SEC_FTUBE_KPt
+   *del,SEC_FTUBE_OuterKPs
+   *dim,SEC_FTUBE_KPt,ARRAY,8
+   *dim,SEC_FTUBE_OuterKPs,ARRAY,8
+   *do,AR49,1,8,1
+      SEC_FTUBE_KPt(AR49)=AR25+AR49
+      SEC_FTUBE_OuterKPs(AR49)=AR25+AR49
+   *enddo
+
+   AR25=AR25+SEC_FTUBE_KPt(8)
+
+   ! Inicializar vetores de keypoints de centro
+   *del,SEC_FTUBE_KCn
+   *del,SEC_FTUBE_OuterCNs
+   *dim,SEC_FTUBE_KCn,ARRAY,4
+   *dim,SEC_FTUBE_OuterCNs,ARRAY,8
+   *do,AR49,1,4,1
+      SEC_FTUBE_KCn(AR49)=AR25+AR49
+      SEC_FTUBE_OuterCNs(AR49)=AR25+AR49
+   *enddo
+
+   ! Definir perímetro do retângulo externo
+   AR26=arg1/2
+   AR27=arg2/2
+   AR28=arg4
+
+   ! Criar keypoints da face externa do tubo
+   K,SEC_FTUBE_KPt(1),AR22-AR26+AR28,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(2),AR22+AR26-AR28,AR23-AR27,AR24
+   K,SEC_FTUBE_KPt(3),AR22+AR26,AR23-AR27+AR28,AR24
+   K,SEC_FTUBE_KPt(4),AR22+AR26,AR23+AR27-AR28,AR24
+   K,SEC_FTUBE_KPt(5),AR22+AR26-AR28,AR23+AR27,AR24
+   K,SEC_FTUBE_KPt(6),AR22-AR26+AR28,AR23+AR27,AR24
+   K,SEC_FTUBE_KPt(7),AR22-AR26,AR23+AR27-AR28,AR24
+   K,SEC_FTUBE_KPt(8),AR22-AR26,AR23-AR27+AR28,AR24
+   CM,AR50,KP
+
+   ! Criar keypoints de centro dos cantos arredondados
+   K,SEC_FTUBE_KCn(1),AR22-AR26+AR28,AR23-AR27+AR28,AR24
+   K,SEC_FTUBE_KCn(2),AR22+AR26-AR28,AR23-AR27+AR28,AR24
+   K,SEC_FTUBE_KCn(3),AR22+AR26-AR28,AR23+AR27-AR28,AR24
+   K,SEC_FTUBE_KCn(4),AR22-AR26+AR28,AR23+AR27-AR28,AR24
+   CM,AR50,KP
+
+   LSEL,U,LINE,,ALL
+
+   ! Criar linhas da face externa do tubo
+   L,SEC_FTUBE_KPt(1),SEC_FTUBE_KPt(2)
+   *get,AR31,LINE,0,NUM,MAX
+   LARC,SEC_FTUBE_KPt(2),SEC_FTUBE_KPt(3),SEC_FTUBE_KCn(2),AR28
+   *get,AR32,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(3),SEC_FTUBE_KPt(4)
+   *get,AR33,LINE,0,NUM,MAX
+   LARC,SEC_FTUBE_KPt(4),SEC_FTUBE_KPt(5),SEC_FTUBE_KCn(3),AR28
+   *get,AR34,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(5),SEC_FTUBE_KPt(6)
+   *get,AR35,LINE,0,NUM,MAX
+   LARC,SEC_FTUBE_KPt(6),SEC_FTUBE_KPt(7),SEC_FTUBE_KCn(4),AR28
+   *get,AR36,LINE,0,NUM,MAX
+   L,SEC_FTUBE_KPt(7),SEC_FTUBE_KPt(8)
+   *get,AR37,LINE,0,NUM,MAX
+   LARC,SEC_FTUBE_KPt(8),SEC_FTUBE_KPt(1),SEC_FTUBE_KCn(1),AR28
+   *get,AR38,LINE,0,NUM,MAX
+
+   CM,AR43,LINE
+
+   *del,SEC_FTUBE_OuterLines
+   *dim,SEC_FTUBE_OuterLines,ARRAY,8
+   SEC_FTUBE_OuterLines(1)=AR31,AR32,AR33,AR34,AR35,AR36,AR37,AR38
+
+   *if,AR51,GT,0,THEN
+
+      ! Obter número máximo de keypoint
+      *get,AR25,KP,0,NUM,MAXD
+
+      ! Inicializar vetores de keypoints internos
+      *del,SEC_FTUBE_KPt
+      *del,SEC_FTUBE_InnerKPs
+      *dim,SEC_FTUBE_KPt,ARRAY,8
+      *dim,SEC_FTUBE_InnerKPs,ARRAY,8
+      *do,AR49,1,8,1
+         SEC_FTUBE_KPt(AR49)=AR25+AR49
+         SEC_FTUBE_InnerKPs(AR49)=AR25+AR49
+      *enddo
+
+      AR25=AR25+SEC_FTUBE_KPt(8)
+
+      ! Inicializar vetores de keypoints de centro
+      *del,SEC_FTUBE_KCn
+      *del,SEC_FTUBE_InnerCNs
+      *dim,SEC_FTUBE_KCn,ARRAY,4
+      *dim,SEC_FTUBE_InnerCNs,ARRAY,8
+      *do,AR49,1,4,1
+         SEC_FTUBE_KCn(AR49)=AR25+AR49
+         SEC_FTUBE_InnerCNs(AR49)=AR25+AR49
+      *enddo
+
+      ! Definir perímetro do retângulo interno
+      AR26=(arg1/2)-arg3
+      AR27=(arg2/2)-arg3
+      AR28=AR51
+
+      ! Criar keypoints da face interna do tubo
+      K,SEC_FTUBE_KPt(1),AR22-AR26+AR28,AR23-AR27,AR24
+      K,SEC_FTUBE_KPt(2),AR22+AR26-AR28,AR23-AR27,AR24
+      K,SEC_FTUBE_KPt(3),AR22+AR26,AR23-AR27+AR28,AR24
+      K,SEC_FTUBE_KPt(4),AR22+AR26,AR23+AR27-AR28,AR24
+      K,SEC_FTUBE_KPt(5),AR22+AR26-AR28,AR23+AR27,AR24
+      K,SEC_FTUBE_KPt(6),AR22-AR26+AR28,AR23+AR27,AR24
+      K,SEC_FTUBE_KPt(7),AR22-AR26,AR23+AR27-AR28,AR24
+      K,SEC_FTUBE_KPt(8),AR22-AR26,AR23-AR27+AR28,AR24
+      CM,AR50,KP
+
+      ! Criar keypoints de centro dos cantos arredondados
+      K,SEC_FTUBE_KCn(1),AR22-AR26+AR28,AR23-AR27+AR28,AR24
+      K,SEC_FTUBE_KCn(2),AR22+AR26-AR28,AR23-AR27+AR28,AR24
+      K,SEC_FTUBE_KCn(3),AR22+AR26-AR28,AR23+AR27-AR28,AR24
+      K,SEC_FTUBE_KCn(4),AR22-AR26+AR28,AR23+AR27-AR28,AR24
+      CM,AR50,KP
+
+      LSEL,U,LINE,,ALL
+
+      ! Criar linhas da face interna do tubo
+      L,SEC_FTUBE_KPt(1),SEC_FTUBE_KPt(2)
+      *get,AR31,LINE,0,NUM,MAX
+      LARC,SEC_FTUBE_KPt(2),SEC_FTUBE_KPt(3),SEC_FTUBE_KCn(2),AR28
+      *get,AR32,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(3),SEC_FTUBE_KPt(4)
+      *get,AR33,LINE,0,NUM,MAX
+      LARC,SEC_FTUBE_KPt(4),SEC_FTUBE_KPt(5),SEC_FTUBE_KCn(3),AR28
+      *get,AR34,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(5),SEC_FTUBE_KPt(6)
+      *get,AR35,LINE,0,NUM,MAX
+      LARC,SEC_FTUBE_KPt(6),SEC_FTUBE_KPt(7),SEC_FTUBE_KCn(4),AR28
+      *get,AR36,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(7),SEC_FTUBE_KPt(8)
+      *get,AR37,LINE,0,NUM,MAX
+      LARC,SEC_FTUBE_KPt(8),SEC_FTUBE_KPt(1),SEC_FTUBE_KCn(1),AR28
+      *get,AR38,LINE,0,NUM,MAX
+
+      CM,AR44,LINE
+
+      *del,SEC_FTUBE_InnerLines
+      *dim,SEC_FTUBE_InnerLines,ARRAY,8
+      SEC_FTUBE_InnerLines(1)=AR31,AR32,AR33,AR34,AR35,AR36,AR37,AR38
+
+      LSEL,U,LINE,,ALL
+
+      ! Criar linhas conectando as faces interna e externa do tubo
+      L,SEC_FTUBE_OuterKPs(1),SEC_FTUBE_InnerKPs(1)
+      *get,AR31,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(2),SEC_FTUBE_InnerKPs(2)
+      *get,AR32,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(3),SEC_FTUBE_InnerKPs(3)
+      *get,AR33,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(4),SEC_FTUBE_InnerKPs(4)
+      *get,AR34,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(5),SEC_FTUBE_InnerKPs(5)
+      *get,AR35,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(6),SEC_FTUBE_InnerKPs(6)
+      *get,AR36,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(7),SEC_FTUBE_InnerKPs(7)
+      *get,AR37,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(8),SEC_FTUBE_InnerKPs(8)
+      *get,AR38,LINE,0,NUM,MAX
+
+      CM,AR45,LINE
+
+      *del,SEC_FTUBE_ConLines
+      *dim,SEC_FTUBE_ConLines,ARRAY,8
+      SEC_FTUBE_ConLines(1)=AR31,AR32,AR33,AR34,AR35,AR36,AR37,AR38
+
+      LSEL,U,LINE,,ALL
+
+      ! Criar linhas dividindo a região interna do tubo
+      L,SEC_FTUBE_InnerKPs(1),SEC_FTUBE_InnerCNs(1)
+      *get,AR31,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(8),SEC_FTUBE_InnerCNs(1)
+      *get,AR32,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerCNs(1),SEC_FTUBE_InnerCNs(2)
+      *get,AR33,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(2),SEC_FTUBE_InnerCNs(2)
+      *get,AR34,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(3),SEC_FTUBE_InnerCNs(2)
+      *get,AR35,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerCNs(2),SEC_FTUBE_InnerCNs(3)
+      *get,AR36,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(4),SEC_FTUBE_InnerCNs(3)
+      *get,AR37,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(5),SEC_FTUBE_InnerCNs(3)
+      *get,AR38,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerCNs(3),SEC_FTUBE_InnerCNs(4)
+      *get,AR39,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(6),SEC_FTUBE_InnerCNs(4)
+      *get,AR40,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerKPs(7),SEC_FTUBE_InnerCNs(4)
+      *get,AR41,LINE,0,NUM,MAX
+      L,SEC_FTUBE_InnerCNs(4),SEC_FTUBE_InnerCNs(1)
+      *get,AR42,LINE,0,NUM,MAX
+
+      CM,AR46,LINE
+
+      *del,SEC_FTUBE_InsideLines
+      *dim,SEC_FTUBE_InsideLines,ARRAY,12
+      SEC_FTUBE_InsideLines(1)=AR31,AR32,AR33,AR34,AR35,AR36,AR37,AR38,AR39,AR40,AR41,AR42
+
+      ASEL,U,AREA,,ALL
+      CMSEL,S,AR43
+      CMSEL,A,AR44
+      CMSEL,A,AR45
+      CMSEL,A,AR46
+
+      ! Criar áreas do tubo
+      AL,SEC_FTUBE_ConLines(1),SEC_FTUBE_OuterLines(1),SEC_FTUBE_ConLines(2),SEC_FTUBE_InnerLines(1)
+      AL,SEC_FTUBE_ConLines(2),SEC_FTUBE_OuterLines(2),SEC_FTUBE_ConLines(3),SEC_FTUBE_InnerLines(2)
+      AL,SEC_FTUBE_ConLines(3),SEC_FTUBE_OuterLines(3),SEC_FTUBE_ConLines(4),SEC_FTUBE_InnerLines(3)
+      AL,SEC_FTUBE_ConLines(4),SEC_FTUBE_OuterLines(4),SEC_FTUBE_ConLines(5),SEC_FTUBE_InnerLines(4)
+      AL,SEC_FTUBE_ConLines(5),SEC_FTUBE_OuterLines(5),SEC_FTUBE_ConLines(6),SEC_FTUBE_InnerLines(5)
+      AL,SEC_FTUBE_ConLines(6),SEC_FTUBE_OuterLines(6),SEC_FTUBE_ConLines(7),SEC_FTUBE_InnerLines(6)
+      AL,SEC_FTUBE_ConLines(7),SEC_FTUBE_OuterLines(7),SEC_FTUBE_ConLines(8),SEC_FTUBE_InnerLines(7)
+      AL,SEC_FTUBE_ConLines(8),SEC_FTUBE_OuterLines(8),SEC_FTUBE_ConLines(1),SEC_FTUBE_InnerLines(8)
+
+      CM,AR47,AREA
+      ASEL,U,AREA,,ALL
+      CMSEL,S,AR43
+      CMSEL,A,AR44
+      CMSEL,A,AR45
+      CMSEL,A,AR46
+
+      ! Criar áreas da região interna do tubo
+      AL,SEC_FTUBE_InsideLines(1),SEC_FTUBE_InnerLines(1),SEC_FTUBE_InsideLines(4),SEC_FTUBE_InsideLines(3)
+      AL,SEC_FTUBE_InsideLines(4),SEC_FTUBE_InnerLines(2),SEC_FTUBE_InsideLines(5)
+      AL,SEC_FTUBE_InsideLines(5),SEC_FTUBE_InnerLines(3),SEC_FTUBE_InsideLines(7),SEC_FTUBE_InsideLines(6)
+      AL,SEC_FTUBE_InsideLines(7),SEC_FTUBE_InnerLines(4),SEC_FTUBE_InsideLines(8)
+      AL,SEC_FTUBE_InsideLines(8),SEC_FTUBE_InnerLines(5),SEC_FTUBE_InsideLines(10),SEC_FTUBE_InsideLines(9)
+      AL,SEC_FTUBE_InsideLines(10),SEC_FTUBE_InnerLines(6),SEC_FTUBE_InsideLines(11)
+      AL,SEC_FTUBE_InsideLines(11),SEC_FTUBE_InnerLines(7),SEC_FTUBE_InsideLines(2),SEC_FTUBE_InsideLines(12)
+      AL,SEC_FTUBE_InsideLines(2),SEC_FTUBE_InnerLines(8),SEC_FTUBE_InsideLines(1)
+
+      AL,SEC_FTUBE_InsideLines(3),SEC_FTUBE_InsideLines(6),SEC_FTUBE_InsideLines(9),SEC_FTUBE_InsideLines(12)
+
+      CM,AR48,AREA
+
+   *else
+
+      ! Obter número máximo de keypoint
+      *get,AR25,KP,0,NUM,MAXD
+
+      ! Inicializar vetores de keypoints internos
+      *del,SEC_FTUBE_KPt
+      *del,SEC_FTUBE_InnerKPs
+      *dim,SEC_FTUBE_KPt,ARRAY,4
+      *dim,SEC_FTUBE_InnerKPs,ARRAY,4
+      *do,AR49,1,4,1
+         SEC_FTUBE_KPt(AR49)=AR25+AR49
+         SEC_FTUBE_InnerKPs(AR49)=AR25+AR49
+      *enddo
+
+      ! Definir perímetro do retângulo interno
+      AR26=(arg1/2)-arg3
+      AR27=(arg2/2)-arg3
+      AR28=AR51
+
+      ! Criar keypoints da face interna do tubo
+      K,SEC_FTUBE_KPt(1),AR22-AR26,AR23-AR27,AR24
+      K,SEC_FTUBE_KPt(2),AR22+AR26,AR23-AR27,AR24
+      K,SEC_FTUBE_KPt(3),AR22+AR26,AR23+AR27,AR24
+      K,SEC_FTUBE_KPt(4),AR22-AR26,AR23+AR27,AR24
+      CM,AR50,KP
+
+      LSEL,U,LINE,,ALL
+
+      ! Criar linhas da face interna do tubo
+      L,SEC_FTUBE_KPt(1),SEC_FTUBE_KPt(2)
+      *get,AR31,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(2),SEC_FTUBE_KPt(3)
+      *get,AR32,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(3),SEC_FTUBE_KPt(4)
+      *get,AR33,LINE,0,NUM,MAX
+      L,SEC_FTUBE_KPt(4),SEC_FTUBE_KPt(1)
+      *get,AR34,LINE,0,NUM,MAX
+
+      CM,AR44,LINE
+
+      *del,SEC_FTUBE_InnerLines
+      *dim,SEC_FTUBE_InnerLines,ARRAY,4
+      SEC_FTUBE_InnerLines(1)=AR31,AR32,AR33,AR34
+
+      LSEL,U,LINE,,ALL
+
+      ! Criar linhas conectando as faces interna e externa do tubo
+      L,SEC_FTUBE_OuterKPs(1),SEC_FTUBE_InnerKPs(1)
+      *get,AR31,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(2),SEC_FTUBE_InnerKPs(2)
+      *get,AR32,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(3),SEC_FTUBE_InnerKPs(2)
+      *get,AR33,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(4),SEC_FTUBE_InnerKPs(3)
+      *get,AR34,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(5),SEC_FTUBE_InnerKPs(3)
+      *get,AR35,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(6),SEC_FTUBE_InnerKPs(4)
+      *get,AR36,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(7),SEC_FTUBE_InnerKPs(4)
+      *get,AR37,LINE,0,NUM,MAX
+      L,SEC_FTUBE_OuterKPs(8),SEC_FTUBE_InnerKPs(1)
+      *get,AR38,LINE,0,NUM,MAX
+
+      CM,AR45,LINE
+
+      *del,SEC_FTUBE_ConLines
+      *dim,SEC_FTUBE_ConLines,ARRAY,8
+      SEC_FTUBE_ConLines(1)=AR31,AR32,AR33,AR34,AR35,AR36,AR37,AR38
+
+      ASEL,U,AREA,,ALL
+      CMSEL,S,AR43
+      CMSEL,A,AR44
+      CMSEL,A,AR45
+
+      ! Criar áreas do tubo
+      AL,SEC_FTUBE_ConLines(1),SEC_FTUBE_OuterLines(1),SEC_FTUBE_ConLines(2),SEC_FTUBE_InnerLines(1)
+      AL,SEC_FTUBE_ConLines(2),SEC_FTUBE_OuterLines(2),SEC_FTUBE_ConLines(3)
+      AL,SEC_FTUBE_ConLines(3),SEC_FTUBE_OuterLines(3),SEC_FTUBE_ConLines(4),SEC_FTUBE_InnerLines(2)
+      AL,SEC_FTUBE_ConLines(4),SEC_FTUBE_OuterLines(4),SEC_FTUBE_ConLines(5)
+      AL,SEC_FTUBE_ConLines(5),SEC_FTUBE_OuterLines(5),SEC_FTUBE_ConLines(6),SEC_FTUBE_InnerLines(3)
+      AL,SEC_FTUBE_ConLines(6),SEC_FTUBE_OuterLines(6),SEC_FTUBE_ConLines(7)
+      AL,SEC_FTUBE_ConLines(7),SEC_FTUBE_OuterLines(7),SEC_FTUBE_ConLines(8),SEC_FTUBE_InnerLines(4)
+      AL,SEC_FTUBE_ConLines(8),SEC_FTUBE_OuterLines(8),SEC_FTUBE_ConLines(1)
+
+      CM,AR47,AREA
+      ASEL,U,AREA,,ALL
+      CMSEL,S,AR43
+      CMSEL,A,AR44
+      CMSEL,A,AR45
+
+      ! Criar áreas da região interna do tubo
+      AL,SEC_FTUBE_InnerLines(1),SEC_FTUBE_InnerLines(2),SEC_FTUBE_InnerLines(3),SEC_FTUBE_InnerLines(4)
+
+      CM,AR48,AREA
+
+   *endif
+
+*endif
+
+CMSEL,S,AR43
+CMSEL,A,AR44
+CMSEL,A,AR45
+*if,arg4,GT,0,AND,AR51,GT,0,THEN
+   CMSEL,A,AR46
+*endif
+CMSEL,A,AR47
+CMSEL,A,AR48
+
+! Definir dimensão do elemento
+*if,arg1,LE,arg2,THEN
+   AR29=arg1
+*else
+   AR29=arg2
+*endif
+AR30=AR29/8
+LESIZE,ALL,AR30
+
+! Definir atributos das áreas do tubo
+CMSEL,S,AR47
+AATT,arg6,,AR21
+! Definir atributos das áreas internas
+CMSEL,S,AR48
+AATT,arg7,,AR21
+
+! Criar malha
+CMSEL,S,AR47
+CMSEL,A,AR48
+AMESH,ALL
+
+! Escrever seção em arquivo
+SECWRITE,arg8,SECT,,AR21
+
+! Excluir entidades do solid model e componentes
+CMSEL,S,AR43
+CMSEL,A,AR44
+CMSEL,A,AR45
+*if,arg4,GT,0,AND,AR51,GT,0,THEN
+   CMSEL,A,AR46
+*endif
+CMSEL,A,AR47
+CMSEL,A,AR48
+CMSEL,A,AR50
+ACLEAR,ALL
+ADELE,ALL
+LDELE,ALL
+KDELE,ALL
+ETDELE,AR21
+CMDELE,AR43
+CMDELE,AR44
+CMDELE,AR45
+CMDELE,AR46
+CMDELE,AR47
+CMDELE,AR48
+CMDELE,AR50
+
+! Excluir parâmetros vetoriais
+*del,SEC_FTUBE_KPt
+*del,SEC_FTUBE_KCn
+*del,SEC_FTUBE_OuterKPs
+*del,SEC_FTUBE_OuterCNs
+*del,SEC_FTUBE_InnerKPs
+*del,SEC_FTUBE_InnerCNs
+*del,SEC_FTUBE_OuterLines
+*del,SEC_FTUBE_InnerLines
+*del,SEC_FTUBE_ConLines
+*del,SEC_FTUBE_InsideLines
+
+! Reativar exibição automática
+/gopr
+IMMED,1
+/uis,REPLOT,1
+/uis,MSGPOP,2
+
+! Restaurar seleção prévia
+VRESTORE
+ARESTORE
+LRESTORE
+KRESTORE
+ERESTORE
+NRESTORE
+

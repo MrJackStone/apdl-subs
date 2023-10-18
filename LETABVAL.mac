@@ -1,0 +1,106 @@
+! LETABVAL,LNum,ETNum,Key
+! LETABVAL,arg1,arg2,arg3
+
+! Key:
+!   'MIN': retornar valor mínimo
+!   'MAX': retornar valor máximo
+!   'ALL' (0): retornar todos os valores
+
+! Lista de argumentos:
+! arg1: LNum
+! arg2: ETNum
+! arg3: Key
+
+! Lista de variáveis:
+! AR20: A2Type
+! AR21: ETNum
+! AR22: A3Type
+! AR23: Key
+! AR24: ECount
+! AR25: ETValue
+! AR26: ENum
+! AR27: MinVal
+! AR28: MaxVal
+! AR29: i
+
+! Atribuir valor dos argumentos às variáveis
+! Número da linha
+LNum=arg1
+! Índice da element table
+*get,AR20,PARM,arg2,TYPE
+*if,AR20,EQ,3,THEN
+   ETINDEX,arg2
+   AR21=_OUTPUT
+*elseif,AR20,EQ,0,THEN
+   AR21=arg2
+*endif
+! Resultados a retornar
+*get,AR22,PARM,arg3,TYPE
+*if,AR22,EQ,0,THEN
+   AR23='ALL'
+*elseif,AR22,EQ,3,THEN
+   AR23=UPCASE(arg3)
+*endif
+
+! Salvar seleção
+LBACKUP
+EBACKUP
+NBACKUP
+
+! Selecionar linha de interesse e elementos e nós adjacentes a essa linha
+LSEL,S,LINE,,LNum
+ESLL,S
+NSLE,S
+! Obter número de elementos selecionados
+*get,AR24,ELEM,0,COUNT
+
+! Caso haja elementos selecionados:
+*if,AR24,GT,0,THEN
+
+   ! Inicializar vetor
+   *del,AR25
+   *dim,AR25,,AR24
+
+   ! Para cada elemento:
+   *do,AR29,1,AR24,1
+      ! Encontrar número do elemento
+      !  (elemento de menor índice dentre os selecionados)
+      *get,AR26,ELEM,0,NUM,MIN
+      ! Extrair da Element Table o valor para o elemento
+      *get,AR25(AR29),ETAB,AR21,ELEM,AR26
+      ! Remover o elemento da seleção
+      ESEL,U,ELEM,,AR26
+   *enddo
+
+   ! Determinar qual valor retornar
+   *if,AR23,EQ,'MIN',THEN
+      ! Retornar o valor mínimo
+      *vscfun,AR27,MIN,AR25
+      _OUTPUT=
+      _OUTPUT=AR27
+   *elseif,AR23,EQ,'MAX',THEN
+      ! Retornar o valor máximo
+      *vscfun,AR28,MAX,AR25
+      _OUTPUT=
+      _OUTPUT=AR28
+   *elseif,AR23,EQ,'ALL',THEN
+      ! Retornar todos os valores
+      *del,_OUTPUT
+      *dim,_OUTPUT,,AR24
+      *voper,_OUTPUT,AR25,ADD
+   *endif
+
+! Caso não haja elementos selecionados:
+*else
+
+   ! Retornar texto indicando que não há elementos adjacentes à linha
+   _OUTPUT=
+   _OUTPUT='No elements'
+
+*endif
+
+! Restaurar seleção
+LRESTORE
+ERESTORE
+NRESTORE
+

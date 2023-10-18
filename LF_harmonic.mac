@@ -1,0 +1,51 @@
+! LF_harmonic, name, value, freq
+! LF_harmonic, arg1, arg2,  arg3
+
+! Descrição:
+! Esta subrotina cria (equivalente a importar) uma função de carga harmônica (função senoidal).
+! A carga (de regime único) inicia-se em t=0 e tem valor máximo da dado pelo argumento 'value'.
+
+! Lista de argumentos:
+! arg1: name       -  nome da função de carga (no máximo 8 caracteres)
+! arg2: value      -  valor máximo da função de carga
+! arg3: freq       -  frequência da carga harmônica
+
+! Deletar parâmetros
+*del,_FNCNAME
+*del,_FNCMTID
+*del,_FNC_C1
+*del,_FNCCSYS
+*set,_FNCNAME,arg1
+*dim,_FNC_C1,,1
+*set,_FNC_C1(1),arg3
+*set,_FNCCSYS,0
+*dim,%_FNCNAME%,TABLE,6,19,1,,,,%_FNCCSYS%
+
+! Gerar tabela do carregamento
+!   Equação: [LOAD]*0.83*EXP(-0.35*FREQUENCY)*cos(2*{PI}*FREQUENCY*{TIME})
+*set,%_FNCNAME%(0,0,1), 0.0, -999
+*set,%_FNCNAME%(2,0,1), 0.0
+*set,%_FNCNAME%(3,0,1), %_FNC_C1(1)%
+*set,%_FNCNAME%(4,0,1), 0.0
+*set,%_FNCNAME%(5,0,1), 0.0
+*set,%_FNCNAME%(6,0,1), 0.0
+*set,%_FNCNAME%(0,1,1), 1.0, -1, 0, arg2, 0, 0, 0
+*set,%_FNCNAME%(0,2,1), 0.0, -2, 0, 0.83, 0, 0, -1
+*set,%_FNCNAME%(0,3,1),   0, -3, 0, 1, -1, 3, -2
+*set,%_FNCNAME%(0,4,1), 0.0, -1, 0, 0, 0, 0, 0
+*set,%_FNCNAME%(0,5,1), 0.0, -2, 0, 1, 0, 0, -1
+*set,%_FNCNAME%(0,6,1), 0.0, -4, 0, 1, -1, 2, -2
+*set,%_FNCNAME%(0,7,1), 0.0, -1, 0, 0.35, 0, 0, -4
+*set,%_FNCNAME%(0,8,1), 0.0, -2, 0, 1, -4, 3, -1
+*set,%_FNCNAME%(0,9,1), 0.0, -1, 0, 1, -2, 3, 17
+*set,%_FNCNAME%(0,10,1), 0.0, -1, 7, 1, -1, 0, 0
+*set,%_FNCNAME%(0,11,1), 0.0, -2, 0, 1, -3, 3, -1
+*set,%_FNCNAME%(0,12,1), 0.0, -1, 0, 2, 0, 0, 0
+*set,%_FNCNAME%(0,13,1), 0.0, -3, 0, 3.14159265358979310, 0, 0, -1
+*set,%_FNCNAME%(0,14,1), 0.0, -4, 0, 1, -1, 3, -3
+*set,%_FNCNAME%(0,15,1), 0.0, -1, 0, 1, -4, 3, 17
+*set,%_FNCNAME%(0,16,1), 0.0, -3, 0, 1, -1, 3, 1
+*set,%_FNCNAME%(0,17,1), 0.0, -1, 10, 1, -3, 0, 0
+*set,%_FNCNAME%(0,18,1), 0.0, -3, 0, 1, -2, 3, -1
+*set,%_FNCNAME%(0,19,1), 0.0, 99, 0, 1, -3, 0, 0
+

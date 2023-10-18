@@ -1,0 +1,132 @@
+! NUM2STR, output, number, format, precision
+! NUM2STR,   arg1,   arg2,   arg3,      arg4
+
+! Description:
+! Converts a number to a formatted string which is stored in a given parameter.
+
+! Arguments:
+! arg1: output     -  name of output parameter (to which string will be assigned)
+! arg2: number     -  number to be converted
+! arg3: format     -  type of number formatting, out of the following options:
+!                        ['F'] Float
+!                        ['E'] Exponential
+!                        ['I'] Integer
+! arg4: precision  -  number of digits after decimal point (not used for arg3='I')
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end of this subroutine):
+! NUM2STR_FILE_nested
+! NUM2STR_VAR_fieldWidth
+! NUM2STR_VAR_formatKey
+! NUM2STR_VAR_input
+! NUM2STR_VAR_inputVarName
+! NUM2STR_VAR_nestedFileVarName
+! NUM2STR_VAR_output
+! NUM2STR_VAR_outputPrecision
+! NUM2STR_VAR_outputVarName
+
+
+*del,NUM2STR_FILE_nested
+*del,NUM2STR_VAR_fieldWidth
+*del,NUM2STR_VAR_formatKey
+*del,NUM2STR_VAR_input
+*del,NUM2STR_VAR_inputVarName
+*del,NUM2STR_VAR_nestedFileVarName
+*del,NUM2STR_VAR_output
+*del,NUM2STR_VAR_outputPrecision
+*del,NUM2STR_VAR_outputVarName
+
+! Check parameters:
+parverify,,arg1,'CHAR'
+*if,_OUTPUT,eq,0,then
+    NUM2STR_VAR_output='_OUTPUT'
+*else
+    NUM2STR_VAR_output=arg1
+*endif
+
+parverify,,arg2,'SCALAR'
+*if,_OUTPUT,ne,1,then
+    *msg,warn
+NUM2STR error: arg2 must be a number.%/&
+NUM2STR command is ignored.
+    *return,-1
+*endif
+
+parverify,,arg3,'CHAR'
+*if,_OUTPUT,ne,1,then
+    *msg,warn
+NUM2STR error: invalid type for format parameter (arg3).%/&
+NUM2STR command is ignored.
+    *return,-1
+*endif
+
+! Set number format parameters
+*if,upcase(arg3),eq,'I',then
+    ! Integer
+    NUM2STR_VAR_fieldWidth=nint(log10(abs(arg2))>0)+2
+    NUM2STR_VAR_formatKey='I'
+    NUM2STR_VAR_outputPrecision=0
+
+*elseif,upcase(arg3),eq,'F',then
+    ! Float
+    NUM2STR_VAR_fieldWidth=nint(log10(abs(arg2))>0)+arg4+3
+    NUM2STR_VAR_formatKey='F'
+    NUM2STR_VAR_outputPrecision=arg4
+
+*elseif,upcase(arg3),eq,'E',then
+    ! Exponential notation
+    NUM2STR_VAR_fieldWidth=arg4+7
+    NUM2STR_VAR_formatKey='E'
+    NUM2STR_VAR_outputPrecision=arg4
+
+*else
+    ! Return error
+    *msg,warn,arg3
+NUM2STR error: invalid format (%s).%/&
+NUM2STR command is ignored.
+    *del,%NUM2STR_VAR_output%
+    *return,-1
+*endif
+
+! Set auxiliary write-to-file parameters
+NUM2STR_VAR_input=arg2
+NUM2STR_VAR_nestedFileVarName='NUM2STR_FILE_nested'
+NUM2STR_VAR_outputVarName='NUM2STR_VAR_output'
+NUM2STR_VAR_inputVarName='NUM2STR_VAR_input'
+
+! Convert number to string through external file
+*cfopen,NUM2STR_FILE_main,tmp
+    *vwrite,NUM2STR_VAR_nestedFileVarName
+*cfopen,%s,tmp
+    *vwrite,NUM2STR_VAR_outputVarName,NUM2STR_VAR_inputVarName
+*vwrite,%s,%s
+    *vwrite,NUM2STR_VAR_fieldWidth,NUM2STR_VAR_outputPrecision,NUM2STR_VAR_formatKey
+%%s='%%%i.%i%1c'
+    *vwrite
+*cfclos
+    *vwrite,NUM2STR_VAR_nestedFileVarName
+/input,%s,tmp
+    *vwrite,NUM2STR_VAR_nestedFileVarName
+/delete,%s,tmp
+*cfclos
+
+/nopr
+/input,NUM2STR_FILE_main,tmp
+/delete,NUM2STR_FILE_main,tmp
+/gopr
+
+! Remove spaces
+%NUM2STR_VAR_output%=strcomp(%NUM2STR_VAR_output%)
+
+*del,NUM2STR_FILE_nested
+*del,NUM2STR_VAR_fieldWidth
+*del,NUM2STR_VAR_formatKey
+*del,NUM2STR_VAR_input
+*del,NUM2STR_VAR_inputVarName
+*del,NUM2STR_VAR_nestedFileVarName
+*del,NUM2STR_VAR_output
+*del,NUM2STR_VAR_outputPrecision
+*del,NUM2STR_VAR_outputVarName
+

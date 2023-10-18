@@ -1,0 +1,67 @@
+! ARR2PTH, valuesArrName, itemName, tableColIndex
+! ARR2PTH,          arg1,     arg2,          arg3
+
+! Description:
+! Puts values of an array into the active path under a given label.
+
+! Arguments:
+! arg1: valueArrName   -  name of the 1-D array parameter containing the values
+! arg2: itemName       -  label for these values in the path definition
+! arg3: tableColIndex  -  number of the column at which the values will be placed in the path table
+
+! Local parameters:
+! AR20: pathTableSize
+! AR21: arrayLen
+! AR22: copiedPositions
+! AR23: nthPosition
+
+! Global parameters (erased at the end on this subroutine):
+! ARR2PTH_ARR_table
+! ARR2PTH_ARR_labels
+! ARR2PTH_ARR_points
+
+! Output parameters:
+! -
+
+*del,ARR2PTH_ARR_table
+*del,ARR2PTH_ARR_labels
+*del,ARR2PTH_ARR_points
+
+PAGET,ARR2PTH_ARR_table,TABLE
+PAGET,ARR2PTH_ARR_labels,LABEL
+PAGET,ARR2PTH_ARR_points,POINTS
+
+*get,AR20,PATH,,NVAL
+*get,AR21,PARM,%arg1%,DIM,X
+
+*if,AR21,GT,AR20,THEN
+    AR22=AR20
+    *msg,WARN,AR21,AR20
+ARR2PTH WARNING: array with %I positions truncated to fit in path of %I size.
+
+*elseif,AR20,GT,AR21,THEN
+    AR22=AR21
+    *msg,WARN,AR21,AR20
+ARR2PTH WARNING: array with %I positions shorter than path of %I size.
+
+*else
+    AR22=AR21
+*endif
+
+*do,AR23,1,AR22,1
+    ARR2PTH_ARR_table(AR23,arg3,1)=%arg1%(AR23)
+*enddo
+
+ARR2PTH_ARR_labels(arg3,1,1)=UPCASE(arg2)
+
+PAPUT,ARR2PTH_ARR_points,POINTS
+PAPUT,ARR2PTH_ARR_table,TABLE
+PAPUT,ARR2PTH_ARR_labels,LABEL
+
+*del,ARR2PTH_ARR_table
+*del,ARR2PTH_ARR_labels
+*del,ARR2PTH_ARR_points
+
+
+
+

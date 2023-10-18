@@ -1,0 +1,22 @@
+! ANNO,    x,    y, string
+! ANNO, arg1, arg2,   arg3
+
+! Description:
+! Creates an annotation using a default group of settings.
+
+! Arguments:
+! arg1: x       -  X coordinate (in window display units) of the annotation's hotspot
+! arg2: y       -  Y coordinate (in window display units) of the annotation's hotspot
+! arg3: string  -  annotation text content
+
+/anum,,1
+/tspec,15,1,4
+*cfopen,anno_file_tmp,tmp
+    *vwrite,arg1,arg2,arg3
+    /tlabel,%g,%g,%s
+*cfclos
+/nopr
+/input,anno_file_tmp,tmp
+/delete,anno_file_tmp,tmp
+/gopr
+

@@ -1,0 +1,19 @@
+! ANRM, ANum,  dir
+! ANRM, arg1, arg2
+
+AR20=UPCASE(arg2)
+
+*get,AR21,AREA,arg1,LOOP,1,LINE,1
+*get,AR22,AREA,arg1,LOOP,1,LINE,2
+*get,AR23,LINE,AR21,KP,1
+*get,AR24,LINE,AR21,KP,2
+*get,AR25,LINE,AR22,KP,2
+
+*if,AR20,EQ,'X',THEN
+    ANRM_output=NORMKX(AR23,AR24,AR25)
+*elseif,AR20,EQ,'Y',THEN
+    ANRM_output=NORMKY(AR23,AR24,AR25)
+*elseif,AR20,EQ,'Z',THEN
+    ANRM_output=NORMKZ(AR23,AR24,AR25)
+*endif
+

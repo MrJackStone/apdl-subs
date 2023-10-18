@@ -1,0 +1,263 @@
+! PTH2V, topNode1, topNode2, botNode1, botNode2, pathName, stressKey, pathDiv,    -, sectArea, avgKey
+! PTH2V,     arg1,     arg2,     arg3,     arg4,     arg5,      arg6,    arg7, arg8,     arg9,   ar10
+
+! Description:
+! Converts shear stresses along N sections into a shear force diagram. The sections are limited
+! above and below by segments defined by nodes (arg1 through arg4) and for each section a path is
+! created along which the selected stresses are integrated. The total stress is then multiplied by
+! the given cross-sectional area (arg8) to obtain the equivalent shear force at that position.
+! Finally a new path is created (mid way between top and bottom faces) and the resulting shear force
+! distribution is mapped onto it.
+
+! Arguments:
+! arg1: topNode1   -  node that marks the beginning of the top cross-sectional boundary
+! arg2: topNode2   -  node that marks the end of the top cross-sectional boundary
+! arg3: botNode1   -  node that marks the beginning of the bottom cross-sectional boundary
+! arg4: botNode2   -  node that marks the end of the bottom cross-sectional boundary
+! arg5: pathName   -  name of the mid-depth path created to map shear force results
+! arg6: stressKey  -  string indicating which stress to use to calculate shear force:
+!                        ['X']    X normal stress
+!                        ['Y']    Y normal stress
+!                        ['Z']    Z normal stress
+!                        ['XY']   XY shear stress
+!                        ['YZ']   YZ shear stress
+!                        ['XZ']   XZ shear stress
+!                        ['1']    first principal stress
+!                        ['2']    second principal stress
+!                        ['3']    third principal stress
+!                        ['INT']  stress intensity
+!                        ['EQV']  equivalent von Mises stress
+!                     NOTE: this subroutine is intended to be used to aggregate shear stresses,
+!                           though the same algorithm can be applied off-label using other stress
+!                           keys for purposes unrelated to the high-level interpretation of a
+!                           resultant cross-sectional shear force distribution.
+! arg7: pathDiv    -  number of divisions along the path defined by cross-sectional boundaries
+! arg8: [blank]    -  unused.
+! arg9: sectArea   -  area of the fictional cross-section (perpendicular to the paths)
+! ar10: avgKey     -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
+!                        [0] AVG  (take average value, default)
+!                        [1] NOAV (don't take average value)
+
+! Local parameters:
+! AR20: avglab
+! AR21: parType
+! AR23: nthSec
+! AR24: shearForce
+! AR25: upcaseSKey
+! AR26: stressLabel
+! AR27: errorKey
+! AR29: nthValue
+! AR30: midPathName
+! AR31: xt_b
+! AR32: xt_e
+! AR33: xb_b
+! AR34: xb_e
+! AR35: yt_b
+! AR36: yt_e
+! AR37: yb_b
+! AR38: yb_e
+! AR39: zt_b
+! AR40: zt_e
+! AR41: zb_b
+! AR42: zb_e
+! AR43: t_deltaX
+! AR44: t_deltaY
+! AR45: t_deltaZ
+! AR46: b_deltaX
+! AR47: b_deltaY
+! AR48: b_deltaZ
+! AR49: t_incX
+! AR50: t_incY
+! AR51: t_incZ
+! AR52: b_incX
+! AR53: b_incY
+! AR54: b_incZ
+! AR55: x_b
+! AR56: x_t
+! AR57: y_b
+! AR58: y_t
+! AR59: z_b
+! AR60: z_t
+! AR61: xm_b
+! AR62: xm_e
+! AR63: ym_b
+! AR64: ym_e
+! AR65: zm_b
+! AR66: zm_e
+! AR67: activeCS
+
+! Global parameters (erased at the end of this subroutine):
+! PTHS2V_ARR_table
+! PTHS2V_ARR_label
+! PTHS2V_ARR_points
+
+! Output parameters:
+! PTHS2V_ARR_shear
+
+
+! Switch to global cartesian
+*get,AR67,active,,csys
+csys,0
+
+! Averaging key
+AR20='AVG'
+*get,AR21,PARM,ar10,TYPE
+*if,AR21,EQ,0,THEN
+    *if,ar10,EQ,1,THEN
+        AR20='NOAV'
+    *endif
+*endif
+
+! Path names
+*get,AR21,PARM,arg5,TYPE
+*if,AR21,EQ,3,THEN
+    AR30=STRSUB(arg5,1,8)
+*else
+    AR30='S2V'
+*endif
+
+! Vertex coordinates of the fictional beam
+AR31=NX(arg1)
+AR32=NX(arg2)
+AR33=NX(arg3)
+AR34=NX(arg4)
+AR35=NY(arg1)
+AR36=NY(arg2)
+AR37=NY(arg3)
+AR38=NY(arg4)
+AR39=NZ(arg1)
+AR40=NZ(arg2)
+AR41=NZ(arg3)
+AR42=NZ(arg4)
+
+! Fictional beam length in each direction
+AR43=AR32-AR31
+AR44=AR36-AR35
+AR45=AR40-AR39
+AR46=AR34-AR33
+AR47=AR38-AR37
+AR48=AR42-AR41
+
+! Space between fictional beam cross-sections
+AR49=AR43/arg7
+AR50=AR44/arg7
+AR51=AR45/arg7
+AR52=AR46/arg7
+AR53=AR47/arg7
+AR54=AR48/arg7
+
+! Position of first cross-section
+AR55=AR33
+AR56=AR31
+AR57=AR37
+AR58=AR35
+AR59=AR41
+AR60=AR39
+
+! Initialize shear force diagram array
+*del,PTHS2V_ARR_shear
+*dim,PTHS2V_ARR_shear,ARRAY,arg7+1
+
+! Loop through fictional cross-sections calculating shear force
+*do,AR23,1,arg7+1,1
+
+    PATH,'tmpsec',2,,100
+    PATH,'tmpsec'
+    PPATH,1,,AR55,AR57,AR59
+    PPATH,2,,AR56,AR58,AR60
+
+    ! Map selected stress to active path
+    AR25=UPCASE(arg6)
+    *if,AR25,EQ,'X',THEN
+        AR26='SX'
+        PDEF,AR26,S,X,AR20
+    *elseif,AR25,EQ,'Y',THEN
+        AR26='SY'
+        PDEF,AR26,S,Y,AR20
+    *elseif,AR25,EQ,'Z',THEN
+        AR26='SZ'
+        PDEF,AR26,S,Z,AR20
+    *elseif,AR25,EQ,'XY',THEN
+        AR26='SXY'
+        PDEF,AR26,S,XY,AR20
+    *elseif,AR25,EQ,'YZ',THEN
+        AR26='SYZ'
+        PDEF,AR26,S,YZ,AR20
+    *elseif,AR25,EQ,'XZ',THEN
+        AR26='SXZ'
+        PDEF,AR26,S,XZ,AR20
+    *elseif,AR25,EQ,'1',THEN
+        AR26='S1'
+        PDEF,AR26,S,1,AR20
+    *elseif,AR25,EQ,'2',THEN
+        AR26='S2'
+        PDEF,AR26,S,2,AR20
+    *elseif,AR25,EQ,'3',THEN
+        AR26='S3'
+        PDEF,AR26,S,3,AR20
+    *elseif,AR25,EQ,'INT',THEN
+        AR26='SINT'
+        PDEF,AR26,S,INT,AR20
+    *elseif,AR25,EQ,'EQV',THEN
+        AR26='SEQV'
+        PDEF,AR26,S,EQV,AR20
+    *else
+        AR26=AR25
+        pdef,AR26,etab,AR26,AR20
+        !AR27=1
+        !*msg,WARN,AR27
+!'PTHS2V error (%I): INVALID STRESS KEY. PTHS2V COMMAND IS IGNORED.'
+        !*exit
+    *endif
+
+    ! Calculate shear force at fictional cross-section
+    PCALC,INTG,'nthV',AR26,S,arg9
+    *get,AR24,PATH,,LAST,'nthV'
+    PTHS2V_ARR_shear(AR23)=AR24
+
+    ! Update cross-section position for next iteration
+    AR55=AR55+AR52
+    AR56=AR56+AR49
+    AR57=AR57+AR53
+    AR58=AR58+AR50
+    AR59=AR59+AR54
+    AR60=AR60+AR51
+
+*enddo
+
+! Position of neutral axis path
+AR61=(AR31+AR33)/2
+AR62=(AR32+AR34)/2
+AR63=(AR35+AR37)/2
+AR64=(AR36+AR38)/2
+AR65=(AR39+AR41)/2
+AR66=(AR40+AR42)/2
+
+! Create neutral axis path
+PATH,AR30,2,20,arg7
+PPATH,1,,AR61,AR63,AR65
+PPATH,2,,AR62,AR64,AR66
+PATH,AR30
+PDEF,'dummy',S,EQV
+
+! Map shear force diagram onto neutral axis path
+PAGET,PTHS2V_ARR_table,TABLE
+PAGET,PTHS2V_ARR_label,LABEL
+PAGET,PTHS2V_ARR_points,POINTS
+*do,AR29,1,arg7+1,1
+    AR24=PTHS2V_ARR_shear(AR29)
+    PTHS2V_ARR_table(AR29,6,1)=AR24
+*enddo
+PTHS2V_ARR_label(6,1,1)='V'
+PATH,AR30
+PAPUT,PTHS2V_ARR_points,POINTS
+PAPUT,PTHS2V_ARR_table,TABLE
+PAPUT,PTHS2V_ARR_label,LABEL
+
+! Clear parameters
+*del,PTHS2V_ARR_table
+*del,PTHS2V_ARR_label
+*del,PTHS2V_ARR_points
+
+! Restore active coordinate system
+csys,AR67

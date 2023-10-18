@@ -1,0 +1,45 @@
+! DANIM, firstSet, lastSet, ETName, kund, fName
+! DANIM,     arg1,    arg2,   arg3, arg4,  arg5
+
+/post1
+
+setCount=arg2-arg1+1
+
+*del,ABSMax
+*dim,ABSMax,ARRAY,setCount
+i=0
+*do,nthSet,arg1,arg2,1
+   i=i+1
+   SET,,,,,,,nthSet
+   ETABLE,REFL
+   PLETAB,arg3
+   *get,nthMax,PLNSOL,,MAX
+   *get,nthMin,PLNSOL,,MIN
+   *if,ABS(nthMax),GT,ABS(nthMin),THEN
+      ABSMax(i)=ABS(nthMax)
+   *else
+      ABSMax(i)=ABS(nthMin)
+   *endif
+*enddo
+
+*vscfun,PeakVal,MAX,ABSMax
+*del,Factors
+*voper,Factors,ABSMax,DIV,PeakVal*0.5
+
+/eshape,0
+/seg,DELET
+/seg,OFF
+/seg,MULTI,arg5,0.02
+
+i=0
+*do,nthSet,arg1,arg2,1
+   i=i+1
+   factor=Factors(i)
+   SET,,,,,,,nthSet
+   ETABLE,REFL
+   PLLS,arg3,arg3,factor,arg4
+*enddo
+/seg,OFF
+ANIM,5,1,0.02
+FINISH
+

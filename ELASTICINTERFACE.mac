@@ -1,0 +1,231 @@
+! ELASTICINTERFACE, outputObject, direction, stiffness, tenskey, distance, elasticModulus,    -, coupledDOFs, cmnName, cmeName, cmsName
+! ELASTICINTERFACE,         arg1,      arg2,      arg3,    arg4,     arg5,           arg6, arg7,        arg8,    arg9,    ar10,    ar11
+
+! Description:
+! Creates an elastic interface of a given stiffness composed of discrete spring elements between a
+! meshed surface and a copy of itself offset by a given amount along global X, Y, or Z axis.
+
+! Arguments:
+! arg1: outputObject       -  name of array parameter to which the following data will be written:
+!                                POS CONTENTS
+!                                (1) material ID assigned to spring elements
+!                                (2) 0
+!                                (3) element type ID assigned to spring elements
+!                                (4) 0
+!                                (5) 0
+!                                (6) 0
+!                                (7) 0
+! arg2: direction          -  direction of the spring elements (must be 'X', 'Y', or 'Z')
+! arg3: stiffness          -  elastic base's stiffness per unit area (N/m²)
+! arg4: tenskey            -  LINK180's TENSKEY option:
+!                                [ 0] Tension & compression (default)
+!                                [ 1] Tension only (tendon)
+!                                [-1] Compression only (strut)
+! arg5: distance           -  spring element length, equal to the distance between the target
+!                             surface and its copy. The sign of this number determines whether the
+!                             spring is created "ahead" of the reference nodes (i.e., towards an
+!                             increasing value of the chosen XYZ coordinate) or "behind" them
+!                             (towards a decreasing value of the coordinate)
+! arg6: elasticModulus     -  elastic modulus of the material assigned to the springs
+! arg7: -                  -  [not used]
+! arg8: coupledDOFs        -  determines which degrees of freedom to couple between each spring's
+!                             nodes:
+!                                [0] no coupling
+!                                [1] UX
+!                                [2] UY
+!                                [3] UX & UY
+!                                [4] UZ
+!                                [5] UX & UZ
+!                                [6] UY & UZ
+!                                [7] UX, UY & UZ
+! arg9: cmnName            -  name of nodal selection component containing created nodes
+!                             (defaults to ELASTICINTERFACE_COMPN_new)
+! ar10: cmeName            -  name of element selection component containing created spring elements
+!                             (defaults to ELASTICINTERFACE_COMPE_new)
+! ar11: cmsName            -  name of element selection component containing elements created by
+!                             copying the target surface (defaults to ELASTICINTERFACE_COMPE_copy)
+
+! Local parameters:
+! AR20: parType
+! AR21: maxType
+! AR22: maxReal
+! AR23: maxMat
+! AR25: adoptedLength
+! AR26: adoptedElasticModulus
+! AR28: copiedElementComponent
+! AR29: nodeComponent
+! AR30: elementComponent
+! AR31: newType
+! AR32: newReal
+! AR33: newMat
+! AR35: maxRC
+! AR41: xLength
+! AR42: yLength
+! AR43: zLength
+! AR44: ecount
+! AR45: enum
+! AR46: nthElem
+! AR47: apportionedArea
+! AR48: crossSectionalArea
+! AR49: COMPN_base
+! AR50: COMPE_base
+! AR51: nBase
+! AR52: nodeIdx
+! AR53: nOpposite
+! AR54: maxNode
+
+! Global parameters (erased at the end of this subroutine):
+! ELASTICINTERFACE_ARR_appoAreas
+! ELASTICINTERFACE_ARR_nodematch
+
+
+! Base elements/nodes
+cm,AR49,node
+cm,AR50,elem
+
+! Calculate apportioned area of base elements/nodes
+apportionedstats,,'ELASTICINTERFACE_ARR_appoAreas'
+
+! Define name of node selection component
+*get,AR20,parm,arg9,type
+*if,AR20,eq,3,then
+    AR29=arg9
+*else
+    AR29='ELASTICINTERFACE_COMPN_new'
+*endif
+
+! Define name of element selection component
+*get,AR20,parm,ar10,type
+*if,AR20,eq,3,then
+    AR30=ar10
+*else
+    AR30='ELASTICINTERFACE_COMPE_new'
+*endif
+
+! Define name of element selection component
+*get,AR20,parm,ar11,type
+*if,AR20,eq,3,then
+    AR28=ar11
+*else
+    AR28='ELASTICINTERFACE_COMPE_copy'
+*endif
+
+! New element type and material numbers
+*get,AR21,etyp,,num,max
+AR31=AR21+1
+*get,AR23,mat,,num,max
+AR33=AR23+1
+
+! Stiffness parameters: length, elastic modulus
+AR25=arg5
+AR26=abs(arg6)
+
+! Determine spring direction
+AR41=0
+AR42=0
+AR43=0
+*if,upcase(arg2),eq,'X',then
+    AR41=AR25
+*elseif,upcase(arg2),eq,'Y',then
+    AR42=AR25
+*elseif,upcase(arg2),eq,'Z',then
+    AR43=AR25
+*else
+    *msg,warn
+ELASTICINTERFACE error: invalid direction. arg2 must be X, Y, or Z.%/&
+ELASTICINTERFACE command is ignored.
+    *return,-1
+*endif
+
+! Create new attribute set applied to all springs: element type, material
+et,AR31,link180
+mp,ex,AR33,AR26
+mp,prxy,AR33,0.3
+
+! Activate new attributes
+type,AR31
+mat,AR33
+
+! Copy base mesh
+*get,AR54,node,,num,maxd
+egen,2,AR54,AR50,,,,,,,,AR41,AR42,AR43
+cmsel,u,AR50
+cmsel,u,AR49
+cm,AR28,elem
+cm,AR29,node
+
+! Create springs
+esel,u,elem,,all
+cmsel,s,AR49
+cmsel,a,AR29
+eintf,,,,,AR41,AR42,AR43
+cm,AR30,elem
+
+! Adjust cross-sectional area of each spring to account for apportioned area
+cmsel,s,AR30
+*get,AR44,elem,,count
+AR45=0
+*do,AR46,1,AR44,1
+    ! Select nth spring
+    cmsel,s,AR30
+    AR45=elnext(AR45)
+    esel,s,elem,,AR45
+    nsle,s
+    cmsel,r,AR49
+    ! Get apportioned area
+    AR51=ndnext(0)
+    *del,ELASTICINTERFACE_ARR_nodematch
+    *voper,ELASTICINTERFACE_ARR_nodematch,ELASTICINTERFACE_ARR_appoAreas(1,1),eq,AR51
+    *vscfun,AR52,first,ELASTICINTERFACE_ARR_nodematch
+    *if,AR52,eq,0,then
+        *msg,warn,AR51,AR45
+ELASTICINTERFACE warning: apportioned area for node number %I not found.%/&
+Corresponding spring element (%I) will be set to material number 999 for debugging.
+        emodif,AR45,mat,999
+        *cycle
+    *endif
+    AR47=ELASTICINTERFACE_ARR_appoAreas(AR52,2)
+    ! Calculate spring's cross-sectional area
+    AR48=arg3*AR47*abs(AR25)/AR26
+    ! Change spring's real constant
+    *get,AR35,rcon,,num,max
+    AR32=AR35+1
+    r,AR32,AR48,,arg4
+    emodif,AR45,real,AR32
+
+!    ! Couple DOFs
+!    nsle,s
+!    AR53=ndnext(AR51)
+!    *if,arg8,eq,1,then
+!        safe_cp,'UX',AR51,AR53
+!    *elseif,arg8,eq,2,then
+!        safe_cp,'UY',AR51,AR53
+!    *elseif,arg8,eq,3,then
+!        safe_cp,'UX',AR51,AR53
+!        safe_cp,'UY',AR51,AR53
+!    *elseif,arg8,eq,4,then
+!        safe_cp,'UZ',AR51,AR53
+!    *elseif,arg8,eq,5,then
+!        safe_cp,'UX',AR51,AR53
+!        safe_cp,'UZ',AR51,AR53
+!    *elseif,arg8,eq,6,then
+!        safe_cp,'UY',AR51,AR53
+!        safe_cp,'UZ',AR51,AR53
+!    *elseif,arg8,eq,7,then
+!        safe_cp,'UX',AR51,AR53
+!        safe_cp,'UY',AR51,AR53
+!        safe_cp,'UZ',AR51,AR53
+!    *endif
+*enddo
+
+! Assign attribute numbers to output object
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    *del,%arg1%
+    *dim,%arg1%,,7
+    %arg1%(1)=AR33,0,AR31,0,0,0,0
+*endif
+
+*del,ELASTICINTERFACE_ARR_appoAreas
+*del,ELASTICINTERFACE_ARR_nodematch
+

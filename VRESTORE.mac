@@ -1,0 +1,6 @@
+! VRestore
+
+! Selecionar volumes armazenados em backup
+CMSEL,S,VBackup_
+CMDELE,VBackup_
+*del,VBackup_

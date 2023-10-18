@@ -1,0 +1,6 @@
+! VBackup
+
+*del,VBackup_
+
+! Criar backup de áreas selecionadas
+CM,VBackup_,VOLU

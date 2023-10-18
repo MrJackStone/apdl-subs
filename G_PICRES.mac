@@ -1,0 +1,43 @@
+! G_PICRES, resolution
+! G_PICRES, arg1
+
+! Description:
+! Sets the global parameter ('GLOBAL_picRes_') that stores the value of resolution to be used when
+! exporting images. Defaults to 1200. When no argument is passed (arg1=0), the current value of the
+! global parameter is returned.
+
+! Arguments:
+! arg1: resolution  -  value of the resolution (between 256 and 2400)
+
+! Local parameters:
+! AR20: parType
+! AR21: adoptedResolution
+
+! Global output parameters:
+! GLOBAL_picRes_
+! _OUTPUT
+
+
+*get,AR20,parm,arg1,type
+*if,AR20,eq,0,and,arg1,gt,0,then
+    ! Set resolution
+    *if,arg1,lt,256,then
+        AR21=256
+    *elseif,arg1,gt,2400,then
+        AR21=2400
+    *else
+        AR21=nint(arg1)
+    *endif
+*else
+    ! Check current resolution
+    *get,AR20,parm,GLOBAL_picRes_,type
+    *if,AR20,ne,0,or,GLOBAL_picRes_,eq,0,then
+        AR21=1200
+    *else
+        AR21=GLOBAL_picRes_
+    *endif
+*endif
+
+GLOBAL_picRes_=AR21
+_OUTPUT=GLOBAL_picRes_
+

@@ -1,0 +1,104 @@
+RESUME,,db
+
+!!                                                                                                !!
+!! 5. PÓS-PROCESSO                                                                                !!
+!!                                                                                                !!
+/post1
+! Escala da deformada determinada automaticamente
+ALLSEL
+/dscale,ALL,AUTO
+VIEW4W
+
+!! 5.1  DEFORMADA                                                                                 !!
+! Ler último substep que convergiu
+SET,LAST
+*get,Status,ACTIVE,,SOLU,CNVG
+*get,ThisSubstep,ACTIVE,,SET,SBST
+LastUnconverged=0
+*if,Status,EQ,0,OR,ThisSubstep,EQ,999999,THEN
+   SET,PREV
+   LastUnconverged=1
+*endif
+! Número do último load step
+*get,LSNum,ACTIVE,,SET,LSTP
+! Obter o número de substeps que convergiram
+*get,LastSubstep,ACTIVE,,SET,SBST
+! Obter o fator de carga do último substep que convergiu
+*get,LastLambda,ACTIVE,,SET,TIME
+! Obter fator de carga máximo
+Lambda=0
+*do,nthSub,1,LastSubstep
+   ! Ler substep
+   SET,LSNum,nthSub
+   ! Obter fator de carga do substep
+   *get,SubstepLoadFactor,ACTIVE,,SET,TIME
+   ! Atualizar o valor máximo do fator de carga
+   *if,SubstepLoadFactor,GT,Lambda,THEN
+      Lambda=SubstepLoadFactor
+      ! Salvar o número do substep de maior fator de carga
+      MaxLFacSubstep=nthSub
+   *endif
+*enddo
+! Ler substep da carga máxima
+SET,LSNum,MaxLFacSubstep
+! Plotar deformada
+/show
+PLDISP,2
+TAKEPIC,'Deformada'
+! Plotar tensões de von Mises
+/show
+PLNSOL,S,EQV
+TAKEPIC,'Von Mises'
+! Plotar deformações principais
+/show
+PLNSOL,EPPL,1
+TAKEPIC,'EPPL'
+
+!! 5.2  GRÁFICOS                                                                                  !!
+/post26
+VIEW1W
+! Definir cor da primeira curva do gráfico (azul)
+/color,CURVE,BLUE,1
+! Número máximo de variáveis
+NUMVAR,200
+! Definir intervalo a ser armazenado
+TIMERANGE,0,Lambda
+NSTORE,1
+! Definir variável: deslocamento em X do nó da face livre
+NSOL,2,midNodeR,U,X,DISP_X1
+! Variável em x: deslocamento do primeiro nó
+XVAR,2
+! Calcular limites do gráfico
+! Fator de carga
+*vlen,LastSubstep,1
+*del,LoadFactors
+*dim,LoadFactors,ARRAY,LastSubstep
+VGET,LoadFactors(1),1
+! Deslocamento em Y do primeiro nó
+*vlen,LastSubstep,1
+*del,FNode1_YDisp
+*dim,FNode1_YDisp,ARRAY,LastSubstep
+VGET,FNode1_YDisp(1),2
+*vlen
+! Plotar gráficos
+! Definir intervalo do eixo X
+*vscfun,GraphXMin,MIN,FNode1_YDisp
+*vscfun,GraphXMax,MAX,FNode1_YDisp
+/xrange,GraphXMin,GraphXMax
+! Definir intervalo do eixo Y
+*vscfun,GraphYMin,MIN,LoadFactors
+*vscfun,GraphYMax,MAX,LoadFactors
+/yrange,GraphYMin,GraphYMax
+! Variável em Y: fator de carga
+/show
+PLVAR,1
+TAKEPIC,'Carga x Deslocamento',800
+
+! Tornar a exibir as tensões de von Mises
+/post1
+VIEW1W
+SET,,LastSubstep
+/dscale,,20
+PLNSOL,S,EQV,2
+
+

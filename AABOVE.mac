@@ -1,0 +1,65 @@
+! aabove, selType,  kp1,  kp2
+! aabove,    arg1, arg2, arg3
+
+! Description:
+! Selects all areas "above" a segment defined by two keypoints. The segment is interpreted as the
+! positive direction of the X axis (with the first keypoint as origin) and the positive Y axis is
+! obtained by rotating the second keypoint about the first by 90 degrees counter-clockwise. In
+! this context, "above" means having positive Y location (asel,s,loc,y...). All measurements are
+! taken in the active coordinate system.
+
+! Arguments:
+! arg1: selType  -  selection type ('S', 'A', 'U', 'R')
+! arg2: kp1      -  first keypoint, adopted as origin of the reference coordinate system
+! arg3: kp2      -  second keypoint, adopted as endpoint of positive X axis
+
+! Local parameters:
+! AR20: parType
+! AR21: selOpt
+! AR22: csmaxd
+! AR23: dummyCS
+! AR24: maxKY
+! AR31: xOrigin
+! AR32: yOrigin
+! AR33: zOrigin
+! AR41: xEnd
+! AR42: yEnd
+! AR43: zEnd
+
+
+! Backup current state
+kbackup
+csbackup
+
+! Selection option: set default
+AR21='S'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR21=strsub(arg1,1,1)
+*endif
+
+! Origin
+AR31=kx(arg2)
+AR32=ky(arg2)
+AR33=kz(arg2)
+
+! X endpoint
+AR41=kx(arg3)
+AR42=ky(arg3)
+AR43=kz(arg3)
+
+! Create dummy CSYS
+*get,AR22,cdsy,,num,max
+AR23=(AR22>10)+1
+csby2p,AR23,AR31,AR32,AR33,AR41,AR42,AR43
+csys,AR23
+
+! Select areas up to maximum Y keypoint coordinate
+ksel,s,kp,,all
+*get,AR24,kp,,mxloc,y
+asel,AR21,loc,y,0,AR24
+
+! Clean up
+krestore
+csrestore
+csdele,AR23

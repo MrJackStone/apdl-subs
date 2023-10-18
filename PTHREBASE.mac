@@ -1,0 +1,99 @@
+! pthrebase, resultPathLabel, defType, outputLabel, outputScale
+! pthrebase,            arg1,    arg2,        arg3,        arg4
+
+! Description:
+! Subtracts a given path result from a reference line. The reference line can be either secant
+! (defined by the path result's value at the first and last path points) or tangent (defined by
+! a slope calculated using the path result's first two values).
+
+! Arguments:
+! arg1: resultPathLabel  -  existing path item label to be calculated upon
+! arg2: defType          -  key indicating how the reference line should be defined:
+!                              [0] secant (default)
+!                              [1] tangent to first node
+! arg3: outputLabel      -  label of the path item to be created
+! arg4: outputScale      -  output path item scaling factor (defaults to 1)
+
+
+! Local parameters:
+! AR20: parType
+! AR21: refLineType
+! AR22: scaleFactor
+! AR23: pathPointCount
+! AR24: pathLength
+! AR25: firstValue
+! AR26: secondValue
+! AR27: lastValue
+! AR28: coef_a
+! AR29: coef_b
+
+
+! Global parameters (erased at the end of this subroutine):
+! PTH2ARR_ARR_OUTPUT
+
+! Output parameters:
+! PTHREBASE_ARR_values
+
+
+! Reference line option
+*get,AR20,PARM,arg2,TYPE
+*if,AR20,NE,0,THEN
+    AR21='SEC'
+*else
+    *if,arg2,EQ,1,THEN
+        AR21='TAN'
+    *else
+        AR21='SEC'
+    *endif
+*endif
+
+! Scale factor
+AR22=1
+*if,arg4,ne,0,then
+    AR22=arg4
+*endif
+
+! Path length
+pth2arr,'s'
+*get,AR23,parm,PTH2ARR_ARR_OUTPUT,dim,x
+AR24=PTH2ARR_ARR_OUTPUT(AR23)
+
+! Key displacements
+pth2arr,arg1
+AR25=PTH2ARR_ARR_OUTPUT(1)
+AR26=PTH2ARR_ARR_OUTPUT(2)
+AR27=PTH2ARR_ARR_OUTPUT(AR23)
+
+! Calculate reference path parameter:
+! Angular coefficient
+*if,AR21,EQ,'SEC',THEN
+    AR28=(AR27-AR25)/AR24
+*elseif,AR21,EQ,'TAN',THEN
+    AR28=(AR26-AR25)/AR24
+*endif
+! Linear coefficient
+AR29=AR25
+
+! Adjust small values for line coefficients
+*if,abs(AR28),lt,1E-10,then
+    AR28=1E-10
+*endif
+*if,abs(AR29),lt,1E-10,then
+    AR29=1E-10
+*endif
+
+! Create reference line path item
+pcalc,add,'REF','S',,AR28,,AR29
+
+! Calculate relative values
+pcalc,add,arg3,arg1,'REF',1,-1
+
+! Scale values
+pcalc,add,arg3,arg3,,AR22
+
+! Store path values in arrays
+pth2arr,arg3,'PTHREBASE_ARR_values'
+
+! Clear parameters
+*del,PTH2ARR_ARR_OUTPUT
+

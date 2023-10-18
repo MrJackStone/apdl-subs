@@ -1,0 +1,21 @@
+! SELEVOLU, outputParm
+! SELEVOLU,       arg1
+
+! AR20: ec
+! AR21: enum
+! AR22: totalVolume
+! AR23: nthElem
+! AR24: nthVol
+
+
+*get,AR20,elem,,count
+AR21=0
+AR22=0
+*do,AR23,1,AR20,1
+    AR21=elnext(AR21)
+    *get,AR24,elem,AR21,volu
+    AR22=AR22+AR24
+*enddo
+
+%arg1%=AR22
+

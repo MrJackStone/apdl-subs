@@ -1,0 +1,231 @@
+! SUGATT, output, csNum
+! SUGATT,   arg1,  arg2
+
+! Description:
+! Calculates, based on a given CS assumed to have its X axis perpendicular to the selected surface,
+! a set of geometric quantities. This subroutine thus generates three kinds of output:
+!    a) a coordinate system (identified as central-principal, 'cpAxes') with its origin on the
+!       surface's centroid and rotated about X to match the principal rotation;
+!    b) result data sets mapped to the selected surface:
+!          LCX - local X coordinate
+!          LCY - local Y coordinate
+!          LCZ - local Z coordinate
+!          Note: all coordinates are relative to the surface's central-principal axes calculated
+!                by this subroutine
+!    c) an array with each element corresponding to a geometric quantity, formatted as follows:
+!          POS   PARAM        DESCRIPTION
+!           1    cpAxes       number identifying the CS created at the surface's CP axes
+!           2    PROP_area    area of the surface
+!           3    PROP_Iycp    second moment of area about Y (CP axes)
+!           4    PROP_Izcp    second moment of area about Z (CP axes)
+!           5    PROP_Iyzcp   product of inertia (CP axes - theoretically equal to zero)
+!           6    GCS_xc       X coordinate of the origin of CP axes in global CS
+!           7    GCS_yc       Y coordinate of the origin of CP axes in global CS
+!           8    GCS_zc       Z coordinate of the origin of CP axes in global CS
+!           9    GCS_thetaXY  XY rotation of the CP axes in global CS
+!          10    GCS_thetaYZ  YZ rotation of the CP axes in global CS
+!          11    GCS_thetaZX  ZX rotation of the CP axes in global CS
+!          12    PROP_yc      Y location of the origin of CP axes (relative to given CS)
+!          13    PROP_zc      Z location of the origin of CP axes (relative to given CS)
+!          14    PROP_Sy      first moment of area of Y axis (in given CS)
+!          15    PROP_Sz      first moment of area of Z axis (in given CS)
+!          16    PROP_Iy      second moment of area about Y axis (in given CS)
+!          17    PROP_Iz      second moment of area about Z axis (in given CS)
+!          18    PROP_Iyz     product of inertia in YZ axis (in given CS)
+!          19    PROP_theta   angle of rotation from given CS to CP axes
+!          20    PROP_Iyc     second moment of area about Y (in central axes)
+!          21    PROP_Izc     second moment of area about Z (in central axes)
+!          22    PROP_Iyzc    product of inertia in YZ (in central axes)
+!          23    PRED_Iycp    predicted second moment of area about CP Y axis
+!          24    PRED_Izcp    predicted second moment of area about CP Z axis
+!          25    PRED_Iyzcp   predicted product of inertia in YZ (CP axes)
+
+! Arguments:
+! arg1: output  -  name of output parameter to which array of geometric quantities is assigned
+!                  (defaults to SUGATT_ARR_output)
+! arg2: csNum   -  number of given coordinate system, assumed to lie on the surface (YZ plane)
+
+! Local parameters:
+! AR21: PROP_area
+! AR22: PROP_Sy
+! AR23: PROP_Sz
+! AR24: PROP_Iy
+! AR25: PROP_Iz
+! AR26: PROP_Iyz
+! AR27: PROP_yc
+! AR28: PROP_zc
+! AR29: PROP_Iyc
+! AR30: PROP_Izc
+! AR31: PROP_Iyzc
+! AR32: PROP_theta
+! AR33: PRED_Iycp
+! AR34: PRED_Izcp
+! AR35: PRED_Iyzcp
+! AR36: PROP_Iycp
+! AR37: PROP_Izcp
+! AR38: PROP_Iyzcp
+! AR39: GCS_xc
+! AR40: GCS_yc
+! AR41: GCS_zc
+! AR42: GCS_thetaXY
+! AR43: GCS_thetaYZ
+! AR44: GCS_thetaZX
+! AR45: outputParm
+
+! Output parameters:
+! %arg1% or SUGATT_ARR_output
+
+! Global parameters (erased at the end of this subroutine):
+! SUGATT_VAR_cpAxes
+
+
+! Backup environment
+csbackup
+afunbackup
+csnext,'SUGATT_VAR_cpAxes'
+*afun,deg
+
+! Output parameter name
+parverify,,arg1,'CHAR'
+*if,_OUTPUT,eq,1,then
+    AR45=arg1
+*else
+    AR45='SUGATT_ARR_output'
+*endif
+
+! Calculate surface area
+sueval,AR21,'DA',sum
+
+*if,AR21,eq,0,then
+
+    ! Surface does not intersect any elements:
+    SUGATT_VAR_cpAxes=0
+    sucalc,'LCX',,zero,,,,0
+    sucalc,'LCY',,zero,,,,0
+    sucalc,'LCZ',,zero,,,,0
+
+*else
+    ! For coordinate system in arbitrary origin and orientation:
+
+    ! Calculate surface coordinates in local CS
+    sulocal, arg2
+
+    ! Calculate first moment of area along local Y axis
+    sucalc,'SY','LCZ',mult,'DA'
+    sueval,AR22,'SY',sum
+
+    ! Calculate first moment of area along local Z axis
+    sucalc,'SZ','LCY',mult,'DA'
+    sueval,AR23,'SZ',sum
+
+    ! Calculate second moment of area about Y axis
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCZ',exp,,2
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR24,'AGGR',sum
+
+    ! Calculate second moment of area about Z axis
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCY',exp,,2
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR25,'AGGR',sum
+
+    ! Calculate product of inertia for Y-Z axes
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCY',mult,'LCZ'
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR26,'AGGR',sum
+
+
+    ! Calculate transformations:
+
+    ! Calculate relative coordinates of the surface's centroid
+    AR27=AR23/AR21
+    AR28=AR22/AR21
+
+    ! Calculate second moments of area for central axes
+    AR29=AR24-2*AR28*AR22+AR21*AR28**2
+    AR30=AR25-2*AR27*AR23+AR21*AR27**2
+    AR31=AR26-AR27*AR22-AR28*AR23+AR27*AR28*AR21
+
+    ! Calculate principal rotation
+    AR32=(1/2)*atan(-2*AR31/(AR29-AR30))
+
+    ! Calculate maximum and minimum second moments of area
+    AR33=((AR29+AR30)/2)+((AR29-AR30)/2)*cos(2*AR32)-AR31*sin(2*AR32)
+    AR34=((AR29+AR30)/2)-((AR29-AR30)/2)*cos(2*AR32)+AR31*sin(2*AR32)
+    AR35=AR31*cos(2*AR32)+((AR29-AR30)/2)*sin(2*AR32)
+
+    ! Create central principal local coordinate system
+    csys,arg2
+    clocal,SUGATT_VAR_cpAxes,cart,0,AR27,AR28,,AR32
+
+
+    ! For central principal coordinate system:
+
+    ! Calculate surface coordinates in local CS
+    sulocal, SUGATT_VAR_cpAxes
+
+    ! Recalculate second moment of area about Y axis
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCZ',exp,,2
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR36,'AGGR',sum
+
+    ! Recalculate second moment of area about Z axis
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCY',exp,,2
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR37,'AGGR',sum
+
+    ! Calculate product of inertia for Y-Z axes
+    sucalc,'AGGR',,zero,,,,0
+    sucalc,'AGGR','LCY',mult,'LCZ'
+    sucalc,'AGGR','AGGR',mult,'DA'
+    sueval,AR38,'AGGR',sum
+
+
+    ! Get principal central coordinate system parmeters in global CS
+    *get,AR39,cdsy,SUGATT_VAR_cpAxes,loc,x
+    *get,AR40,cdsy,SUGATT_VAR_cpAxes,loc,y
+    *get,AR41,cdsy,SUGATT_VAR_cpAxes,loc,z
+    *get,AR42,cdsy,SUGATT_VAR_cpAxes,ang,xy
+    *get,AR43,cdsy,SUGATT_VAR_cpAxes,ang,yz
+    *get,AR44,cdsy,SUGATT_VAR_cpAxes,ang,zx
+
+*endif
+
+! Prepare output array
+*del,%AR45%
+*dim,%AR45%,,25
+
+! CS-independent:
+!          cpAxes,            PROP_area
+%AR45%(1)= SUGATT_VAR_cpAxes, AR21
+
+! Relative to CP-axes:
+!          PROP_Iycp, PROP_Izcp, PROP_Iyzcp
+%AR45%(3)= AR36,      AR37,      AR38
+
+! In global CS:
+!          GCS_xc, GCS_yc, GCS_zc, GCS_thetaXY, GCS_thetaYZ, GCS_thetaZX
+%AR45%(6)= AR39,   AR40,   AR41,   AR42,        AR43,        AR44
+
+! In arbitrary CS:
+!          PROP_yc, PROP_zc, PROP_Sy, PROP_Sz, PROP_Iy, PROP_Iz, PROP_Iyz
+%AR45%(12)=AR27,    AR28,    AR22,    AR23,    AR24,    AR25,    AR26
+
+! In central axes:
+!          PROP_theta, PROP_Iyc, PROP_Izc, PROP_Iyzc
+%AR45%(19)=AR32,       AR29,     AR30,     AR31
+
+! In CP-axes:
+!          PRED_Iycp, PRED_Izcp, PRED_Iyzcp
+%AR45%(23)=AR33,      AR34,      AR35
+
+
+! Restore environment
+csrestore
+afunrestore
+*del,SUGATT_VAR_cpAxes
+

@@ -1,0 +1,271 @@
+! SEC_CCIRC, name, angDiv, radSize, dCore, matCore,   d2, mat2,   d3, mat3,   d4, mat4,   d5, mat5,  d6, mat6,    d7, mat7,   d8, mat8
+! SEC_CCIRC, arg1,   arg2,    arg3,  arg4,    arg5, arg6, arg7, arg8, arg9, ar10, ar11, ar12, ar13, ar14, ar15, ar16, ar17, ar18, ar19
+
+! Description:
+! Creates a custom cross-section for beam elements composed of a solid circular core and up to 7
+! concentric rings enclosing the core (each with a given material) and saves it to a .SECT file
+! of a given name.
+
+! Argument list:
+! arg1: name           -  name of the .SECT file with the cross-section definition to be created
+! arg2: angDiv         -  number of mesh divisions along circumference (must be even, min=default=8)
+! arg3: radSize        -  size of mesh divisions along radial direction (defaults to single element)
+! arg4: dCore          -  diameter of the core
+! arg5: matCore        -  material number of the core (defaults to 1)
+! [arg6:ar18:2]: dN    -  outer diameter of each successive ring
+! [arg7:ar19:2]: matN  -  material number for each ring (defaults to the core material)
+
+! Local variables:
+! AR20: ringCount
+! AR21: coreMaterial
+! AR22: validGeometry
+! AR23: maxEType
+! AR24: plane82EType
+! AR25: prevRadius
+! AR26: SEC_CCIRC_COMPA_layers
+! AR27: subSlices
+! AR28: maxDim
+! AR29: radSize
+! AR30: sliceSize
+! AR31: sliceRad
+! AR32: nthSlice
+! AR33: nthRing
+! AR34: nthRadius
+! AR35: nthMaterial
+! AR36: ringThk
+! AR37: circDiv
+! AR38: wedgeAngle
+
+! Global variables (erased at the end of this subroutine):
+! SEC_CCIRC_d
+! SEC_CCIRC_m
+
+*if,arg3,LT,0,THEN
+    AR21=1
+*else
+    AR21=arg3
+*endif
+
+AR22=1
+*if,arg4,GT,0,THEN
+    *if,arg6,GT,0,AND,arg6,GT,arg4,THEN
+        *if,arg8,GT,0,AND,arg8,GT,arg6,THEN
+            *if,ar10,GT,0,AND,ar10,GT,arg8,THEN
+                *if,ar12,GT,0,AND,ar12,GT,ar10,THEN
+                    *if,ar14,GT,0,AND,ar14,GT,ar12,THEN
+                        *if,ar16,GT,0,AND,ar16,GT,ar14,THEN
+                            *if,ar18,GT,0,AND,ar18,GT,ar16,THEN
+                                ! 7 RINGS
+                                AR20=7
+                                *if,ar19,LE,0,THEN
+                                    ar19=AR21
+                                *endif
+                            *else
+                                ! 6 RINGS
+                                AR20=6
+                                *if,ar17,LE,0,THEN
+                                    ar17=AR21
+                                *endif
+                            *endif
+                        *else
+                            ! 5 RINGS
+                            AR20=5
+                            *if,ar15,LE,0,THEN
+                                ar15=AR21
+                            *endif
+                        *endif
+                    *else
+                        ! 4 RINGS
+                        AR20=4
+                        *if,ar13,LE,0,THEN
+                            ar13=AR21
+                        *endif
+                    *endif
+                *else
+                    ! 3 RINGS
+                    AR20=3
+                    *if,ar11,LE,0,THEN
+                        ar11=AR21
+                    *endif
+                *endif
+            *else
+                ! 2 RINGS
+                AR20=2
+                *if,arg9,LE,0,THEN
+                    arg9=AR21
+                *endif
+            *endif
+        *else
+            ! 1 RING
+            AR20=1
+            *if,arg7,LE,0,THEN
+                arg7=AR21
+            *endif
+        *endif
+    *else
+        ! SOLID CIRCLE
+        AR20=0
+    *endif
+*else
+    ! Invalid geometry
+    AR22=0
+*endif
+
+! Arrays: diameters and material numbers
+*dim,SEC_CCIRC_d,ARRAY,7
+SEC_CCIRC_d(1)= arg6, arg8, ar10, ar12, ar14, ar16, ar18
+*dim,SEC_CCIRC_m,ARRAY,7
+SEC_CCIRC_m(1) = arg7, arg9, ar11, ar13, ar15, ar17, ar19
+
+! Calculate maximum diameter
+*if,AR20,GT,0,THEN
+    AR28=SEC_CCIRC_d(AR20)
+*else
+    AR28=arg4
+*endif
+
+! Calculate radial element size
+*if,arg3,GT,0,THEN
+    AR29=arg3
+*else
+    AR29=AR28
+*endif
+
+! Calculate circular element size
+AR37=0
+*if,arg2,GT,0,THEN
+    AR37=NINT((arg2/2)+0.1)*2
+*endif
+*if,AR37,LT,8,THEN
+    AR37=8
+*endif
+AR38=360/AR37
+
+! Create custom cross-section
+*if,AR22,EQ,0,THEN
+    *msg,WARN
+SEC_CCIRC error: invalid geometry definition. Command is ignored.
+
+*else
+
+    ! Deactivate auto screen update
+    /nopr
+    IMMED,0
+    /uis,REPLOT,0
+    /uis,MSGPOP,3
+
+    ! Store previous selection
+    ABACKUP
+    LBACKUP
+    KBACKUP
+    EBACKUP
+    NBACKUP
+    ASEL,U,AREA,,ALL
+    LSEL,U,LINE,,ALL
+    KSEL,U,KP,,ALL
+    ESEL,U,ELEM,,ALL
+    NSEL,U,NODE,,ALL
+
+    ! Create element type: PLANE82
+    *get,AR23,ETYP,0,NUM,MAX
+    AR24=AR23+1
+    ET,AR24,82
+
+    ! Draw core
+    AR25=arg4/2
+    CYL4,0,0,AR25
+
+    ! Split core: concentric rings
+    AR27=NINT(AR25/AR29)-1
+    *if,AR27,GE,1,THEN
+        AR30=AR25/(AR27+1)
+        AR31=AR25
+        *do,AR32,1,AR27,1
+            AR31=AR31-AR30
+            ARADSLICE,AR31
+        *enddo
+    *endif
+    CM,AR26,AREA
+
+    ! Draw and split outer rings
+    *do,AR33,1,AR20,1
+        ! Draw ring
+        ASEL,U,AREA,,ALL
+        AR34=SEC_CCIRC_d(AR33)/2
+        AR35=SEC_CCIRC_m(AR33)
+        CYL4,0,0,AR34,,AR25
+        ! Split ring
+        AR36=AR34-AR25
+        AR27=NINT(AR36/AR29)-1
+        *if,AR27,GE,1,THEN
+            AR30=AR36/(AR27+1)
+            AR31=AR34
+            *do,AR32,1,AR27,1
+                AR31=AR31-AR30
+                ARADSLICE,AR31
+            *enddo
+        *endif
+        CMSEL,A,AR26
+        CM,AR26,AREA
+        AR25=AR34
+    *enddo
+
+    ! Core & rings: cut wedges
+    CMSEL,S,AR26
+    LSLA,S
+    KSLL,S
+    WPROTA,,90
+    *do,AR32,1,AR37/2,1
+        WPROTA,,,AR38
+        ASBW,ALL,,DELETE
+    *enddo
+    WPROTA,,,-AR38*(AR37/2)
+    WPROTA,,-90
+    CM,AR26,AREA
+
+    ! Merge areas
+    NUMMRG,KP
+
+    ! Core: set material attribute
+    CSYS,1
+    AR25=arg4/2
+    ASEL,S,LOC,X,0,AR25
+    AATT,AR21,,AR24
+    ! Rings: set material attribute
+    *do,AR33,1,AR20,1
+        ASEL,U,AREA,,ALL
+        AR34=SEC_CCIRC_d(AR33)/2
+        AR35=SEC_CCIRC_m(AR33)
+        ASEL,S,LOC,X,AR25,AR34
+        AATT,AR35,,AR24
+        AR25=AR34
+    *enddo
+    CSYS,0
+
+    ! Mesh areas
+    CMSEL,A,AR26
+    AESIZE,ALL,AR28
+    AMESH,ALL
+
+    ! Write section file
+    SECWRITE,arg1,SECT,,AR24
+
+    ! Clear solid model and finite element model entities
+    ACLEAR,ALL
+    ADELE,ALL
+    LDELE,ALL
+    KDELE,ALL
+    ETDELE,AR24
+
+    ! Restore previous selection
+    ARESTORE
+    LRESTORE
+    KRESTORE
+    NRESTORE
+    ELRESTORE
+
+*endif
+
+! Clear parameters
+*del,SEC_CCIRC_d
+*del,SEC_CCIRC_m

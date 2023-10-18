@@ -1,0 +1,7 @@
+! mpopbackup
+! mpopbackup
+
+! Description:
+! Stores the current value of /uis,MSGPOP, to be later restored by MPOPRESTORE.
+
+*get,MPOPBACKUP_,common,,d3com2,,int,31

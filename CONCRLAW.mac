@@ -1,0 +1,179 @@
+! CONCRLAW, law , fck ,  E  , pointNumber
+! CONCRLAW, arg1, arg2, arg3, arg4
+
+! Descrição:
+! Esta subrotina gera os pontos (pares ordenados [sigma; epsilon]) que compõem a lei tensão-
+! deformação do concreto. É possível selecionar três tipos de curva:
+!    · Tipo 0: curva retirada de publicações internacionais (ver descrição matemática no
+!              material do curso de Ansys);
+!    · Tipo 1: curva Tipo 0 com cauda (epsilonCU = 2*epsilonC2)
+!    · Tipo 2: curva da ABNT NBR 6118:2014 sem a cauda (curva interrompida ao final do trecho
+!              não linear);
+!    · Tipo 3: curva da ABNT NBR 6118:2014 com a cauda até a deformação epsilonCU
+
+! Lista de argumentos:
+! arg1: law          -  tipo da curva tensão-deformação (valores 0, 1 e 2, ver descrição acima)
+! arg2: fck          -  valor do fck do concreto (é possível fornecer um valor ponderado, como por
+!                       exemplo o fcd, para gerar uma curva distinta da característica)
+! arg3: E            -  módulo de elasticidade secante do concreto (utilizado apenas pela curva
+!                       tipo 0, do curso de Ansys)
+! arg4: pointNumber  -  número de pontos para a discretização da lei tensão-deformação (default: 5)
+
+! Lista de variáveis locais
+! AR20: parType
+! AR21: tail
+! AR22: corrPtNumber
+! AR23: epsilonC2
+! AR24: epsilonC1
+! AR25: fc1
+! AR26: deltaEpsilon
+! AR27: nthPoint
+! AR28: nthEpsilon
+! AR29: nthSigma
+! AR30: epsilonCU
+! AR31: n
+
+! Lista de variáveis de saída:
+! CONCRLAW_ARR_eVector
+! CONCRLAW_ARR_sVector
+! CONCRLAW_VAR_E0
+
+
+!!                                                                                                !!
+!! 1. CÁLCULOS PRELIMINARES                                                                       !!
+!!                                                                                                !!
+! Verificar número de pontos
+*get,AR20,PARM,arg4,TYPE
+*if,AR20,EQ,0,THEN
+   *if,arg4,EQ,0,THEN
+      arg4=5
+   *endif
+*else
+   arg4=5
+*endif
+
+! Verificar a existência de cauda
+*if,arg1,EQ,1,OR,arg1,EQ,3,THEN
+   AR21=1
+*else
+   AR21=0
+*endif
+
+! Comprimento do vetor corrigido
+*if,AR21,EQ,1,THEN
+   AR22=arg4+1
+*else
+   AR22=arg4
+*endif
+
+! Inicializar vetores
+*del,CONCRLAW_ARR_eVector
+*del,CONCRLAW_ARR_sVector
+*dim,CONCRLAW_ARR_eVector,ARRAY,AR22
+*dim,CONCRLAW_ARR_sVector,ARRAY,AR22
+
+
+!!                                                                                                !!
+!! 2. PONTOS DA LEI TENSÃO-DEFORMAÇÃO                                                             !!
+!!                                                                                                !!
+
+*if,arg1,EQ,0,OR,arg1,EQ,1,THEN
+   !! 2.1 TIPO: LITERATURA (CURSO ANSYS, COM E SEM CAUDA)                                         !!
+   !!                                                                                             !!
+   ! Verificar módulo de elasticidade
+   *get,AR20,PARM,arg3,TYPE
+   *if,AR20,EQ,0,THEN
+      *if,arg3,EQ,0,THEN
+         arg3=5600*SQRT(arg2/1e6)*1e6
+      *endif
+   *else
+      arg3=5600*SQRT(arg2/1e6)*1e6
+   *endif
+
+   ! Deformação ao final do trecho não linear
+   AR23=2*arg2/arg3
+
+   ! Tensão ao final do trecho linear inicial
+   AR25=0.3*arg2
+
+   ! Deformação ao final do trecho linear inicial
+   AR24=AR25/arg3
+
+   ! Passo de deformação
+   AR26=(AR23-AR24)/(arg4-1)
+
+   ! Preencher vetor com pontos tensão-deformação
+   CONCRLAW_ARR_eVector(1)=AR24
+   CONCRLAW_ARR_sVector(1)=AR25
+   CONCRLAW_ARR_eVector(arg4)=AR23
+   CONCRLAW_ARR_sVector(arg4)=arg2
+   *do,AR27,2,arg4-1,1
+      AR28=((AR27-1)*AR26)+AR24
+      AR29=(arg3*AR28)/(1+((AR28/AR23)**2))
+      CONCRLAW_ARR_eVector(AR27)=AR28
+      CONCRLAW_ARR_sVector(AR27)=AR29
+   *enddo
+
+   ! Cauda da curva
+   *if,AR21,EQ,1,THEN
+      ! Deformação ao final da cauda: 2*epsilonC2
+      AR30=2*AR23
+      CONCRLAW_ARR_eVector(AR22)=AR30
+      CONCRLAW_ARR_sVector(AR22)=CONCRLAW_ARR_sVector(AR22-1)
+   *else
+      ! Deformação ao final da cauda (desativar)
+      AR30=-1
+   *endif
+
+   ! Valor inicial do módulo de elasticidade
+   CONCRLAW_VAR_E0=arg3
+
+*elseif,arg1,EQ,2,OR,arg1,EQ,3,THEN
+   !! 2.1 TIPO: ABNT NBR 6118:2014 (COM E SEM CAUDA)                                              !!
+   !!                                                                                             !!
+   ! Deformação ao final do trecho não linear
+   *if,arg2,LE,50e6,THEN
+      AR23=2/1000
+   *elseif
+      AR23=(2/1000)+(0.085/1000)*((arg2/1e6)-50)**(0.53)
+   *endif
+
+   ! Calcular valor do expoente n
+   AR31=1.4+23.4*((90-(arg2/1e6))/100)**4
+   *if,AR31,GT,2,THEN
+      AR31=2
+   *endif
+
+   ! Passo de deformação
+   AR26=AR23/arg4
+
+   ! Preencher vetor com pontos tensão-deformação
+   *do,AR27,1,arg4,1
+      AR28=AR27*AR26
+      AR29=arg2*(1-((1-(AR28/AR23))**AR31))
+      CONCRLAW_ARR_eVector(AR27)=AR28
+      CONCRLAW_ARR_sVector(AR27)=AR29
+   *enddo
+
+   ! Cauda da curva
+   *if,AR21,EQ,1,THEN
+      ! Deformação ao final da cauda
+      *if,arg2,LE,50e6,THEN
+         AR30=3.5/1000
+      *elseif
+         AR30=(2.6/1000)+(35/1000)*((90-(arg2/1e6))/100)**4
+      *endif
+      CONCRLAW_ARR_eVector(AR22)=AR30
+      CONCRLAW_ARR_sVector(AR22)=CONCRLAW_ARR_sVector(AR22-1)
+   *else
+      ! Cauda desativada
+      AR30=-1
+   *endif
+
+   ! Valor inicial do módulo de elasticidade
+   CONCRLAW_VAR_E0=CONCRLAW_ARR_sVector(1)/CONCRLAW_ARR_eVector(1)
+
+*endif
+
+
+

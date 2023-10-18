@@ -1,0 +1,33 @@
+! POSTTOOLBAR
+! POSTTOOLBAR
+
+! Descrição:
+! Esta subrotina criar botões com opções de pós-processo na barra de atalhos.
+
+! Set Postprocess Toolbar
+/nopr
+*abbr,DISP,ABBRES,NEW,DISPTOOLBAR,MAC
+*abbr,STLAST,SET,LAST
+*abbr,STPREV,SET,PREV
+*abbr,STNEXT,SET,NEXT
+*abbr,PLDSP,PLDISP
+*abbr,PLDSP1,PLDISP,1
+*abbr,PLDSP2,PLDISP,2
+*abbr,MISES,PLNSOL,S,EQV
+*abbr,USUM,PLNSOL,U,SUM
+*abbr,DSCL_OFF,/DSCALE,ALL,OFF
+*abbr,DSCL_AUTO,/DSCALE,ALL,AUTO
+*abbr,DSCL_+,DSCALEFCT,2
+*abbr,DSCL_-,DSCALEFCT,0.6667
+*abbr,V1W,VIEW1W
+*abbr,V4W,VIEW4W
+*abbr,PIC,TAKEPIC
+*abbr,RPL ,/REPLOT
+*abbr,ASL  ,ALLSEL
+/go
+
+
+
+
+
+

@@ -1,0 +1,17 @@
+! ENRM, ENum,  dir
+! ENRM, arg1, arg2
+
+AR20=UPCASE(arg2)
+
+*get,AR23,ELEM,arg1,NODE,1
+*get,AR24,ELEM,arg1,NODE,2
+*get,AR25,ELEM,arg1,NODE,3
+
+*if,AR20,EQ,'X',THEN
+    ENRM_output=NORMNX(AR23,AR24,AR25)
+*elseif,AR20,EQ,'Y',THEN
+    ENRM_output=NORMNY(AR23,AR24,AR25)
+*elseif,AR20,EQ,'Z',THEN
+    ENRM_output=NORMNZ(AR23,AR24,AR25)
+*endif
+

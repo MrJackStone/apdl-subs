@@ -1,0 +1,61 @@
+! PTH2ARR, itemLabel, outputParm
+! PTH2ARR,      arg1,       arg2
+
+! Description:
+! Transfers values from one of the current PATH'S columns (LABEL) to an ARRAY.
+
+! Arguments:
+! arg1: itemLabel   -  label of path column containing desired result
+! arg2: outputParm  -  name of the output parameter (defaults to PTH2ARR_ARR_output)
+
+! Local parameters:
+! AR20: labelCount
+! AR21: targetIndex
+! AR22: nthLabel
+! AR23: labelName
+! AR24: dataCount
+! AR25: nthPoint
+! AR26: parType
+
+! Global parameters (erased at the end on this subroutine):
+! PTH2ARR_ARR_POINTS
+! PTH2ARR_ARR_TABLE
+! PTH2ARR_ARR_LABEL
+
+! Output parameters:
+! %arg2% or 'PTH2ARR_ARR_OUTPUT'
+
+*get,AR26,PARM,arg2,TYPE
+*if,AR26,NE,3,THEN
+    AR27='PTH2ARR_ARR_output'
+*else
+    AR27=arg2
+*endif
+
+PAGET,PTH2ARR_ARR_POINTS,POINTS
+PAGET,PTH2ARR_ARR_TABLE,TABLE
+PAGET,PTH2ARR_ARR_LABEL,LABEL
+
+*get,AR20,PARM,PTH2ARR_ARR_LABEL,DIM,X
+AR21=0
+*do,AR22,1,AR20,1
+    AR23=PTH2ARR_ARR_LABEL(AR22)
+    *if,UPCASE(AR23),EQ,UPCASE(arg1),THEN
+        AR21=AR22
+    *endif
+*enddo
+
+*del,%AR27%,,nopr
+*if,AR21,GT,0,THEN
+    *get,AR24,PARM,PTH2ARR_ARR_TABLE,DIM,X
+    *dim,%AR27%,ARRAY,AR24
+    *do,AR25,1,AR24,1
+        %AR27%(AR25)=PTH2ARR_ARR_TABLE(AR25,AR21)
+    *enddo
+*endif
+
+*del,PTH2ARR_ARR_POINTS
+*del,PTH2ARR_ARR_TABLE
+*del,PTH2ARR_ARR_LABEL
+
+

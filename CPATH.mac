@@ -1,0 +1,39 @@
+! CPATH, pathName, xCenter, yCenter, radius
+! CPATH,     arg1,    arg2,    arg3,   arg4
+
+! Description:
+! Creates a circular path of a given radius centered about given X and Y coordinates.
+
+! Arguments:
+! arg1: xCenter  -  X coordinate of circular path's center
+! arg2: yCenter  -  Y coordinate of circular path's center
+! arg3: radius   -  path radius
+
+! Local parameters:
+! AR20: maxCS
+! AR21: newCS
+! AR30: prevCS
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! -
+
+*get,AR30,ACTIVE,,CSYS
+
+*get,AR20,CDSY,,NUM,MAX
+AR21=AR20+1
+LOCAL,AR21,CYLIN,arg2,arg3,0
+CSCIR,AR21,1
+
+PATH,arg1,2,30,120
+
+PPATH,1,, arg2+arg4+1e-6, arg3+1E-6, 0
+PPATH,2,, arg2+arg4-1e-6, arg3-1E-6, 0
+
+PMAP,'UNI'
+
+CSYS,AR30
+
+

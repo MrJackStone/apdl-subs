@@ -1,0 +1,69 @@
+! HELIX, radius,  phi, loops, direction, theta0
+! HELIX,   arg1, arg2,  arg3,      arg4,   arg5
+
+! Lista de argumentos:
+! arg1: radius     -  raio da helicoidal
+! arg2: phi        -  ângulo de inclinação da helicoidal
+! arg3: loops      -  número de loops da helicoidal (inteiro)
+! arg4: direction  -  direção de giro da helicoidal:
+!                        [+1] sentido de Z positivo;
+!                        [-1] sentido de Z negativo;
+! arg5: theta0     -  ângulo inicial da helicoidal
+
+! Lista de variáveis:
+! AR20: parType
+! AR21: hDir
+! AR22: pi
+! AR23: pitch
+! AR24: theta0rad
+! AR25: KMaxD
+! AR26: nthKP
+! AR27: KNum
+! AR28: xCoord
+! AR29: yCoord
+! AR30: zCoord
+
+/prep7
+
+! Verificar direção da helicoidal (padrão: Z positivo)
+*get,AR20,PARM,arg4,TYPE
+*if,AR20,NE,0,THEN
+    AR21=1
+*else
+    *if,arg4,NE,1,AND,arg4,NE,-1,THEN
+        AR21=1
+    *else
+        AR21=arg4
+    *endif
+*endif
+
+! Cálculos preliminares
+*afun,RAD
+AR22=ACOS(-1)
+*afun,DEG
+AR23=2*AR22*arg1/TAN(arg2)
+!AR23=360*arg1/arg2
+*afun,RAD
+AR24=arg5*AR22/180
+*get,AR25,KP,,NUM,MAXD
+
+! Criar keypoints no sistema cartesiano global
+CSYS,0
+*do,AR26,1,(4*arg3+1),1
+    AR27=AR25+AR26
+    AR28=arg1*COS(AR24+(AR26-1)*(AR21*AR22/2))
+    AR29=arg1*SIN(AR24+(AR26-1)*(AR21*AR22/2))
+    AR30=AR23*((AR26-1)/(4*arg3))
+    K,AR27,AR28,AR29,AR30
+*enddo
+
+! Criar linhas no sistema de coordenadas cilíndricas
+CSYS,1
+L,AR25+1,AR25+2
+*repeat,(4*arg3),1,1
+
+! Reverter para sistema de coordenadas cartesianas
+CSYS,0
+
+
+

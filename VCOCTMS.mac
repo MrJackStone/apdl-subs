@@ -1,0 +1,727 @@
+! VCOCTMS,  L,     bfs,   bfi,   dm,    dtms,  dtmi,  d0,    sw,    s0,    se,    theta,  bos,   x0,    y0,    z0,    swi,   swf
+! VCOCTMS,  arg1,  arg2,  arg3,  arg4,  arg5,  arg6,  arg7,  arg8,  arg9,  ar10,  ar11,   ar12,  ar13,  ar14,  ar15,  ar16,  ar17
+
+! Descrição:
+! Criar solid model de uma viga de seção transversal tipo perfil I monossimétrico
+! com aberturas hexagonais na alma (viga castelada). As aberturas podem ou não ter
+! enrijecedores e as larguras dos montantes inicial e final podem ser definidas diretamente.
+! Pode-se determinar o fechamento de aberturas por meio da variável VCASTMS_ARR_closedOpenings.
+
+! Lista de argumentos:
+! arg1: L      -  vão da barra (distância entre as seções extremas)
+! arg2: bfs    -  largura da mesa superior
+! arg3: bfi    -  largura da mesa inferior
+! arg4: dm     -  distância entre planos médios das mesas superior e inferior
+! arg5: dts    -  altura do T superior (distância entre a mesa superior e o topo da abertura)
+! arg6: dti    -  altura do T inferior (distância entre a mesa inferior e a base da abertura)
+! arg7: d0     -  altura da abertura
+! arg8: sw     -  largura do montante
+! arg9: s0     -  largura da abertura
+! ar10: se     -  distância entre eixos de aberturas consecutivas
+! ar11: theta  -  ângulo da face inclinada da abertura hexagonal
+! ar12: bos    -  largura do enrijecedor de abertura
+! ar13: x0     -  coordenada X da origem (face esquerda, centro da mesa inferior)
+! ar14: y0     -  coordenada Y da origem (face esquerda, centro da mesa inferior)
+! ar15: z0     -  coordenada Z da origem (face esquerda, centro da mesa inferior)
+! ar16: swi    -  largura do montante inicial
+! ar17: swf    -  largura do montante final
+
+! Lista de argumentos implícitos:
+! VCASTMS_ARR_closedOpenings
+!    Vetor com os números das aberturas (contadas da esquerda para a direita) a fechar
+
+! Lista de variáveis locais:
+! AR20: Stiffener
+! AR21: sb
+! AR22: LMod
+! AR23: CustomP0
+! AR24: q1
+! AR25: AQuant
+! AR26: Rem
+! AR27: P0
+! AR28: COMPK_NEW
+! AR29: COMPL_NEW
+! AR30: COMPA_NEW
+! AR31: MaxKP
+! AR32: MaxLN
+! AR33: HexArea
+! AR34: HexAreas
+! AR36: WebArea
+! AR40: ParTypeDM
+! AR41: ParTypeDTS
+! AR42: ParTypeDTI
+! AR43: ParTypeD0
+! AR44: bfMax
+! AR45: bfMin
+! AR46: dCenter
+! AR47: closeOp
+! AR48: ParType
+! AR49: closedCount
+! AR50: prevArea
+! AR51: nthCopy
+! AR52: newArea
+! AR53: closeThis
+! AR54: prevCopy
+! AR55: nthIndex
+! AR56: nthReqClose
+! AR57: MaxANumDef
+! AR58: TrueOpNum
+! AR73: OutsideXMin
+! AR74: OutsideXMax
+! AR77: OutsideZMin
+! AR78: OutsideZMax
+! AR80: COMPL_OpBorders
+! AR81: MaxKP2
+! AR82: DragLine1
+! AR83: DragLine2
+! AR84: ArgType
+! AR85: LCount
+! AR86: COMPL_DragLines
+! AR90: LNum
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! VCASTMS_ARR_LNUMS
+! VCASTMS_ARR_KPNUMS
+
+! Lista de variáveis de saída:
+!    COMPONENTES:
+!       VCASTMS_COMPA_ALMA
+!          Componente contendo todas as áreas da alma da peça
+!       VCASTMS_COMPA_MESAS
+!          Componente contendo todas as áreas das mesas da peça
+!       VCASTMS_COMPA_ENRIJECEDORES
+!          Componente contendo todas as áreas dos enrijecedores
+!          das aberturas (se houver algum)
+!    GEOMETRIA:
+!       VCASTMS_VAR_L
+!       VCASTMS_VAR_bfs
+!       VCASTMS_VAR_bfi
+!       VCASTMS_VAR_dm
+!       VCASTMS_VAR_dtms
+!       VCASTMS_VAR_dtmi
+!       VCASTMS_VAR_d0
+!       VCASTMS_VAR_sw
+!       VCASTMS_VAR_s0
+!       VCASTMS_VAR_se
+!       VCASTMS_VAR_sb
+!       VCASTMS_VAR_theta
+!       VCASTMS_VAR_bos
+!       VCASTMS_VAR_x0
+!       VCASTMS_VAR_y0
+!       VCASTMS_VAR_z0
+!       VCASTMS_VAR_n
+!       VCASTMS_VAR_swi
+!       VCASTMS_VAR_swf
+
+/prep7
+
+
+!!                                                                                                                                            !!
+!! 1.   DADOS CALCULADOS                                                                                                                      !!
+!!                                                                                                                                            !!
+
+! Posição vertical da abertura
+*get,AR40,PARM,arg4,TYPE
+*get,AR41,PARM,arg5,TYPE
+*get,AR42,PARM,arg6,TYPE
+*get,AR43,PARM,arg7,TYPE
+! Se dm estiver definido:
+*if,AR40,EQ,0,AND,arg4,GT,0,THEN
+   ! Se d0 estiver definido:
+   *if,AR43,EQ,0,AND,arg7,GT,0,THEN
+      ! Se dts estiver definido:
+      *if,AR41,EQ,0,AND,arg5,GT,0,THEN
+         ! Calcular altura do T inferior
+         arg6=arg4-arg7-arg5
+      ! Se dti estiver definido:
+      *elseif,AR42,EQ,0,AND,arg6,GT,0,THEN
+         ! Calcular altura do T superior
+         arg5=arg4-arg7-arg6
+      *else
+         ! Calcular altura dos Ts superior e inferior
+         arg5=(arg4-arg7)/2
+         arg6=(arg4-arg7)/2
+      *endif
+   *else
+      ! Se dts estiver definido:
+      *if,AR41,EQ,0,AND,arg5,GT,0,THEN
+         ! Se dti estiver definido:
+         *if,AR42,EQ,0,AND,arg6,GT,0,THEN
+            ! Calcular altura da abertura
+            arg7=arg4-arg5-arg6
+         *endif
+      *endif
+   *endif
+*else
+   ! Se d0 estiver definido:
+   *if,AR43,EQ,0,AND,arg7,GT,0,THEN
+      ! Se dts estiver definido:
+      *if,AR41,EQ,0,AND,arg5,GT,0,THEN
+         ! Se dti estiver definido:
+         *if,AR42,EQ,0,AND,arg6,GT,0,THEN
+            ! Calcular altura total da seção (entre planos médios das mesas)
+            arg4=arg7+arg5+arg6
+         *endif
+      *endif
+   *endif
+*endif
+
+! Verificar tipo de definição de geometria da abertura
+*afun,DEG
+*if,arg7,GT,0,THEN
+   *if,arg8,GT,0,AND,arg9,GT,0,THEN
+      ar10=arg9+arg8
+      ar11=ATAN(arg7/(arg9-arg8))
+   *elseif,ar10,GT,0,AND,ar11,GT,0,THEN
+      arg8=(ar10/2)-(arg7/(2*TAN(ar11)))
+      arg9=(arg7/TAN(ar11))+arg8
+   *elseif,ar11,GT,0,THEN
+      arg8=(arg7/2)/SIN(ar11)
+      arg9=2*((arg7/2)/TAN(ar11))+arg8
+      ar10=arg9+arg8
+   *else
+      *msg,ERROR,0
+      VCAST ERROR: INVALID PARAMETERS (%I).
+   *endif
+*else
+   *msg,ERROR,1
+   VCAST ERROR: INVALID PARAMETERS (%I).
+*endif
+*afun,RAD
+
+*if,ar12,GT,0,THEN
+   AR20=1
+*else
+   AR20=0
+*endif
+! Projeção horizontal (em x) da face inclinada
+AR21=(arg9-arg8)/2
+! Calcular comprimento modificado por largura de montante inicial
+*if,ar16,GT,0,THEN
+   *if,ar16,LT,arg1,THEN
+      AR22=arg1-ar16
+      AR23=1
+   *else
+      *msg,ERROR,2
+      VCAST ERROR: INVALID W0 (%I).
+   *endif
+*else
+   AR22=arg1
+   AR23=0
+*endif
+! Calcular comprimento modificado por largura de montante final
+*if,ar17,GT,0,THEN
+   *if,ar17,LT,arg1,THEN
+      AR22=AR22-ar17
+      AR23=AR23+2
+   *else
+      *msg,ERROR,3
+      VCAST ERROR: INVALID WF (%I).
+   *endif
+*endif
+! Corrigir o comprimento de distribuição modificado
+*if,AR23,EQ,1,THEN
+   AR22=AR22+(arg8/2)
+*elseif,AR23,EQ,2,THEN
+   AR22=AR22+(arg8/2)
+*elseif,AR23,EQ,3,THEN
+   AR22=AR22+arg8
+*endif
+! Calcular quantidade de aberturas a ser criadas
+AR24=AR22/ar10
+AR25=NINT(AR24)
+*if,AR25,GT,AR24,THEN
+   AR25=AR25-1
+*endif
+!   Posição (em x) do eixo da primeira abertura
+!     (mais próxima à face 1)
+*if,AR23,EQ,0,THEN
+   AR26=AR24-AR25
+   AR27=((AR26*ar10)/2)+AR21+arg8
+*elseif,AR23,EQ,1,THEN
+   AR27=ar16+(arg9/2)
+*elseif,AR23,EQ,2,THEN
+   AR27=arg1-ar17-(AR25*ar10)+arg8+(arg9/2)
+*elseif,AR23,EQ,3,THEN
+   AR27=ar16+(arg9/2)
+   arg1=AR27+AR25*ar10-(arg9/2)-arg8+ar17
+   *msg,WARN,arg1
+   COMPRIMENTO TOTAL ALTERADO PARA %10.4F.
+*endif
+
+
+!!                                                                                                                                            !!
+!! 2.   SOLID MODEL                                                                                                                           !!
+!!                                                                                                                                            !!
+
+SELTOL,1e-8
+
+! Desativar exibição de mensagens de aviso
+/uis,MSGPOP,3
+
+! Fazer backup das entidades do solid model atualmente selecionadas
+KBACKUP
+LBACKUP
+ABACKUP
+
+! Remover keypoints, linhas e áreas existentes da seleção
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+ASEL,U,AREA,,ALL
+
+! Criar componentes de keypoints, linhas e áreas novas
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+*get,AR31,KP,0,NUM,MAXD
+
+*del,VCASTMS_ARR_KPNUMS
+*dim,VCASTMS_ARR_KPNUMS,ARRAY,18
+*vfill,VCASTMS_ARR_KPNUMS,RAMP,AR31+1,1
+NUMSTR,KP,AR31+1
+
+! Keypoints da seção transversal (face 1)
+K,VCASTMS_ARR_KPNUMS(1), ar13, ar14,      ar15-arg3/2
+K,VCASTMS_ARR_KPNUMS(2), ar13, ar14,      ar15
+K,VCASTMS_ARR_KPNUMS(3), ar13, ar14,      ar15+arg3/2
+K,VCASTMS_ARR_KPNUMS(4), ar13, ar14+arg4, ar15-arg2/2
+K,VCASTMS_ARR_KPNUMS(5), ar13, ar14+arg4, ar15
+K,VCASTMS_ARR_KPNUMS(6), ar13, ar14+arg4, ar15+arg2/2
+
+! Keypoints da seção transversal (face 2)
+K,VCASTMS_ARR_KPNUMS(7),  ar13+arg1, ar14,      ar15-arg3/2
+K,VCASTMS_ARR_KPNUMS(8),  ar13+arg1, ar14,      ar15
+K,VCASTMS_ARR_KPNUMS(9),  ar13+arg1, ar14,      ar15+arg3/2
+K,VCASTMS_ARR_KPNUMS(10), ar13+arg1, ar14+arg4, ar15-arg2/2
+K,VCASTMS_ARR_KPNUMS(11), ar13+arg1, ar14+arg4, ar15
+K,VCASTMS_ARR_KPNUMS(12), ar13+arg1, ar14+arg4, ar15+arg2/2
+
+CM,AR28,KP
+
+*get,AR32,LINE,0,NUM,MAXD
+
+*del,VCASTMS_ARR_LNUMS
+*dim,VCASTMS_ARR_LNUMS,ARRAY,22
+*vfill,VCASTMS_ARR_LNUMS,RAMP,AR32+1,1
+NUMSTR,LINE,AR32+1
+
+! Linhas da seção transversal (face 1)
+L, VCASTMS_ARR_KPNUMS(1), VCASTMS_ARR_KPNUMS(2)
+L, VCASTMS_ARR_KPNUMS(2), VCASTMS_ARR_KPNUMS(3)
+L, VCASTMS_ARR_KPNUMS(4), VCASTMS_ARR_KPNUMS(5)
+L, VCASTMS_ARR_KPNUMS(5), VCASTMS_ARR_KPNUMS(6)
+L, VCASTMS_ARR_KPNUMS(2), VCASTMS_ARR_KPNUMS(5)
+
+! Linhas da seção transversal (face 2)
+L, VCASTMS_ARR_KPNUMS(7),  VCASTMS_ARR_KPNUMS(8)
+L, VCASTMS_ARR_KPNUMS(8),  VCASTMS_ARR_KPNUMS(9)
+L, VCASTMS_ARR_KPNUMS(10), VCASTMS_ARR_KPNUMS(11)
+L, VCASTMS_ARR_KPNUMS(11), VCASTMS_ARR_KPNUMS(12)
+L, VCASTMS_ARR_KPNUMS(8),  VCASTMS_ARR_KPNUMS(11)
+
+! Linhas longitudinais
+L, VCASTMS_ARR_KPNUMS(3), VCASTMS_ARR_KPNUMS(9)
+L, VCASTMS_ARR_KPNUMS(2), VCASTMS_ARR_KPNUMS(8)
+L, VCASTMS_ARR_KPNUMS(1), VCASTMS_ARR_KPNUMS(7)
+L, VCASTMS_ARR_KPNUMS(6), VCASTMS_ARR_KPNUMS(12)
+L, VCASTMS_ARR_KPNUMS(5), VCASTMS_ARR_KPNUMS(11)
+L, VCASTMS_ARR_KPNUMS(4), VCASTMS_ARR_KPNUMS(10)
+
+CM,AR29,LINE
+
+! Áreas das mesas e alma do perfil
+AL, VCASTMS_ARR_LNUMS(2),  VCASTMS_ARR_LNUMS(11), VCASTMS_ARR_LNUMS(7),  VCASTMS_ARR_LNUMS(12)
+AL, VCASTMS_ARR_LNUMS(1),  VCASTMS_ARR_LNUMS(12), VCASTMS_ARR_LNUMS(6),  VCASTMS_ARR_LNUMS(13)
+AL, VCASTMS_ARR_LNUMS(4),  VCASTMS_ARR_LNUMS(14), VCASTMS_ARR_LNUMS(9),  VCASTMS_ARR_LNUMS(15)
+AL, VCASTMS_ARR_LNUMS(3),  VCASTMS_ARR_LNUMS(15), VCASTMS_ARR_LNUMS(8),  VCASTMS_ARR_LNUMS(16)
+AL, VCASTMS_ARR_LNUMS(12), VCASTMS_ARR_LNUMS(10), VCASTMS_ARR_LNUMS(15), VCASTMS_ARR_LNUMS(5)
+
+! Obter largura mínima das mesas
+*if,arg2,GE,arg3,THEN
+   AR44=arg2
+   AR45=arg3
+*else
+   AR44=arg3
+   AR45=arg2
+*endif
+
+! Criar componente com todas as áreas
+CM,AR30,AREA
+
+! Caso haja ao menos uma abertura:
+*if,AR25,GT,0,THEN
+
+   ! Altura do centro da linha de aberturas
+   AR46=ar14+arg6+(arg7/2)
+
+   ! Keypoints da primeira abertura hexagonal
+   K,VCASTMS_ARR_KPNUMS(13), ar13+AR27-(arg9/2), AR46,        ar15
+   K,VCASTMS_ARR_KPNUMS(14), ar13+AR27-(arg8/2), AR46-arg7/2, ar15
+   K,VCASTMS_ARR_KPNUMS(15), ar13+AR27+(arg8/2), AR46-arg7/2, ar15
+   K,VCASTMS_ARR_KPNUMS(16), ar13+AR27+(arg9/2), AR46,        ar15
+   K,VCASTMS_ARR_KPNUMS(17), ar13+AR27+(arg8/2), AR46+arg7/2, ar15
+   K,VCASTMS_ARR_KPNUMS(18), ar13+AR27-(arg8/2), AR46+arg7/2, ar15
+
+   CM,AR28,KP
+
+   ! Linhas da primeira abertura hexagonal
+   L, VCASTMS_ARR_KPNUMS(13), VCASTMS_ARR_KPNUMS(14)
+   L, VCASTMS_ARR_KPNUMS(14), VCASTMS_ARR_KPNUMS(15)
+   L, VCASTMS_ARR_KPNUMS(15), VCASTMS_ARR_KPNUMS(16)
+   L, VCASTMS_ARR_KPNUMS(16), VCASTMS_ARR_KPNUMS(17)
+   L, VCASTMS_ARR_KPNUMS(17), VCASTMS_ARR_KPNUMS(18)
+   L, VCASTMS_ARR_KPNUMS(18), VCASTMS_ARR_KPNUMS(13)
+
+   CM,AR29,LINE
+
+   ! Área da primeira abertura hexagonal
+   ASEL,U,AREA,,ALL
+   AL,VCASTMS_ARR_LNUMS(17),VCASTMS_ARR_LNUMS(18),VCASTMS_ARR_LNUMS(19),VCASTMS_ARR_LNUMS(20),VCASTMS_ARR_LNUMS(21),VCASTMS_ARR_LNUMS(22)
+   *get,AR33,AREA,0,NUM,MIN
+
+   ! Vértices do retângulo externo de corte
+   AR73=ar13-arg1
+   AR74=ar13+2*arg1
+   AR77=ar15-AR44
+   AR78=ar15+AR44
+
+   ! Verificar se há aberturas a ser fechadas
+   AR47=0
+   *get,AR48,PARM,VCASTMS_ARR_closedOpenings,TYPE
+   *if,AR48,EQ,1,THEN
+      *get,AR49,PARM,VCASTMS_ARR_closedOpenings,DIM,X
+      *if,AR49,GE,1,THEN
+         AR47=1
+      *endif
+   *endif
+
+   ! Caso não haja aberturas a fechar:
+   *if,AR47,EQ,0,THEN
+      ! Copiar área da abertura hexagonal (AQUANT vezes)
+      AGEN,AR25,AR33,,,ar10
+      CM,AR34,AREA
+      *get,AR58,AREA,,COUNT
+      CMSEL,A,AR30
+      CM,AR30,AREA
+
+   ! Caso haja aberturas a fechar:
+   *else
+      ! Armazenar número da área anterior (já criada)
+      AR50=AR33
+      ! Criar demais áreas de abertura:
+      *do,AR51,2,AR25+1,1
+         ! Criar nova área (cópia da anterior)
+         AGEN,2,AR50,,,ar10
+         ! Armazenar número da nova área
+         *get,AR52,AREA,,NUM,MAX
+         ! Verificar se a área anterior pertence à lista de aberturas a fechar
+         AR53=0
+         AR54=AR51-1
+         *do,AR55,1,AR49,1
+            AR56=VCASTMS_ARR_closedOpenings(AR55)
+            *if,AR56,EQ,AR54,THEN
+               AR53=1
+            *endif
+         *enddo
+         ! Caso a área anterior corresponda a abertura fechada:
+         *if,AR53,EQ,1,THEN
+            ! Deletar a área anterior
+            ADELE,AR50,,,1
+            *get,AR57,AREA,,NUM,MAXD
+            NUMSTR,AREA,AR57+1
+         *endif
+         ! Redefinir número da área prévia
+         AR50=AR52
+      *enddo
+      ! Excluir a última área
+      ADELE,AR50,,,1
+      ! Atualizar componentes
+      CM,AR34,AREA
+      *get,AR58,AREA,,COUNT
+      CMSEL,A,AR30
+      CM,AR30,AREA
+
+   *endif
+
+   ! Obter o número da área que representa a alma do perfil
+   CMSEL,U,AR34
+   ASEL,R,LOC,Z,ar15
+   *get,AR36,AREA,0,NUM,MIN
+   CMSEL,A,AR30
+   CM,AR30,AREA
+   CMSEL,A,AR34
+
+   ! Cortar aberturas hexagonais
+   *if,AR58,GT,0,THEN
+      ASBA,AR36,AR34,,,DELETE,DELETE
+      CMSEL,A,AR30
+      CM,AR30,AREA
+      CMSEL,A,AR29
+      CM,AR29,LINE
+      CMSEL,A,AR28
+      CM,AR28,KP
+   *endif
+
+   ! Fatiar horizontalmente áreas no meio da altura
+   CMSEL,S,AR28
+   CMSEL,A,AR29
+   CMSEL,A,AR30
+   SLICEXZ,AR46,AR73,AR77,AR74,AR78
+   CM,AR28,KP
+   CM,AR29,LINE
+   CM,AR30,AREA
+
+   ! OBS.: Opção de fatiar nos demais vértices dos hexágonos (horizontal
+   !       e verticalmente) excluída por gerar malha desfavorável.
+
+   ! Criar enrijecedores nas aberturas
+   *if,AR20,EQ,1,THEN
+
+      ! Selecionar apenas linhas das aberturas
+      LSEL,S,LOC,Z,ar15
+      LSEL,R,LOC,Y,ar14,ar14+arg4
+      LSEL,R,LOC,X,ar13,ar13+arg1
+      LSEL,U,LOC,Y,AR46
+      LSEL,U,LOC,Y,ar14
+      LSEL,U,LOC,Y,ar14+arg4
+      LSEL,U,LOC,X,ar13
+      LSEL,U,LOC,X,ar13+arg1
+      CM,AR80,LINE
+      *get,AR85,LINE,,COUNT
+
+      ! Criar linhas de direção de arrasto
+      *get,AR81,KP,,NUM,MAXD
+      K,AR81+1,ar13-arg1,ar14,ar15
+      K,AR81+2,ar13-arg1,ar14,ar15-ar12
+      K,AR81+3,ar13-arg1,ar14,ar15+ar12
+      LSEL,U,LINE,,ALL
+      L,AR81+1,AR81+2
+      *get,AR82,LINE,,NUM,MAX
+      L,AR81+1,AR81+3
+      *get,AR83,LINE,,NUM,MAX
+      CM,AR86,LINE
+
+      ! Criar áreas dos enrijecedores de abertura
+      AR90=0
+      *do,AR86,1,AR85,1
+         CMSEL,S,AR80
+         AR90=LSNEXT(AR90)
+         CMSEL,A,AR86
+         ADRAG,AR90,,,,,,AR82
+         ADRAG,AR90,,,,,,AR83
+      *enddo
+      LSLA,A
+      KSLL,A
+
+      ! Excluir entidades de arrasto
+      LDELE,AR82
+      LDELE,AR83
+      KDELE,AR81+1
+      KDELE,AR81+2
+      KDELE,AR81+3
+
+      ! Mesclar entidades
+      NUMMRG,KP
+
+      ! Atualizar componentes
+      CMSEL,A,AR28
+      CM,AR28,KP
+      CMSEL,A,AR29
+      CM,AR29,LINE
+      CMSEL,A,AR30
+      CM,AR30,AREA
+
+   *endif
+
+*endif
+
+! Fatiar mesa maior na largura da mesa menor
+*if,AR44,NE,AR45,THEN
+   SLICEXY,ar15+AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+   SLICEXY,ar15-AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+*endif
+
+! Fatiar áreas na largura dos enrijecedores de abertura
+*if,AR20,EQ,1,THEN
+   *if,ar12,NE,AR45/2,AND,ar12,NE,AR44/2,THEN
+      SLICEXY,ar15+ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+      SLICEXY,ar15-ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+   *endif
+*endif
+
+
+!!                                                                                                                                            !!
+!! 3.   SAÍDA                                                                                                                                 !!
+!!                                                                                                                                            !!
+
+! Definir componente de saída das mesas
+ASEL,S,LOC,Y,ar14
+ASEL,A,LOC,Y,ar14+arg4
+CM,VCASTMS_COMPA_MESAS,AREA
+
+! Definir componente de saída da alma
+ASEL,INVE
+ASEL,R,LOC,Z,ar15
+CM,VCASTMS_COMPA_ALMA,AREA
+
+! Definir componente de saída dos enrijecedores
+*if,AR20,EQ,1,THEN
+   CMSEL,S,AR30
+   ASEL,U,LOC,Y,ar14+arg4
+   ASEL,U,LOC,Y,ar14
+   ASEL,U,LOC,Z,ar15
+   CM,VCASTMS_COMPA_ENRIJECEDORES,AREA
+*endif
+
+! Restaurar seleção prévia
+KRESTORE
+LRESTORE
+ARESTORE
+
+! Selecionar novas entidades criadas
+CMSEL,A,VCASTMS_COMPA_ALMA
+CMSEL,A,VCASTMS_COMPA_MESAS
+CMSEL,A,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+
+! Excluir componentes
+CMDELE,AR28
+CMDELE,AR29
+CMDELE,AR30
+
+*if,AR20,EQ,1,THEN
+   CMSEL,A,VCASTMS_COMPA_ENRIJECEDORES
+*endif
+
+*del,VCASTMS_ARR_LNUMS
+*del,VCASTMS_ARR_KPNUMS
+
+! Vão da barra (L)
+*get,AR84,PARM,arg1,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_L=0
+*else
+   VCASTMS_VAR_L=arg1
+*endif
+! Largura da mesa superior (bfs)
+*get,AR84,PARM,arg2,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_bfs=0
+*else
+   VCASTMS_VAR_bfs=arg2
+*endif
+! Largura da mesa inferior (bfi)
+*get,AR84,PARM,arg3,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_bfi=0
+*else
+   VCASTMS_VAR_bfi=arg3
+*endif
+! Altura da seção (dm)
+*get,AR84,PARM,arg4,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_dm=0
+*else
+   VCASTMS_VAR_dm=arg4
+*endif
+! Altura do T superior (dtms)
+*get,AR84,PARM,arg5,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_dtms=0
+*else
+   VCASTMS_VAR_dtms=arg5
+*endif
+! Altura do T inferior (dtmi)
+*get,AR84,PARM,arg6,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_dtmi=0
+*else
+   VCASTMS_VAR_dtmi=arg6
+*endif
+! Altura da abertura (d0)
+*get,AR84,PARM,arg7,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_d0=0
+*else
+   VCASTMS_VAR_d0=arg7
+*endif
+! Largura do montante (sw)
+*get,AR84,PARM,arg8,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_sw=0
+*else
+   VCASTMS_VAR_sw=arg8
+*endif
+! Largura da abertura (s0)
+*get,AR84,PARM,arg9,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_s0=0
+*else
+   VCASTMS_VAR_s0=arg9
+*endif
+! Distância entre eixos de aberturas (se)
+*get,AR84,PARM,ar10,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_se=0
+*else
+   VCASTMS_VAR_se=ar10
+*endif
+! Largura (horizontal) da face inclinada (sb)
+*get,AR84,PARM,AR21,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_sb=0
+*else
+   VCASTMS_VAR_sb=AR21
+*endif
+! Ângulo da face inclinada (theta)
+*get,AR84,PARM,ar11,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_theta=0
+*else
+   VCASTMS_VAR_theta=ar11
+*endif
+! Largura do enrijecedor de abertura (bos)
+*get,AR84,PARM,ar12,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_bos=0
+*else
+   VCASTMS_VAR_bos=ar12
+*endif
+! X da origem (x0)
+*get,AR84,PARM,ar13,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_x0=0
+*else
+   VCASTMS_VAR_x0=ar13
+*endif
+! Y da origem (y0)
+*get,AR84,PARM,ar14,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_y0=0
+*else
+   VCASTMS_VAR_y0=ar14
+*endif
+! Z da origem (z0)
+*get,AR84,PARM,ar15,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_z0=0
+*else
+   VCASTMS_VAR_z0=ar15
+*endif
+! Número de aberturas (n)
+*get,AR84,PARM,AR25,TYPE
+*if,AR84,EQ,-1,THEN
+   VCASTMS_VAR_n=0
+*else
+   VCASTMS_VAR_n=AR25
+*endif
+! Largura do montante inicial (swi)
+VCASTMS_VAR_swi=AR27-arg9/2
+! Largura do montante final (swf)
+VCASTMS_VAR_swf=arg1-(AR25*ar10-arg8+VCASTMS_VAR_swi)
+
+
+
+

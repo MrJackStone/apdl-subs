@@ -1,0 +1,195 @@
+! IBEAMMS,  L,     bfs,   bfi,   dm,    x0,    y0,    z0
+! IBEAMMS,  arg1,  arg2,  arg3,  arg4,  arg5,  arg6,  arg7
+
+! Descrição:
+! Criar solid model de uma viga de seção transversal tipo perfil I monossimétrico.
+
+! Lista de argumentos:
+! arg1: L    -  vão da barra (distância entre as seções extremas)
+! arg2: bfs  -  largura da mesa superior
+! arg3: bfi  -  largura da mesa inferior
+! arg4: dm   -  distância entre planos médios das mesas superior e inferior
+! arg5: x0   -  coordenada X da origem (face esquerda, centro da mesa inferior)
+! arg6: y0   -  coordenada Y da origem (face esquerda, centro da mesa inferior)
+! arg7: z0   -  coordenada Z da origem (face esquerda, centro da mesa inferior)
+
+! Lista de variáveis locais:
+! AR28: COMPK_NEW
+! AR29: COMPL_NEW
+! AR30: COMPA_NEW
+! AR31: MaxKP
+! AR32: MaxLN
+! AR33: OutsideXMin
+! AR34: OutsideXMax
+! AR35: OutsideZMin
+! AR36: OutsideZMax
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! IBEAM_ARR_LNUMS
+! IBEAM_ARR_KPNUMS
+
+! Lista de variáveis de saída:
+! IBEAM_COMPA_ALMA
+!    Componente contendo todas as áreas da alma da peça
+! IBEAM_COMPA_MESAS
+!    Componente contendo todas as áreas das mesas da peça
+
+/prep7
+
+
+!!                                                                                                                                            !!
+!! 1.   SOLID MODEL                                                                                                                           !!
+!!                                                                                                                                            !!
+
+SELTOL,1e-8
+
+! Desativar exibição de mensagens de aviso
+/uis,MSGPOP,3
+
+! Fazer backup das entidades do solid model atualmente selecionadas
+KBACKUP
+LBACKUP
+ABACKUP
+
+! Remover keypoints, linhas e áreas existentes da seleção
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+ASEL,U,AREA,,ALL
+
+! Criar componentes de keypoints, linhas e áreas novas
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+*get,AR31,KP,0,NUM,MAXD
+
+*del,IBEAMMS_ARR_KPNUMS
+*dim,IBEAMMS_ARR_KPNUMS,ARRAY,18
+*vfill,IBEAMMS_ARR_KPNUMS,RAMP,AR31+1,1
+NUMSTR,KP,AR31+1
+
+! Keypoints da seção transversal (face 1)
+K,IBEAMMS_ARR_KPNUMS(1), arg5, arg6,      arg7-arg3/2
+K,IBEAMMS_ARR_KPNUMS(2), arg5, arg6,      arg7
+K,IBEAMMS_ARR_KPNUMS(3), arg5, arg6,      arg7+arg3/2
+K,IBEAMMS_ARR_KPNUMS(4), arg5, arg6+arg4, arg7-arg2/2
+K,IBEAMMS_ARR_KPNUMS(5), arg5, arg6+arg4, arg7
+K,IBEAMMS_ARR_KPNUMS(6), arg5, arg6+arg4, arg7+arg2/2
+
+! Keypoints da seção transversal (face 2)
+K,IBEAMMS_ARR_KPNUMS(7),  arg5+arg1, arg6,      arg7-arg3/2
+K,IBEAMMS_ARR_KPNUMS(8),  arg5+arg1, arg6,      arg7
+K,IBEAMMS_ARR_KPNUMS(9),  arg5+arg1, arg6,      arg7+arg3/2
+K,IBEAMMS_ARR_KPNUMS(10), arg5+arg1, arg6+arg4, arg7-arg2/2
+K,IBEAMMS_ARR_KPNUMS(11), arg5+arg1, arg6+arg4, arg7
+K,IBEAMMS_ARR_KPNUMS(12), arg5+arg1, arg6+arg4, arg7+arg2/2
+
+CM,AR28,KP
+
+*get,AR32,LINE,0,NUM,MAXD
+
+*del,IBEAMMS_ARR_LNUMS
+*dim,IBEAMMS_ARR_LNUMS,ARRAY,22
+*vfill,IBEAMMS_ARR_LNUMS,RAMP,AR32+1,1
+NUMSTR,LINE,AR32+1
+
+! Linhas da seção transversal (face 1)
+L, IBEAMMS_ARR_KPNUMS(1), IBEAMMS_ARR_KPNUMS(2)
+L, IBEAMMS_ARR_KPNUMS(2), IBEAMMS_ARR_KPNUMS(3)
+L, IBEAMMS_ARR_KPNUMS(4), IBEAMMS_ARR_KPNUMS(5)
+L, IBEAMMS_ARR_KPNUMS(5), IBEAMMS_ARR_KPNUMS(6)
+L, IBEAMMS_ARR_KPNUMS(2), IBEAMMS_ARR_KPNUMS(5)
+
+! Linhas da seção transversal (face 2)
+L, IBEAMMS_ARR_KPNUMS(7),  IBEAMMS_ARR_KPNUMS(8)
+L, IBEAMMS_ARR_KPNUMS(8),  IBEAMMS_ARR_KPNUMS(9)
+L, IBEAMMS_ARR_KPNUMS(10), IBEAMMS_ARR_KPNUMS(11)
+L, IBEAMMS_ARR_KPNUMS(11), IBEAMMS_ARR_KPNUMS(12)
+L, IBEAMMS_ARR_KPNUMS(8),  IBEAMMS_ARR_KPNUMS(11)
+
+! Linhas longitudinais
+L, IBEAMMS_ARR_KPNUMS(3), IBEAMMS_ARR_KPNUMS(9)
+L, IBEAMMS_ARR_KPNUMS(2), IBEAMMS_ARR_KPNUMS(8)
+L, IBEAMMS_ARR_KPNUMS(1), IBEAMMS_ARR_KPNUMS(7)
+L, IBEAMMS_ARR_KPNUMS(6), IBEAMMS_ARR_KPNUMS(12)
+L, IBEAMMS_ARR_KPNUMS(5), IBEAMMS_ARR_KPNUMS(11)
+L, IBEAMMS_ARR_KPNUMS(4), IBEAMMS_ARR_KPNUMS(10)
+
+CM,AR29,LINE
+
+! Áreas das mesas e alma do perfil
+AL, IBEAMMS_ARR_LNUMS(2),  IBEAMMS_ARR_LNUMS(11), IBEAMMS_ARR_LNUMS(7),  IBEAMMS_ARR_LNUMS(12)
+AL, IBEAMMS_ARR_LNUMS(1),  IBEAMMS_ARR_LNUMS(12), IBEAMMS_ARR_LNUMS(6),  IBEAMMS_ARR_LNUMS(13)
+AL, IBEAMMS_ARR_LNUMS(4),  IBEAMMS_ARR_LNUMS(14), IBEAMMS_ARR_LNUMS(9),  IBEAMMS_ARR_LNUMS(15)
+AL, IBEAMMS_ARR_LNUMS(3),  IBEAMMS_ARR_LNUMS(15), IBEAMMS_ARR_LNUMS(8),  IBEAMMS_ARR_LNUMS(16)
+AL, IBEAMMS_ARR_LNUMS(12), IBEAMMS_ARR_LNUMS(10), IBEAMMS_ARR_LNUMS(15), IBEAMMS_ARR_LNUMS(5)
+
+CM,AR30,AREA
+
+! Vértices do retângulo externo de corte
+AR33=arg5-arg1
+AR34=arg5+2*arg1
+AR35=arg7-arg2
+AR36=arg7+arg2
+
+! Fatiar horizontalmente áreas no meio da altura
+CMSEL,S,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+SLICEXZ,arg6+arg4/2,AR33,AR35,AR34,AR36
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+! Obter largura mínima das mesas
+*if,arg2,GE,arg3,THEN
+   AR44=arg2
+   AR45=arg3
+*else
+   AR44=arg3
+   AR45=arg2
+*endif
+
+! Fatiar mesa maior na largura da mesa menor
+*if,AR44,NE,AR45,THEN
+   SLICEXY,arg7+AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4
+   SLICEXY,arg7-AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4
+   CM,AR28,KP
+   CM,AR29,LINE
+   CM,AR30,AREA
+*endif
+
+
+!!                                                                                                                                            !!
+!! 2.   SAÍDA                                                                                                                                 !!
+!!                                                                                                                                            !!
+
+! Definir componente de saída das mesas
+ASEL,S,LOC,Y,arg6
+ASEL,A,LOC,Y,arg6+arg4
+CM,IBEAMMS_COMPA_MESAS,AREA
+
+! Definir componente de saída da alma
+ASEL,INVE
+ASEL,R,LOC,Z,arg7
+CM,IBEAMMS_COMPA_ALMA,AREA
+
+! Restaurar seleção prévia
+KRESTORE
+LRESTORE
+ARESTORE
+
+! Selecionar novas entidades criadas
+CMSEL,A,IBEAMMS_COMPA_ALMA
+CMSEL,A,IBEAMMS_COMPA_MESAS
+CMSEL,A,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+
+! Excluir componentes
+CMDELE,AR28
+CMDELE,AR29
+CMDELE,AR30
+
+*del,IBEAMMS_ARR_LNUMS
+*del,IBEAMMS_ARR_KPNUMS

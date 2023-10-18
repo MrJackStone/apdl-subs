@@ -1,0 +1,7 @@
+! LBACKUP
+
+*del,LBackup_
+
+! ! Created named component with currently selected lines
+CM,LBackup_,LINE
+

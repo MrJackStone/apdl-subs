@@ -1,0 +1,8 @@
+! STRSET, parmName, value
+! STRSET, arg1, arg2
+
+stringp,arg1,'STRSET_VAR_tmp'
+*if,STRSET_VAR_tmp,eq,1,then
+    %arg1%=arg2
+*endif
+

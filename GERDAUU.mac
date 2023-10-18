@@ -1,0 +1,129 @@
+! GERDAUU, secID, name, refineKey, consultOnly
+! GERDAUU, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de perfis U laminados da Gerdau.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! GERDAUU_VAR_num
+! GERDAUU_VAR_d
+! GERDAUU_VAR_bf
+! GERDAUU_VAR_tf
+! GERDAUU_VAR_tw
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+GERDAUU_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'U76.2X6.11',THEN
+   GERDAUU_VAR_d=0.0762
+   GERDAUU_VAR_bf=0.0358
+   GERDAUU_VAR_tf=0.0069
+   GERDAUU_VAR_tw=0.0043
+*elseif,AR20,EQ,'U76.2X7.44',THEN
+   GERDAUU_VAR_d=0.0762
+   GERDAUU_VAR_bf=0.0380
+   GERDAUU_VAR_tf=0.0069
+   GERDAUU_VAR_tw=0.0066
+*elseif,AR20,EQ,'U101.6X7.95',THEN
+   GERDAUU_VAR_d=0.1016
+   GERDAUU_VAR_bf=0.0401
+   GERDAUU_VAR_tf=0.0075
+   GERDAUU_VAR_tw=0.0046
+*elseif,AR20,EQ,'U101.6X9.3',THEN
+   GERDAUU_VAR_d=0.1016
+   GERDAUU_VAR_bf=0.0418
+   GERDAUU_VAR_tf=0.0075
+   GERDAUU_VAR_tw=0.0063
+*elseif,AR20,EQ,'U152.4X12.2',THEN
+   GERDAUU_VAR_d=0.1524
+   GERDAUU_VAR_bf=0.0488
+   GERDAUU_VAR_tf=0.0087
+   GERDAUU_VAR_tw=0.0051
+*elseif,AR20,EQ,'U152.4X15.6',THEN
+   GERDAUU_VAR_d=0.1524
+   GERDAUU_VAR_bf=0.0517
+   GERDAUU_VAR_tf=0.0087
+   GERDAUU_VAR_tw=0.0080
+*elseif,AR20,EQ,'U203.2X17.1',THEN
+   GERDAUU_VAR_d=0.2032
+   GERDAUU_VAR_bf=0.0574
+   GERDAUU_VAR_tf=0.0095
+   GERDAUU_VAR_tw=0.0056
+*elseif,AR20,EQ,'U203.2X20.5',THEN
+   GERDAUU_VAR_d=0.2032
+   GERDAUU_VAR_bf=0.0595
+   GERDAUU_VAR_tf=0.0095
+   GERDAUU_VAR_tw=0.0077
+*elseif,AR20,EQ,'U254X22.77',THEN
+   GERDAUU_VAR_d=0.2540
+   GERDAUU_VAR_bf=0.0660
+   GERDAUU_VAR_tf=0.0111
+   GERDAUU_VAR_tw=0.0061
+*elseif,AR20,EQ,'U254X29.76',THEN
+   GERDAUU_VAR_d=0.2540
+   GERDAUU_VAR_bf=0.0696
+   GERDAUU_VAR_tf=0.0111
+   GERDAUU_VAR_tw=0.0096
+*else
+   *msg,WARN
+GERDAUU WARNING: Specified section not found. Command ignored.
+   GERDAUU_VAR_d=-1
+*endif
+
+! Criar seção transversal
+*if,GERDAUU_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,GERDAUU_VAR_num,BEAM,CHAN,arg2,AR22
+   SECDATA,GERDAUU_VAR_bf,GERDAUU_VAR_bf,GERDAUU_VAR_d,GERDAUU_VAR_tf,GERDAUU_VAR_tf,GERDAUU_VAR_tw
+*endif
+
+

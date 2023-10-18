@@ -1,0 +1,130 @@
+! THRMCNCLAW,  fck,   [],   [], Poisson, matNum,  nPt
+! THRMCNCLAW, arg1, arg2, arg3,    arg4,   arg5, arg6
+
+! Descrição:
+! Esta subrotina define as propriedades mecânicas do concreto de acordo com as prescrições do
+! Eurocode (EN 1993-1-2, 2005).
+
+! Lista de argumentos:
+! arg1: fck     -  resistência à compressão característica do concreto a 20°C
+! arg2: []      -
+! arg3: []      -
+! arg4: Poisson -  coeficiente de Poisson do concreto (constante com a temperatura)
+! arg5: matNum  -  número do material
+! arg6: nPt     -  número de pontos para discretização da curva tensão-deformação (default: 10)
+
+! Lista de argumentos implícitos:
+! -
+
+! Lista de variáveis locais:
+! AR28: epcount
+! AR29: epincr
+! AR30: epsilon
+! AR32: epsilonfck
+! AR35: fc
+! AR36: nthep
+! AR37: nthTemp
+! AR39: sigma
+! AR40: T
+! AR41: tempCount
+! AR42: parType
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! THRMCNCLAW_ARR_E0
+! THRMCNCLAW_ARR_ec1
+! THRMCNCLAW_ARR_fck
+! THRMCNCLAW_ARR_kfck
+! THRMCNCLAW_ARR_T
+
+! Lista de variáveis de saída:
+! -
+
+! Corrigir número de pontos da curva tensão-deformação
+*get,AR42,PARM,arg6,TYPE
+*if,AR42,NE,0,THEN
+   AR28=10
+*elseif,arg6,LT,1,THEN
+   AR28=10
+*elseif,arg6,GT,99,THEN
+   AR28=99
+*else
+   AR28=arg6
+*endif
+
+! Número de temperaturas
+AR41=13
+
+! Preencher vetores com as temperaturas, os fatores de redução e as deformações máximas
+*del,THRMCNCLAW_ARR_kfck
+*dim,THRMCNCLAW_ARR_kfck,ARRAY,AR41
+*del,THRMCNCLAW_ARR_ec1
+*dim,THRMCNCLAW_ARR_ec1,ARRAY,AR41
+*del,THRMCNCLAW_ARR_T
+*dim,THRMCNCLAW_ARR_T,ARRAY,AR41
+! Temps [°C]:               20,    100,    200,    300,    400,    500,    600,    700,    800,    900,   1000,   1100,    1200
+THRMCNCLAW_ARR_T(1)=        20,    100,    200,    300,    400,    500,    600,    700,    800,    900,   1000,   1100,    1200
+THRMCNCLAW_ARR_kfck(1)=  1.0000, 1.0000, 0.9500, 0.8500, 0.7500, 0.6000, 0.4500, 0.3000, 0.1500, 0.0800, 0.0400, 0.0100, 0.0000
+THRMCNCLAW_ARR_ec1(1)=   0.0025, 0.0040, 0.0055, 0.0070, 0.0100, 0.0150, 0.0250, 0.0250, 0.0250, 0.0250, 0.0250, 0.0250, 0.0250    ! Eurocode
+!THRMCNCLAW_ARR_ec1(1)=   0.0025, 0.0035, 0.0045, 0.0060, 0.0075, 0.0095, 0.0125, 0.0140, 0.0145, 0.0150, 0.0150, 0.0150, 0.0150   ! NBR 15200
+
+! Calcular valores reduzidos do fck
+*del,THRMCNCLAW_ARR_fck
+*dim,THRMCNCLAW_ARR_fck,ARRAY,AR41
+*do,AR37,1,AR41,1
+   THRMCNCLAW_ARR_fck(AR37)=arg1*THRMCNCLAW_ARR_kfck(AR37)
+*enddo
+
+! Definição de lei tensão-deformação multilinear
+TB,MISO,arg5,AR41-1,AR28+1
+
+! Inicializar vetor de módulos de elasticidade iniciais
+*del,THRMCNCLAW_ARR_E0
+*dim,THRMCNCLAW_ARR_E0,ARRAY,AR41-1
+
+! Definir pontos das curvas tensão-deformação
+*do,AR37,1,AR41-1,1
+
+   ! Definir temperatura associada à curva
+   AR40=THRMCNCLAW_ARR_T(AR37)
+   TBTEMP,AR40
+
+   ! Obter parâmetros para a temperatura
+   AR35=THRMCNCLAW_ARR_fck(AR37)
+   AR32=THRMCNCLAW_ARR_ec1(AR37)
+
+   ! Cálculo do incremento de epsilon
+   AR29=AR32/(AR28+1)
+   AR30=0
+
+   ! Pontos intermediários da lei tensão-deformação
+   *do,AR36,1,AR28,1
+      AR30=AR30+AR29
+      AR39=(3*AR30*AR35)/(AR32*(2+(AR30/AR32)**3))
+      *if,AR36,EQ,1,THEN
+         THRMCNCLAW_ARR_E0(AR37)=AR39/AR30
+      *endif
+      TBPT,DEFI,AR30,AR39
+   *enddo
+
+   ! Último ponto: início do patamar de escoamento
+   TBPT,DEFI,AR32,AR35
+
+*enddo
+
+! Definição das propriedades lineares elásticas do material
+MPTEMP
+*do,AR37,1,AR41-1,1
+   MPTEMP,AR37,THRMCNCLAW_ARR_T(AR37)
+*enddo
+*do,AR37,1,AR41-1,1
+   MPDATA,EX,arg5,AR37,THRMCNCLAW_ARR_E0(AR37)
+   MPDATA,PRXY,arg5,AR37,arg4
+*enddo
+
+! Apagar vetores
+*del,THRMCNCLAW_ARR_E0
+*del,THRMCNCLAW_ARR_ec1
+*del,THRMCNCLAW_ARR_fck
+*del,THRMCNCLAW_ARR_kfck
+*del,THRMCNCLAW_ARR_T
+

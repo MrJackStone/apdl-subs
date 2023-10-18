@@ -1,0 +1,351 @@
+! IBEAMSTF, L,    bf,   dt,   x0,   y0,   z0
+! IBEAMSTF, arg1, arg2, arg3, arg4, arg5, arg6
+
+! Descrição:
+! Criar solid model de uma viga de seção transversal tipo perfil I duplamente simétrico.
+! É possível adicionar enrijecedores horizontais e/ou verticais à barra.
+
+! Lista de argumentos:
+! arg1: L - distância entre seções extremas
+! arg2: bf - largura das mesas superior e inferior
+! arg3: dt - altura total da seção transversal (distância entre mesas)
+! arg4: x0 - coordenada X da origem da barra
+! arg5: y0 - coordenada Y da origem da barra
+! arg6: z0 - coordenada Z da origem da barra
+
+! Lista de argumentos implícitos:
+! IBEAMSTF_VERENRIJ
+!    Vetor com as coordenadas X das posições dos enrijecedores verticais
+! IBEAMSTF_HORENRIJ
+!    Matriz com a seguinte formatação
+!    [ Xi  Xf  Y  dZ ]
+!    [ ...           ]
+!    [ ...        dZ ]
+!    Em que: cada linha representa um enrijecedor horizontal;
+!            Xi é a coordenada X do início do enrijecedor horizontal;
+!            Xf é a coordenada X do final do enrijecedor horizontal;
+!            Y é a coordenada Y do enrijecedor horizontal;
+!            dZ é a largura do enrijecedor horizontal (medida a partir do plano da alma)
+
+! Lista de variáveis locais:
+! AR28: COMPK_NEW
+! AR29: COMPL_NEW
+! AR30: COMPA_NEW
+! AR31: MaxKP
+! AR32: MaxLN
+! AR33: OutsideXMin
+! AR34: OutsideXMax
+! AR35: OutsideZMin
+! AR36: OutsideZMax
+! AR37: parType
+! AR38: vStiffCount
+! AR39: nthVerStiff
+! AR40: verStiffPos
+! AR41: PerYMin
+! AR42: PerYMid
+! AR43: PerYMax
+! AR44: PerZMin
+! AR45: PerZMid
+! AR46: PerZMax
+! AR47: hStiffCount
+! AR48: arrDim2
+! AR49: nthHorStiff
+! AR50: horStiffXi
+! AR51: horStiffXf
+! AR52: horStiffY
+! AR53: horStiffZ
+! AR54: zMin
+! AR55: zMid
+! AR56: zMax
+! AR57: chk
+! AR58: COMPA_Current
+
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! IBEAM_ARR_LNUMS
+! IBEAM_ARR_KPNUMS
+
+! Lista de variáveis de saída:
+! IBEAM_COMPA_ALMA
+!    Componente contendo todas as áreas da alma da peça
+! IBEAM_COMPA_MESAS
+!    Componente contendo todas as áreas das mesas da peça
+
+/prep7
+
+
+!!                                                                                                !!
+!! 1.   SOLID MODEL                                                                               !!
+!!                                                                                                !!
+
+SELTOL,1e-8
+
+! Desativar exibição de mensagens de aviso
+/uis,MSGPOP,3
+
+! Fazer backup das entidades do solid model atualmente selecionadas
+KBACKUP
+LBACKUP
+ABACKUP
+
+! Remover keypoints, linhas e áreas existentes da seleção
+KSEL,U,KP,,ALL
+LSEL,U,LINE,,ALL
+ASEL,U,AREA,,ALL
+
+! Criar componentes de keypoints, linhas e áreas novas
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+*get,AR31,KP,0,NUM,MAXD
+
+*del,IBEAM_ARR_KPNUMS
+*dim,IBEAM_ARR_KPNUMS,ARRAY,18
+*vfill,IBEAM_ARR_KPNUMS,RAMP,AR31+1,1
+NUMSTR,KP,AR31+1
+
+! Keypoints da seção transversal (face 1)
+K,IBEAM_ARR_KPNUMS(1), arg4, arg5,      arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(2), arg4, arg5,      arg6
+K,IBEAM_ARR_KPNUMS(3), arg4, arg5,      arg6+arg2/2
+K,IBEAM_ARR_KPNUMS(4), arg4, arg5+arg3, arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(5), arg4, arg5+arg3, arg6
+K,IBEAM_ARR_KPNUMS(6), arg4, arg5+arg3, arg6+arg2/2
+
+! Keypoints da seção transversal (face 2)
+K,IBEAM_ARR_KPNUMS(7),  arg4+arg1, arg5,      arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(8),  arg4+arg1, arg5,      arg6
+K,IBEAM_ARR_KPNUMS(9),  arg4+arg1, arg5,      arg6+arg2/2
+K,IBEAM_ARR_KPNUMS(10), arg4+arg1, arg5+arg3, arg6-arg2/2
+K,IBEAM_ARR_KPNUMS(11), arg4+arg1, arg5+arg3, arg6
+K,IBEAM_ARR_KPNUMS(12), arg4+arg1, arg5+arg3, arg6+arg2/2
+
+CM,AR28,KP
+
+*get,AR32,LINE,0,NUM,MAXD
+
+*del,IBEAM_ARR_LNUMS
+*dim,IBEAM_ARR_LNUMS,ARRAY,22
+*vfill,IBEAM_ARR_LNUMS,RAMP,AR32+1,1
+NUMSTR,LINE,AR32+1
+
+! Linhas da seção transversal (face 1)
+L, IBEAM_ARR_KPNUMS(1), IBEAM_ARR_KPNUMS(2)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(3)
+L, IBEAM_ARR_KPNUMS(4), IBEAM_ARR_KPNUMS(5)
+L, IBEAM_ARR_KPNUMS(5), IBEAM_ARR_KPNUMS(6)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(5)
+
+! Linhas da seção transversal (face 2)
+L, IBEAM_ARR_KPNUMS(7),  IBEAM_ARR_KPNUMS(8)
+L, IBEAM_ARR_KPNUMS(8),  IBEAM_ARR_KPNUMS(9)
+L, IBEAM_ARR_KPNUMS(10), IBEAM_ARR_KPNUMS(11)
+L, IBEAM_ARR_KPNUMS(11), IBEAM_ARR_KPNUMS(12)
+L, IBEAM_ARR_KPNUMS(8),  IBEAM_ARR_KPNUMS(11)
+
+! Linhas longitudinais
+L, IBEAM_ARR_KPNUMS(3), IBEAM_ARR_KPNUMS(9)
+L, IBEAM_ARR_KPNUMS(2), IBEAM_ARR_KPNUMS(8)
+L, IBEAM_ARR_KPNUMS(1), IBEAM_ARR_KPNUMS(7)
+L, IBEAM_ARR_KPNUMS(6), IBEAM_ARR_KPNUMS(12)
+L, IBEAM_ARR_KPNUMS(5), IBEAM_ARR_KPNUMS(11)
+L, IBEAM_ARR_KPNUMS(4), IBEAM_ARR_KPNUMS(10)
+
+CM,AR29,LINE
+
+! Áreas das mesas e alma do perfil
+AL, IBEAM_ARR_LNUMS(2),  IBEAM_ARR_LNUMS(11), IBEAM_ARR_LNUMS(7),  IBEAM_ARR_LNUMS(12)
+AL, IBEAM_ARR_LNUMS(1),  IBEAM_ARR_LNUMS(12), IBEAM_ARR_LNUMS(6),  IBEAM_ARR_LNUMS(13)
+AL, IBEAM_ARR_LNUMS(4),  IBEAM_ARR_LNUMS(14), IBEAM_ARR_LNUMS(9),  IBEAM_ARR_LNUMS(15)
+AL, IBEAM_ARR_LNUMS(3),  IBEAM_ARR_LNUMS(15), IBEAM_ARR_LNUMS(8),  IBEAM_ARR_LNUMS(16)
+AL, IBEAM_ARR_LNUMS(12), IBEAM_ARR_LNUMS(10), IBEAM_ARR_LNUMS(15), IBEAM_ARR_LNUMS(5)
+
+CM,AR30,AREA
+
+! Vértices do retângulo externo de corte
+AR33=arg4-arg1
+AR34=arg4+2*arg1
+AR35=arg6-arg2
+AR36=arg6+arg2
+
+! Fatiar horizontalmente áreas no meio da altura
+CMSEL,S,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+SLICEXZ,arg5+arg3/2,AR33,AR35,AR34,AR36
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+! Definir componente de saída das mesas
+ASEL,S,LOC,Y,arg5
+ASEL,A,LOC,Y,arg5+arg3
+CM,IBEAM_COMPA_MESAS,AREA
+
+! Definir componente de saída da alma
+ASEL,INVE
+ASEL,R,LOC,Z,arg6
+CM,IBEAM_COMPA_ALMA,AREA
+
+! Selecionar novamente as áreas criadas
+CMSEL,S,IBEAM_COMPA_MESAS
+CMSEL,A,IBEAM_COMPA_ALMA
+
+
+!!                                                                                                !!
+!! 2.   ENRIJECEDORES                                                                             !!
+!!                                                                                                !!
+! Coordenadas do perímetro da seção transversal
+AR41=arg5
+AR42=arg5+(arg3/2)
+AR43=arg5+arg3
+AR44=arg6-(arg2/2)
+AR45=arg6
+AR46=arg6+(arg2/2)
+
+! Enrijecedores verticais
+*get,AR37,PARM,IBEAMSTF_VERENRIJ,TYPE
+*if,AR37,EQ,1,THEN
+    *get,AR38,PARM,IBEAMSTF_VERENRIJ,DIM,1
+    *if,AR38,GT,0,THEN
+        *do,AR39,1,AR38,1
+            AR40=IBEAMSTF_VERENRIJ(AR39)
+            *if,AR40,GE,arg4,AND,AR40,LE,arg4+arg1,THEN
+                SLICEYZ,AR40,AR41,AR44,AR42,AR45,1
+                SLICEYZ,AR40,AR41,AR45,AR42,AR46,1
+                SLICEYZ,AR40,AR42,AR44,AR43,AR45,1
+                SLICEYZ,AR40,AR42,AR45,AR43,AR46,1
+            *endif
+        *enddo
+    *endif
+*endif
+
+! Atualizar componentes gerais
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+! Criar componente temporário com todas as áreas
+CM,AR58,AREA
+! Criar componente das áreas dos enrijecedores verticais
+ASEL,U,LOC,Y,arg5
+ASEL,U,LOC,Y,arg5+arg3
+ASEL,U,LOC,Z,arg6
+CM,IBEAM_COMPA_VENRIJ,AREA
+! Criar componente das áreas das mesas
+CMSEL,S,AR58
+ASEL,R,LOC,Y,arg5
+CM,IBEAM_COMPA_MESAS,AREA
+CMSEL,S,AR58
+ASEL,R,LOC,Y,arg5+arg3
+CMSEL,A,IBEAM_COMPA_MESAS
+CM,IBEAM_COMPA_MESAS,AREA
+! Criar componente das áreas da alma
+CMSEL,S,AR58
+CMSEL,U,IBEAM_COMPA_MESAS
+CMSEL,U,IBEAM_COMPA_VENRIJ
+CM,IBEAM_COMPA_ALMA,AREA
+CMSEL,S,AR58
+
+! Enrijecedores horizontais
+*get,AR37,PARM,IBEAMSTF_HORENRIJ,TYPE
+*if,AR37,EQ,1,THEN
+    *get,AR47,PARM,IBEAMSTF_HORENRIJ,DIM,1
+    *get,AR48,PARM,IBEAMSTF_HORENRIJ,DIM,2
+    *if,AR47,GT,0,AND,AR48,EQ,4,THEN
+        *do,AR49,1,AR47,1
+            AR50=IBEAMSTF_HORENRIJ(AR49,1)
+            AR51=IBEAMSTF_HORENRIJ(AR49,2)
+            AR52=IBEAMSTF_HORENRIJ(AR49,3)+arg5
+            AR53=IBEAMSTF_HORENRIJ(AR49,4)
+            AR57=0
+            *if,AR50,GE,arg4,THEN
+                AR57=AR57+1
+            *endif
+            *if,AR51,GT,AR50,AND,AR51,LT,arg4+arg1,THEN
+                AR57=AR57+2
+            *endif
+            *if,AR52,GT,arg5,AND,AR52,LT,arg5+arg3,THEN
+                AR57=AR57+4
+            *endif
+            *if,AR53,GT,0,THEN
+                AR57=AR57+8
+            *endif
+            *if,AR57,EQ,15,THEN
+                AR54=arg6-AR53
+                AR55=arg6
+                AR56=arg6+AR53
+                SLICEXZ,AR52,AR50,AR54,AR51,AR55,1
+                SLICEXZ,AR52,AR50,AR55,AR51,AR56,1
+            *endif
+        *enddo
+    *endif
+*endif
+
+! Atualizar componentes gerais
+CM,AR28,KP
+CM,AR29,LINE
+CM,AR30,AREA
+
+! Criar componente temporário com todas as áreas
+CM,AR58,AREA
+! Criar componente das áreas dos enrijecedores horizontais
+ASEL,U,LOC,Y,arg5
+ASEL,U,LOC,Y,arg5+arg3
+ASEL,U,LOC,Z,arg6
+KSEL,U,LOC,Y,arg5
+KSEL,U,LOC,Y,arg5+arg3
+LSLK,R,1
+ASLL,R,1
+CM,IBEAM_COMPA_HENRIJ,AREA
+! Criar componente das áreas dos enrijecedores verticais
+CMSEL,S,AR58
+ASEL,U,LOC,Y,arg5
+ASEL,U,LOC,Y,arg5+arg3
+ASEL,U,LOC,Z,arg6
+CMSEL,U,IBEAM_COMPA_HENRIJ
+CM,IBEAM_COMPA_VENRIJ,AREA
+! Criar componente das áreas das mesas
+CMSEL,S,AR58
+ASEL,R,LOC,Y,arg5
+CM,IBEAM_COMPA_MESAS,AREA
+CMSEL,S,AR58
+ASEL,R,LOC,Y,arg5+arg3
+CMSEL,A,IBEAM_COMPA_MESAS
+CM,IBEAM_COMPA_MESAS,AREA
+! Criar componente das áreas da alma
+CMSEL,S,AR58
+CMSEL,U,IBEAM_COMPA_MESAS
+CMSEL,U,IBEAM_COMPA_VENRIJ
+CMSEL,U,IBEAM_COMPA_HENRIJ
+CM,IBEAM_COMPA_ALMA,AREA
+CMSEL,S,AR58
+
+
+!!                                                                                                !!
+!! 3.   SAÍDA                                                                                     !!
+!!                                                                                                !!
+
+! Restaurar seleção prévia
+KRESTORE
+LRESTORE
+ARESTORE
+
+! Selecionar novas entidades criadas
+CMSEL,A,IBEAM_COMPA_ALMA
+CMSEL,A,IBEAM_COMPA_MESAS
+CMSEL,A,IBEAM_COMPA_VENRIJ
+CMSEL,A,IBEAM_COMPA_HENRIJ
+CMSEL,A,AR28
+CMSEL,A,AR29
+CMSEL,A,AR30
+
+! Excluir componentes
+CMDELE,AR28
+CMDELE,AR29
+CMDELE,AR30
+
+*del,IBEAM_ARR_LNUMS
+*del,IBEAM_ARR_KPNUMS
+

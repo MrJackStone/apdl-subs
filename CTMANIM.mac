@@ -1,0 +1,28 @@
+!CTMANIM
+
+!/post26
+!NUMVAR,200
+!NSOL,3,LoadNode,U,Y,UY
+!/color,CURVE,BLUE,1
+
+/noerase
+
+var=2
+*do,i,1,173,1
+   /post1
+   SET,1,i
+   /seg,MULTI,'3dANIM',0.02
+   PLDISP
+   !/post26
+   !XVAR,1
+   !/seg,MULTI,'newanim',0.02
+   !PLVAR,var
+   !*if,var,EQ,2,THEN
+   !   var=3
+   !*elseif,var,EQ,3,THEN
+   !   var=2
+   !*endif
+*enddo
+/seg,OFF
+anim,10,1,0.02
+

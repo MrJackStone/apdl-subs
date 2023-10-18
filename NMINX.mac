@@ -1,0 +1,24 @@
+! NMINX
+
+! Lista de variáveis
+! AR20: NCount
+! VAR21: xValues
+! AR22: NDIndex
+! AR23: PrevND
+! AR24: MinX
+
+*get,AR20,NODE,0,COUNT
+*del,VAR21
+*dim,VAR21,,AR20
+AR23=0
+! Para cada node selecionado:
+*do,AR22,1,AR20,1
+   AR23=NDNEXT(AR23)
+   ! Obter (e armazenar no vetor) o valor da coordenada X desse node
+   VAR21(AR22)=NX(AR23)
+*enddo
+! Obter menor valor de coordenada X armazenado no vetor
+*vscfun,AR24,MIN,VAR21
+! Atribuir valor à variável de saída
+_OUTPUT=AR24
+

@@ -1,0 +1,224 @@
+! PARVERIFY, output, parameter, type, option, value, xDim, yDim, zDim
+! PARVERIFY,   arg1,      arg2, arg3,   arg4,  arg5, arg6, arg7, arg8
+
+! Description:
+! Checks if a provided parameter is of a certain type (and optionally of a certain value) and
+! returns to an output parameter either true (1) or false (0).
+
+! Arguments:
+! arg1: output     -  name of output parameter to which result is written (defaults to _OUTPUT)
+! arg2: parameter  -  name of parameter which will be checked
+! arg3: type       -  type to compare the parameter (arg2) against:
+!                        ['UNDEF',  -1] Undefined
+!                        ['SCALAR',  0] Scalar (number)
+!                        ['ARRAY',   1] Number array
+!                        ['TABLE',   2] Table
+!                        ['CHAR',    3] Character scalar
+!                        ['CHR_ARR', 4] Character array
+!                        ['STR_ARR', 5] String array
+! arg4: option     -  type of parameter value check (optional, for scalar parameters only):
+!                        ['NOT'  ] Checks if parameter is NOT equal to value (arg5)
+!                        ['EQUAL'] Checks if parameter is EQUAL to value (arg5)
+! arg5: value      -  value to compare parameter (arg2) against, depending on the definition of
+!                     option (arg4)
+! arg6: xDim       -  value of dimension X (first dimension of an array parameter) that arg2 must
+!                     match (optional, for arrays and tables only)
+! arg7: yDim       -  value of dimension Y (second dimension of an array parameter) that arg2 must
+!                     match (optional, for arrays and tables only)
+! arg8: zDim       -  value of dimension Z (third dimension of an array parameter) that arg2 must
+!                     match (optional, for arrays and tables only)
+
+! Local parameters:
+! AR20: typeCount
+! AR21: typeType
+! AR22: targetTypeIdx
+! AR23: targetType
+! AR24: nthTypeIdx
+! AR25: nthType
+! AR26: optionType
+! AR27: compareOption
+! AR28: checkXDim
+! AR29: checkYDim
+! AR30: checkZDim
+! AR31: checkClass
+! AR32: parType
+! AR33: typeCheck
+! AR34: valueCheck
+! AR35: xDimCheck
+! AR36: yDimCheck
+! AR37: zDimCheck
+! AR38: parXDim
+! AR39: parYDim
+! AR40: parZDim
+! AR41: outType
+! AR42: outputParm
+
+! Global parameters (erased at the end of this subroutine)
+! PARVERIFY_ARR_types
+
+
+! Initialize array of available types
+AR20=7
+*del,PARVERIFY_ARR_types
+*dim,PARVERIFY_ARR_types,char,AR20
+PARVERIFY_ARR_types(1)='UNDEF','SCALAR','ARRAY','TABLE','CHAR','CHR_ARR','STR_ARR'
+
+! Get standardized output
+*get,AR41,parm,arg1,type
+*if,AR41,eq,3,then
+    AR42=arg1
+*else
+    AR42='_OUTPUT'
+*endif
+
+! Get standardized target type
+*get,AR21,parm,arg3,type
+*if,AR21,eq,0,then
+    AR22=arg3
+    *if,AR22,ge,-1,and,AR22,le,5,then
+        AR23=PARVERIFY_ARR_types(AR22+2)
+    *else
+        *msg,warn,arg3
+PARVERIFY error: invalid TYPE (arg3=%I).%/&
+PARVERIFY command is ignored.
+        %AR42%=-1
+        *return,-1
+    *endif
+*elseif,AR21,eq,3,then
+    AR23=upcase(arg3)
+    *do,AR24,1,AR20,1
+        AR25=PARVERIFY_ARR_types(AR24)
+        *if,AR25,eq,AR23,then
+            AR22=AR24-2
+            *exit
+        *endif
+    *enddo
+*else
+    *msg,warn,AR21
+PARVERIFY error: invalid arg3 parameter type (%I).%/&
+PARVERIFY command is ignored.
+    %AR42%=-1
+    *return,-1
+*endif
+
+! Get standardized option
+*get,AR26,parm,arg4,type
+*if,AR26,eq,3,then
+    AR27=upcase(arg4)
+*else
+    AR27=''
+*endif
+
+! Set flag to check array's X dimension
+AR28=0
+*if,arg6,gt,0,then
+    AR28=1
+*endif
+
+! Set flag to check array's Y dimension
+AR29=0
+*if,arg7,gt,0,then
+    AR29=1
+*endif
+
+! Set flag to check array's Z dimension
+AR30=0
+*if,arg8,gt,0,then
+    AR30=1
+*endif
+
+! Classify verification to be performed
+*if,AR23,eq,'UNDEF',then
+    AR31='undefined'
+    *get,AR32,parm,arg2,type
+
+*elseif,AR23,eq,'SCALAR',or,AR23,eq,'CHAR',then
+    AR31='scalar'
+    *get,AR32,parm,arg2,type
+
+*else
+    AR31='array'
+    *get,AR32,parm,%arg2%,type
+*endif
+
+! Perform checks
+*if,AR31,eq,'undefined',then
+    ! Check an undefined parameter (type only)
+    AR33=0
+
+    *if,AR32,eq,AR22,then
+        AR33=1
+    *endif
+
+    %AR42%=AR33
+
+*elseif,AR31,eq,'scalar',then
+    ! Check a scalar parameter (type, value optionally)
+    AR33=0
+    AR34=0
+
+    *if,AR32,eq,AR22,then
+        AR33=1
+    *endif
+
+    *if,AR33,eq,1,then
+        ! If type matches, check if value matches
+        *if,AR27,eq,'EQUAL',then
+            ! Check if parameter is equal to target
+            *if,arg2,eq,arg5,then
+                AR34=1
+            *endif
+        *elseif,AR27,eq,'NOT',then
+            ! Check if parameter is not equal to target
+            *if,arg2,ne,arg5,then
+                AR34=1
+            *endif
+        *else
+            ! Accept any value for parameter
+            AR34=1
+        *endif
+    *endif
+
+    %AR42%=AR33*AR34
+
+*elseif,AR31,eq,'array',then
+    ! Check an array parameter (type, dimensions optionally)
+    AR33=0
+    AR35=abs(AR28-1)
+    AR36=abs(AR29-1)
+    AR37=abs(AR30-1)
+
+    *if,AR32,eq,AR22,then
+        AR33=1
+    *endif
+
+    *if,AR33,eq,1,then
+        ! Check if X dimension matches
+        *if,AR28,eq,1,then
+            *get,AR38,parm,%arg2%,dim,x
+            *if,AR38,eq,arg6,then
+                AR35=1
+            *endif
+        *endif
+        ! Check if Y dimension matches
+        *if,AR29,eq,1,then
+            *get,AR39,parm,%arg2%,dim,y
+            *if,AR39,eq,arg7,then
+                AR36=1
+            *endif
+        *endif
+        ! Check if Z dimension matches
+        *if,AR30,eq,1,then
+            *get,AR40,parm,%arg2%,dim,z
+            *if,AR40,eq,arg8,then
+                AR37=1
+            *endif
+        *endif
+    *endif
+
+    %AR42%=AR33*AR35*AR36*AR37
+*endif
+
+*del,PARVERIFY_ARR_types
+
+

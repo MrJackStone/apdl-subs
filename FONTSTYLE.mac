@@ -1,0 +1,94 @@
+! FONTSTYLE, type, font, bold, italics
+! FONTSTYLE, arg1, arg2, arg3,    arg4
+
+! Description:
+! Sets font style (font name, bold, italics) for a type of on-screen annotation (LEGEND, ENTITY, or
+! ANNOTATION).
+
+! Arguments:
+! arg1: type     -  type of text element:
+!                      ['L'] legend
+!                      ['E'] entity
+!                      ['A'] annotation
+! arg2: font     -  name of font to be used (replace spaces with '*'). Defaults to Courier*New.
+! arg3: bold     -  boldface status:
+!                      [0] off (thin lines)
+!                      [1] on (thick lines)
+! arg4: italics  -  italics status:
+!                      [0] off
+!                      [1] on
+
+! Local parameters:
+! AR21: elementType
+! AR22: fontName
+! AR33: boldFontWeight
+! AR43: lightFontWeight
+
+! Global parameters (erased at the end of this subroutine):
+! _OUTPUT
+
+
+! Ensure text type is valid (LEGEND, ENTITY, or ANNOTATION)
+parverify,,arg1,'CHAR'
+*if,_OUTPUT,eq,1,then
+    firstChar=upcase(strsub(arg1,1,1))
+    *if,firstChar,eq,'L',then
+        AR21=1
+    *elseif,firstChar,eq,'E',then
+        AR21=2
+    *elseif,firstChar,eq,'A',then
+        AR21=3
+    *else
+        *msg,warn,arg1
+FONTSTYLE warning: invalid type key (arg1=%s).%/&
+Valid types are '[L]EG', '[E]NT', and '[A]NNO'.%/&
+FONTSTYLE command is ignored.
+        *return,-1
+    *endif
+*else
+    *msg,warn
+FONTSTYLE warning: invalid parameter type (arg1).%/&
+arg1 must be a string ('[L]EG', '[E]NT', or '[A]NNO').%/&
+FONTSTYLE command is ignored.
+    *return,-1
+*endif
+
+! Ensure font name is a string
+parverify,,arg2,'CHAR'
+*if,_OUTPUT,eq,0,then
+    AR22='Courier*New'
+*else
+    AR22=arg2
+*endif
+
+! Boldface setting
+AR33=1000
+AR43=0
+parverify,,arg3,'SCALAR','EQUAL',1
+*if,_OUTPUT,eq,1,then
+    AR23=AR33
+*else
+    AR23=AR43
+*endif
+
+! Italics setting
+parverify,,arg4,'SCALAR','EQUAL',1
+*if,_OUTPUT,eq,1,then
+    AR24=1
+*else
+    AR24=0
+*endif
+
+! Annotation: change setting of global boldface parameter
+*if,AR21,eq,3,then
+    *if,AR23,eq,AR33,then
+        g_annobold,1
+    *else
+        g_annobold,-1
+    *endif
+*endif
+
+! Set font style
+/device,font,AR21,AR22,AR23,,,,AR24
+
+*del,_OUTPUT

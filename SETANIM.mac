@@ -1,0 +1,60 @@
+! SETANIM, firstSet, lastSet, setStep, folderName
+! SETANIM,     arg1,    arg2,    arg3,       arg4
+
+! Descrição:
+! Captura imagens dos sets de resultados especificados para geração de animação customizada.
+
+! Lista de argumentos:
+! arg1: firstSet    -  número do primeiro set de resultados a ser fotografado
+! arg2: lastSet     -  número do último set de resultados a ser fotografado
+! arg3: folderName  -  nome do diretório no qual as imagens serão armazenadas
+! arg4: setStep     -  incremento na leitura de substeps (default = 1)
+
+! Lista de variáveis:
+! AR20: parType
+! AR21: nthSet
+! AR22: substepIncrement
+! AR23: subdirKey
+
+! Obter diretório atual
+*del,SETANIM_STR_mainDir
+/inquire,SETANIM_STR_mainDir,DIRECTORY
+
+! Passo da leitura de substeps
+AR22=1
+*get,AR20,PARM,arg3,TYPE
+*if,AR20,EQ,0,THEN
+   *if,arg3,GT,0,THEN
+      AR22=arg3
+   *endif
+*endif
+
+! Criar diretório para armazenar as imagens
+AR23=0
+*get,AR20,PARM,arg4,TYPE
+*if,AR20,EQ,3,THEN
+   AR23=1
+   SUBDIR,arg4,0
+*endif
+
+! Capturar imagens
+*do,AR21,arg1,arg2,AR22
+
+    SET,,,,,,,AR21
+
+    SETANIM_VAR_frameNumber=AR21
+    /title,%SETANIM_VAR_frameNumber%
+
+   /replot
+   *if,AR23,EQ,1,THEN
+      /cwd,'%SUBDIR_ARR_newFolderPath(1)%'
+      TAKEPIC,,,,,1
+      /cwd,'%SETANIM_STR_mainDir(1)%'
+   *else
+      TAKEPIC,,,,,1
+   *endif
+*enddo
+
+!*del,SETANIM_VAR_frameNumber
+
+

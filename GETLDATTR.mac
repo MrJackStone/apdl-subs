@@ -1,0 +1,161 @@
+! getldattr, outputParm, attributeName, attributeOption, loadObject
+! getldattr,       arg1,          arg2,            arg3,       arg4
+
+! Description:
+! Returns an attribute of a load object, identified by arg2=attributeName and (in some cases) also
+! by arg3=attributeOption.
+! A load hypothesis's name is obtained indirectly from the loadObject (arg4) by concatenating a
+! letter (stored in position 1 of arg4) and a number (stored in position 2 of arg4). Examples:
+!    loadObject(1)=0   ┐
+!    loadObject(2)=1   ├► yields: 'G1'
+!    loadObject(3)=... ┘
+!    loadObject(1)=1   ┐
+!    loadObject(2)=5   ├► yields: 'Q5'
+!    loadObject(3)=... ┘
+!    loadObject(1)=2   ┐
+!    loadObject(2)=2   ├► yields: 'W2'
+!    loadObject(3)=... ┘
+
+! Arguments:
+! arg1: outputParm     -  name of output parameter to which the returned attribute will be written
+! arg2: attributeName  -  name of the attribute to extract. Options:
+!                            'TYPE'  -  hypothesis type
+!                            'HNUM'  -  hypothesis number
+!                            'HYPO'  -  hypothesis name
+!                            'KVAL'  -  load's characteristic value
+!                            'GAMMA' -  gamma coefficient (requires arg3)
+!                            'PSI'   -  psi coefficient (requires arg3)
+! arg3: attributeOpt   -  additional info regarding attribute to extract (only for gamma and psi)
+!                            Options for arg2='GAMMA':
+!                            'MAX'   -  maximum gamma
+!                            'MIN'   -  minimum gamma
+!                            '-'     -  use gamma = 1
+!                            Options for arg2='PSI':
+!                            '0'     -  psi_0
+!                            '1'     -  psi_1
+!                            '2'     -  psi_2
+!                            'F'     -  psi_f (fatigue combination)
+!                            '-'     -  use psi = 1
+! arg4: loadObject     -  9x1x1 array containing the load's attributes, formatted as follows:
+!                            POS  DESCRIPTION
+!                             1   Load type. Valid options are:
+!                                    [0] Dead load (conversion to letter 'G')
+!                                    [1] Live load (conversion to letter 'Q')
+!                                    [2] Wind load (conversion to letter 'W')
+!                             2   Load hypothesis number (> 0). This number does not uniquely
+!                                 identify a hypothesis, as it can be repeated for different
+!                                 types of hypothesis (e.g.: 'G2' and 'Q2' can coexist)
+!                             3   Load's characteristic value
+!                             4   Gamma coefficient: maximum value
+!                             5   Gamma coefficient: minimum value
+!                             6   Psi_0 coefficient
+!                             7   Psi_1 coefficient
+!                             8   Psi_2 coefficient
+!                             9   Psi_f coefficient (for fatigue combinations)
+
+! Local parameters:
+! AR21: typeIdx
+! AR22: hypIdx
+! AR23: kvalueIdx
+! AR24: gammaMaxIdx
+! AR25: gammaMinIdx
+! AR26: psi0Idx
+! AR27: psi1Idx
+! AR28: psi2Idx
+! AR29: psifIdx
+! AR32: attrName
+! AR33: attrOpt
+! AR34: hypoType
+! AR35: namePrefix
+! AR36: hypoNum
+
+
+! Hardcoded: index corresponding to each attribute in the load object
+AR21=1
+AR22=2
+AR23=3
+AR24=4
+AR25=5
+AR26=6
+AR27=7
+AR28=8
+AR29=9
+
+AR32=upcase(arg2)
+
+*if,AR32,eq,'TYPE',then
+    %arg1%=%arg4%(AR21)
+
+*elseif,AR32,eq,'HNUM',then
+    %arg1%=%arg4%(AR22)
+
+*elseif,AR32,eq,'KVAL',then
+    %arg1%=%arg4%(AR23)
+
+*elseif,AR32,eq,'GAMMA',then
+    AR33=upcase(arg3)
+    *if,AR33,eq,'MAX',then
+        %arg1%=%arg4%(AR24)
+    *elseif,AR33,eq,'MIN',then
+        %arg1%=%arg4%(AR25)
+    *elseif,AR33,eq,'-',then
+        %arg1%=1
+    *else
+        *msg,warn
+GETLDATTR error: invalid arg3 (GAMMA option).%/&
+Valid options are 'MAX', 'MIN', '-'.%/&
+GETLDATTR returned 0.
+        %arg1%=0
+        *return,-1
+    *endif
+
+*elseif,AR32,eq,'PSI',then
+    AR33=upcase(arg3)
+    *if,AR33,eq,'0',then
+        %arg1%=%arg4%(AR26)
+    *elseif,AR33,eq,'1',then
+        %arg1%=%arg4%(AR27)
+    *elseif,AR33,eq,'2',then
+        %arg1%=%arg4%(AR28)
+    *elseif,AR33,eq,'F',then
+        %arg1%=%arg4%(AR29)
+    *elseif,AR33,eq,'-',then
+        %arg1%=1
+    *else
+        *msg,warn
+GETLDATTR error: invalid arg3 (PSI option).%/&
+Valid options are '0', '1', '2', 'F', '-'.%/&
+GETLDATTR returned 0.
+        %arg1%=0
+        *return,-1
+    *endif
+
+*elseif,AR32,eq,'HYPO',then
+    AR34=%arg4%(AR21)
+    *if,AR34,eq,0,then
+        AR35='G'
+    *elseif,AR34,eq,1,then
+        AR35='Q'
+    *elseif,AR34,eq,2,then
+        AR35='W'
+    *else
+        *msg,warn
+GETLDATTR error: invalid arg4 (hypothesis type).%/&
+Valid options are 0 ('G'), 1 ('Q'), 2 ('W').%/&
+GETLDATTR returned 0.
+        %arg1%=0
+        *return,-1
+    *endif
+    AR36=chrval(%arg4%(AR22))
+    %arg1%=strcat(AR35,AR36)
+
+*else
+    *msg,warn
+GETLDATTR error: invalid arg2 (attribute name).%/&
+Valid options are 'TYPE', 'HNUM', 'HYPO', 'KVAL', 'GAMMA', 'PSI'.%/&
+GETLDATTR returned 0.
+    %arg1%=0
+    *return,-1
+
+*endif
+

@@ -1,0 +1,22 @@
+! VLIMS, xMin, yMin, zMin, xMax, yMax, zMax
+! VLIMS, arg1, arg2, arg3, arg4, arg5, arg6
+
+ABACKUP
+LBACKUP
+KBACKUP
+
+ASLV,S
+LSLA,S
+KSLL,S
+
+*get,%arg1%,KP,,MNLOC,X
+*get,%arg2%,KP,,MNLOC,Y
+*get,%arg3%,KP,,MNLOC,Z
+*get,%arg4%,KP,,MXLOC,X
+*get,%arg5%,KP,,MXLOC,Y
+*get,%arg6%,KP,,MXLOC,Z
+
+ARESTORE
+LRESTORE
+KRESTORE
+

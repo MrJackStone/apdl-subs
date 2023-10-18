@@ -1,0 +1,39 @@
+! PTHLIMS, pathName,  min,  max,  avg
+! PTHLIMS,     arg1, arg2, arg3, arg4
+
+! Descrição:
+! Transfere os valores associados a um LABEL de um PATH para um ARRAY e extrai dentre esses
+! valores as quantidades mínima, máxima e média.
+
+! Lista de argumentos
+! arg1: pathName  -  nome do LABEL
+
+! Lista de variáveis locais:
+! -
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! PTH2ARR_ARR_OUTPUT
+
+! Lista de variáveis de saída:
+! PTHLIMS_AVG_OUTPUT  -  média dos valores
+! PTHLIMS_MAX_OUTPUT  -  limite superior dos valores
+! PTHLIMS_MIN_OUTPUT  -  limite inferior dos valores
+
+PTH2ARR,arg1
+
+*vscfun,PTHLIMS_AVG_OUTPUT,MEAN,PTH2ARR_ARR_OUTPUT
+*vscfun,PTHLIMS_MAX_OUTPUT,MAX,PTH2ARR_ARR_OUTPUT
+*vscfun,PTHLIMS_MIN_OUTPUT,MIN,PTH2ARR_ARR_OUTPUT
+
+*if,ABS(PTHLIMS_MIN_OUTPUT),GT,ABS(PTHLIMS_MAX_OUTPUT),THEN
+    PTHLIMS_ABS_OUTPUT=ABS(PTHLIMS_MIN_OUTPUT)
+*else
+    PTHLIMS_ABS_OUTPUT=ABS(PTHLIMS_MAX_OUTPUT)
+*endif
+
+*del,PTH2ARR_ARR_OUTPUT
+
+strset,arg2,PTHLIMS_MIN_OUTPUT
+strset,arg3,PTHLIMS_MAX_OUTPUT
+strset,arg4,PTHLIMS_AVG_OUTPUT
+

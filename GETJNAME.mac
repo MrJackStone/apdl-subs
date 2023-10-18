@@ -1,0 +1,56 @@
+! GETJNAME, outputParm
+! GETJNAME, arg1
+
+! Description:
+! Stores the current jobname in a character array parameter.
+
+! Local variables:
+! AR20: kIndex
+! AR21: FLAG
+! AR22: namePart
+! AR23: partLength
+
+! Output variables:
+! GETJNAME_ARR_jobname
+
+! Initialize character array parameter
+*del,GETJNAME_ARR_jobname
+*dim,GETJNAME_ARR_jobname,STRING,248
+
+! Initialize reading position
+AR20=1
+
+! While the read string has characters:
+AR21=1
+*dowhile,AR21
+
+   ! Get part of the jobname
+   *get,AR22,ACTIVE,0,JOBNAM,,START,AR20
+
+   ! Get number of characters in this portion of the string
+   AR23=STRLENG(AR22)
+
+   ! If the string has non-empty character (not spaces):
+   *if,AR23,GT,0,THEN
+
+      ! Concatenate file name
+      GETJNAME_ARR_jobname(1)=STRCAT(GETJNAME_ARR_jobname(1),AR22)
+      ! Increment reading position
+      AR20=AR20+8
+
+   *else
+      ! Empty string: exit loop
+      AR21=0
+   *endif
+
+*enddo
+
+! Remove space characters from filename
+GETJNAME_ARR_jobname(1)=STRCOMP(GETJNAME_ARR_jobname(1))
+
+*get,AR24,parm,arg1,type
+*if,AR24,eq,3,then
+    %arg1%=GETJNAME_ARR_jobname(1)
+*endif
+
+

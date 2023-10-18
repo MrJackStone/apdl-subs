@@ -1,0 +1,232 @@
+! PSTACK, stackType, rows, columns, innerRadius, midRadius, outerRadius, coating, mergeOpt
+! PSTACK,      arg1, arg2,    arg3,        arg4,      arg5,        arg6,    arg7,     arg8
+
+! Description:
+! Creates rings representing cross-sections of stacked pipes.
+
+! Arguments:
+! arg1: stackType    -  pipe stacking configuration:
+!                          [0] NESTED
+!                          [1] STAGGERED
+! arg2: rows         -  number of rows
+! arg3: columns      -  number of columns ('STAGGERED' configuration only)
+! arg4: innerRadius  -  inner pipe radius (opening radius)
+! arg5: midRadius    -  mid pipe radius (boundary between inner material and coating)
+! arg6: outerRadius  -  outer pipe radius (external to coating)
+! arg7: coating      -  pipe coating status:
+!                          [0] No coating ('outerRadius' is ignored)
+!                          [1] Coating
+! arg8: mergeOpt     -  entity merging option:
+!                          [0] pipe sectors only
+!                          [1] all areas
+!                          [2] all areas except vertical walls
+
+! Local parameters:
+! AR20: parType
+! AR21: maxRadius
+! AR22: nthRow
+! AR23: xCenter
+! AR24: yCenter
+! AR25: colCount
+! AR26: nthTube
+! AR27: plateThk
+! AR28: baseWidth
+! AR29: wallHeight
+! AR30: rowCompName
+! AR31: nthCol
+! AR32: newCS
+! AR33: tubeCompName
+! AR34: pi
+
+! Global parameters (erased at the end on this subroutine):
+! PSTACK_1stPipe_xCenter
+! PSTACK_1stPipe_yCenter
+! PSTACK_COMPA_temp
+
+! Output parameters:
+! PSTACK_CS_TABLE
+! COMPA_ROW<i>
+! COMPA_R<i>_C<j>
+! PSTACK_COMPA_PIPES
+! PSTACK_COMPA_CORE
+! PSTACK_COMPA_COATING
+! PSTACK_COMPA_SUPPORTS
+! PSTACK_COMPA_BotSupport
+! PSTACK_COMPA_LatSupports
+! PSTACK_ColCounts
+
+ABACKUP
+LBACKUP
+KBACKUP
+ASEL,U,AREA,,ALL
+CM,PSTACK_COMPA_temp,AREA
+
+AR34=ACOS(-1)
+
+! Initialize table with coordinate system pointers for each pipe
+*del,PSTACK_CS_TABLE
+*dim,PSTACK_CS_TABLE,ARRAY,arg2,arg3
+
+! Initialize array with column numbers per row
+*del,PSTACK_ColCounts
+*dim,PSTACK_ColCounts,ARRAY,arg2
+
+! Initialize arrays with X-Y coordinates of first pipe's center on each row
+*del,PSTACK_1stPipe_xCenter
+*dim,PSTACK_1stPipe_xCenter,ARRAY,arg2
+*del,PSTACK_1stPipe_yCenter
+*dim,PSTACK_1stPipe_yCenter,ARRAY,arg2
+
+*get,AR20,PARM,arg6,TYPE
+*if,AR20,NE,0,OR,arg6,LT,arg5,THEN
+    AR21=arg5
+*else
+    AR21=arg6
+*endif
+
+! Draw pipes in stacked configuration
+*do,AR22,1,arg2,1
+
+    ! Calculate X,Y coordinates of the center of the first pipe in this row
+    *if,arg1,EQ,0,THEN
+        AR23=arg6*AR22
+        AR24=arg6+(AR22-1)*COS(AR34/6)*2*arg6
+        AR25=arg2-AR22+1
+    *elseif,arg1,EQ,1,THEN
+        AR23=(arg6)*(1+MOD((AR22-1),2))
+        AR24=arg6+(AR22-1)*2*arg6*SIN(AR34/3)
+        AR25=arg3-MOD(AR22-1,2)
+    *endif
+
+    PSTACK_1stPipe_xCenter(AR22)=AR23
+    PSTACK_1stPipe_yCenter(AR22)=AR24
+    PSTACK_ColCounts(AR22)=AR25
+
+    *do,AR26,1,AR25,1
+        ! Unselect all areas
+        ASEL,U,AREA,,ALL
+        ! Draw pipe (divided in four 90° sectors)
+        CYL4, AR23, AR24, arg4,   0, arg5,  90
+        CYL4, AR23, AR24, arg4,  90, arg5, 180
+        CYL4, AR23, AR24, arg4, 180, arg5, 270
+        CYL4, AR23, AR24, arg4, 270, arg5, 360
+        *if,arg7,EQ,1,THEN
+            CYL4, AR23, AR24, arg5,   0, arg6,  90
+            CYL4, AR23, AR24, arg5,  90, arg6, 180
+            CYL4, AR23, AR24, arg5, 180, arg6, 270
+            CYL4, AR23, AR24, arg5, 270, arg6, 360
+        *endif
+        ! Merge coincident keypoints of the four sectors
+        LSLA,S
+        KSLL,S
+        NUMMRG,KP
+        ! Update all new areas component
+        CMSEL,A,PSTACK_COMPA_temp
+        CM,PSTACK_COMPA_temp,AREA
+        ! Update X location of the center of the next pipe in this row
+        AR23=AR23+arg6*2
+    *enddo
+*enddo
+
+! Draw walls and base
+AR27=arg6-arg4
+AR28=2*arg6*arg3+AR27
+*if,arg1,EQ,0,THEN
+    AR29=2*arg6
+*elseif,arg1,EQ,1,THEN
+    AR29=2*arg6*(1+(arg2-1)*SIN(AR34/3))
+*endif
+RECTNG,         0, -AR27, 0,  AR29
+RECTNG,     -AR27,  AR28, 0, -AR27
+RECTNG, AR28-AR27,  AR28, 0,  AR29
+
+! Update all new areas component
+CMSEL,A,PSTACK_COMPA_temp
+CM,PSTACK_COMPA_temp,AREA
+
+*if,arg8,EQ,1,THEN
+    ! Glue and merge all touching areas
+    AGLUE,ALL
+    NUMMRG,ALL
+    NUMCMP,ALL
+    CM,PSTACK_COMPA_temp,AREA
+*elseif,arg8,EQ,2,THEN
+    ! Glue and merge all touching areas (except vertical walls)
+    ASEL,U,LOC,X,-AR27,0
+    ASEL,U,LOC,X,AR28-AR27,AR28
+    AGLUE,ALL
+    NUMMRG,ALL
+    NUMCMP,ALL
+    CMSEL,A,PSTACK_COMPA_temp
+    CM,PSTACK_COMPA_temp,AREA
+*endif
+
+! Create area selection components for each row and each pipe
+ASEL,U,AREA,,ALL
+CM,PSTACK_COMPA_PIPES,AREA
+CM,PSTACK_COMPA_COATING,AREA
+*do,AR22,1,arg2,1
+
+    AR23=PSTACK_1stPipe_xCenter(AR22)
+    AR24=PSTACK_1stPipe_yCenter(AR22)
+    AR25=PSTACK_ColCounts(AR22)
+
+    ! Unselect all areas, initialize empty area selection component for this row
+    ASEL,U,AREA,,ALL
+    AR30=STRCAT('PSTACK_COMPA_ROW',CHRVAL(AR22))
+    CM,%AR30%,AREA
+
+    *do,AR31,1,AR25,1
+        ! Create cylindrical coordinate system centered on pipe
+        *get,MXCS,CDSY,,NUM,MAX
+        AR32=MXCS+1
+        CSYS,0
+        LOCAL,AR32,CYLIN,AR23,AR24,0
+        PSTACK_CS_TABLE(AR22,AR31)=AR32
+        ! Create area selection component for this single pipe
+        ! Component name format: 'PSTACK_COMPA_Rx_Cy', in which 'x' is row number and 'y' column number
+        ASEL,U,AREA,,ALL
+        ASEL,S,LOC,X,0,arg6
+        AR33=STRCAT('PSTACK_COMPA_R',STRCAT(CHRVAL(AR22),STRCAT('_C',CHRVAL(AR31))))
+        CM,%AR33%,AREA
+        ! Update concrete coating component
+        LSLA,S
+        LSEL,R,LOC,X,arg5,arg6
+        ASLL,R,1
+        CMSEL,A,PSTACK_COMPA_COATING
+        CM,PSTACK_COMPA_COATING,AREA
+        CSYS,0
+        ! Update area selection component for the entire row to include current pipe
+        CMSEL,S,%AR33%
+        CMSEL,A,%AR30%
+        CM,%AR30%,AREA
+        ! Update X location of the center of the next pipe in this row
+        AR23=AR23+2*arg6
+    *enddo
+    CMSEL,A,PSTACK_COMPA_PIPES
+    CM,PSTACK_COMPA_PIPES,AREA
+*enddo
+
+! Create area selection component for floor and wall plates
+CMSEL,S,PSTACK_COMPA_PIPES
+CMSEL,U,PSTACK_COMPA_COATING
+CM,PSTACK_COMPA_CORE,AREA
+CMSEL,S,PSTACK_COMPA_temp
+CMSEL,U,PSTACK_COMPA_PIPES
+CM,PSTACK_COMPA_SUPPORTS,AREA
+ASEL,R,LOC,Y,-AR27,0
+CM,PSTACK_COMPA_BotSupport,AREA
+CMSEL,S,PSTACK_COMPA_SUPPORTS
+CMSEL,U,PSTACK_COMPA_BotSupport
+CM,PSTACK_COMPA_LatSupports,AREA
+
+ARESTORE
+LRESTORE
+KRESTORE
+CMSEL,A,PSTACK_COMPA_temp
+LSLA,A
+KSLL,A
+
+CMDELE,PSTACK_COMPA_temp
+*del,PSTACK_1stPipe_xCenter
+*del,PSTACK_1stPipe_yCenter

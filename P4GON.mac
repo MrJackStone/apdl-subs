@@ -1,0 +1,4 @@
+! P4GON, x_llc, y_llc, x_urc, y_urc
+! P4GON,  arg1,  arg2,  arg3,  arg4
+
+/polygon, 4, arg1, arg2, arg3, arg2, arg3, arg4, arg1, arg4

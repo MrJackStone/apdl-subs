@@ -1,0 +1,52 @@
+! EDPSOIL, matNum,    E, Poisson, dens,   fi,    c,   ai
+! EDPSOIL,   arg1, arg2,    arg3, arg4, arg5, arg6, arg7
+
+! Description:
+! Creates a material definition (usually representing soil) using the Extended Drucker-Prager
+! constitutive model.
+
+! Arguments:
+! arg1: matNum   -  material number
+! arg2: E        -  elastic modulus
+! arg3: Poisson  -  Poisson's coefficient
+! arg4: dens     -  mass density
+! arg5: fi       -  internal friction angle
+! arg6: c        -  cohesion
+! arg7: ai       -  internal friction angle in plastic flow
+
+! Local parameters:
+! AR20: C1_pressureSensitivity
+! AR21: C2_uniaxialYieldStress
+! AR22: parType
+! AR23: C1_plasticFlowPressureSensitivity
+
+! Elastic properties
+MP,EX,arg1,arg2
+MP,PRXY,arg1,arg3
+MP,DENS,arg1,arg4
+
+!!
+!    *afun,DEG
+!    AR20=6*SIN(arg5)/(3-SIN(arg5))
+!    AR21=arg6*6*COS(arg5)/(3-SIN(arg5))
+!    *afun,RAD
+!
+!    *get,AR22,PARM,arg7,TYPE
+!    *if,AR22,NE,0,OR,arg7,LT,0,THEN
+!        AR23=0
+!    *else
+!        *afun,DEG
+!        AR23=6*SIN(arg7)/(3-SIN(arg7))
+!        *afun,RAD
+!    *endif
+!
+!    TB,EDP,arg1,,,LYFUN
+!    TBDATA,1,AR20,AR21
+!    TB,EDP,arg1,,,LFPOT
+!    TBDATA,1,AR23
+!!
+
+compare,'cohe','max',2,arg6,1e3
+
+TB,MC,arg1,,,BASE
+TBDATA,1,arg5,cohe,arg5/6,arg5,cohe

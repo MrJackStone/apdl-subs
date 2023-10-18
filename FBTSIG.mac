@@ -1,0 +1,11 @@
+! fbtsig
+
+*vwrite,APDL_name, APDL_version
+█ %s © (%s)
+
+*vwrite,APDL_sig, APDL_contact
+█ Developed by: %s (%s)
+
+*vwrite,
+(' ')
+

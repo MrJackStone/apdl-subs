@@ -1,0 +1,49 @@
+! UNITPTH, setName
+! UNITPTH,    arg1
+
+! AR20: labelCount
+! AR21: tableRows
+! AR22: freeIdx
+! AR23: nthLabel
+! AR24: labelStr
+
+*get,AR25,parm,arg1,type
+*if,AR25,ne,3,then
+    AR26='UNIT'
+*else
+    AR26=upcase(arg1)
+*endif
+
+! Collect path's labels and table
+*del,UNITPTH_ARR_labels
+*del,UNITPTH_ARR_table
+paget,UNITPTH_ARR_labels,label
+paget,UNITPTH_ARR_table,table
+
+! Get path table size
+*get,AR20,parm,UNITPTH_ARR_labels,dim,x
+*get,AR21,parm,UNITPTH_ARR_table,dim,x
+
+! Create unit array
+*del,UNITPTH_ARR_unit
+*dim,UNITPTH_ARR_unit,array,AR21
+*vfill,UNITPTH_ARR_unit,ramp,1,0
+
+! Find first free position
+AR22=0
+*do,AR23,1,AR20,1
+    AR24=UNITPTH_ARR_labels(AR23)
+    *if,strleng(AR24),eq,0,then
+        AR22=AR23
+        *exit
+    *endif
+*enddo
+
+! Add unit data set to path
+*if,AR22,eq,0,then
+    *msg,WARN
+_UNITPTH WARNING: path has no free data sets. _UNITPTH command is ignored.
+*else
+    arr2pth,'UNITPTH_ARR_unit',AR26,AR22
+*endif
+

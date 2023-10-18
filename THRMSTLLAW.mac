@@ -1,0 +1,205 @@
+! THRMSTLLAW,   fy,   fp,    E, Poisson, matNum,  nPt
+! THRMSTLLAW, arg1, arg2, arg3,    arg4,   arg5, arg6
+
+! Descrição:
+! Esta subrotina define as propriedades mecânicas do aço de acordo com as prescrições do Eurocode
+! (EN 1993-1-2, 2005).
+
+! Lista de argumentos:
+! arg1: fy      -  tensão de escoamento do aço a 20°C
+! arg2: fp      -  limite de proporcionalidade do aço a 20°C (adotado igual a fy)
+! arg3: E       -  módulo de elasticidade do aço a 20°C
+! arg4: Poisson -  coeficiente de Poisson do aço (constante com a temperatura)
+! arg5: matNum  -  número do material
+! arg6: nPt     -  número de pontos para discretização da curva tensão-deformação (default: 10)
+
+! Lista de argumentos implícitos:
+! -
+
+! Lista de variáveis locais:
+! AR20: a
+! AR21: b
+! AR22: c
+! AR23: deltaep
+! AR24: deltaf
+! AR25: denom
+! AR26: E
+! AR27: ep
+! AR28: epcount
+! AR29: epincr
+! AR30: epsilon
+! AR31: epsilonfu
+! AR32: epsilonfy
+! AR33: epsilonti
+! AR34: fp
+! AR35: fy
+! AR36: nthep
+! AR37: nthTemp
+! AR38: num
+! AR39: sigma
+! AR40: T
+! AR41: tempCount
+! AR42: parType
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! THRMSTLLAW_ARR_a
+! THRMSTLLAW_ARR_b
+! THRMSTLLAW_ARR_c
+! THRMSTLLAW_ARR_E
+! THRMSTLLAW_ARR_ep
+! THRMSTLLAW_ARR_fp
+! THRMSTLLAW_ARR_fy
+! THRMSTLLAW_ARR_kE
+! THRMSTLLAW_ARR_kp
+! THRMSTLLAW_ARR_ky
+! THRMSTLLAW_ARR_T
+
+! Lista de variáveis de saída:
+! -
+
+! Corrigir fp
+*get,AR42,PARM,arg2,TYPE
+*if,AR42,NE,0,THEN
+   arg2=arg1
+*elseif,arg2,EQ,0,THEN
+   arg2=arg1
+*endif
+
+! Corrigir número de pontos da curva tensão-deformação (entre fp & fy)
+*get,AR42,PARM,arg6,TYPE
+*if,AR42,NE,0,THEN
+   AR28=10
+*elseif,arg6,LT,1,THEN
+   AR28=10
+*elseif,arg6,GT,98,THEN
+   AR28=98
+*else
+   AR28=arg6
+*endif
+
+! Deformação correspondente à tensão fy (início do patamar de escoamento)
+AR32=0.02
+! Deformação correspondente ao final do patamar de escoamento
+AR33=0.15
+! Deformação correspondente à tensão fu
+AR31=0.20
+! Número de temperaturas
+AR41=13
+
+! Preencher vetores com as temperaturas e os respectivos fatores de redução
+*del,THRMSTLLAW_ARR_ky
+*dim,THRMSTLLAW_ARR_ky,ARRAY,AR41
+*del,THRMSTLLAW_ARR_kp
+*dim,THRMSTLLAW_ARR_kp,ARRAY,AR41
+*del,THRMSTLLAW_ARR_kE
+*dim,THRMSTLLAW_ARR_kE,ARRAY,AR41
+*del,THRMSTLLAW_ARR_T
+*dim,THRMSTLLAW_ARR_T,ARRAY,AR41
+! Temps [°C]:              20,    100,    200,    300,    400,    500,    600,    700,    800,    900,   1000,   1100,   1200
+THRMSTLLAW_ARR_T(1)=       20,    100,    200,    300,    400,    500,    600,    700,    800,    900,   1000,   1100,   1200
+THRMSTLLAW_ARR_ky(1)=  1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.7800, 0.4700, 0.2300, 0.1100, 0.0600, 0.0400, 0.0200, 0.0000
+THRMSTLLAW_ARR_kp(1)=  1.0000, 1.0000, 0.8070, 0.6130, 0.4200, 0.3600, 0.1800, 0.0750, 0.0500, 0.0375, 0.0250, 0.0125, 0.0000
+THRMSTLLAW_ARR_kE(1)=  1.0000, 1.0000, 0.9000, 0.8000, 0.7000, 0.6000, 0.3100, 0.1300, 0.0900, 0.0675, 0.0450, 0.0225, 0.0000
+
+! Calcular valores reduzidos das tensões e do módulo de elasticidade
+*del,THRMSTLLAW_ARR_fy
+*dim,THRMSTLLAW_ARR_fy,ARRAY,AR41
+*del,THRMSTLLAW_ARR_fp
+*dim,THRMSTLLAW_ARR_fp,ARRAY,AR41
+*del,THRMSTLLAW_ARR_E
+*dim,THRMSTLLAW_ARR_E,ARRAY,AR41
+*do,AR37,1,AR41,1
+   THRMSTLLAW_ARR_fy(AR37)=arg1*THRMSTLLAW_ARR_ky(AR37)
+   THRMSTLLAW_ARR_fp(AR37)=arg2*THRMSTLLAW_ARR_kp(AR37)
+   THRMSTLLAW_ARR_E(AR37)=arg3*THRMSTLLAW_ARR_kE(AR37)
+*enddo
+
+! Deformação no limite de proporcionalidade
+*del,THRMSTLLAW_ARR_ep
+*dim,THRMSTLLAW_ARR_ep,ARRAY,AR41
+*voper,THRMSTLLAW_ARR_ep,THRMSTLLAW_ARR_fp,DIV,THRMSTLLAW_ARR_E
+
+! Parâmetros a, b & c do Eurocode
+*del,THRMSTLLAW_ARR_a
+*dim,THRMSTLLAW_ARR_a,ARRAY,AR41
+*del,THRMSTLLAW_ARR_b
+*dim,THRMSTLLAW_ARR_b,ARRAY,AR41
+*del,THRMSTLLAW_ARR_c
+*dim,THRMSTLLAW_ARR_c,ARRAY,AR41
+*do,AR37,1,AR41-1,1
+   AR23=AR32-THRMSTLLAW_ARR_ep(AR37)
+   AR24=THRMSTLLAW_ARR_fy(AR37)-THRMSTLLAW_ARR_fp(AR37)
+   AR38=AR24**2
+   AR25=AR23*THRMSTLLAW_ARR_E(AR37)-2*AR24
+   AR22=AR38/AR25
+   AR21=SQRT(AR22*AR23*THRMSTLLAW_ARR_E(AR37)+AR22**2)
+   AR20=SQRT(AR23*(AR23+(AR22/THRMSTLLAW_ARR_E(AR37))))
+   THRMSTLLAW_ARR_a(AR37)=AR20
+   THRMSTLLAW_ARR_b(AR37)=AR21
+   THRMSTLLAW_ARR_c(AR37)=AR22
+*enddo
+THRMSTLLAW_ARR_a(AR41)=0
+THRMSTLLAW_ARR_b(AR41)=0
+THRMSTLLAW_ARR_c(AR41)=0
+
+! Definição de lei tensão-deformação multilinear
+TB,MISO,arg5,AR41-1,AR28+2
+
+! Definir pontos das curvas tensão-deformação
+*do,AR37,1,AR41-1,1
+
+   ! Definir temperatura associada à curva
+   AR40=THRMSTLLAW_ARR_T(AR37)
+   TBTEMP,AR40
+
+   ! Obter parâmetros para a temperatura
+   AR27=THRMSTLLAW_ARR_ep(AR37)
+   AR26=THRMSTLLAW_ARR_E(AR37)
+   AR34=THRMSTLLAW_ARR_fp(AR37)
+   AR35=THRMSTLLAW_ARR_fy(AR37)
+   AR20=THRMSTLLAW_ARR_a(AR37)
+   AR21=THRMSTLLAW_ARR_b(AR37)
+   AR22=THRMSTLLAW_ARR_c(AR37)
+
+   ! Primeiro ponto: fim do trecho inicial (linear elástico)
+   TBPT,DEFI,AR27,AR27*AR26
+
+   ! Cálculo do incremento de epsilon
+   AR23=AR32-AR27
+   AR29=AR23/(AR28+1)
+   AR30=AR27
+
+   ! Pontos intermediários entre fp & fy
+   *do,AR36,1,AR28,1
+      AR30=AR30+AR29
+      AR39=AR34-AR22+(AR21/AR20)*(AR20**2-(AR32-AR30)**2)**0.5
+      TBPT,DEFI,AR30,AR39
+   *enddo
+
+   ! Último ponto: início do patamar de escoamento
+   TBPT,DEFI,AR32,AR35
+
+*enddo
+
+! Definição das propriedades lineares elásticas do material
+MPTEMP
+*do,AR37,1,AR41-1,1
+   MPTEMP,AR37,THRMSTLLAW_ARR_T(AR37)
+*enddo
+*do,AR37,1,AR41-1,1
+   MPDATA,EX,arg5,AR37,THRMSTLLAW_ARR_E(AR37)
+   MPDATA,PRXY,arg5,AR37,arg4
+*enddo
+
+! Apagar vetores
+*del,THRMSTLLAW_ARR_a
+*del,THRMSTLLAW_ARR_b
+*del,THRMSTLLAW_ARR_c
+*del,THRMSTLLAW_ARR_E
+*del,THRMSTLLAW_ARR_ep
+*del,THRMSTLLAW_ARR_fp
+*del,THRMSTLLAW_ARR_fy
+*del,THRMSTLLAW_ARR_kE
+*del,THRMSTLLAW_ARR_kp
+*del,THRMSTLLAW_ARR_ky
+*del,THRMSTLLAW_ARR_T

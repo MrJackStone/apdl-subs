@@ -1,0 +1,7 @@
+! ABACKUP
+
+*del,ABackup_
+
+! Created named component with currently selected areas
+CM,ABackup_,AREA
+

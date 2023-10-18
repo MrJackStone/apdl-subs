@@ -1,0 +1,119 @@
+! ORIENT,ETYPE,MAT,SECN,KPNum,ESize,EDiv
+! ORIENT,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8
+
+! Atribuir os argumentos a variáveis
+EleNumber=arg1
+MatNumber=arg2
+SecNumber=arg3
+KPNum=arg4
+ElemSize=arg5
+ElemDiv=arg6
+
+! Contador de linhas orientadas e ignoradas
+IgnoredLines=0
+OrientedLines=0
+
+! Entrar no pré-processo
+/prep7
+
+! Criar backups de linhas e keypoints selecionados
+LBACKUP
+KBACKUP
+
+! Criar grupo de seleção temporário
+CM,TempLines,LINE
+*get,LCount,LINE,0,COUNT
+
+! ativar exibição de todas as mensagens
+/uis,MSGPOP,0
+
+! Caso haja linhas selecionadas:
+*if,LCount,GT,0,THEN
+
+   ! Para cada linha selecionada:
+   *do,LIndex,1,LCount,1
+
+      ! Obter a linha de menor número selecionada
+      *get,nthLine,LINE,0,NUM,MIN
+      ! Remover a linha de menor número do componente temporário
+      LSEL,U,LINE,,nthLine
+      CM,TempLines,LINE
+
+      ! Obter o número de elementos adjacentes à linha
+      *get,ECount,LINE,nthLine,ATTR,NELM
+
+      ! Caso haja mais de zero (0) elementos associados à linha:
+      *if,ECount,GT,0,THEN
+
+         ! Exibir mensagem indicando que a linha não foi alterada
+         *msg,WARN,nthLine
+Linha %I possui malha associada e não foi alterada.
+
+         ! Incrementar o contador de linhas ignoradas
+         IgnoredLines=IgnoredLines+1
+
+      *else
+
+         ! Selecionar a linha a orientar
+         LSEL,S,LINE,,nthLine
+
+         ! Definir atributos da linha
+         LATT,MatNumber,,EleNumber,,KPNum,,SecNumber
+
+         ! Definir divisão da malha sobre a linha
+         *if,ElemDiv,NE,0,THEN
+            LESIZE,nthLine,,,ElemDiv
+         *elseif,ElemSize,NE,0,THEN
+            LESIZE,nthLine,ElemSize
+         *endif
+
+         ! Incrementar o contador de linhas orientadas
+         OrientedLines=OrientedLines+1
+
+      *endif
+
+      ! Selecionar as linhas remanescentes
+      CMSEL,S,TempLines
+
+   *enddo
+
+*endif
+
+! Selecionar keypoints e linhas armazenadas nos componentes de backup
+KRESTORE
+LRESTORE
+
+! Reativar exibição total de mensagens
+/uis,MSGPOP,0
+
+! Exibir mensagem indicando o número de linhas orientadas e ignoradas
+*msg,UI,OrientedLines,IgnoredLines
+Operação concluída! %/&
+%I Linha(s) orientada(s). %/&
+%I Linha(s) ignorada(s).
+
+! Desativar exibição de mensagens
+/uis,MSGPOP,3
+
+! Excluir componentes e variáveis
+CMDELE,TempLines
+*del,LCount
+*del,nthLine
+*del,xVal
+*del,yVal
+*del,zVal
+*del,KPMax
+*del,OriKp
+*del,EleNumber
+*del,MatNumber
+*del,SecNumber
+*del,DeltaX
+*del,DeltaY
+*del,DeltaZ
+*del,IgnoredLines
+*del,OrientedLines
+*del,ElemDiv
+*del,ElemSize
+
+! Reativar exibição padrão de mensagens
+/uis,MSGPOP,2

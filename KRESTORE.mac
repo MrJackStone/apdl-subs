@@ -1,0 +1,7 @@
+! KRESTORE
+
+! Select last backed up keypoint named selection component
+CMSEL,S,KBackup_
+CMDELE,KBackup_
+*del,KBackup_
+

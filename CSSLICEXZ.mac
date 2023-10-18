@@ -1,0 +1,26 @@
+! CSSLICEXZ, y
+! CSSLICEXZ, arg1
+
+! Description:
+! Divides all selected areas by using a working plane aligned with the active coordinate system
+! and offset according to y=arg1
+
+! Position working plane
+*get,AR20,ACTIVE,,CSYS
+WPCSYS,,AR20
+WPOFFS,,arg1
+WPROTA,,90
+
+! Hide working plane
+WPSTYL,,,,,,,,0
+
+! Divide areas
+ASBW,ALL,,DELETE
+
+! Reset working plane to global cartesian
+WPCSYS,-1,0
+
+! Hide working plane
+WPSTYL,,,,,,,,0
+
+

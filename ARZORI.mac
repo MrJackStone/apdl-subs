@@ -1,0 +1,97 @@
+! ARZORI, zDir
+! ARZORI, arg1
+
+! Descrição:
+! Esta subrotina serve para orientar o vetor normal de todas as áreas selecionadas com base
+! no sentido imposto para a componente Z do vetor normal.
+
+! Lista de argumentos:
+! arg1: zDir  -  sentido da componente Z da normal (valor positivo ou negativo)
+
+! Lista de variáveis locais:
+! AR20: ACount
+! AR21: nthArea
+! AR22: nthLine
+! AR34: ZNorm
+! AR35: revCheck
+! AR36: ANum
+! AR37: COMPA_prev
+! AR38: COMPL_prev
+! AR39: COMPK_prev
+! AR40: kc
+! AR41: kn
+! AR42: nthKP
+! AR43: kAnchor_1
+! AR44: kAnchor_2
+! AR45: max_angle
+! AR46: k_i
+! AR47: nthAngle
+! AR48: kAnchor_3
+
+! Global parameters (erased at the end of this subroutine)
+! ARZORI_ARR_klist
+
+! Obter número de áreas selecionadas
+*get,AR20,AREA,,COUNT
+AR36=0
+
+! Orientar cada área selecionada
+*do,AR21,1,AR20,1
+
+    ! Obter número da área
+    AR36=ARNEXT(AR36)
+
+    ! Backup selection
+    cm,AR37,area
+    cm,AR38,line
+    cm,AR39,kp
+
+    ! Count keypoints
+    asel,s,area,,AR36
+    lsla,s
+    ksll,s
+    *get,AR40,kp,,count
+
+    ! List keypoints
+    *del,ARZORI_ARR_klist
+    *dim,ARZORI_ARR_klist,,AR40
+    *do,AR42,1,AR40,1
+        *get,AR22,area,AR36,loop,1,line,AR42
+        *get,AR41,line,AR22,kp,1
+        ARZORI_ARR_klist(AR42)=AR41
+    *enddo
+
+    ! First two keypoints
+    AR43=ARZORI_ARR_klist(1)
+    AR44=ARZORI_ARR_klist(2)
+
+    ! Third keypoint chosen to maximize internal angle
+    AR45=0
+    *do,AR42,3,AR40,1
+        AR46=ARZORI_ARR_klist(AR42)
+        AR47=abs(anglek(AR43,AR44,AR46))
+        *if,AR47,gt,AR45,then
+            AR45=AR47
+            AR48=AR46
+        *endif
+    *enddo
+
+    ! Restore previous selection
+    cmsel,s,AR37
+    cmsel,s,AR38
+    cmsel,s,AR39
+
+    ! Calcular vetor normal (componente na direção Z)
+    AR34=NORMKZ(AR43,AR44,AR48)
+    AR35=AR34*arg1
+
+    ! Inverter a área (se necessário)
+    *if,AR35,LT,0,THEN
+        AREVERSE,AR36
+    *endif
+
+*enddo
+
+*del,ARZORI_ARR_klist
+
+

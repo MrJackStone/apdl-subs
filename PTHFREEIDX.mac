@@ -1,0 +1,73 @@
+! PTHFREEIDX, output, rsets
+! PTHFREEIDX,   arg1,  arg2
+
+! Description:
+! Calculates the value of the first path result set index so that a total number of result sets
+! can be stored in the active path. Warnings are issued if the path does not have enough room
+! (returns 0), if some path items will be overwriten, and if path was empty (returns 5).
+
+! Arguments:
+! arg1: output  -  name of output parameter to which result will be assigned
+! arg2: rsets   -  number of result sets to be stored in the active path
+
+! Local parameters:
+! AR21: rsetsAvailable
+! AR22: minIdxRequired
+! AR23: freeIdx
+! AR24: nthRset
+! AR25: rsetName
+
+! Global parameters (erased at the end of this subroutine):
+! PTHFREEIDX_ARR_labels
+
+
+! Get list of path's existing labels
+*del,PTHFREEIDX_ARR_labels
+paget,PTHFREEIDX_ARR_labels,label
+
+! Get number of labels (including blank)
+*get,AR21,parm,PTHFREEIDX_ARR_labels,dim,x
+
+! Calculate minimum initial index to fit all required result sets
+AR22=AR21-(arg2-1)
+*if,AR22,lt,5,then
+    *msg,warn
+PTHFREEIDX warning: active path does not have space for required sets.%/&
+PTHFREEIDX returned 0.
+    %arg1%=0
+    *return,-1
+*endif
+
+! Loop through array of labels looking for first blank one
+AR23=AR21+1
+*do,AR24,1,AR21,1
+    AR25=PTHFREEIDX_ARR_labels(AR24)
+    *if,strleng(AR25),eq,0,then
+        AR23=AR24
+        *exit
+    *endif
+*enddo
+
+! Check if data will be overwritten
+*if,AR23,gt,AR22,then
+    AR23=AR22
+    *msg,warn,arg2
+PTHFREEIDX warning: not enough free path data sets available.%/&
+Last %I data set(s) will be overwritten.
+*endif
+
+! Check if path is empty
+*if,AR23,eq,1,then
+    *msg,warn
+PTHFREEIDX warning: active path was empty.%/&
+Initializing path with dummy result.%/&
+PTHFREEIDX returned 5.
+    pdef,'dummy',u,x
+    AR23=5
+*endif
+
+! Return first free index
+%arg1%=AR23
+
+! Clear parameters
+*del,PTHFREEIDX_ARR_labels

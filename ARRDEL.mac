@@ -1,0 +1,93 @@
+! ARRDEL
+! ARRDEL
+
+! Descrição:
+! Esta subrotina remove elementos do vetor que tenham valor igual a um dos valores definidos
+! no vetor de valores a excluir.
+
+! Lista de argumentos:
+! -
+
+! Lista de argumentos implícitos:
+! ARRDEL_ARR_input   -  vetor original
+! ARRDEL_ARR_remove  -  vetor com números a serem removidos
+
+! Lista de variáveis locais:
+! AR20: inputLength
+! AR21: delLength
+! AR22: nthEntry
+! AR23: nthValue
+! AR24: delCheck
+! AR25: nthDel
+! AR26: delValue
+! AR27: outputLength
+
+! Lista de variáveis de saída
+! ARRDEL_ARR_output
+
+! Obter dimensão do vetor de entrada
+*get,AR20,PARM,ARRDEL_ARR_input,DIM,X
+! Obter dimensão do vetor de números a remover
+*get,AR21,PARM,ARRDEL_ARR_remove,DIM,X
+
+! Inicializar a dimensão do vetor de saída
+AR27=0
+
+! Para cada elemento no vetor de entrada:
+*do,AR22,1,AR20,1
+
+   ! Obter o valor do elemento
+   AR23=ARRDEL_ARR_input(AR22)
+
+   ! Inicializar a verificação de correspondência
+   AR24=0
+
+   ! Para cada elemento no vetor de números a remover
+   *do,AR25,1,AR21,1
+      ! Obter o valor do número a remover
+      AR26=ARRDEL_ARR_remove(AR25)
+      ! Redefinir a verificação de correspondência
+      *if,AR26,EQ,AR23,THEN
+         AR24=1
+      *endif
+   *enddo
+
+   ! Caso não tenha ocorrido correspondência (elemento mantido)
+   *if,AR24,EQ,0,THEN
+
+      ! Incrementar a dimensão do vetor de saída
+      AR27=AR27+1
+
+      ! Caso esse seja o primeiro elemento a ser incluído:
+      *if,AR27,EQ,1,THEN
+
+         ! Criar o vetor de saída
+         *del,ARRDEL_ARR_output
+         *dim,ARRDEL_ARR_output,ARRAY,1
+         ARRDEL_ARR_output(1)=AR23
+
+      *else
+
+         ! Criar vetor temporário
+         *del,ARRDEL_ARR_temp
+         *dim,ARRDEL_ARR_temp,ARRAY,AR27
+         *vfun,ARRDEL_ARR_temp,COPY,ARRDEL_ARR_output
+         ! Incrementar vetor de saída
+         *del,ARRDEL_ARR_output
+         *dim,ARRDEL_ARR_output,ARRAY,AR27
+         *vfun,ARRDEL_ARR_output,COPY,ARRDEL_ARR_temp
+         ARRDEL_ARR_output(AR27)=AR23
+
+      *endif
+
+   *endif
+
+*enddo
+
+! Caso todos os elementos tenham sido removidos:
+*if,AR27,EQ,0,THEN
+   ! Definir vetor de saída como zero
+   *del,ARRDEL_ARR_output
+   ARRDEL_ARR_output=0
+*endif
+

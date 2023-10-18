@@ -1,0 +1,7 @@
+! EBACKUP
+
+*del,EBackup_
+
+! ! Created named component with currently selected elements
+CM,EBackup_,ELEM
+

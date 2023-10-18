@@ -1,0 +1,27 @@
+! PROPDMP, parmAlpha, parmBeta,  ksi,   f1,   f2
+! PROPDMP,      arg1,     arg2, arg3, arg4, arg5
+
+! Description:
+! Calculates values for ALPHAD (mass matrix multiplier) and BETAD (stiffness matrix multiplier)
+! based on a damping ratio and two natural frequencies.
+! This formulation is taken from:
+!    Dynamics of Structures, 3rd edition
+!    by Ray W. Clough & Joseph Penzien
+!    Chapter 12, Eq. 12-41 (page 236)
+
+! Arguments:
+! arg1: parmAlpha  -  parameter name (string) to which value for alpha will be attributed
+! arg2: parmBeta   -  parameter name (string) to which value for beta will be attributed
+! arg3: ksi        -  damping ratio (c/cc), NOT multiplied by 100 to convert to %
+! arg4: f1         -  first natural frequency (usually fundamental frequency), in Hertz
+! arg5: f2         -  natural frequency of the highest mode contributing to the response, in Hertz
+
+! Local parameters:
+! AR21: alpha
+! AR22: beta
+
+AR21=2*arg3/(arg4+arg5)
+AR22=AR21*(arg4*arg5)
+
+%arg1%=AR21
+%arg2%=AR22

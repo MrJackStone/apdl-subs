@@ -1,0 +1,85 @@
+! CONICALAR, RBOT, RTOP,   Z1,   Z2, THETA1, THETA2
+! CONICALAR, arg1, arg2, arg3, arg4,   arg5,   arg6
+
+! Description:
+! Creates conical areas by applying the native 'CONE' command and deleting unwanted volumes
+! and areas.
+
+! Arguments (see full description in ANSYS's help page for command 'CONE')
+! arg1: RBOT    -  radius at the bottom
+! arg2: RTOB    -  radius at the top
+! arg3: Z1      -  z coordinate at the bottom
+! arg4: Z2      -  z coordinate at the top
+! arg5: THETA1  -  starting angle at the bottom
+! arg6: THETA2  -  ending angle at the bottom
+
+! Local parameters:
+! AR20: VNum
+! AR21: A1
+! AR22: A2
+! AR23: A3
+! AR24: A4
+! AR25: ACount
+
+! Output parameters:
+! CONICALAR_COMPA_cone
+
+KBACKUP
+LBACKUP
+ABACKUP
+VBACKUP
+
+VSEL,U,VOLU,,ALL
+ASEL,U,AREA,,ALL
+LSEL,U,LINE,,ALL
+KSEL,U,KP,,ALL
+
+*if,abs(arg3-arg4),le,1e-6,then
+    ! Flat circular area:
+    wpoffs,,,arg3
+    cyl4,0,0,(arg1>arg2)
+    wprota,,90
+    asbw,all,,delete
+    wprota,,-90
+    wpoffs,,,-arg3
+
+*else
+    ! Conical area:
+    CONE, arg1, arg2, arg3, arg4, arg5, arg6
+    *get,AR20,VOLU,,NUM,MIN
+    VDELE,AR20,,,0
+
+    *get,AR25,AREA,,COUNT
+
+    AR21=ARNEXT(0)
+    AR22=ARNEXT(AR21)
+    AR23=ARNEXT(AR22)
+    AR24=ARNEXT(AR23)
+
+    *if,AR25,EQ,3,THEN
+        ASEL,S,AREA,,AR21
+        ADELE,ALL,,,1
+
+        ASEL,S,AREA,,AR22
+        ASEL,A,AREA,,AR23
+
+    *elseif,AR25,EQ,4,THEN
+        ASEL,S,AREA,,AR21
+        ASEL,A,AREA,,AR22
+        ADELE,ALL,,,1
+
+        ASEL,S,AREA,,AR23
+        ASEL,A,AREA,,AR24
+
+    *endif
+
+*endif
+CM,CONICALAR_COMPA_cone,AREA
+
+KRESTORE
+LRESTORE
+ARESTORE
+VRESTORE
+
+CMSEL,A,CONICALAR_COMPA_cone
+

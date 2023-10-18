@@ -1,0 +1,69 @@
+! RECASLL, linePool, areaPool
+! RECASLL,     arg1,     arg2
+
+! Description:
+! Recursively selects areas adjacent to lines (and vice-versa) until all connected areas/lines
+! in the chosen pool have been selected. The selection pool for lines and areas can be restricted
+! to a selection component (arg1 and arg2, respectively) or can include all existing entities.
+
+! Arguments:
+! arg1: linePool  -  name of line selection component that constitutes the pool of lines
+!                    (leave blank to use all existing lines)
+! arg2: areaPool  -  name of area selection component that constitutes the pool of areas
+!                    (leave blank to use all existing areas)
+
+! Local parameters:
+! AR20: parType
+! AR21: useLinePool
+! AR22: useAreaPool
+! AR23: prevAreaCount
+! AR24: areaCount
+! AR25: forceLoop
+
+
+! Determine whether to select lines from a set or from all lines
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    AR21=1
+*else
+    AR21=0
+*endif
+
+! Determine whether to select areas from a set or from all areas
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+    AR22=1
+*else
+    AR22=0
+*endif
+
+! Initialize previous selected area counter register
+AR23=0
+
+! Force loop
+AR25=1
+
+! Recursively select areas adjacent to lines and vice-versa
+*dowhile,AR25
+    ! Select areas
+    asll,s
+    *if,AR22,eq,1,then
+        cmsel,r,%arg2%
+    *endif
+    *get,AR24,area,,count
+
+    ! Select lines
+    lsla,s
+    *if,AR21,eq,1,then
+        cmsel,r,%arg1%
+    *endif
+
+    ! Break loop if no new areas were added to selection
+    *if,AR24,le,AR23,then
+        *exit
+    *endif
+
+    ! Update previous selected area counter register
+    AR23=AR24
+*enddo
+

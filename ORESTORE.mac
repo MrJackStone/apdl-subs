@@ -1,0 +1,8 @@
+! orestore
+! orestore
+
+! Description:
+! Restores the /output definition previously backed up by OBACKUP.
+
+/output,OBACKUP_
+*del,OBACKUP_,,nopr

@@ -1,0 +1,37 @@
+! ARRCDR
+! ARRCDR
+
+! Descrição:
+! Esta subrotina remove o primeiro elemento de um vetor fornecido (ARRCDR_ARR_input), retornando
+! um vetor de saída (ARRCDR_ARR_output) com um elemento a menos. Caso o vetor de entrada possua
+! apenas dois elementos a variável de saída passa a ser um escalar, contendo o valor na segunda
+! posição do vetor. Caso o vetor de entrada tenha apenas uma posição a variável de saída perma-
+! necerá indefinida
+
+! Lista de argumentos
+! -
+
+! Lista de argumentos implícitos
+! ARRCDR_ARR_input  -  vetor original
+
+! Lista de variáveis locais
+! AR20: ParLength
+! AR21: nthEntry
+
+! Lista de variáveis de saída
+! ARRCDR_ARR_output
+
+*get,AR20,PARM,ARRCDR_ARR_input,DIM,X
+*if,AR20,GT,2,THEN
+   *del,ARRCDR_ARR_output
+   *dim,ARRCDR_ARR_output,ARRAY,AR20-1
+   *do,AR21,2,AR20,1
+      ARRCDR_ARR_output(AR21-1)=ARRCDR_ARR_input(AR21)
+   *enddo
+*elseif,AR20,EQ,2,THEN
+   *del,ARRCDR_ARR_output
+   ARRCDR_ARR_output=ARRCDR_ARR_input(2)
+*else
+   *del,ARRCDR_ARR_output
+*endif
+

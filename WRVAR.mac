@@ -1,0 +1,64 @@
+! WRVAR, xVar, yVar, fName, append
+! WRVAR, arg1, arg3,  arg3,   arg4
+
+! Description:
+! Transfers the contents of two time-history variables (one associated with the X axis and the other
+! with the Y axis) to array parameters and writes their contents to an external file (.VAR)
+
+! Argument list:
+! arg1: xVar    -  number of time-history variable corresponding to X values
+! arg2: yVar    -  number of time-history variable corresponding to Y values
+! arg3: fName   -  name of the output file to which data will be written
+! arg4: append  -  append key
+!                     [0] Create new file
+!                     [1] Append existing file
+
+! Local variable list:
+! AR20: parmType
+! AR21: newFileKey
+! AR22: appendFileKey
+
+! Output variable list:
+!    WRVAR_ARR_xValues
+!       Array parameter with X values
+!    WRVAR_ARR_yValues
+!       Array parameter with Y values
+
+
+! Set file creation options
+AR21=0
+AR22=0
+*get,AR20,PARM,arg3,TYPE
+*if,AR20,EQ,3,THEN
+   AR22=STRLENG(arg3)
+   *if,AR22,GT,1,THEN
+      AR21=1
+      *get,AR20,PARM,arg4,TYPE
+      *if,AR20,EQ,0,THEN
+         *if,arg4,EQ,1,THEN
+            AR22=1
+         *endif
+      *endif
+   *endif
+*endif
+
+! Transfer X values
+*del,WRVAR_ARR_xValues
+VGET,WRVAR_ARR_xValues,arg1
+
+! Transfer Y values
+*del,WRVAR_ARR_yValues
+VGET,WRVAR_ARR_yValues,arg2
+
+! Write data do file
+*if,AR21,EQ,1,THEN
+   *if,AR22,EQ,1,THEN
+      *cfopen,arg3,'VAR',,APPEND
+   *else
+      *cfopen,arg3,'VAR'
+   *endif
+      *vwrite,WRVAR_ARR_xValues(1),WRVAR_ARR_yValues(1)
+      (E20.8,' ',E20.8)
+   *cfclos
+*endif
+

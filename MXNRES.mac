@@ -1,0 +1,45 @@
+! MXNRES, Item1, IT1NUM, func
+! MXNRES,  arg1,   arg2, arg3
+
+! Description:
+! Finds an extreme value of a nodal result and returns this value and the number of the node
+! at which it occurs.
+
+! Arguments:
+! arg1: Item1  (STR)  -  as described in documentation for *VGET command:
+!                        'loc', 'ang', 'u', 'rot', 'temp', etc.
+! arg2: IT1NUM (STR)  -  as described in documentation for *VGET command:
+!                        'x', 'y', 'z', etc.
+! arg3: func   (STR)  -  function describing extreme value wanted:
+!                        'max' or 'min'
+
+! Local parameters:
+! AR20: upcaseFunc
+! AR21: xtrmIdx
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! MXNRES_ARR_nn
+! MXNRES_ARR_vals
+! MXNRES_VAR_node
+! MXNRES_VAR_value
+
+/uis,MSGPOP,3
+
+*del,MXNRES_ARR_nn
+*vget,MXNRES_ARR_nn,NODE,,NLIST
+
+*del,MXNRES_ARR_vals
+*vget,MXNRES_ARR_vals,NODE,0,arg1,arg2,,,0
+
+AR20=UPCASE(arg3)
+*if,AR20,EQ,'MAX',THEN
+    *vscfun,AR21,LMAX,MXNRES_ARR_Vals
+*elseif,AR20,EQ,'MIN',THEN
+    *vscfun,AR21,LMIN,MXNRES_ARR_Vals
+*endif
+
+MXNRES_VAR_value=MXNRES_ARR_vals(AR21)
+MXNRES_VAR_node=MXNRES_ARR_nn(AR21)

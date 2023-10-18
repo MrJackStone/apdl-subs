@@ -1,0 +1,118 @@
+! FITARR, L,    a,    b,    bi,   bf,   bmin
+! FITARR, arg1, arg2, arg3, arg4, arg5, arg6
+
+! Descrição:
+! Distribuir um padrão 'a'-'b' ao longo de um comprimento L claculando o número de repetições ('n')
+! e a posição do primeiro conjunto 'a'-'b' ('P0'). Os valores inicial e final de b ('bi' e 'bf',
+! respectivamente) podem ser estabelecidos de maneira forçada e caso ambos sejam definidos o valor
+! do comprimento da distribuição ('L') será alterado para acomodar os 'n' conjuntos 'a'-'b'.
+
+! Exemplo:
+! Determinação da distribuição de aberturas na alma de uma viga alveolar ('a' é a largura da
+! abertura, 'b' é a largura do montante e 'L' é o comprimento da viga).
+
+! Lista de argumentos
+! arg1: L     -  comprimento da distribuição
+! arg2: a     -  largura do segmento indivisível do conjunto
+! arg3: b     -  largura do segmento divisível (que inicia e encerra a distribuição) do conjunto
+! arg4: bi    -  largura do segmento 'b' inicial
+! arg5: bf    -  largura do segmento 'b' final
+! arg6: bmin  -  largura mínima do segmento 'b':
+!                   [<1] largura mínima igual a zero;
+!                   [0]  largura mínima padrão (metade de 'b');
+!                   [>0] valor da largura mínima;
+
+! Lista de variáveis locais
+! AR20: e
+! AR21: LMod
+! AR22: CustomP0
+! AR23: q1
+! AR24: AQuant
+! AR25: Rem
+! AR26: P0
+! AR27: ParType
+
+! Lista de variáveis de saída:
+! FITARR_VAR_L: comprimento da distribuição
+! FITARR_VAR_n: número de repetições do conjunto
+! FITATT_VAR_P0: posição do centro do segmento 'a' do primeiro conjunto
+
+! Determinar largura mínima do montante
+*get,AR27,PARM,arg6,TYPE
+*if,AR27,EQ,0,THEN
+   *if,arg6,LT,0,THEN
+      arg6=0
+   *elseif,arg6,EQ,0,THEN
+      arg6=arg3/2
+   *endif
+*else
+   arg6=arg3/2
+*endif
+
+! Calcular o comprimento total do conjunto
+AR20=arg2+arg3
+
+! Calcular comprimento modificado por largura de montante inicial
+*if,arg4,GT,0,THEN
+   *if,arg4,LT,arg1,THEN
+      AR21=arg1-arg4
+      AR22=1
+   *else
+      *msg,ERROR,2
+      FITARR ERROR: INVALID BI (%I).
+   *endif
+*else
+   AR21=arg1
+   AR22=0
+*endif
+
+! Calcular comprimento modificado por largura de montante final
+*if,arg5,GT,0,THEN
+   *if,arg5,LT,arg1,THEN
+      AR21=AR21-arg5
+      AR22=AR22+2
+   *else
+      *msg,ERROR,3
+      FITARR ERROR: INVALID BF (%I).
+   *endif
+*endif
+
+! Corrigir o comprimento de distribuição modificado
+*if,AR22,EQ,0,THEN
+   AR21=arg1-2*(arg6)+arg3
+*elseif,AR22,EQ,1,THEN
+   AR21=AR21+(arg3/2)
+*elseif,AR22,EQ,2,THEN
+   AR21=AR21+(arg3/2)
+*elseif,AR22,EQ,3,THEN
+   AR21=AR21+arg3
+*endif
+
+! Calcular quantidade de aberturas a ser criadas
+AR23=AR21/AR20
+AR24=NINT(AR23)
+*if,AR24,GT,AR23,THEN
+   AR24=AR24-1
+*endif
+
+!   Posição do eixo da primeira abertura
+*if,AR22,EQ,0,THEN
+   AR25=AR23-AR24
+   AR26=((AR25*AR20)/2)+(AR20/2)+arg6-(arg3/2)
+*elseif,AR22,EQ,1,THEN
+   AR26=arg4+(arg2/2)
+*elseif,AR22,EQ,2,THEN
+   AR26=arg1-arg5-(AR24*AR20)+arg3+(arg2/2)
+*elseif,AR22,EQ,3,THEN
+   AR26=arg4+(arg2/2)
+   arg1=AR26+AR24*AR20-(arg2/2)-arg3+arg5
+   *msg,WARN,arg1
+   FITARR WARNING: DISTRIBUTION LENGTH ALTERED TO %10.4F.
+*endif
+
+! Definir variáveis de saída
+FITARR_VAR_L=arg1
+FITARR_VAR_n=AR24
+FITARR_VAR_P0=AR26
+
+

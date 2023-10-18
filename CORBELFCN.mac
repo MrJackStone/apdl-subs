@@ -1,0 +1,54 @@
+! CORBELFCN, parName, corbelParallel, corbelOrtho, baseThk, orthoThk, corbelLen, direction, csys
+! CORBELFCN,    arg1,           arg2,        arg3,    arg4,     arg5,      arg6,      arg7, arg8
+
+! AR20: angularCoefficient
+! AR21: linearCoefficient
+! AR22: upcaseDir
+! AR23: dirNumber
+! AR24: fictThk
+! AR25: tZero
+! AR26: deltaT
+
+! Calculate corbel geometric parameters
+AR24=(arg5/2)*(arg3/arg2)
+AR25=arg4+arg3+AR24
+AR26=AR25-arg4
+
+! Calculate linear function coefficients
+AR20=-AR26/arg6
+AR21=AR25
+
+! Direction key
+AR22=UPCASE(arg7)
+*if,AR22,EQ,'X',THEN
+    AR23=2
+*elseif,AR22,EQ,'Y',THEN
+    AR23=3
+*elseif,AR22,EQ,'Z',THEN
+    AR23=4
+*endif
+
+!!
+*dim,%arg1%,TABLE,6,3,1,,,,0
+
+*set,%arg1%(0,0,1), 0.0, -999
+*set,%arg1%(2,0,1), 0.0
+*set,%arg1%(3,0,1), AR20
+*set,%arg1%(4,0,1), AR21
+*set,%arg1%(5,0,1), 0.0
+*set,%arg1%(6,0,1), 0.0
+*set,%arg1%(0,1,1), 1.0, -1, 0, 1, 17, 3, AR23
+*set,%arg1%(0,2,1), 0.0, -2, 0, 1, -1, 1, 18
+*set,%arg1%(0,3,1),   0, 99, 0, 1, -2, 0, 0
+!!
+
+!*del,%arg1%
+!*dim,%arg1%,TABLE,2,,,X,,,0
+!*if,arg6,GT,0,THEN
+!    %arg1%(1,0)=0,arg6
+!    %arg1%(1,1)=AR25,arg4
+!*else
+!    %arg1%(1,0)=arg6,0
+!    %arg1%(1,1)=arg4,AR25
+!*endif
+

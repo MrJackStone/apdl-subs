@@ -1,0 +1,47 @@
+! cmpatoe, newCMname, existingCMname
+! cmpatoe,      arg1,           arg2
+
+! Description:
+! Given an area selection component creates a corresponding element selection component, by applying
+! ESLA,S.
+
+! Arguments:
+! arg1: elemCompName  -  name of the newly created element selection component (optional).
+!                        If this value is not provided the name defaults to COMPE_arg2*,
+!                        in which arg2* is the substring of arg2 after 'COMPA_'.
+! arg2: areaCompName  -  name of the existing area selection component.
+
+! Local parameters:
+! AR20: parType
+! AR21: compeName
+! AR22: compaPrefix
+! AR23: compaSuffix
+
+! Set the element selection component's name
+*get,AR20,parm,arg1,type
+*if,AR20,ne,3,then
+    AR22=upcase(strsub(arg2,1,6))
+    *if,AR22,eq,'COMPA_',then
+        AR23=strsub(arg2,7,32)
+        AR21=strcat('COMPE_',AR23)
+    *else
+        AR23=strsub(arg2,1,26)
+        AR21=strcat('COMPE_',AR23)
+    *endif
+*else
+    AR21=arg1
+*endif
+
+! Backup current selection
+ebackup
+abackup
+
+! Create new component
+cmsel,s,%arg2%
+esla,s
+cm,%AR21%,elem
+
+! Restore previous selection
+elrestore
+arestore
+

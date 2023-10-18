@@ -1,0 +1,16 @@
+! SIGDIG, parm,  num, digits
+! SIGDIG, arg1, arg2,   arg3
+
+! Description:
+! Returns input value with a given number of significant digits.
+
+! Arguments:
+! arg1: parm    -  name of the output parameter (to which value will be assigned)
+! arg2: num     -  value to be converted
+! arg3: digits  -  number of significant digits in the output value
+
+! Local parameters:
+! AR20: expo
+
+AR20=nint(log10(arg2)+0.5)
+%arg1%=(10**(AR20-arg3))*nint(0.5+(arg2/(10**(AR20-arg3))))

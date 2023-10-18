@@ -1,0 +1,7 @@
+! LRESTORE
+
+! ! Select last backed up line named selection component
+CMSEL,S,LBackup_
+CMDELE,LBackup_
+*del,LBackup_
+

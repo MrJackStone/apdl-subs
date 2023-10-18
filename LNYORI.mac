@@ -1,0 +1,46 @@
+! LNYORI, yDir
+! LNYORI, arg1
+
+! Descrição:
+! Esta subrotina serve para orientar o sentido de todas as linhas selecionadas com base
+! no sentido imposto para a componente Y do vetor normal.
+
+! Lista de argumentos:
+! arg1: yDir  -  sentido da componente Y do eixo da linha (valor positivo ou negativo)
+
+! Lista de variáveis locais:
+! AR20: LCount
+! AR21: nthLine
+! AR22: K1
+! AR23: K2
+! AR25: K1y
+! AR26: K2y
+! AR27: yDistKey
+
+! Obter número de linhas selecionadas
+*get,AR20,LINE,,COUNT
+AR36=0
+
+! Orientar cada linha selecionada
+*do,AR21,1,AR20,1
+
+   ! Obter número da linha
+   AR36=LSNEXT(AR36)
+
+   ! Obter número dos dois keypoints
+   *get,AR22,LINE,AR36,KP,1
+   *get,AR23,LINE,AR36,KP,2
+
+   ! Obter coordenada X dos keypoints
+   AR25=KY(AR22)
+   AR26=KY(AR23)
+   AR27=(AR26-AR25)*arg1
+
+   ! Inverter linha se necessário
+   *if,AR27,LT,0,THEN
+      LREVERSE,AR36
+   *endif
+
+*enddo
+
+

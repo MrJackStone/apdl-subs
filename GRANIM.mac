@@ -1,0 +1,145 @@
+! GRANIM, xVarNum, yVarNum, name, xRangeMode, yRangeMode, tInterval, tTotal
+! GRANIM, arg1,    arg2,    arg3, arg4,       arg5,       arg6,      arg7
+
+! Descrição:
+! Esta subrotina cria um gráfico animado a partir de duas variáveis representando abscissas e
+! ordenadas e salva a animação como arquivo .avi. O usuário controla a velocidade da animação
+! definindo um valor para a duração do quadro (tInterval) ou um valor para o tempo total de
+! animação (tTotal). Caso ambos os valores sejam definidos tInterval governará a velocidade da
+! animação.
+
+! Lista de argumentos:
+! arg1: xVarNum     -  número de variável que contém os valores da abscissa
+! arg2: yVarNum     -  número da variável que contém os valores da ordenada
+! arg3: name        -  nome do arquivo .avi de animação gerado
+! arg4: xRangeMode  -  definição de limites do eixo X:
+!                         [0] não modificar os limites;
+!                         [1] aplicar limites estáticos automáticos com base nos dados da variável;
+!                         [2] utilizar limite dinâmico com base nos dados plotados;
+! arg5: yRangeMode  -  definição de limites do eixo Y:
+!                         [0] não modificar os limites;
+!                         [1] aplicar limites estáticos automáticos com base nos dados da variável;
+!                         [2] utilizar limite dinâmico com base nos dados plotados;
+! arg6: tInterval   -  intervalo de tempo entre quadros da animação
+! arg7: tTotal      -  duração total da animação
+
+! Lista de variáveis locais:
+! AR20: frameCount
+! AR21: deltaT
+! AR22: xMin
+! AR23: xMax
+! AR24: yMin
+! AR25: yMax
+! AR26: nthFrame
+! AR27: progress
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! GRANIM_ARR_xVector
+! GRANIM_ARR_yVector
+! GRANIM_ARR_tempX
+! GRANIM_ARR_tempY
+
+! Limpar variáveis que serão utilizadas por esta subrotina
+VARDEL,199
+VARDEL,200
+
+! Transferir valores das variáveis (abscissas e ordenadas) para os vetores
+*del,GRANIM_ARR_xVector
+*del,GRANIM_ARR_yVector
+VGET,GRANIM_ARR_xVector,arg1
+VGET,GRANIM_ARR_yVector,arg2
+
+! Obter a dimensão dos vetores de dados
+*get,AR20,PARM,GRANIM_ARR_xVector,DIM,X
+!!
+*if,AR20,GE,1000,THEN
+   AR20=999
+*endif
+!!
+
+! Calcular duração do quadro de animação
+*if,arg6,GT,0,THEN
+   AR21=arg6
+*else
+   *if,arg7,GT,0,THEN
+      AR21=arg7/AR20
+   *else
+      AR21=0.02
+   *endif
+*endif
+
+! Obter valores mínimos e máximos de abscissas e ordenadas
+*vscfun,AR22,MIN,GRANIM_ARR_xVector
+*vscfun,AR23,MAX,GRANIM_ARR_xVector
+*vscfun,AR24,MIN,GRANIM_ARR_yVector
+*vscfun,AR25,MAX,GRANIM_ARR_yVector
+
+! Definir os limites do eixo X
+*if,arg4,EQ,1,THEN
+   /xrange,AR22,AR23
+*elseif,arg4,EQ,2,THEN
+   /xrange
+*endif
+! Definir os limites do eixo Y
+*if,arg5,EQ,1,THEN
+   /yrange,AR24,AR25
+*elseif,arg5,EQ,2,THEN
+   /yrange
+*endif
+
+! Limpar definições de armazenamento de quadros
+/seg,DELET
+/seg,OFF
+
+! Iniciar armazenamento de quadros
+/seg,MULTI,arg3,AR21
+
+! Exibir janela de progresso
+*abset,'Animating Results',BAR
+
+! Iniciar loop de geração dos quadros da animação
+*do,AR26,1,AR20,1
+
+   ! Criar vetores temporários com os valores das abscissas e das ordenadas
+   *del,GRANIM_ARR_tempX
+   *dim,GRANIM_ARR_tempX,ARRAY,AR26
+   *del,GRANIM_ARR_tempY
+   *dim,GRANIM_ARR_tempY,ARRAY,AR26
+   *do,i,1,AR26,1
+      GRANIM_ARR_tempX(i)=GRANIM_ARR_xVector(i)
+      GRANIM_ARR_tempY(i)=GRANIM_ARR_yVector(i)
+   *enddo
+
+   ! Transferir conteúdo dos vetores temporários para variáveis
+   VPUT,GRANIM_ARR_tempX,199,,,'X'
+   VPUT,GRANIM_ARR_tempY,200,,,'Y'
+
+   ! Definir variável do eixo X
+   XVAR,199
+
+   ! Plotar variável do eixo Y
+   PLVAR,200
+
+   ! Atualizar barra de progresso
+   AR27=100*(AR26/AR20)
+   *abcheck,AR27
+
+*enddo
+
+! Fechar janela com barra de progresso
+*abfini
+
+! Desativar armazenamento de quadros
+/seg,OFF
+
+! Apagar vetores
+!*del,GRANIM_ARR_xVector
+!*del,GRANIM_ARR_yVector
+!*del,GRANIM_ARR_tempX
+!*del,GRANIM_ARR_tempY
+
+! Iniciar animação
+ANIM,5,1,AR21
+
+
+

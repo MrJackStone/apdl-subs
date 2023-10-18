@@ -1,0 +1,160 @@
+! SETLAST, OutresLast
+! SETLAST, arg1
+
+! Descrição:
+! Esta subrotina lê o último substep que convergiu e retorna os seguintes dados: número do último
+! load step, número do último substep válido (convergido, fator de carga positivo) dentro do último
+! load step, fator de carga do último substep, número do substep de fator de carga máximo dentro do
+! último load step, fator de carga máximo do último load step e vetor com os TIMEs de todos os
+! substeps dentro do último load step. Ao sair desta subrotina estará ativo o último substep válido
+! do último load step.
+
+! Lista de argumentos:
+! arg1: OutresLast  -  tipo de armazenamento dos resultados durante a solução:
+!                      [0] Todos os substeps foram armazenados
+!                      [1] Apenas o último substep foi armazenado
+
+! Lista de variáveis locais:
+! AR20: LSNum
+! AR21: firstSBSTNum
+! AR22: lastSBSTNum
+! AR23: MaxSubsNum
+! AR24: LastStatus
+! AR25: LastSubsNum
+! AR26: ParType
+! AR27: LastSubstepOnly
+! AR28: nthSub
+! AR29: MaxLambda
+! AR30: FLAG
+! AR31: nthStatus
+! AR32: nthSubsNum
+! AR33: nthFreq
+! AR34: nthUnconverged
+! AR35: nthNegative
+! AR36: LastSubstep
+! AR37: LastLambda
+! AR38: MaxLFacSubstep
+
+! Lista de variáveis de saída
+! SETLAST_ARR_Times         -  lista de TIMEs do último load step
+! SETLAST_VAR_lastLoadstep  -  número do último load step
+! SETLAST_VAR_lastSubstep   -  número do último substep do último load step
+! SETLAST_VAR_lastLambda    -  fator de carga (TIME) do último substep do último load step
+! SETLAST_VAR_maxSubstep    -  número do substep de máximo TIME dentro do último load step
+! SETLAST_VAR_maxLambda     -  fator de carga (TIME) máximo do último load step
+
+/post1
+
+! Ler último substep
+SET,LAST
+
+! Obter número do último load step
+*get,AR20,ACTIVE,,SET,LSTP
+
+! Obter o número de substeps do último load step
+*get,AR21,ACTIVE,,SET,NSET,FIRST,AR20
+*get,AR22,ACTIVE,,SET,NSET,LAST,AR20
+AR23=AR22-AR21+1
+
+! Obter número do último substep que convergiu
+*get,AR24,ACTIVE,,SOLU,CNVG
+*get,AR25,ACTIVE,,SET,SBST
+*if,AR24,EQ,0,OR,AR25,EQ,999999,THEN
+    AR23=AR23-1
+*endif
+
+! Determinar o tipo de armazenamento de resultados (todos os substeps ou apenas o último substep)
+*get,AR26,PARM,arg1,TYPE
+*if,AR26,NE,0,THEN
+   AR27=0
+*elseif,AR26,EQ,0,THEN
+   *if,arg1,EQ,1,THEN
+      AR27=1
+   *else
+      AR27=0
+   *endif
+*endif
+
+! Inicializar o contador de substeps
+*if,AR27,EQ,1,THEN
+   AR28=AR25
+   AR23=AR25
+*else
+   AR28=1
+*endif
+
+! Inicializar o último fator de carga a convergir
+AR37=0
+! inicializar o máximo fator de carga
+AR29=0
+! Inicializar o vetor de TIMEs
+*del,SETLAST_ARR_Times
+*dim,SETLAST_ARR_Times,ARRAY,1
+SETLAST_ARR_Times(1)=0
+
+! Ler sequencialmente os substeps do último load step
+AR30=1
+*dowhile,AR30
+    *if,AR28,LE,AR23,THEN
+        ! Ler enésimo substep
+        SET,AR20,AR28
+        ! Obter verificador de convergência do substep
+        *get,AR31,ACTIVE,,SOLU,CNVG
+        ! Obter número do substep
+        *get,AR32,ACTIVE,,SET,SBST
+        ! Obter frequência do substep
+        *get,AR33,ACTIVE,,SET,FREQ
+        ! Verificar se o substep convergiu
+        AR34=0
+        *if,AR31,EQ,0,OR,AR32,EQ,999999,THEN
+            AR34=1
+        *endif
+        ! Verificar se o substep lido possui frequência negativa
+        AR35=0
+        *if,AR33,LT,0,THEN
+            AR35=1
+        *endif
+        ! Verificar se o próximo substep será lido
+        *if,AR34,EQ,1,OR,AR35,EQ,1,THEN
+            ! Sair do loop caso o último substep lido seja inválido
+            AR30=0
+        *else
+            ! Redefinir o número do último substep válido
+            AR36=AR32
+            ! Atualizar o último fator de carga a convergir
+            *get,AR37,ACTIVE,,SET,TIME
+            ! Adicionar o fator de carga à lista completa de TIMEs
+            *del,ARRADD_ARR_input
+            *vfun,ARRADD_ARR_input,COPY,SETLAST_ARR_Times
+            ARRADD,1,AR37
+            *del,SETLAST_ARR_Times
+            *vfun,SETLAST_ARR_Times,COPY,ARRADD_ARR_output
+            ! Atualizar o valor máximo do fator de carga
+            *if,AR37,GT,AR29,THEN
+                ! Máximo fator de carga
+                AR29=AR37
+                ! Número do substep no qual ocorre o máximo fator de carga
+                AR38=AR36
+            *endif
+        *endif
+        ! Incrementar o contador de substeps
+        AR28=AR28+1
+    *else
+        ! Sair do loop
+        AR30=0
+    *endif
+*enddo
+
+! Remover o primeiro valor da lista de TIMEs
+*del,ARRCDR_ARR_input
+*vfun,ARRCDR_ARR_input,COPY,SETLAST_ARR_Times
+ARRCDR
+*del,SETLAST_ARR_Times
+*vfun,SETLAST_ARR_Times,COPY,ARRCDR_ARR_output
+
+! Variáveis de saída
+SETLAST_VAR_lastLoadstep=AR20
+SETLAST_VAR_lastSubstep=AR36
+SETLAST_VAR_lastLambda=AR37
+SETLAST_VAR_maxSubstep=AR38
+SETLAST_VAR_maxLambda=AR29

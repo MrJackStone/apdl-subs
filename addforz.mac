@@ -1,0 +1,13 @@
+! addforz
+
+*get,NC,NODE,,COUNT
+nthNode=0
+totFor=0
+*do,i,1,NC,1
+   nthNode=NDNEXT(nthNode)
+   *get,zFor,NODE,nthNode,F,FZ
+   totFor=totFor+zFor
+*enddo
+
+_OUTPUT=totFor
+

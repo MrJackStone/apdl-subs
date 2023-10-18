@@ -1,0 +1,201 @@
+! CEDISAU, secID, name, refineKey, consultOnly
+! CEDISAU, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de perfis U laminados da Cedisa.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Cedisa
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! CEDISAU_VAR_num
+! CEDISAU_VAR_d
+! CEDISAU_VAR_bf
+! CEDISAU_VAR_t
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+CEDISAU_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'U76.2X6.1',THEN
+   CEDISAU_VAR_d=0.0762
+   CEDISAU_VAR_bf=0.0358
+   CEDISAU_VAR_t=0.0043
+*elseif,AR20,EQ,'U76.2X7.44',THEN
+   CEDISAU_VAR_d=0.0762
+   CEDISAU_VAR_bf=0.0381
+   CEDISAU_VAR_t=0.0066
+*elseif,AR20,EQ,'U76.2X8.93',THEN
+   CEDISAU_VAR_d=0.0762
+   CEDISAU_VAR_bf=0.0405
+   CEDISAU_VAR_t=0.0090
+*elseif,AR20,EQ,'U101.6X8.04',THEN
+   CEDISAU_VAR_d=0.1016
+   CEDISAU_VAR_bf=0.0401
+   CEDISAU_VAR_t=0.0046
+*elseif,AR20,EQ,'U101.6X9.3',THEN
+   CEDISAU_VAR_d=0.1016
+   CEDISAU_VAR_bf=0.0418
+   CEDISAU_VAR_t=0.0063
+*elseif,AR20,EQ,'U101.6X10.79',THEN
+   CEDISAU_VAR_d=0.1016
+   CEDISAU_VAR_bf=0.0437
+   CEDISAU_VAR_t=0.0081
+*elseif,AR20,EQ,'U152.4X12.2',THEN
+   CEDISAU_VAR_d=0.1524
+   CEDISAU_VAR_bf=0.0488
+   CEDISAU_VAR_t=0.0051
+*elseif,AR20,EQ,'U152.4X15.63',THEN
+   CEDISAU_VAR_d=0.1524
+   CEDISAU_VAR_bf=0.0517
+   CEDISAU_VAR_t=0.0080
+*elseif,AR20,EQ,'U152.4X19.35',THEN
+   CEDISAU_VAR_d=0.1524
+   CEDISAU_VAR_bf=0.0548
+   CEDISAU_VAR_t=0.0111
+*elseif,AR20,EQ,'U152.4X23.07',THEN
+   CEDISAU_VAR_d=0.1524
+   CEDISAU_VAR_bf=0.0579
+   CEDISAU_VAR_t=0.0142
+*elseif,AR20,EQ,'U203.2X17.11',THEN
+   CEDISAU_VAR_d=0.2032
+   CEDISAU_VAR_bf=0.0574
+   CEDISAU_VAR_t=0.0056
+*elseif,AR20,EQ,'U203.2X20.46',THEN
+   CEDISAU_VAR_d=0.2032
+   CEDISAU_VAR_bf=0.0595
+   CEDISAU_VAR_t=0.0077
+*elseif,AR20,EQ,'U203.2X24.18',THEN
+   CEDISAU_VAR_d=0.2032
+   CEDISAU_VAR_bf=0.0619
+   CEDISAU_VAR_t=0.0100
+*elseif,AR20,EQ,'U203.2X27.9',THEN
+   CEDISAU_VAR_d=0.2032
+   CEDISAU_VAR_bf=0.0642
+   CEDISAU_VAR_t=0.0124
+*elseif,AR20,EQ,'U203.2X31.62',THEN
+   CEDISAU_VAR_d=0.2032
+   CEDISAU_VAR_bf=0.0665
+   CEDISAU_VAR_t=0.0147
+*elseif,AR20,EQ,'U254X22.77',THEN
+   CEDISAU_VAR_d=0.2540
+   CEDISAU_VAR_bf=0.0660
+   CEDISAU_VAR_t=0.0061
+*elseif,AR20,EQ,'U254X29.76',THEN
+   CEDISAU_VAR_d=0.2540
+   CEDISAU_VAR_bf=0.0696
+   CEDISAU_VAR_t=0.0096
+*elseif,AR20,EQ,'U254X37.2',THEN
+   CEDISAU_VAR_d=0.2540
+   CEDISAU_VAR_bf=0.0733
+   CEDISAU_VAR_t=0.0134
+*elseif,AR20,EQ,'U254X44.65',THEN
+   CEDISAU_VAR_d=0.2540
+   CEDISAU_VAR_bf=0.0770
+   CEDISAU_VAR_t=0.0171
+*elseif,AR20,EQ,'U254X52.09',THEN
+   CEDISAU_VAR_d=0.2540
+   CEDISAU_VAR_bf=0.0808
+   CEDISAU_VAR_t=0.0208
+*elseif,AR20,EQ,'U304.8X30.81',THEN
+   CEDISAU_VAR_d=0.3048
+   CEDISAU_VAR_bf=0.0747
+   CEDISAU_VAR_t=0.0071
+*elseif,AR20,EQ,'U304.8X37.2',THEN
+   CEDISAU_VAR_d=0.3048
+   CEDISAU_VAR_bf=0.0774
+   CEDISAU_VAR_t=0.0098
+*elseif,AR20,EQ,'U304.8X44.65',THEN
+   CEDISAU_VAR_d=0.3048
+   CEDISAU_VAR_bf=0.0805
+   CEDISAU_VAR_t=0.0130
+*elseif,AR20,EQ,'U304.8X52.09',THEN
+   CEDISAU_VAR_d=0.3048
+   CEDISAU_VAR_bf=0.0836
+   CEDISAU_VAR_t=0.0161
+*elseif,AR20,EQ,'U304.8X59.53',THEN
+   CEDISAU_VAR_d=0.3048
+   CEDISAU_VAR_bf=0.0867
+   CEDISAU_VAR_t=0.0192
+*elseif,AR20,EQ,'U381X50.45',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0864
+   CEDISAU_VAR_t=0.0102
+*elseif,AR20,EQ,'U381X52.09',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0869
+   CEDISAU_VAR_t=0.0107
+*elseif,AR20,EQ,'U381X59.53',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0894
+   CEDISAU_VAR_t=0.0132
+*elseif,AR20,EQ,'U381X66.97',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0919
+   CEDISAU_VAR_t=0.0157
+*elseif,AR20,EQ,'U381X74.41',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0944
+   CEDISAU_VAR_t=0.0182
+*elseif,AR20,EQ,'U381X81.85',THEN
+   CEDISAU_VAR_d=0.3810
+   CEDISAU_VAR_bf=0.0969
+   CEDISAU_VAR_t=0.0207
+*else
+   *msg,WARN
+CEDISAU WARNING: Specified section not found. Command ignored.
+   CEDISAU_VAR_d=-1
+*endif
+
+! Criar seção transversal
+*if,CEDISAU_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,CEDISAU_VAR_num,BEAM,CHAN,arg2,AR22
+   SECDATA,CEDISAU_VAR_bf,CEDISAU_VAR_bf,CEDISAU_VAR_d,CEDISAU_VAR_t,CEDISAU_VAR_t,CEDISAU_VAR_t
+*endif
+

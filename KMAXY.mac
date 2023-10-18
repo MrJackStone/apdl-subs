@@ -1,0 +1,24 @@
+! KMAXY
+
+! Lista de variáveis
+! AR20: KCount
+! VAR21: yValues
+! AR22: KPIndex
+! AR23: PrevKP
+! AR24: MaxY
+
+*get,AR20,KP,0,COUNT
+*del,VAR21
+*dim,VAR21,,AR20
+AR23=0
+! Para cada keypoint selecionado:
+*do,AR22,1,AR20,1
+   AR23=KPNEXT(AR23)
+   ! Obter (e armazenar no vetor) o valor da coordenada Y desse keypoint
+   VAR21(AR22)=KY(AR23)
+*enddo
+! Obter maior valor de coordenada Y armazenado no vetor
+*vscfun,AR24,MAX,VAR21
+! Atribuir valor à variável de saída
+_OUTPUT=AR24
+

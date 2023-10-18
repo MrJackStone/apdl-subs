@@ -1,0 +1,8 @@
+! SAFE_CMSEL, selKey, cmName
+! SAFE_CMSEL,   arg1,   arg2
+
+*get,AR20,comp,%arg2%,type
+*if,AR20,gt,0,then
+    cmsel,%arg1%,%arg2%
+*endif
+

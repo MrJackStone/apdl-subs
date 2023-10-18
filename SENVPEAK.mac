@@ -1,0 +1,48 @@
+! SENVPEAK
+! Bending moment MX
+/show
+PLETAB,S_MX_MAX,NOAV
+*get,MXMax,PLNSOL,,MAX
+/show
+PLETAB,S_MX_MIN,NOAV
+*get,MXMin,PLNSOL,,MIN
+! Bending moment MY
+/show
+PLETAB,S_MY_MAX,NOAV
+*get,MYMax,PLNSOL,,MAX
+/show
+PLETAB,S_MY_MIN,NOAV
+*get,MYMin,PLNSOL,,MIN
+! Axial force FX
+/show
+PLETAB,S_FX_MAX,NOAV
+*get,FXMax,PLNSOL,,MAX
+/show
+PLETAB,S_FX_MIN,NOAV
+*get,FXMin,PLNSOL,,MIN
+! Axial force FY
+/show
+PLETAB,S_FY_MAX,NOAV
+*get,FYMax,PLNSOL,,MAX
+/show
+PLETAB,S_FY_MIN,NOAV
+*get,FYMin,PLNSOL,,MIN
+! Shear force QX
+/show
+PLETAB,S_QX_MAX,NOAV
+*get,QXMax,PLNSOL,,MAX
+/show
+PLETAB,S_QX_MIN,NOAV
+*get,QXMin,PLNSOL,,MIN
+! Shear force QY
+/show
+PLETAB,S_QY_MAX,NOAV
+*get,QYMax,PLNSOL,,MAX
+/show
+PLETAB,S_QY_MIN,NOAV
+*get,QYMin,PLNSOL,,MIN
+! Vertical deflection UZ
+/show
+PLETAB,S_UZ_MIN,NOAV
+*get,UZMin,PLNSOL,,MIN
+

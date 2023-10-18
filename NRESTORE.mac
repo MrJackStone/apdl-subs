@@ -1,0 +1,22 @@
+! NRESTORE
+
+! Description:
+! Selects nodes stored in named node selection component created by 'NBACKUP'.
+
+! Arguments:
+! -
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! -
+
+CMSEL,S,NBackup_
+CMDELE,NBackup_
+*del,NBackup_
+
+

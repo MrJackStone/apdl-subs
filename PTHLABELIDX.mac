@@ -1,0 +1,44 @@
+! PTHLABELIDX, output, label
+! PTHLABELIDX,   arg1,  arg2
+
+! Description:
+! Searches the active path's table for a label with a given name. Returns the column's index if the
+! label is found and returns 0 otherwise.
+
+! Arguments:
+! arg1: output  -  name of output parameter to which result will be assigned
+! arg2: label   -  label to be searched
+
+! Local parameters:
+! AR21: rsetsAvailable
+! AR23: targetIdx
+! AR24: nthRset
+! AR25: nthLabel
+
+! Global parameters (erased at the end of this subroutine):
+! PTHLABELIDX_ARR_labels
+
+
+! Get list of path's existing labels
+*del,PTHLABELIDX_ARR_labels
+paget,PTHLABELIDX_ARR_labels,label
+
+! Get number of labels (including blank)
+*get,AR21,parm,PTHLABELIDX_ARR_labels,dim,x
+
+! Loop through array of labels looking for target one
+AR23=0
+*do,AR24,1,AR21,1
+    AR25=PTHLABELIDX_ARR_labels(AR24)
+    *if,upcase(AR25),eq,upcase(arg2),then
+        AR23=AR24
+        *exit
+    *endif
+*enddo
+
+! Return first free index
+%arg1%=AR23
+
+! Clear parameters
+*del,PTHLABELIDX_ARR_labels
+

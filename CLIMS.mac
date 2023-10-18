@@ -1,0 +1,43 @@
+! CLIMS, minContour, maxContour, greyExceeding
+! CLIMS,       arg1,       arg2,          arg3
+
+! Description:
+! Sets scale limits for contour display.
+
+! Arguments:
+! arg1: minContour     -  minimum value for contour scale
+! arg2: maxContour     -  maximum value for contour scale
+! arg3: greyExceeding  -  controls coloring of values outside min/max limits:
+!                         [0] Values below min are colored BLUE, above min are colored RED
+!                         [1] Values below min or above max are colored GREY
+!                         [2] Values below min or above max are colored BLACK
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end on this subroutine):
+! -
+
+! Output parameters:
+! -
+
+*if,arg1,EQ,0,AND,arg2,EQ,0,THEN
+    /contour,ALL,9,AUTO
+*else
+    /contour,ALL,9,arg1,,arg2
+*endif
+
+*if,arg3,eq,1,then
+    /color,SMIN,DGRA
+    /color,SMAX,DGRA
+*elseif,arg3,eq,2,then
+    /color,SMIN,WHIT
+    /color,SMAX,WHIT
+*else
+    /color,SMIN,BLUE
+    /color,SMAX,RED
+*endif
+
+
+
+

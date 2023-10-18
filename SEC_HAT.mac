@@ -1,0 +1,177 @@
+! SEC_HAT,    d,   bf,   be,    e, theta,    t, name, secID
+! SEC_HAT, arg1, arg2, arg3, arg4,  arg5, arg6, arg7,  arg8
+
+! Description:
+! Writes a hat-shaped cross-section to an external .SECT file.
+
+! Arguments:
+! arg1: d      -  height (external)
+! arg2: bf     -  top flange width (external)
+! arg3: be     -  bottom flange width (external)
+! arg4: e      -  stiffener height (external)
+! arg5: theta  -  web inclination (default: 90°)
+! arg6: t      -  thickness
+! arg7: name   -  cross-section's .SECT file name
+! arg8: secID  -  section ID:
+!                   [<=0] do not import as BEAM188 cross-section
+!                   [>0]  BEAM188 cross-section ID
+
+! Local parameters:
+! AR20: MaxEType
+! AR21: NewEType
+! AR22: theta
+! AR23: bo
+! AR24: bi_bot
+! AR25: bi_top
+! AR26: b
+! AR27: area_bb
+! AR28: COMPA_subtracted
+! AR29: COMPA_added
+! AR30: ti
+
+
+! Global parameters (erased at the end of this subroutine)
+! -
+
+! Backup previous selection
+abackup
+lbackup
+kbackup
+ebackup
+nbackup
+asel, u, area, , all
+lsel, u, line, , all
+ksel, u, kp  , , all
+esel, u, elem, , all
+nsel, u, node, , all
+
+! Turn off display updating
+/nopr
+IMMED,0
+/uis,replot,0
+/uis,msgpop,3
+
+! Use PLANE82
+*get,AR20,etyp,,num,max
+AR21=AR20+1
+et,AR21,82
+
+! Geometric parameters
+*if,arg5,eq,0,then
+    AR22=90
+*else
+    AR22=arg5
+*endif
+
+*if,AR22,ne,90,then
+    *afun,deg
+        AR23 = (arg1 - arg6) / tan(AR22)
+    *afun,rad
+*else
+    AR23 = 0
+*endif
+
+*afun,deg
+    AR30 = (arg6/sin(AR22)) * (1 - cos(AR22))
+*afun,rad
+
+AR24 = arg2 - 2*AR30 + 2*AR23
+AR25 = arg2 - 2*AR30
+
+AR26 = 2*arg3 + AR25 + 2*AR23
+
+! Bounding box
+blc4,0,0,AR26,arg1
+*get,AR27,area,,num,min
+
+! Subtractions:
+asel,u,area,,all
+
+! Inner subtraction
+wpoffs,AR26/2
+    ptxy, -AR24/2, 0, AR24/2, 0, AR25/2, arg1-arg6, -AR25/2, arg1-arg6
+    poly
+wpoffs,-AR26/2
+
+! Left outer subtraction
+wpoffs,,arg6
+    ptxy, 0, 0, arg3-AR30, 0, (AR26-arg2)/2, arg1-arg6, 0, arg1-arg6
+    poly
+wpoffs,,-arg6
+
+! Right outer subtraction
+wpoffs,AR26,arg6
+    ptxy, 0, 0, AR30-arg3, 0, (arg2-AR26)/2, arg1-arg6, 0, arg1-arg6
+    poly
+wpoffs,-AR26,-arg6
+
+cm,AR28,area
+
+! Added areas (stiffeners)
+*if,arg4,gt,0,then
+    asel,u,area,,all
+
+    wpoffs,,arg6
+        blc4, 0, 0, arg6, arg4-arg6
+        wpoffs,AR26
+            blc4, 0, 0, -arg6, arg4-arg6
+        wpoffs,-AR26
+    wpoffs,,-arg6
+
+    cm,AR29,area
+
+    cmsel,s,AR28
+    cmsel,a,AR29
+    asba,AR28,AR29,,delete,delete
+
+    cm,AR28,area
+*endif
+
+! Create hat-shape with boolean subtraction
+asel,s,area,,AR27
+cmsel,a,AR28
+asba,AR27,AR28,,delete,delete
+
+! Slice areas
+wpslicexz,arg6
+wpslicexz,arg1-arg6
+wpsliceyz,arg3-AR30
+wpsliceyz,AR26-arg3+AR30
+wpsliceyz,arg3+AR23
+wpsliceyz,AR26-arg3-AR23
+
+! Mesh cross-section
+lesize,all,2*arg6
+aatt,,,AR21
+amesh,all
+
+! Write to file
+secwrite,arg7,sect,,AR21
+
+! Revert model
+aclear,all
+adele ,all
+ldele ,all
+kdele ,all
+etdele,AR21
+
+! Import cross-section
+*if,arg8,gt,0,then
+    sectype,arg8,beam,mesh,arg7
+    secread,arg7,sect,,mesh
+*endif
+
+! Restore previous selection
+arestore
+lrestore
+krestore
+erestore
+nrestore
+
+! Reactivate automatic display refreshing
+/gopr
+immed,1
+/uis,replot,1
+/uis,msgpop,2
+
+

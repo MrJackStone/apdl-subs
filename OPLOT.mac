@@ -1,0 +1,51 @@
+! OPLOT, wnum, options
+! OPLOT, arg1,    arg2
+
+! 3 characters. Options for 1st character   (TYPE): _ N E K L A V G R
+!               Options for 2nd character  (GLINE): _ 0 1
+!               Options for 3rd character (VECTOR): _ 0 1
+
+! AR20: parType
+! AR23: char1
+! AR24: char2
+! AR25: char3
+
+*get,AR20,parm,arg2,type
+*if,AR20,ne,3,then
+    *return,-1
+*endif
+
+AR23=upcase(strsub(arg2,1,1))
+AR24=upcase(strsub(arg2,2,1))
+AR25=upcase(strsub(arg2,3,1))
+
+*if,AR24,eq,'0',then
+    /gline,arg1,-1
+*elseif,AR24,eq,'1',then
+    /gline,arg1,0
+*endif
+
+*if,AR25,eq,'0',then
+    /device,vector,off
+*elseif,AR25,eq,'1',then
+    /device,vector,on
+*endif
+
+*if,AR23,eq,'N',then
+    nplot
+*elseif,AR23,eq,'E',then
+    eplot
+*elseif,AR23,eq,'K',then
+    kplot
+*elseif,AR23,eq,'L',then
+    lplot
+*elseif,AR23,eq,'A',then
+    aplot
+*elseif,AR23,eq,'V',then
+    vplot
+*elseif,AR23,eq,'G',then
+    gplot
+*elseif,AR23,eq,'R',then
+    /replot
+*endif
+

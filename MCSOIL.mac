@@ -1,0 +1,172 @@
+! MCSOIL, matNum,    E, Poisson, dens,  phi,    c,  psi, phiR,   cR,   sT,  sTR, coupling, plasticPotentialType, phiScalingFunction, cScalingFunction, sTScalingFunction, psiScalingFunction, matSolParam, linear
+! MCSOIL,   arg1, arg2,    arg3, arg4, arg5, arg6, arg7, arg8, arg9, ar10, ar11,     ar12,                 ar13,               ar14,             ar15,              ar16,               ar17,        ar18,   ar19
+
+! Description:
+! Creates a material definition (usually representing soil) using the Mohr-Coulomb constitutive
+! model.
+
+! Arguments:
+! arg1: matNum                -  material number
+! arg2: E                     -  elastic modulus
+! arg3: Poisson               -  Poisson's coefficient
+! arg4: dens                  -  mass density
+! arg5: phi                   -  initial inner friction angle
+! arg6: c                     -  initial cohesion
+! arg7: psi                   -  dilatancy angle
+! arg8: phiR                  -  residual inner friction angle
+! arg9: cR                    -  residual cohesion
+! ar10: sT                    -  initial tensile strength (stress). Defaults to 0 (disabled)
+! ar11: sTR                   -  residual tensile strength (stress)
+! ar12: coupling              -  residual strength coupling flag:
+!                                   [0]  disabled
+!                                   [>0] enabled (2)
+! ar13: plasticPotentialType  -  optional flow potential:
+!                                   [0] Mohr-Coulomb potential surface (default)
+!                                   [1] Smoothed compression-meridian potential surface
+!                                   [2] Smoothed tension-meridian potential surface
+! ar14: phiScalingFunction    -  optional scaling function for the inner friction angle (array name)
+!                                   - Nx2 array;
+!                                   - 1st column: hardening variable;
+!                                   - 2nd column: scaling function;
+! ar15: cScalingFunction      -  optional scaling function for the cohesion (array name)
+!                                   - Nx2 array;
+!                                   - 1st column: hardening variable;
+!                                   - 2nd column: scaling function;
+! ar16: sTScalingFunction     -  optional tensile strength (stress) scaling function (array name)
+!                                   - Nx2 array;
+!                                   - 1st column: hardening variable;
+!                                   - 2nd column: scaling function;
+! ar17: psiScalingFunction    -  optional dilatation angle scaling function (array name)
+!                                   - Nx2 array;
+!                                   - 1st column: hardening variable;
+!                                   - 2nd column: scaling function;
+! ar18: matSolParam           -  material solution option:
+!                                   [0] Use default value (depends on material)
+!                                   [1] Consistent tangent
+!                                   [2] Elastic tangent
+! ar19: linear                -  create linear-elastic material:
+!                                   [0] non-linear Mohr-Coulomb material (default)
+!                                   [1] linear material (E, Poisson, and density only)
+
+! Local parameters:
+! AR21: initialInnerFrictionAngle
+! AR22: initialCohesion
+! AR23: dilatancyAngle
+! AR24: residualInnerFrictionAngle
+! AR25: residualCohesion
+! AR26: arrayLength
+! AR27: nthPoint
+! AR31: initialTensileStrength
+! AR32: residualTensileStrength
+! AR41: residualStrengthCouplingFlag
+! AR51: plasticPotentialType
+! AR61: nthX
+! AR62: nthY
+! AR71: elastoplasticTangentFlag
+
+! Elastic properties
+mp,ex,arg1,arg2
+MP,prxy,arg1,arg3
+mp,dens,arg1,arg4
+
+! Early return for linear-elastic material definition
+*if,ar19,eq,1,then
+    *return,-1
+*endif
+
+! Base behavior:
+! Initial inner friction angle
+AR21=((arg5>0)<90)
+! Initial cohesion
+AR22=(arg6>0)
+! Dilatancy angle
+AR23=((arg7>0)<AR21)
+! Residual inner friction angle
+AR24=((arg8>0)<AR21)
+! Residual cohesion
+AR25=((arg9>0)<AR22)
+
+tb,mc,arg1,,,BASE
+tbdata,1,AR21,AR22,AR23,AR24,AR25
+
+! Tension cutoff:
+! Initial tensile strength
+AR31=(ar10>0)
+! Residual tensile strength
+AR32=((ar11>0)<AR31)
+*if,AR31,gt,0,then
+    tb,mc,arg1,,,RCUT
+    tbdata,1,AR31,AR32
+*endif
+
+! Residual strength coupling flag:
+AR41=0
+*if,ar12,ne,0,then
+    AR41=2
+*endif
+tb,mc,arg1,,,RSC
+tbdata,1,AR41
+
+! Plastic potential type:
+AR51=((ar13>0)<2)
+tb,mc,arg1,,,POTN
+tbdata,1,AR51
+
+! Optional friction angle scaling function:
+parverify,'MCSOIL_VAR_phiCheck',ar14,'ARRAY','EQUAL',,,2
+*if,MCSOIL_VAR_phiCheck,eq,1,then
+    *get,AR26,parm,%ar14%,dim,x
+    *do,AR27,1,AR26,1
+        AR61=%ar14%(AR27,1)
+        AR62=%ar14%(AR27,2)
+        tb,mc,arg1,,,FRICTION
+        tbpt,defi,AR61,AR62
+    *enddo
+*endif
+
+! Optional cohesion scaling function:
+parverify,'MCSOIL_VAR_cCheck',ar15,'ARRAY','EQUAL',,,2
+*if,MCSOIL_VAR_cCheck,eq,1,then
+    *get,AR26,parm,%ar15%,dim,x
+    *do,AR27,1,AR26,1
+        AR61=%ar15%(AR27,1)
+        AR62=%ar15%(AR27,2)
+        tb,mc,arg1,,,COHESION
+        tbpt,defi,AR61,AR62
+    *enddo
+*endif
+
+! Optional tension strength scaling function:
+parverify,'MCSOIL_VAR_stCheck',ar16,'ARRAY','EQUAL',,,2
+*if,MCSOIL_VAR_stCheck,eq,1,then
+    *get,AR26,parm,%ar16%,dim,x
+    *do,AR27,1,AR26,1
+        AR61=%ar16%(AR27,1)
+        AR62=%ar16%(AR27,2)
+        tb,mc,arg1,,,TENSION
+        tbpt,defi,AR61,AR62
+    *enddo
+*endif
+
+! Optional dilatation angle scaling function:
+parverify,'MCSOIL_VAR_psiCheck',ar17,'ARRAY','EQUAL',,,2
+*if,MCSOIL_VAR_psiCheck,eq,1,then
+    *get,AR26,parm,%ar17%,dim,x
+    *do,AR27,1,AR26,1
+        AR61=%ar17%(AR27,1)
+        AR62=%ar17%(AR27,2)
+        tb,mc,arg1,,,DILATATION
+        tbpt,defi,AR61,AR62
+    *enddo
+*endif
+
+! Material solution option:
+AR71=((ar18>0)<2)
+*if,AR71,gt,0,then
+    tb,mc,arg1,,,MSOL
+    tbdata,1,AR71
+*endif
+
+
+
+

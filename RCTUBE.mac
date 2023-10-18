@@ -1,0 +1,130 @@
+! rctube, widthX, depthY, lengthZ, cornerRadius,  thk, areaCM, lineCM, kpCM
+! rctube,   arg1,   arg2,    arg3,         arg4, arg5,   arg6,   arg7, arg8
+
+! Description:
+! Draws areas in the shape of a rectangular tube with rounded corners. All dimensions (width in the
+! X-direction, depth in the Y-direction, and length in the Z-direction) are relative to the active
+! coordinate system, to which the Working Plane will be aligned. The original position/orientation
+! of the Working Plane (as it existed before executing this subroutine) is not restored.
+
+! NOTE: thickness (arg5) is not yet implemented. Might be added in the future as a way of creating
+!       volumes instead of areas.
+
+! Arguments:
+! arg1: widthX        -  cross-section's width, drawn along X-axis
+! arg2: depthY        -  cross-section's depth, drawn along Y-axis
+! arg3: lengthZ       -  beam's length, drawn along Z-axis
+! arg4: cornerRadius  -  cross-section's corner radius (can be set to 0 for sharp corners)
+! arg5: thk           -  thickness of the beam's walls (not implemented)
+! arg6: areaCM        -  name of area selection component containing newly created areas.
+!                        Defaults to 'COMPA_rectube'.
+! arg7: lineCM        -  name of line selection component containing newly created lines.
+!                        Defaults to 'COMPL_rectube'.
+! arg8: kpCM          -  name of keypoint selection component containing newly created keypoints.
+!                        Defaults to 'COMPK_rectube'.
+
+! Local parameters:
+! AR20: parType
+! AR21: COMPA_temp
+! AR22: COMPA_delete
+! AR23: COMPA_keep
+! AR24: nthVer
+! AR25: nthHor
+! AR26: areaCM
+! AR27: lineCM
+! AR28: kpCM
+! AR31: verticalArea
+! AR32: horizontalArea
+
+
+! Name of selection components to be created
+AR26='COMPA_rectube'
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  AR26=arg6
+*endif
+
+AR27='COMPL_rectube'
+*get,AR20,parm,arg7,type
+*if,AR20,eq,3,then
+  AR27=arg7
+*endif
+
+AR28='COMPK_rectube'
+*get,AR20,parm,arg8,type
+*if,AR20,eq,3,then
+  AR28=arg8
+*endif
+
+! Align Working Plane with active CSYS
+wpcsys,-1
+
+! Backup current selection
+vbackup
+abackup
+lbackup
+kbackup
+
+vsel,u,volu,,all
+asel,u,area,,all
+
+! Draw areas
+blc5,0,0,arg1,arg2,arg3
+vdele,all,,,0
+cm,AR21,area
+
+! Delete capping areas
+asel,s,loc,z,0
+asel,a,loc,z,arg3
+cmsel,r,AR21
+cm,AR22,area
+asel,inve
+cmsel,r,AR21
+cm,AR23,area
+cmsel,s,AR22
+cmdele,AR21
+cmdele,AR22
+adele,all,,,0
+cmsel,s,AR23
+
+! Round corners
+*if,arg4,gt,0,then
+  *do,AR24,1,2,1
+    *do,AR25,1,2,1
+      ! Get vertical area
+      asel,s,loc,x,((-1)**AR24)*(arg1/2)
+      cmsel,r,AR23
+      AR31=arnext(0)
+      ! Get horizontal area
+      asel,s,loc,y,((-1)**AR25)*(arg2/2)
+      cmsel,r,AR23
+      AR32=arnext(0)
+      ! Fillet between areas
+      asel,s,area,,AR31
+      asel,a,area,,AR32
+      afillt,AR31,AR32,arg4
+      ! Update temporary area selection component
+      cmsel,a,AR23
+      cm,AR23,area
+    *enddo
+  *enddo
+*endif
+
+! Store new entities in selection components
+cmdele,AR23
+lsla,s
+ksll,s
+cm,%AR26%,area
+cm,%AR27%,line
+cm,%AR28%,kp
+
+! Restore previous selection
+vrestore
+arestore
+lrestore
+krestore
+
+! Add new entities to current selection
+cmsel,a,AR26
+cmsel,a,AR27
+cmsel,a,AR28

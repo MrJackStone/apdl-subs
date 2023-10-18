@@ -1,0 +1,11 @@
+! GETAFUN, output
+! GETAFUN, arg1
+
+sine30=sin(30)
+
+*if,sine30,gt,0.4999,and,sine30,lt,0.5001,then
+    %arg1%='DEG'
+*else
+    %arg1%='RAD'
+*endif
+

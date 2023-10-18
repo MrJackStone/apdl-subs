@@ -1,0 +1,39 @@
+! BEAM_ROTZ, scale, kund, direction
+! BEAM_ROTZ,  arg1, arg2,      arg3
+
+! Description:
+! Plots BEAM188 Z rotation diagram.
+
+! Arguments:
+! arg1: scale  -  scale factor (negative to invert)
+! arg2: kund   -  [0] Display on undeformed shape / [1] Display on deformed shape
+! arg3: direction  -  undocumented PLLS argument:
+!                        [0] Direction based on view
+!                        [1] Direction based on global CS
+
+! Local parameters:
+! AR21: DOFtype
+! AR22: DOFdir
+! AR23: unitScaleFactor
+! AR24: nameKey
+
+AR21='rot'
+AR22='z'
+AR23=1
+AR24='UZ'
+
+etable,'TMP_%AR24%',AR21,AR22
+
+sadd,'BEAM_%AR24%','TMP_%AR24%',,AR23
+
+etable,'TMP_%AR24%',eras
+
+*cfopen,beamdiagram_tmp,tmp
+    *vwrite,'BEAM_%AR24%','BEAM_%AR24%',arg1,arg2,arg3
+plls,%C,%C,%G,%I,%I
+*cfclos
+/nopr
+/input,beamdiagram_tmp,tmp
+/delete,beamdiagram_tmp,tmp
+/gopr
+

@@ -1,0 +1,64 @@
+! COPYAR
+
+! AR20: acount
+! AR21: anum
+! AR22: nthArea
+! AR23: lcount
+! AR24: lnum
+! AR25: nthLine
+! AR26: KP1
+! AR27: KP2
+! AR28: x1
+! AR29: y1
+! AR30: z1
+! AR31: x2
+! AR32: y2
+! AR33: z2
+! AR34: KMXD
+! AR35: newK1
+! AR36: newK2
+
+cm,COPYAR_COMPA_initial,area
+*get,AR20,area,,count
+AR21=0
+
+lsel,u,line,,all
+cm,COPYAR_COMPL_new,line
+
+*do,AR22,1,AR20,1
+    cmsel,s,COPYAR_COMPA_initial
+    AR21=arnext(AR21)
+    lsla,s
+    ksll,s
+    cm,COPYAR_COMPL_borders,line
+    *get,AR23,line,,count
+    AR24=0
+    *do,AR25,1,AR23,1
+        AR24=lsnext(AR24)
+
+        *get,AR26,line,AR24,kp,1
+        AR28=kx(AR26)
+        AR29=ky(AR26)
+        AR30=kz(AR26)
+
+        *get,AR27,line,AR24,kp,2
+        AR31=kx(AR27)
+        AR32=ky(AR27)
+        AR33=kz(AR27)
+
+        *get,AR34,kp,,num,maxd
+        AR35=AR34+1
+        k,AR35,AR28,AR29,AR30
+        k,AR36,AR31,AR31,AR33
+
+        cmsel,s,COPYAR_COMPL_new
+        l,AR25,AR36
+        cm,COPYAR_COMPL_new,line
+    *enddo
+
+    cmsel,s,COPYAR_COMPL_new
+    al,COPYAR_COMPL_new
+*enddo
+
+
+

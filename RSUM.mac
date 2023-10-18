@@ -1,0 +1,44 @@
+! RSUM,  DOF, varNum, varName
+! RSUM, arg1,   arg2,    arg3
+
+DOFname=UPCASE(arg1)
+dummyVar=100
+dummyVar2=101
+
+*get,NC,NODE,,COUNT
+NodeNum=0
+*do,nthNode,1,NC,1
+   NodeNum=NDNEXT(NodeNum)
+
+   *if,DOFname,EQ,'FX',THEN
+      RFORCE,dummyVar,NodeNum,F,X,'nthFX'
+   *elseif,DOFname,EQ,'FY',THEN
+      RFORCE,dummyVar,NodeNum,F,Y,'nthFY'
+   *elseif,DOFname,EQ,'FZ',THEN
+      RFORCE,dummyVar,NodeNum,F,Z,'nthFZ'
+   *elseif,DOFname,EQ,'MX',THEN
+      RFORCE,dummyVar,NodeNum,M,X,'nthMX'
+   *elseif,DOFname,EQ,'MY',THEN
+      RFORCE,dummyVar,NodeNum,M,Y,'nthMY'
+   *elseif,DOFname,EQ,'MZ',THEN
+      RFORCE,dummyVar,NodeNum,M,Z,'nthMZ'
+   *endif
+
+   *if,nthNode,EQ,1,THEN
+      VARDEL,arg2
+      ADD,arg2,dummyVar,,,arg3,,,1
+   *else
+      VARDEL,dummyVar2
+      ADD,dummyVar2,dummyVar,arg2,,'dummy2'
+      VARDEL,arg2
+      ADD,arg2,dummyVar2,,,arg3,,,1
+   *endif
+*enddo
+
+VARDEL,dummyVar2
+VARDEL,dummyVar
+
+
+
+
+

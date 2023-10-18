@@ -1,0 +1,101 @@
+! HLXORI, refLine, zOri
+! HLXORI,    arg1, arg2
+
+KBACKUP
+LBACKUP
+ABACKUP
+NBACKUP
+EBACKUP
+
+ESLA,S
+NSLE,S
+CM,COMPN_Helix,NODE
+CM,COMPE_Helix,ELEM
+
+CSYS,0
+*if,arg1,EQ,-1,THEN
+    CM,COMPL_axis,LINE
+*else
+    LSEL,S,LINE,,arg1
+*endif
+NSLL,S,1
+ESLN,S
+NSLE,R,CORNER
+CM,COMPN_Line,NODE
+*get,zMin,NODE,,MNLOC,Z
+*get,zMax,NODE,,MXLOC,Z
+
+*if,arg2,EQ,-1,THEN
+    NSEL,R,LOC,Z,zMax
+*else
+    NSEL,R,LOC,Z,zMin
+*endif
+*get,FirstNode,NODE,,NUM,MIN
+
+CMSEL,S,COMPN_Line
+NDSTR,FirstNode
+! NDSTR_ARR_NodeList
+*get,NC,NODE,,COUNT
+
+*afun,RAD
+
+*get,CSMaxD,CDSY,,NUM,MAX
+nthCS=CSMaxD+10
+
+*do,nthNode,2,NC-1,1
+    prvNode=NDSTR_ARR_NodeList(nthNode-1)
+    trgNode=NDSTR_ARR_NodeList(nthNode)
+    nxtNode=NDSTR_ARR_NodeList(nthNode+1)
+    xPrv=NX(prvNode)
+    yPrv=NY(prvNode)
+    zPrv=NZ(prvNode)
+    xTrg=NX(trgNode)
+    yTrg=NY(trgNode)
+    zTrg=NZ(trgNode)
+    xNxt=NX(nxtNode)
+    yNxt=NY(nxtNode)
+    zNxt=NZ(nxtNode)
+    deltaX=xNxt-xPrv
+    deltaY=yNxt-yPrv
+    deltaZ=zNxt-zPrv
+    delta=DISTND(prvNode,nxtNode)
+
+    thetaXZ=ATAN(deltaX/deltaZ)
+    rotXZ=-(90-(thetaXZ*180/pi))
+
+    thetaXY=ATAN(deltaY/delta)
+    rotXY=thetaXY*180/pi
+
+    *if,yPrv,EQ,0,THEN
+        thetaYZ=pi/2
+    *else
+        thetaYZ=ATAN(xPrv/yPrv)
+    *endif
+    rotYZ=-(90+(thetaYZ*180/pi))
+
+    CMSEL,S,COMPN_Helix
+    NSEL,R,LOC,Z,zPrv,zNxt
+    ESLN,S,0
+    CMSEL,R,COMPE_Helix
+
+    nthCS=nthCS+1
+    CSYS,0
+    LOCAL,nthCS,0,xTrg,yTrg,zTrg
+    CLOCAL,nthCS,0,,,,,,rotXZ
+    CLOCAL,nthCS,0,,,,rotXY
+    CLOCAL,nthCS,0,,,,,rotYZ
+    EMODIF,ALL,ESYS,nthCS
+    CSYS,0
+*enddo
+
+
+
+KRESTORE
+LRESTORE
+ARESTORE
+NRESTORE
+ERESTORE
+
+
+
+

@@ -1,0 +1,41 @@
+! FHOUR, parm,  num
+! FHOUR, arg1, arg2
+
+! Description:
+! Converts real number representing time in a formatted string HH:MM:SS.
+
+! Arguments:
+! arg1: parm  -  parameter name (string)
+! arg2: num   -  number to be converted (as returned by *get,active,,time,cpu)
+
+! Local parameters:
+! AR20: hours
+! AR21: minutes
+! AR22: seconds
+! AR23: hStr
+! AR24: mStr
+! AR25: sStr
+
+AR20=nint(arg2-0.5)
+AR21=nint((arg2-AR20)*60-0.5)
+AR22=nint((arg2-AR20-AR21/60)*3600-0.5)
+
+*if,AR20,lt,10,then
+    AR23=strcat('0',strcat(chrval(AR20),':'))
+*else
+    AR23=strcat(chrval(AR20),':')
+*endif
+
+*if,AR21,lt,10,then
+    AR24=strcat('0',strcat(chrval(AR21),':'))
+*else
+    AR24=strcat(chrval(AR21),':')
+*endif
+
+*if,AR22,lt,10,then
+    AR25=strcat('0',chrval(AR22))
+*else
+    AR25=chrval(AR22)
+*endif
+
+%arg1%=strcat(AR23,strcat(AR24,AR25))

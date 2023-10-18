@@ -1,0 +1,124 @@
+! APPORTIONEDSTATS, stats, areas, nodePool, elemPool
+! APPORTIONEDSTATS,  arg1,  arg2,     arg3,     arg4
+
+! Description:
+! Calculates apportioned area of every selected node (target nodes) and returns:
+!    - statistical summary information in the form of an array of values;
+!    - apportioned areas and node numbers for every target node.
+! The statistical summary array has the following format:
+!    POS  VALUE
+!    (1)  minimum
+!    (2)  maximum
+!    (3)  sum
+!    (4)  mean
+!    (5)  median
+!    (6)  variance
+!    (7)  standard deviation
+!    (8)  root-mean-square
+! The apportioned areas are returned in a Nx2 array, in which N is the number of target nodes.
+! Column 1 contains node numbers (of target nodes) and column 2 has the corresponding apportioned
+! areas.
+
+! Arguments:
+! arg1: stats     -  name of array parameter to which statistical summary data will be written
+!                    (defaults to APPORTIONEDSTATS_ARR_stats)
+! arg2: areas     -  name of array parameter to which apportioned areas calculated for every node
+!                    will be written (defaults to APPORTIONEDSTATS_ARR_areas)
+! arg3: nodePool  -  name of node selection component that contains nodes which will be selected
+!                    to calculate apportioned area of target nodes (defaults to ALL)
+! arg4: elemPool  -  name of element selection component that contains elements which will be
+!                    selected to calculate apportioned area of target nodes (defaults to ALL)
+
+! Local parameters:
+! AR20: parType
+! AR21: statsArrayName
+! AR22: areasArrayName
+! AR23: COMPN_target
+! AR24: COMPE_target
+! AR25: targetNodeCount
+! AR33: COMPN_pool
+! AR34: COMPE_pool
+! AR35: targetNodeIndex
+! AR45: targetNodeNumber
+! AR91: minApportioned
+! AR92: maxApportioned
+! AR93: sumApportioned
+! AR94: meanApportioned
+! AR95: mediApportioned
+! AR96: variApportioned
+! AR97: stdvApportioned
+! AR98: rmsApportioned
+
+
+! Set name of output parameters
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+    AR21=arg1
+*else
+    AR21='APPORTIONEDSTATS_ARR_stats'
+*endif
+
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+    AR22=arg2
+*else
+    AR22='APPORTIONEDSTATS_ARR_areas'
+*endif
+
+! Store current selection
+cm,AR23,node
+cm,AR24,elem
+*get,AR25,node,,count
+
+! Initialize apportioned area array
+*del,%AR22%
+*dim,%AR22%,,AR25,2
+
+! Set node pool selection component
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+    cmsel,s,%arg3%
+*else
+    nsel,s,node,,all
+*endif
+cm,AR33,node
+
+! Set element pool selection component
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+    cmsel,s,%arg3%
+*else
+    esel,s,elem,,all
+*endif
+cm,AR34,elem
+
+! Calculate apportioned areas for target nodes
+AR45=0
+*do,AR35,1,AR25,1
+    cmsel,s,AR23
+    AR45=ndnext(AR45)
+    cmsel,s,AR33
+    cmsel,s,AR34
+    %AR22%(AR35,1)=AR45
+    %AR22%(AR35,2)=arnode(AR45)
+*enddo
+
+! Restore original selection
+cmsel,s,AR23
+cmsel,s,AR24
+
+! Calculate statistical summary data
+*vscfun,AR91,min ,%AR22%(1,2)
+*vscfun,AR92,max ,%AR22%(1,2)
+*vscfun,AR93,sum ,%AR22%(1,2)
+*vscfun,AR94,mean,%AR22%(1,2)
+*vscfun,AR95,medi,%AR22%(1,2)
+*vscfun,AR96,vari,%AR22%(1,2)
+*vscfun,AR97,stdv,%AR22%(1,2)
+*vscfun,AR98,rms ,%AR22%(1,2)
+
+! Assign stats to output array
+*del,%AR21%
+*dim,%AR21%,,8
+%AR21%(1)=AR91,AR92,AR93,AR94,AR95,AR96,AR97,AR98
+

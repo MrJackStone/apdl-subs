@@ -1,0 +1,48 @@
+! sec_init,
+! sec_init,
+
+! Description:
+! Prepares the model for the creation of a customized BEAM188 cross-section. This preparation
+! consists of the following steps:
+!   1. backup current selection and unselect everything
+!   2. switch to pre-processor and deactivate warnings and automatic redrawing
+!   3. create PLANE82 element type
+! After the custome cross-section has been drawn and meshed, these preparatory steps can be undone
+! by calling 'SEC_FINISH'.
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: maxETnum
+! AR21: etNum
+
+! Backup previous selection
+abackup
+lbackup
+kbackup
+ebackup
+nbackup
+csbackup
+asel, u, area, , all
+lsel, u, line, , all
+ksel, u, kp  , , all
+esel, u, elem, , all
+nsel, u, node, , all
+csys,0
+wpcsys,-1
+
+! Turn off display updating
+/prep7
+/nopr
+IMMED,0
+/uis,replot,0
+/uis,msgpop,3
+
+! Use PLANE82
+*get,AR20,etyp,,num,max
+AR21=AR20+1
+et,AR21,82
+
+! Store element type number in global parameter
+SEC_INIT_VAR_etnum=AR21

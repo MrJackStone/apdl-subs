@@ -1,0 +1,133 @@
+! CEDISAT, secID, name, refineKey, consultOnly
+! CEDISAT, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de perfis T da Cedisa.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Cedisa
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! CEDISAT_VAR_num
+! CEDISAT_VAR_d
+! CEDISAT_VAR_bf
+! CEDISAT_VAR_tf
+! CEDISAT_VAR_tw
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+CEDISAT_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'T15.88X3.18',THEN
+   CEDISAT_VAR_d=0.0159
+   CEDISAT_VAR_bf=0.0159
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T19.05X3.18',THEN
+   CEDISAT_VAR_d=0.0191
+   CEDISAT_VAR_bf=0.0191
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T22.22X3.18',THEN
+   CEDISAT_VAR_d=0.0222
+   CEDISAT_VAR_bf=0.0222
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T25.4X3.18',THEN
+   CEDISAT_VAR_d=0.0254
+   CEDISAT_VAR_bf=0.0254
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T31.75X3.18',THEN
+   CEDISAT_VAR_d=0.0318
+   CEDISAT_VAR_bf=0.0318
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T38.1X3.18',THEN
+   CEDISAT_VAR_d=0.0381
+   CEDISAT_VAR_bf=0.0381
+   CEDISAT_VAR_tf=0.0032
+   CEDISAT_VAR_tw=0.0032
+*elseif,AR20,EQ,'T31.75X4.76',THEN
+   CEDISAT_VAR_d=0.0318
+   CEDISAT_VAR_bf=0.0318
+   CEDISAT_VAR_tf=0.0048
+   CEDISAT_VAR_tw=0.0048
+*elseif,AR20,EQ,'T38.1X4.76',THEN
+   CEDISAT_VAR_d=0.0381
+   CEDISAT_VAR_bf=0.0381
+   CEDISAT_VAR_tf=0.0048
+   CEDISAT_VAR_tw=0.0048
+*elseif,AR20,EQ,'T50.8X4.76',THEN
+   CEDISAT_VAR_d=0.0508
+   CEDISAT_VAR_bf=0.0508
+   CEDISAT_VAR_tf=0.0048
+   CEDISAT_VAR_tw=0.0048
+*elseif,AR20,EQ,'T38.1X6.35',THEN
+   CEDISAT_VAR_d=0.0381
+   CEDISAT_VAR_bf=0.0381
+   CEDISAT_VAR_tf=0.0064
+   CEDISAT_VAR_tw=0.0064
+*elseif,AR20,EQ,'T50.8X6.35',THEN
+   CEDISAT_VAR_d=0.0508
+   CEDISAT_VAR_bf=0.0508
+   CEDISAT_VAR_tf=0.0064
+   CEDISAT_VAR_tw=0.0064
+*else
+   *msg,WARN
+CEDISAT WARNING: Specified section not found. Command ignored.
+   CEDISAT_VAR_d=-1
+*endif
+
+! Criar seção transversal
+*if,CEDISAT_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,CEDISAT_VAR_num,BEAM,T,arg2,AR22
+   SECDATA,CEDISAT_VAR_bf,CEDISAT_VAR_d,CEDISAT_VAR_tf,CEDISAT_VAR_tw
+*endif
+

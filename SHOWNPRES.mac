@@ -1,0 +1,109 @@
+! SHOWNPRES, lkey, valueOpt
+! SHOWNPRES, arg1,     arg2
+
+! Description:
+! Displays on-screen annotations showing pressures at selected nodes.
+
+! Arguments:
+! arg1: lkey      -  load key, usually 'FX', 'FY', or 'FZ'.
+! arg2: valueOpt  -  determines which value(s) to display:
+!                    'MIN'     -  annotates minimum value only
+!                    'MAX'     -  annotates maximum value only
+!                    'ABSMIN'  -  annotates minimum absolute value only
+!                    'ABSMAX'  -  annotates maximum absolute value only
+!                    'ALL'     -  annotates all values (default)
+
+! Local parameters:
+! AR20: parType
+! AR21: annotValues
+! AR22: activeCS
+! AR23: showAll
+! AR24: nc
+! AR25: pres
+! AR26: loc
+! AR27: nthNode
+! AR28: nodenum
+! AR29: str
+! AR30: x
+! AR31: y
+! AR32: z
+
+! Output parameters:
+! GETNPRES_ARR_nodes
+! GETNPRES_ARR_pressures
+
+
+! Switch to global cartesian
+*get,AR22,active,,csys
+csys,0
+
+! Calculate nodal pressures
+getnpres,arg1
+
+! Default option
+*get,AR20,parm,arg2,type
+*if,AR20,ne,3,then
+    AR21='ALL'
+*else
+    AR21=upcase(arg2)
+*endif
+
+! Collect values
+AR23=0
+*if,AR21,eq,'MIN',then
+    *vabs
+    *vscfun,AR25,min,GETNPRES_ARR_pressures
+    *vscfun,AR26,lmin,GETNPRES_ARR_pressures
+
+*elseif,AR21,eq,'MAX',then
+    *vabs
+    *vscfun,AR25,max,GETNPRES_ARR_pressures
+    *vscfun,AR26,lmax,GETNPRES_ARR_pressures
+
+*elseif,AR21,eq,'ABSMIN',then
+    *vabs,1,1,1,1
+    *vscfun,AR25,min,GETNPRES_ARR_pressures
+    *vabs,1,1,1,1
+    *vscfun,AR26,lmin,GETNPRES_ARR_pressures
+
+*elseif,AR21,eq,'ABSMAX',then
+    *vabs,1,1,1,1
+    *vscfun,AR25,max,GETNPRES_ARR_pressures
+    *vabs,1,1,1,1
+    *vscfun,AR26,lmax,GETNPRES_ARR_pressures
+
+*else
+    AR23=1
+
+*endif
+
+
+*if,AR23,eq,1,then
+    ! Create annotation for all nodes
+    *get,AR24,node,,count
+    *do,AR27,1,AR24,1
+        AR28=GETNPRES_ARR_nodes(AR27)
+        AR25=GETNPRES_ARR_pressures(AR27)
+        AR30=nx(AR28)
+        AR31=ny(AR28)
+        AR32=nz(AR28)
+        AR29=strcat(chrval(nint(AR25/1000)),' kPa')
+        /an3d,anum,,101
+        /an3d,text,AR30,AR31,AR32,%AR29%
+    *enddo
+*else
+    ! Create annotation for selected value
+    AR28=GETNPRES_ARR_nodes(AR26)
+    AR30=nx(AR28)
+    AR31=ny(AR28)
+    AR32=nz(AR28)
+    AR29=strcat(chrval(nint(AR25/1000)),' kPa')
+    /an3d,anum,,101
+    /an3d,text,AR30,AR31,AR32,%AR29%
+*endif
+
+! Restore active coordinate system
+csys,AR22
+
+
+

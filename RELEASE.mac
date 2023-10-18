@@ -1,0 +1,131 @@
+! RELEASE,LNum,KP
+! RELEASE,arg1,arg2
+
+! Atribuir argumentos
+LNum=arg1
+KPPos=arg2
+
+! Pré-processo
+/prep7
+
+! Salvar seleção prévia
+KBACKUP
+LBACKUP
+NBACKUP
+EBACKUP
+
+! Selecionar linha desejada
+LSEL,S,LINE,,LNum
+! Selecionar elementos adjacentes à linha
+ESLL,S
+! Selecionar nós ativos adjacentes aos elementos
+NSLE,S,ACTIVE
+
+! Caso deseje-se rotular o nó associado ao início da linha:
+*if,KPPos,EQ,1,OR,KPPos,EQ,0,THEN
+   ! Obter número do keypoint inicial da linha
+   *get,RefKP,LINE,LNum,KP,1
+! Caso deseje-se rotular o nó associado ao final da linha:
+*elseif,KPPos,EQ,2,THEN
+   ! Obter o número do keypoint final da linha
+   *get,RefKP,LINE,LNum,KP,2
+*endif
+
+! Selecionar o keypoint de referência (nó a rotular)
+KSEL,S,KP,,RefKP
+! Selecionar (dentre os nós já selecionados) nó adjacente ao keypoint de referência
+NSLK,R
+! Obter número de nós selecionados
+*get,NCount,NODE,0,COUNT
+
+! Selecionar (dentre os elementos já selecionados) os elementos adjacentes ao nó
+ESLN,R,0
+! Obter número de elementos selecionados
+*get,ECount,ELEM,0,COUNT
+
+! Caso o número de nós selecionados e o número de elementos selecionados
+!    sejam ambos iguais a 1:
+*if,NCount,EQ,1,AND,ECount,EQ,1,THEN
+   ! Obter o número do nó e o número do elemento selecionados
+   *get,ENum,ELEM,0,NUM,MIN
+   *get,NNum,NODE,0,NUM,MIN
+   ! Obter os números dos nós inicial e final (primeiro e segundo) do elemento
+   *get,EFirstNode,ELEM,ENum,NODE,1
+   *get,ESecondNode,ELEM,ENum,NODE,2
+   ! Caso o nó selecionado seja o nó inicial do elemento:
+   *if,EFirstNode,EQ,NNum,THEN
+      ! Definir posição de nó a modificar como 1
+      NPosition=1
+   ! Caso o nó selecionado seja o nó final do elemento:
+   *elseif,ESecondNode,EQ,NNum,THEN
+      ! Definir posição de nó a modificar como 2
+      NPosition=2
+   *endif
+   ! Obter as coordenadas (X, Y e Z) do nó selecionado
+   NXVal=NX(NNum)
+   NYVal=NY(NNum)
+   NZVal=NZ(NNum)
+   ! Obter o maior número de nó existente no modelo
+   *get,MaxNode,NODE,0,NUM,MAXD
+   ! Incrementar o maior número de nó de uma unidade para definir número do
+   !    novo nó a ser criado
+   NewNode=MaxNode+1
+   ! Criar novo nó (na mesma posição do nó selecionado
+   N,NewNode,NXVal,NYVal,NZVal
+   ! Fazer backup das propriedades do elemento
+   *get,Bckp_MAT,ELEM,ENum,ATTR,MAT
+   *get,Bckp_TYPE,ELEM,ENum,ATTR,TYPE
+   *get,Bckp_REAL,ELEM,ENum,ATTR,REAL
+   *get,Bckp_ESYS,ELEM,ENum,ATTR,ESYS
+   *get,Bckp_SECN,ELEM,ENum,ATTR,SECN
+   ! Desabilita exibição de mensagens de aviso
+   /uis,MSGPOP,3
+   ! Desativa a verificação de associação entre Solid Model e FEM
+   MODMSH,NOCHECK
+   ! Modificar o elemento:
+   !    O nó (definido pela posição a modificar conhecida) do elemento é
+   !    alterado para o novo nó criado
+   EMODIF,ENum,NPosition,NewNode
+   EMODIF,ENum,MAT,Bckp_MAT
+   EMODIF,ENum,TYPE,Bckp_TYPE
+   EMODIF,ENum,REAL,Bckp_REAL
+   EMODIF,ENum,ESYS,Bckp_ESYS
+   EMODIF,ENum,SECNUM,Bckp_SECN
+   ! Reativa a verificação de associação entre Solid Model e FEM
+   MODMSH,CHECK
+   ! Reabilita exibição de mensagens de aviso
+   /uis,MSGPOP,2
+   ! Aplicar acoplamento dos graus de liberdade referentes aos deslocamentos
+   CP,NEXT,UX,NNum,NewNode
+   CP,NEXT,UY,NNum,NewNode
+   CP,NEXT,UZ,NNum,NewNode
+*endif
+
+! Excluir variáveis
+*del,LNum
+*del,KPPos
+*del,RefKP
+*del,NCount
+*del,ECount
+*del,ENum
+*del,NNum
+*del,EFirstNode
+*del,ESecondNode
+*del,NPosition
+*del,NXVal
+*del,NYVal
+*del,NZVal
+*del,MaxNode
+*del,NewNode
+*del,Bckp_MAT
+*del,Bckp_TYPE
+*del,Bckp_REAL
+*del,Bckp_ESYS
+*del,Bckp_SECN
+
+! Restaurar seleção prévia
+KRESTORE
+LRESTORE
+NRESTORE
+ERESTORE
+

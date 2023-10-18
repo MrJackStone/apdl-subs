@@ -1,0 +1,36 @@
+! WINCLN, wnum
+! WINCLN, arg1
+
+
+/triad,off
+
+/annot,dele
+
+/plopts,wins,off
+/plopts,info,0
+/plopts,leg1,off
+/plopts,leg2,off
+/plopts,leg3,off
+/plopts,title,off
+/plopts,minm,off
+/plopts,file,off
+/plopts,logo,off
+/plopts,date,off
+
+
+/udoc,arg1,cntr,off
+/udoc,arg1,gwin,off
+/udoc,arg1,type,off
+/udoc,arg1,typ2,off
+/udoc,arg1,inum,off
+/udoc,arg1,bcdc,off
+/udoc,arg1,vect,off
+/udoc,arg1,surf,off
+/udoc,arg1,body,off
+/udoc,arg1,psta,off
+/udoc,arg1,view,off
+/udoc,arg1,misc,off
+
+
+
+

@@ -1,0 +1,110 @@
+! REBARTRUSS, width, height, depth,  s_w,  s_h,  s_i, cov_w, cov_h
+! REBARTRUSS,  arg1,   arg2,  arg3, arg4, arg5, arg6,  arg7,  arg8
+
+! Description:
+! Draws evenly spaced zigzaging lines representing rebar trusses.
+
+! Arguments:
+! arg1: width   -  width along which the mesh will be distributed
+! arg2: height  -  heigth along which the mesh will be distributed
+! arg3: depth   -  depth of the truss
+! arg4: s_w     -  spacing in the width direction
+! arg5: s_h     -  projected distance in the Y direction of the sloping truss segment
+! arg6: s_i     -  distance between adjacent truss segments
+! arg7: cov_w   -  concrete cover in the width direction
+! arg8: cov_h   -  concrete cover in the height direction
+
+! Local variables:
+! AR20: verCount
+! AR21: horCount
+! AR22: x0
+! AR23: y0
+! AR24: x
+! AR25: nthVer
+! AR26: y
+! AR27: nthHor
+! AR28: xCoord
+! AR29: zBottom
+! AR30: zTop
+! AR31: yBottom
+! AR32: yTop
+! AR33: KMax
+! AR34: K1
+! AR35: K2
+! AR36: zTemp
+
+! Global parameters (erased at the end of the subroutine):
+! REBARTRUSS_ARR_X
+! REBARTRUSS_ARR_Y
+
+! Output parameters:
+! REBARTRUSS_COMPL_rebars: lines representing rebars
+! REBARTRUSS_COMPK_rebars: keypoints attached to rebars
+
+! Backup current selection
+KBACKUP
+LBACKUP
+
+! Calculate number of trusses and segments on each truss
+AR20=NINT(((arg1-2*arg7)/arg4)+0.5)
+AR21=NINT(((arg2+arg6-2*arg8)/(arg5+arg6))-0.5)
+
+! Calculate distribution start points
+AR22=(arg1-((AR20-1)*arg4))/2
+AR23=(arg2-((AR21)*(arg5+arg6)-arg6))/2
+
+! X coordinate of each truss
+*del,REBARTRUSS_ARR_X
+*dim,REBARTRUSS_ARR_X,ARRAY,AR20
+AR24=AR22
+*do,AR25,1,AR20,1
+    REBARTRUSS_ARR_X(AR25)=AR24
+    AR24=AR24+arg4
+*enddo
+
+! Y coordinate of the bottom of each segment
+*del,REBARTRUSS_ARR_Y
+*dim,REBARTRUSS_ARR_Y,ARRAY,AR21
+AR26=AR23
+*do,AR27,1,AR21,1
+    REBARTRUSS_ARR_Y(AR27)=AR26
+    AR26=AR26+(arg5+arg6)
+*enddo
+
+! Draw trusses
+LSEL,U,LINE,,ALL
+*do,AR25,1,AR20,1
+
+    AR28=REBARTRUSS_ARR_X(AR25)
+    AR29=0
+    AR30=arg3
+
+    *do,AR27,1,AR21,1
+
+        AR31=REBARTRUSS_ARR_Y(AR27)
+        AR32=AR31+arg5
+
+        *get,AR33,KP,,NUM,MAXD
+        AR34=AR33+1
+        AR35=AR33+2
+
+        K,AR34,AR28,AR31,AR29
+        K,AR35,AR28,AR32,AR30
+        L,AR34,AR35
+
+        AR36=AR29
+        AR29=AR30
+        AR30=AR36
+
+    *enddo
+*enddo
+KSLL,S
+CM,REBARTRUSS_COMPL_rebars,LINE
+CM,REBARTRUSS_COMPK_rebars,LINE
+
+! Restore previous selection and add newly created entities
+KRESTORE
+LRESTORE
+CMSEL,A,REBARTRUSS_COMPK_rebars
+CMSEL,A,REBARTRUSS_COMPL_rebars
+

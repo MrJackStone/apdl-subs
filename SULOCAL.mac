@@ -1,0 +1,95 @@
+! SULOCAL, csNum
+! SULOCAL,  arg1
+
+! Description:
+! Calculates local X, Y, Z coordinates of every surface point given a local coordinate system
+! assumed to have its origin on the surface and its X direction perpendicular to the surface.
+
+! Arguments:
+! arg1: csNum  -  number of the reference local coordinate system
+
+! Local parameters:
+! AR21: nthAxis
+! AR22: axisName
+! AR23: rsetName
+! AR24: linearOffset
+! AR25: xUnitVectorComponent
+! AR26: yUnitVectorComponent
+! AR27: zUnitVectorComponent
+
+! Global parameters (erased at the end of this subroutine):
+! SULOCAL_ARR_LCSorigin
+! SULOCAL_ARR_rotMatrix
+! SULOCAL_ARR_tranRotMatrix
+! SULOCAL_ARR_translationVector
+! SULOCAL_ARR_axisNames
+
+
+! Calculate translations and rotations relative to local CS
+transmatrix,'SULOCAL_ARR_LCSorigin','SULOCAL_ARR_rotMatrix',arg1
+
+! Calculate linear translation in the local CS frame of reference
+*del, SULOCAL_ARR_tranRotMatrix
+*mfun,SULOCAL_ARR_tranRotMatrix,tran,SULOCAL_ARR_rotMatrix
+*del, SULOCAL_ARR_translationVector
+*moper,SULOCAL_ARR_translationVector,SULOCAL_ARR_tranRotMatrix,mult,SULOCAL_ARR_LCSorigin
+
+! Array for naming result sets
+*del,SULOCAL_ARR_axisNames
+*dim,SULOCAL_ARR_axisNames,char,3
+SULOCAL_ARR_axisNames(1)='X','Y','Z'
+
+*do,AR21,1,3,1
+    ! Surface & result set name
+    AR22=SULOCAL_ARR_axisNames(AR21)
+    AR23='LC%AR22%'
+
+    ! Linear translation
+    AR24=SULOCAL_ARR_translationVector(AR21)
+
+    ! Rotational transformation
+    AR25=SULOCAL_ARR_rotMatrix(1,AR21)
+    AR26=SULOCAL_ARR_rotMatrix(2,AR21)
+    AR27=SULOCAL_ARR_rotMatrix(3,AR21)
+
+    ! Constant: translation parameter
+    sucalc,'OFFSET',,zero,,,,AR24
+
+    ! Constants: rotation parameters
+    sucalc,'X_UCV',,zero,,,,AR25
+    sucalc,'Y_UCV',,zero,,,,AR26
+    sucalc,'Z_UCV',,zero,,,,AR27
+
+    ! Calculate partial values
+    sucalc,'GCX_X','GCX',mult,'X_UCV'
+    sucalc,'GCY_Y','GCY',mult,'Y_UCV'
+    sucalc,'GCZ_Z','GCZ',mult,'Z_UCV'
+
+    ! Initialize aggregator
+    sucalc,'AGGR',,zero,,,,0
+
+    ! Aggregate partial results
+    sucalc,'AGGR','AGGR',add,'GCX_X'
+    sucalc,'AGGR','AGGR',add,'GCY_Y'
+    sucalc,'AGGR','AGGR',add,'GCZ_Z'
+
+    ! Apply final translation operation
+    sucalc,'%AR23%','AGGR',sub,'OFFSET'
+
+    ! Clear intermediary results
+    sumap,'AGGR',clear
+    sumap,'OFFSET',clear
+    sumap,'X_UCV',clear
+    sumap,'Y_UCV',clear
+    sumap,'Z_UCV',clear
+    sumap,'GCX_X',clear
+    sumap,'GCY_Y',clear
+    sumap,'GCZ_Z',clear
+*enddo
+
+! Clear global parameters
+!*del,SULOCAL_ARR_LCSorigin
+!*del,SULOCAL_ARR_rotMatrix
+!*del,SULOCAL_ARR_tranRotMatrix
+!*del,SULOCAL_ARR_translationVector
+!*del,SULOCAL_ARR_axisNames

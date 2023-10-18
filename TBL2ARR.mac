@@ -1,0 +1,98 @@
+! TBL2ARR, outputParm, mode, inputParm
+! TBL2ARR,       arg1, arg2,      arg3
+
+! Description:
+! Condenses values of all table colums (Y dimension) into a single unidimensional array applying
+! a given *VSCFUN operator to each table row (X dimension)
+
+! Arguments:
+! arg1: outputParm  -  name (string) of the output 1-D parameter containing operated data
+! arg2: operation   -  *VSCFUN operator to be applied to each row. Valid operations:
+!                          'MIN'      -  returns minimum masked value (signed)
+!                          'MAX'      -  returns maximum masked value (signed)
+!                          'MEAN'     -  returns mean of masked values
+!                          'SUM'      -  returns sum of masked values
+!                          'ABSMAX'   -  returns absolute maximum masked value
+!                          'ABSMIN'   -  returns absolute minimum masked value
+!                          'SABSMAX'  -  use ABS to calculate MAX, but return signed value
+!                          'SABSMIN'  -  use ABS to calculate MIN, but return signed value
+! arg3: inputParm   -  name (string) of the 2-D parameter containing table data
+
+! Output parameters:
+! TBL2ARR_ARR_output  -  1-D array containing operated table data
+
+! Local parameters:
+! AR20: xDim
+! AR21: yDim
+! AR22: nthX
+! AR23: nthY
+! AR24: nthValue
+! AR25: upcaseOperator
+! AR26: maxVal
+! AR27: minVal
+
+! Global parameters (erased at the end of this subroutine):
+! TBL2ARR_ARR_temp
+
+AR25=UPCASE(arg2)
+
+*get,AR20,PARM,%arg3%,DIM,X
+*get,AR21,PARM,%arg3%,DIM,Y
+
+*del,%arg1%
+*dim,%arg1%,ARRAY,AR20
+
+*do,AR22,1,AR20,1
+
+    *del,TBL2ARR_ARR_temp
+    *dim,TBL2ARR_ARR_temp,ARRAY,AR21
+
+    *do,AR23,1,AR21,1
+        TBL2ARR_ARR_temp(AR23)=%arg3%(AR22,AR23)
+    *enddo
+
+    *if,AR25,EQ,'MIN',THEN
+        *vscfun,AR24,MIN,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'MAX',THEN
+        *vscfun,AR24,MAX,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'MEAN',THEN
+        *vscfun,AR24,MEAN,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'SUM',THEN
+        *vscfun,AR24,SUM,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'ABSMAX',THEN
+        *vabs,,1
+        *vscfun,AR24,MAX,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'ABSMIN',THEN
+        *vabs,,1
+        *vscfun,AR24,MIN,TBL2ARR_ARR_temp
+
+    *elseif,AR25,EQ,'SABSMAX',THEN
+        *vscfun,AR26,MAX,TBL2ARR_ARR_temp
+        *vscfun,AR27,MIN,TBL2ARR_ARR_temp
+        *if,ABS(AR26),GE,ABS(AR27),THEN
+            AR24=AR26
+        *else
+            AR24=AR27
+        *endif
+
+    *elseif,AR25,EQ,'SABSMIN',THEN
+        *vscfun,AR26,MAX,TBL2ARR_ARR_temp
+        *vscfun,AR27,MIN,TBL2ARR_ARR_temp
+        *if,ABS(AR26),LE,ABS(AR27),THEN
+            AR24=AR26
+        *else
+            AR24=AR27
+        *endif
+    *endif
+
+    %arg1%(AR22)=AR24
+*enddo
+
+! Clear parameters
+*del,TBL2ARR_ARR_temp
+

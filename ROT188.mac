@@ -1,0 +1,116 @@
+! ROT188, nodeNum, DOFs
+! ROT188,    arg1, arg2
+
+!!
+!!
+!!
+!! *************** DEVELOPING *****************
+!!
+!!
+
+! BALL  0
+! UX    1
+! UY    2
+! UZ    4
+! ROTX  8
+! ROTY 16
+! ROTZ 32
+! WARP 64
+
+! ROT188_COMPE_Fixed
+! ROT188_COMPE_Pinned
+
+BITWISE,arg2
+*del,ROT188_ARR_DOFs
+*dim,ROT188_ARR_DOFs,CHAR,7
+ROT188_ARR_DOFs(1)='UX','UY','UZ','ROTX','ROTY','ROTZ','WARP'
+
+!*del,ROT188_ARR_decoupled
+!*dim,ROT188_ARR_decoupled,CHAR,7
+!*vmask,BITWISE_ARR_bits(1)
+!*vfun,ROT188_ARR_decoupled,COMP,ROT188_ARR_DOFs(1)
+!!
+*vscfun,AR54,SUM,BITWISE_ARR_bits
+*del,ROT188_ARR_decoupled
+*dim,ROT188_ARR_decoupled,CHAR,AR54
+AR53=0
+*do,AR50,1,7,1
+    AR51=BITWISE_ARR_bits(AR50)
+    *if,AR51,EQ,1,THEN
+        AR53=AR53+1
+        AR52=ROT188_ARR_DOFs(AR50)
+        ROT188_ARR_decoupled(AR53)=AR52
+    *endif
+*enddo
+!!
+
+
+!*del,ROT188_ARR_mask2
+!*vfun,ROT188_ARR_mask2(1),NOT,BITWISE_ARR_bits(1)
+!*vmask,ROT188_ARR_mask2(1)
+!*vfun,ROT188_ARR_coupled,COMP,ROT188_ARR_DOFs
+
+NBACKUP
+EBACKUP
+
+NSEL,S,NODE,,arg1
+ESLN,S
+
+AR20=NX(arg1)
+AR21=NY(arg1)
+AR22=NZ(arg1)
+
+*if,arg2,EQ,0,THEN
+
+    ENDRELEASE,,-1,BALL
+
+*else
+
+    *cfopen,'ROT188_FILE_tmp',tmp
+        *vwrite,
+        ('ENDRELEASE,,-1,',\b)
+        *vwrite,ROT188_ARR_decoupled(1)
+        (A8, ', ', \b)
+    *cfclos
+    /nopr
+    /input,'ROT188_FILE_tmp',tmp
+    /delete,'ROT188_FILE_tmp',tmp
+    /gopr
+
+*endif
+
+CM,AR23,NODE
+
+CMSEL,R,ROT188_COMPE_Fixed
+NSLE,S,ACTIVE
+CMSEL,R,AR23
+
+*if,arg2,EQ,0,THEN
+
+    CP,NEXT,ROTX,ALL
+    CP,NEXT,ROTY,ALL
+    CP,NEXT,ROTZ,ALL
+    CP,NEXT,WARP,ALL
+
+*else
+
+    *cfopen,'ROT188_FILE_tmp',tmp
+        *vwrite,ROT188_ARR_decoupled(1)
+        ('CP,NEXT,', A8, ',ALL')
+    *cfclos
+    /nopr
+    /input,'ROT188_FILE_tmp',tmp
+    /delete,'ROT188_FILE_tmp',tmp
+    /gopr
+
+*endif
+
+ELRESTORE
+NRESTORE
+CMSEL,A,AR23
+
+*del,ROT188_ARR_DOFs
+*del,BITWISE_ARR_bits
+*del,ROT188_ARR_decoupled
+!*del,ROT188_ARR_mask2
+!*del,ROT188_ARR_coupled

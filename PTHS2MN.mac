@@ -1,0 +1,250 @@
+! PTHS2MN, topNode1, topNode2, botNode1, botNode2, pathNameRoot, stressKey, pathDiv,    W,    A, avgKey
+! PTHS2MN,     arg1,     arg2,     arg3,     arg4,         arg5,      arg6,    arg7, arg8, arg9,   ar10
+
+! Descrição:
+! Esta subrotina converte tensões ao longo de dois paths (interpretados como as faces superior e
+! inferior da seção transversal de uma barra) em esforços internos de flexão reta (momento fletor)
+! e de força axial (força normal, de tração ou compressão). Os valores dos esforços internos são
+! registrados em ambos os paths, sendo o momento fletor identificados com o label 'M' e a força
+! normal identificada com o label 'N'. Esta subrotina presume seção transversal constante e com
+! dupla simetria ao longo do eixo da barra (comprimento dos paths), e o usuário precisa fornecer
+! as propriedades geométricas da seção transversal.
+
+! Lista de argumentos:
+! arg1: topNode1      -  nó de início do path da face superior da seção transversal
+! arg2: topNode2      -  nó de final do path da face superior
+! arg3: botNode1      -  nó de início do path da face inferior da seção transversal
+! arg4: botNode2      -  nó de final do path da face inferior
+! arg5: pathNameRoot  -  string a ser utilizada como prefixo do nome dos paths superior e inferior
+!                        (deve conter no máximo 6 caracteres, pois os dois últimos serão '_T' e
+!                        '_B' para os paths superior e inferior, respectivamente)
+! arg6: stressKey     -  string indicando qual tensão utilizar para o cálculo dos esforços internos:
+!                           ['X']   tensão normal sigma X;
+!                           ['Y']   tensão normal sigma Y;
+!                           ['Z']   tensão normal sigma Z;
+!                           ['XY']  tensão cisalhante sigma XY;
+!                           ['YZ']  tensão cisalhante sigma YZ;
+!                           ['XZ']  tensão cisalhante sigma XZ;
+!                           ['1']   tensão principal sigma 1;
+!                           ['2']   tensão principal sigma 2;
+!                           ['3']   tensão principal sigma 3;
+!                           ['INT'] intensidade de tensão;
+!                           ['EQV'] tensão equivalente de vonMises.
+!                           <other> custom element table
+!                           OBS: para que esta subrotina funcione conforme o esperado recomenda-se
+!                                de maneira geral que seja utilizada a tensão normal alinhada com
+!                                o eixo da barra fictícia ('X', 'Y' ou 'Z').
+! arg7: pathDiv       -  número de divisões de cada path
+! arg8: W             -  módulo resistente máximo da seção transversal (momento de inércia sobre
+!                        distância do centroide até a fibra extrema)
+! arg9: A             -  área da seção transversal
+! ar10: avgKey        -  ativa ou desativa opção de tirar média através das fronteiras entre
+!                        elementos adjacentes (argumento 'avglab' do comando 'PDEF')
+!                           [0] AVG  (tirar média, default)
+!                           [1] NOAV (não tirar média)
+
+! Lista de variáveis locais:
+! AR20: avglab
+! AR21: parType
+! AR22: pathPrefix
+! AR23: topPathName
+! AR24: botPathName
+! AR25: upcaseSKey
+! AR26: stressLabel
+! AR27: errorKey
+! AR28: i
+! AR29: nthValue
+
+! Lista de variáveis globais (apagadas ao final da subrotina):
+! PTH2ARR_ARR_OUTPUT
+! PTHS2MN_ARR_stressDifference
+! PTHS2MN_ARR_topTable
+! PTHS2MN_ARR_topLabel
+! PTHS2MN_ARR_topPoints
+! PTHS2MN_ARR_botTable
+! PTHS2MN_ARR_botLabel
+! PTHS2MN_ARR_botPoints
+
+! Lista de variáveis de saída:
+! PTHS2MN_ARR_topStress
+! PTHS2MN_ARR_botStress
+! PTHS2MN_ARR_bendingStress
+! PTHS2MN_ARR_bendingMoment
+! PTHS2MN_ARR_normalStress
+! PTHS2MN_ARR_axialForce
+
+
+
+AR20='AVG'
+*get,AR21,PARM,ar10,TYPE
+*if,AR21,EQ,0,THEN
+    *if,ar10,EQ,1,THEN
+        AR20='NOAV'
+    *endif
+*endif
+
+! Nomes dos paths
+*get,AR21,PARM,arg5,TYPE
+*if,AR21,EQ,3,THEN
+    AR22=STRSUB(arg5,1,6)
+*else
+    AR22='S2MN'
+*endif
+AR23=STRCAT(AR22,'_T')
+AR24=STRCAT(AR22,'_B')
+
+! Topo da seção transversal
+PATH,AR23,2,20,arg7
+PATH,AR23
+PPATH,1,arg1
+PPATH,2,arg2
+
+! Bottom of the cross-section
+PATH,AR24,2,20,arg7
+PATH,AR24
+PPATH,1,arg3
+PPATH,2,arg4
+
+! Inicializar indicador de erros
+AR27=0
+
+! Mapear tensão nos paths
+*do,AR28,1,2,1
+    ! Ativar path (superior ou inferior)
+    *if,AR28,EQ,1,THEN
+        PATH,AR23
+    *else
+        PATH,AR24
+    *endif
+
+    ! Mapear tensão selecionada no path ativo
+    AR25=UPCASE(arg6)
+    *if,AR25,EQ,'X',THEN
+        AR26='SX'
+        PDEF,AR26,S,X,AR20
+    *elseif,AR25,EQ,'Y',THEN
+        AR26='SY'
+        PDEF,AR26,S,Y,AR20
+    *elseif,AR25,EQ,'Z',THEN
+        AR26='SZ'
+        PDEF,AR26,S,Z,AR20
+    *elseif,AR25,EQ,'XY',THEN
+        AR26='SXY'
+        PDEF,AR26,S,XY,AR20
+    *elseif,AR25,EQ,'YZ',THEN
+        AR26='SYZ'
+        PDEF,AR26,S,YZ,AR20
+    *elseif,AR25,EQ,'XZ',THEN
+        AR26='SXZ'
+        PDEF,AR26,S,XZ,AR20
+    *elseif,AR25,EQ,'1',THEN
+        AR26='S1'
+        PDEF,AR26,S,1,AR20
+    *elseif,AR25,EQ,'2',THEN
+        AR26='S2'
+        PDEF,AR26,S,2,AR20
+    *elseif,AR25,EQ,'3',THEN
+        AR26='S3'
+        PDEF,AR26,S,3,AR20
+    *elseif,AR25,EQ,'INT',THEN
+        AR26='SINT'
+        PDEF,AR26,S,INT,AR20
+    *elseif,AR25,EQ,'EQV',THEN
+        AR26='SEQV'
+        PDEF,AR26,S,EQV,AR20
+    *else
+        AR26=AR25
+        pdef,AR26,etab,AR26,AR20
+        !AR27=1
+        !*msg,WARN,AR27
+!'PTHS2MN error (%I): INVALID STRESS KEY. PTHS2MN COMMAND IS IGNORED.'
+        !*exit
+    *endif
+
+*enddo
+
+*if,AR27,EQ,0,THEN
+    ! Transferir tensões na face superior para vetor
+    PATH,AR23
+    PTH2ARR,AR26
+    *del,PTHS2MN_ARR_topStress
+    *vfun,PTHS2MN_ARR_topStress,COPY,PTH2ARR_ARR_OUTPUT
+
+    ! Transferir tensões na face inferior para vetor
+    PATH,AR24
+    PTH2ARR,AR26
+    *del,PTHS2MN_ARR_botStress
+    *vfun,PTHS2MN_ARR_botStress,COPY,PTH2ARR_ARR_OUTPUT
+
+    ! Calcular esforços internos
+    *del,PTHS2MN_ARR_stressDifference
+    *del,PTHS2MN_ARR_bendingStress
+    *del,PTHS2MN_ARR_bendingMoment
+    *del,PTHS2MN_ARR_normalStress
+    *del,PTHS2MN_ARR_axialForce
+    *voper,PTHS2MN_ARR_stressDifference, PTHS2MN_ARR_botStress,        SUB,  PTHS2MN_ARR_topStress
+    *voper,PTHS2MN_ARR_bendingStress,    PTHS2MN_ARR_stressDifference, DIV,  2
+    *voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8
+    *voper,PTHS2MN_ARR_normalStress,     PTHS2MN_ARR_topStress,        ADD,  PTHS2MN_ARR_bendingStress
+    *voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9
+
+    ! Adicionar vetores calculados às tabelas extraídas dos paths
+    *del,PTHS2MN_ARR_topTable
+    *del,PTHS2MN_ARR_topLabel
+    *del,PTHS2MN_ARR_topPoints
+    PATH,AR23
+    PAGET,PTHS2MN_ARR_topTable,TABLE
+    PAGET,PTHS2MN_ARR_topLabel,LABEL
+    PAGET,PTHS2MN_ARR_topPoints,POINTS
+    *do,AR29,1,arg7+1,1
+        PTHS2MN_ARR_topTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
+        PTHS2MN_ARR_topTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
+        PTHS2MN_ARR_topTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
+        PTHS2MN_ARR_topTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
+    *enddo
+    PTHS2MN_ARR_topLabel(6,1,1)='M'
+    PTHS2MN_ARR_topLabel(7,1,1)='N'
+    PTHS2MN_ARR_topLabel(8,1,1)='BS'
+    PTHS2MN_ARR_topLabel(9,1,1)='NS'
+    PATH,AR23
+    PAPUT,PTHS2MN_ARR_topPoints,POINTS
+    PAPUT,PTHS2MN_ARR_topTable,TABLE
+    PAPUT,PTHS2MN_ARR_topLabel,LABEL
+
+    *del,PTHS2MN_ARR_botTable
+    *del,PTHS2MN_ARR_botLabel
+    *del,PTHS2MN_ARR_botPoints
+    PATH,AR24
+    PAGET,PTHS2MN_ARR_botTable,TABLE
+    PAGET,PTHS2MN_ARR_botLabel,LABEL
+    PAGET,PTHS2MN_ARR_botPoints,POINTS
+    *do,AR29,1,arg7+1,1
+        PTHS2MN_ARR_botTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
+        PTHS2MN_ARR_botTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
+        PTHS2MN_ARR_botTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
+        PTHS2MN_ARR_botTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
+    *enddo
+    PTHS2MN_ARR_botLabel(6,1,1)='M'
+    PTHS2MN_ARR_botLabel(7,1,1)='N'
+    PTHS2MN_ARR_botLabel(8,1,1)='BS'
+    PTHS2MN_ARR_botLabel(9,1,1)='NS'
+    PATH,AR24
+    PAPUT,PTHS2MN_ARR_botPoints,POINTS
+    PAPUT,PTHS2MN_ARR_botTable,TABLE
+    PAPUT,PTHS2MN_ARR_botLabel,LABEL
+
+*endif
+
+*del,PTH2ARR_ARR_OUTPUT
+*del,PTHS2MN_ARR_stressDifference
+*del,PTHS2MN_ARR_topTable
+*del,PTHS2MN_ARR_topLabel
+*del,PTHS2MN_ARR_topPoints
+*del,PTHS2MN_ARR_botTable
+*del,PTHS2MN_ARR_botLabel
+*del,PTHS2MN_ARR_botPoints
+
+
+
+
+

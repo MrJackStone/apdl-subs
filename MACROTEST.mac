@@ -1,0 +1,7 @@
+! MACROTEST
+
+!! ANSYS_MACROLIB checking: ANSYS should display the message below if you have defined paths      !!
+!!                          and directories correctly.                                            !!
+*msg,UI
+Search path successfully set!
+

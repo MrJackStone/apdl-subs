@@ -1,0 +1,63 @@
+! ETENV, FirstNSet, LastNSet, ETables, nopr
+! ETENV,      arg1,     arg2,    arg3, arg4
+
+*get,AR21,PARM,%arg3%,DIM,X
+
+*del,ETENV_ARR_MXETNames
+*dim,ETENV_ARR_MXETNames,CHAR,AR21
+*del,ETENV_ARR_MNETNames
+*dim,ETENV_ARR_MNETNames,CHAR,AR21
+*del,ETENV_ARR_ABETNames
+*dim,ETENV_ARR_ABETNames,CHAR,AR21
+*do,AR22,1,AR21,1
+    AR25=%arg3%(AR22)
+    AR26=STRCAT('EMX_',AR25)
+    AR27=STRCAT('EMN_',AR25)
+    AR28=STRCAT('EAB_',AR25)
+    ETENV_ARR_MXETNames(AR22)=AR26
+    ETENV_ARR_MNETNames(AR22)=AR27
+    ETENV_ARR_ABETNames(AR22)=AR28
+*enddo
+
+
+AR24=0
+*do,AR20,arg1,arg2,1
+
+    *if,arg4,ne,1,then
+    *msg,ui,AR20,arg2
+ETENV: reading set %I / %I
+    *endif
+
+    SET,,,,,,,AR20
+    ETABLE,REFL
+
+    *do,AR22,1,AR21,1
+        AR23=%arg3%(AR22)
+        AR26=ETENV_ARR_MXETNames(AR22)
+        AR27=ETENV_ARR_MNETNames(AR22)
+        AR28=ETENV_ARR_ABETNames(AR22)
+
+        *if,AR24,EQ,0,THEN
+            SMAX,%AR26%,%AR23%
+            SMIN,%AR27%,%AR23%
+            SABS,1
+            SMAX,%AR28%,%AR23%
+            SABS,0
+        *else
+            SMAX,%AR26%,%AR23%,%AR26%
+            SMIN,%AR27%,%AR23%,%AR27%
+            SABS,1
+            SMAX,%AR28%,%AR23%,%AR28%
+            SABS,0
+        *endif
+
+    *enddo
+    AR24=AR24+1
+
+*enddo
+
+*if,arg4,ne,1,then
+    *msg,ui,
+ETENV: done!
+*endif
+

@@ -1,0 +1,153 @@
+! GENSTRESS,   fx,   fy,   fz,   mx,   my,   mz,  x_c,  y_c
+! GENSTRESS, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+
+! Arguments
+! arg1: fx   -  name of parameter to which FX generalized stress will be assigned
+! arg2: fy   -  name of parameter to which FY generalized stress will be assigned
+! arg3: fz   -  name of parameter to which FZ generalized stress will be assigned
+! arg4: mx   -  name of parameter to which MX generalized stress will be assigned
+! arg5: my   -  name of parameter to which MY generalized stress will be assigned
+! arg6: mz   -  name of parameter to which MZ generalized stress will be assigned
+! arg7: x_c  -  X coordinate of the reference point (usually cross-section centroid)
+! arg8: y_c  -  Y coordinate of the reference point (usually cross-section centroid)
+
+! Local parameters:
+! AR20: AR20
+! AR21: AR21
+! AR22: AR22
+! AR23: AR23
+! AR24: AR24
+! AR25: AR25
+! AR26: AR26
+! AR27: AR27
+! AR28: AR28
+! AR29: AR29
+! AR30: AR30
+! AR31: AR31
+! AR32: AR32
+! AR33: AR33
+! AR34: AR34
+
+! Global parameters (erased at the end of this subroutine):
+! GENSTRESS_ARR_nn
+! GENSTRESS_ARR_nx
+! GENSTRESS_ARR_ny
+! GENSTRESS_ARR_fx
+! GENSTRESS_ARR_fy
+! GENSTRESS_ARR_fz
+! GENSTRESS_ARR_mx
+! GENSTRESS_ARR_my
+! GENSTRESS_ARR_mz1
+! GENSTRESS_ARR_mz2
+! GENSTRESS_ARR_mz
+
+
+nbackup
+ebackup
+
+cm,AR20,node
+cm,AR21,elem
+*get,AR22,node,,count
+
+*del,GENSTRESS_ARR_nn
+*dim,GENSTRESS_ARR_nn,,AR22
+*del,GENSTRESS_ARR_nx
+*dim,GENSTRESS_ARR_nx,,AR22
+*del,GENSTRESS_ARR_ny
+*dim,GENSTRESS_ARR_ny,,AR22
+*del,GENSTRESS_ARR_fx
+*dim,GENSTRESS_ARR_fx,,AR22
+*del,GENSTRESS_ARR_fy
+*dim,GENSTRESS_ARR_fy,,AR22
+*del,GENSTRESS_ARR_fz
+*dim,GENSTRESS_ARR_fz,,AR22
+
+AR23=0
+*do,AR24,1,AR22,1
+    AR23=ndnext(AR23)
+    cmsel,s,AR21
+    esln,r
+    *get,AR29,elem,,count
+    AR25=0
+    AR26=0
+    AR27=0
+    AR28=0
+    *do,AR30,1,AR29,1
+        AR25=elnext(AR25)
+        *get,AR31,elem,AR25,efor,AR23,fx
+        AR26=AR26+AR31
+        *get,AR32,elem,AR25,efor,AR23,fy
+        AR27=AR27+AR32
+        *get,AR33,elem,AR25,efor,AR23,fz
+        AR28=AR28+AR33
+    *enddo
+
+    GENSTRESS_ARR_nn(AR24)=AR23
+    GENSTRESS_ARR_nx(AR24)=nx(AR23)-arg7
+    GENSTRESS_ARR_ny(AR24)=ny(AR23)-arg8
+    GENSTRESS_ARR_fx(AR24)=AR26
+    GENSTRESS_ARR_fy(AR24)=AR27
+    GENSTRESS_ARR_fz(AR24)=AR28
+*enddo
+
+! X force
+*get,AR34,parm,arg1,type
+*if,AR34,eq,3,then
+    *vscfun,%arg1%,sum,GENSTRESS_ARR_fx
+*endif
+
+! Y force
+*get,AR34,parm,arg2,type
+*if,AR34,eq,3,then
+    *vscfun,%arg2%,sum,GENSTRESS_ARR_fy
+*endif
+
+! Z force
+*get,AR34,parm,arg3,type
+*if,AR34,eq,3,then
+    *vscfun,%arg3%,sum,GENSTRESS_ARR_fz
+*endif
+
+! X bending moment
+*get,AR34,parm,arg4,type
+*if,AR34,eq,3,then
+    *del,GENSTRESS_ARR_mx
+    *voper,GENSTRESS_ARR_mx,GENSTRESS_ARR_fz,mult,GENSTRESS_ARR_ny
+    *vscfun,%arg4%,sum,GENSTRESS_ARR_mx
+*endif
+
+! Y bending moment
+*get,AR34,parm,arg5,type
+*if,AR34,eq,3,then
+    *del,GENSTRESS_ARR_my
+    *voper,GENSTRESS_ARR_my,GENSTRESS_ARR_fz,mult,GENSTRESS_ARR_nx
+    *vscfun,%arg5%,sum,GENSTRESS_ARR_my
+*endif
+
+! Z bending moment
+*get,AR34,parm,arg6,type
+*if,AR34,eq,3,then
+    *del,GENSTRESS_ARR_mz1
+    *voper,GENSTRESS_ARR_mz1,GENSTRESS_ARR_fx,mult,GENSTRESS_ARR_ny
+    *del,GENSTRESS_ARR_mz2
+    *voper,GENSTRESS_ARR_mz2,GENSTRESS_ARR_fy,mult,GENSTRESS_ARR_nx
+    *voper,GENSTRESS_ARR_mz,GENSTRESS_ARR_mz1,add,GENSTRESS_ARR_mz2
+    *vscfun,%arg6%,sum,GENSTRESS_ARR_mz
+*endif
+
+
+*del,GENSTRESS_ARR_nn
+*del,GENSTRESS_ARR_nx
+*del,GENSTRESS_ARR_ny
+*del,GENSTRESS_ARR_fx
+*del,GENSTRESS_ARR_fy
+*del,GENSTRESS_ARR_fz
+*del,GENSTRESS_ARR_mx
+*del,GENSTRESS_ARR_my
+*del,GENSTRESS_ARR_mz1
+*del,GENSTRESS_ARR_mz2
+*del,GENSTRESS_ARR_mz
+
+nrestore
+elrestore
+

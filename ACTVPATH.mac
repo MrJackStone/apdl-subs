@@ -1,0 +1,100 @@
+! ACTVPATH, parmPathName, parmPathIndex
+! ACTVPATH,         arg1,          arg2
+
+! Description:
+! Returns the name and index of the active path.
+
+! Arguments:
+! arg1: parmPathName   -  name of parameter to which active path's name is assigned
+! arg2: parmPathIndex  -  name of parameter to which active path's index is assigned
+
+! Local parameters:
+! AR20: parType
+! AR21: pathCount
+! AR22: nthPath
+! AR23: pathName
+! AR24: labelCount
+! AR25: nthLabelIndex
+! AR26: nthLabelValue
+! AR27: matchFound
+! AR40: activePathName
+! AR41: activePathIndex
+
+! Output parameters:
+! ACTVPATH_ARR_pathNames
+
+! Global parameters (erased at the end of this subroutine):
+! ACTVPATH_VAR_dummyLabel
+! ACTVPATH_VAR_backupFname
+! ACTVPATH_ARR_LABEL
+
+
+! Backup current path definition
+ACTVPATH_VAR_backupFname='ACTVPATH_pathBackup'
+pasave,all,ACTVPATH_VAR_backupFname,pth
+
+! Create dummy label
+ACTVPATH_VAR_dummyLabel='!@#$%6&*'
+pdef,%ACTVPATH_VAR_dummyLabel%,u,x
+
+! Get path count
+*get,AR21,path,,numpath
+*del,ACTVPATH_ARR_pathNames
+*dim,ACTVPATH_ARR_pathNames,char,AR21
+
+! Get all path names
+*do,AR22,1,AR21,1
+    *get,AR23,path,AR22,name
+    ACTVPATH_ARR_pathNames(AR22)=AR23
+*enddo
+
+! Find path with dummy label
+AR27=0
+*do,AR22,1,AR21,1
+    ! Activate nth path
+    AR23=ACTVPATH_ARR_pathNames(AR22)
+    path,%AR23%
+    ! Get path's labels
+    *del,ACTVPATH_ARR_LABEL
+    paget,ACTVPATH_ARR_LABEL,label
+    *get,AR24,parm,ACTVPATH_ARR_LABEL,dim,x
+    ! Look for matching label name
+    *do,AR25,1,AR24,1
+        AR26=ACTVPATH_ARR_LABEL(AR25)
+        *if,AR26,eq,ACTVPATH_VAR_dummyLabel,then
+            AR40=AR23
+            AR41=AR22
+            AR27=1
+            *exit
+        *endif
+    *enddo
+    *if,AR27,eq,1,then
+        *exit
+    *endif
+*enddo
+
+! Restore original paths
+paresu,all,ACTVPATH_VAR_backupFname,pth
+/delete,%ACTVPATH_VAR_backupFname%,pth
+
+! Return results
+*if,AR27,eq,1,then
+    ! Reactivate path
+    path,%AR40%
+
+    ! Set output parameters
+    *get,AR20,parm,arg1,type
+    *if,AR20,eq,3,then
+        %arg1%=AR40
+    *endif
+    *get,AR20,parm,arg2,type
+    *if,AR20,eq,3,then
+        %arg2%=AR41
+    *endif
+*endif
+
+! Clear parameters
+*del,ACTVPATH_VAR_dummyLabel
+*del,ACTVPATH_ARR_LABEL
+*del,ACTVPATH_VAR_backupFname
+

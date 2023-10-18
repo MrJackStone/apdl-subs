@@ -1,0 +1,100 @@
+! designld, outputParm, loadObj, combObj, combIdx
+! designld,       arg1,    arg2,    arg3,    arg4
+
+! Description:
+! Calculates a load's design value based on its attributes (stored in arg2=loadObj) and on the
+! selected load combination (defined by arg3=combObj and arg4=combIdx). Writes a summary of the
+! calculation to an external file named 'designld_report.log'.
+! LCINIT should be executed before this subroutine is called for the first time whenever a new load
+! combination is to be used.
+
+! Arguments:
+! arg1: outputParm  -  name of output parameter to which the load's design value will be assigned
+! arg2: loadObj     -  9x1x1 array containing the load's attributes, formatted as follows:
+!                         POS  DESCRIPTION
+!                          1   Load type (see GETLDATTR for options)
+!                          2   Load hypothesis number (> 0)
+!                          3   Load's characteristic value
+!                          4   Gamma coefficient: maximum value
+!                          5   Gamma coefficient: minimum value
+!                          6   Psi_0 coefficient
+!                          7   Psi_1 coefficient
+!                          8   Psi_2 coefficient
+!                          9   Psi_f coefficient (for fatigue combinations)
+! arg3: combObj     -  IxJxK array containing load combinations, formatted as follows:!
+!                         I: (fixed length of 3)
+!                         └── J=1: combination name, LS solved using this combination, [blank]
+!                         └── J>1: hypothesis name,  gamma option,                     psi option
+!                         J: (length equal to the total number of load hypotheses + 1)
+!                         └── J=1: stores information regarding the load combination, not specific
+!                                  to any load hypothesis
+!                         └── J>1: each J stores the three attributes of a specific hypothesis!
+!                         K: (length equal to the total number of combinations)
+!                         └── each K identifies one load combination
+! arg4: combIdx     -  number identifying which load combination is to be used to calculate the
+!                      the load's design value (K index of the arg3=combObj array)
+
+! Local parameters:
+! AR21: hypothesisCount
+! AR22: hypIndex
+! AR23: nthHypothesis
+! AR24: nthHypName
+! AR25: gammaOpt
+! AR26: psiOpt
+! AR27: designValue
+
+! Global parameters (erased at the end of this subroutine)
+! DESIGNLD_VAR_loadObjName
+! DESIGNLD_VAR_hypothesisName
+! DESIGNLD_VAR_gammaValue
+! DESIGNLD_VAR_psiValue
+! DESIGNLD_VAR_characteristicValue
+
+
+DESIGNLD_VAR_loadObjName=arg2
+
+! Get name of load's hypothesis
+getldattr,'DESIGNLD_VAR_hypothesisName', 'HYPO',,DESIGNLD_VAR_loadObjName
+DESIGNLD_VAR_hypothesisName=upcase(DESIGNLD_VAR_hypothesisName)
+
+! Search load's hypothesis in load combination table
+*get,AR21,parm,%arg3%,dim,y
+AR22=0
+*do,AR23,2,AR21,1
+    AR24=upcase(%arg3%(1,AR23,arg4))
+    *if,DESIGNLD_VAR_hypothesisName,eq,AR24,then
+        AR22=AR23
+        *exit
+    *endif
+*enddo
+
+! Extract value of GAMMA and PSI coefficients
+*if,AR22,gt,0,then
+    AR25=%arg3%(2,AR22,arg4)
+    AR26=%arg3%(3,AR22,arg4)
+    getldattr, 'DESIGNLD_VAR_gammaValue', 'GAMMA', AR25, DESIGNLD_VAR_loadObjName
+    getldattr, 'DESIGNLD_VAR_psiValue', 'PSI', AR26, DESIGNLD_VAR_loadObjName
+*else
+    DESIGNLD_VAR_gammaValue=0
+    DESIGNLD_VAR_psiValue=0
+*endif
+
+! Extract load's characteristic value
+getldattr, 'DESIGNLD_VAR_characteristicValue','KVAL',, DESIGNLD_VAR_loadObjName
+
+! Calculate load's design value for the selected load combination
+AR27=DESIGNLD_VAR_characteristicValue*DESIGNLD_VAR_gammaValue*DESIGNLD_VAR_psiValue
+%arg1%=AR27
+
+! Write design load calculation to load combination report file
+*cfopen,'designld_report','log',,append
+    *vwrite,strsub(DESIGNLD_VAR_hypothesisName,1,6),arg2, DESIGNLD_VAR_characteristicValue, chrval(DESIGNLD_VAR_gammaValue), chrval(DESIGNLD_VAR_psiValue), AR27
+   %-6s ► %-32s = (%12.5E ) * (%8s) * (%8s) = %15.4F
+*cfclos
+
+! Clear global parameters
+*del,DESIGNLD_VAR_loadObjName
+*del,DESIGNLD_VAR_hypothesisName
+*del,DESIGNLD_VAR_gammaValue
+*del,DESIGNLD_VAR_psiValue
+*del,DESIGNLD_VAR_characteristicValue

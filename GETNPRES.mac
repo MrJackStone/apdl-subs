@@ -1,0 +1,53 @@
+! GETNPRES, lkey
+! GETNPRES, arg1
+
+! Description:
+! Returns the nodal pressure at each selected node, calculated based on applied nodal force and
+! apportioned node area.
+
+! Arguments:
+! arg1: lkey  -  load key, usually 'FX', 'FY', or 'FZ'.
+
+! Local parameters:
+! AR20: COMPN_selection
+! AR21: COMPE_selection
+! AR22: nc
+! AR23: nodenum
+! AR24: nthNode
+! AR25: apportionedArea
+! AR26: pressure
+! AR27: nodalforce
+
+! Output parameters:
+! GETNPRES_ARR_nodes
+! GETNPRES_ARR_pressures
+
+cm,AR20,node
+cm,AR21,elem
+
+*get,AR22,node,,count
+*del,GETNPRES_ARR_nodes
+*del,GETNPRES_ARR_pressures
+*dim,GETNPRES_ARR_nodes,array,AR22
+*dim,GETNPRES_ARR_pressures,array,AR22
+
+AR23=0
+*do,AR24,1,AR22,1
+    cmsel,s,AR20
+    AR23=ndnext(AR23)
+    *get,AR27,node,AR23,f,arg1
+    nsel,s,node,,AR23
+    esln,s
+    nsle,s
+    AR25=arnode(AR23)
+    *if,AR25,eq,0,then
+        AR26=0
+    *else
+        AR26=AR27/AR25
+    *endif
+    GETNPRES_ARR_nodes(AR24)=AR23
+    GETNPRES_ARR_pressures(AR24)=AR26
+*enddo
+
+cmsel,s,AR20
+cmsel,s,AR21

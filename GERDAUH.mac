@@ -1,0 +1,227 @@
+! GERDAUH, secID, name, refineKey, consultOnly
+! GERDAUH, arg1,  arg2, arg3,      arg4
+
+! Descrição:
+! Esta subrotina cria uma seção transversal a partir do catálogo de perfis H da Gerdau.
+
+! Lista de argumentos:
+! arg1: secID        -  número da seção transversal
+! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+
+! Lista de variáveis locais:
+! AR20: checkName
+! AR21: parType
+! AR22: refKey
+! AR23: maxSecNum
+! AR24: newSecNum
+! AR25: createSection
+
+! Lista de variáveis de saída:
+! GERDAUH_VAR_num
+! GERDAUH_VAR_d
+! GERDAUH_VAR_bf
+! GERDAUH_VAR_tf
+! GERDAUH_VAR_tw
+
+! Nome da seção em letras maiúsculas
+AR20=UPCASE(arg2)
+
+! Definição de criação da seção transversal
+*get,AR21,PARM,arg4,TYPE
+*if,AR21,NE,0,THEN
+   AR25=1
+*else
+   *if,arg4,NE,1,THEN
+      AR25=1
+   *else
+      AR25=0
+   *endif
+*endif
+
+! Obter definição de refinamento da seção
+*get,AR21,PARM,arg3,TYPE
+*if,AR21,NE,0,THEN
+   AR22=0
+*else
+   *if,arg3,LT,0,THEN
+      AR22=0
+   *elseif,arg3,GT,5,THEN
+      AR22=5
+   *else
+      AR22=arg3
+   *endif
+*endif
+
+! Obter número da nova seção transversal
+*if,arg1,EQ,0,THEN
+   *get,AR23,SECP,,NUM,MAX
+   AR24=AR23+1
+*else
+   AR24=arg1
+*endif
+GERDAUH_VAR_num=AR24
+
+! Determinar geometria da seção
+*if,AR20,EQ,'W150X22.5',THEN
+   GERDAUH_VAR_d=0.1520
+   GERDAUH_VAR_bf=0.1520
+   GERDAUH_VAR_tf=0.0066
+   GERDAUH_VAR_tw=0.0058
+*elseif,AR20,EQ,'W150X29.8',THEN
+   GERDAUH_VAR_d=0.1570
+   GERDAUH_VAR_bf=0.1530
+   GERDAUH_VAR_tf=0.0093
+   GERDAUH_VAR_tw=0.0066
+*elseif,AR20,EQ,'W150X37.1',THEN
+   GERDAUH_VAR_d=0.1620
+   GERDAUH_VAR_bf=0.1540
+   GERDAUH_VAR_tf=0.0116
+   GERDAUH_VAR_tw=0.0081
+*elseif,AR20,EQ,'W200X35.9',THEN
+   GERDAUH_VAR_d=0.2010
+   GERDAUH_VAR_bf=0.1650
+   GERDAUH_VAR_tf=0.0102
+   GERDAUH_VAR_tw=0.0062
+*elseif,AR20,EQ,'W200X41.7',THEN
+   GERDAUH_VAR_d=0.2050
+   GERDAUH_VAR_bf=0.1660
+   GERDAUH_VAR_tf=0.0118
+   GERDAUH_VAR_tw=0.0072
+*elseif,AR20,EQ,'W200X46.1',THEN
+   GERDAUH_VAR_d=0.2030
+   GERDAUH_VAR_bf=0.2030
+   GERDAUH_VAR_tf=0.0110
+   GERDAUH_VAR_tw=0.0072
+*elseif,AR20,EQ,'W200X52',THEN
+   GERDAUH_VAR_d=0.2060
+   GERDAUH_VAR_bf=0.2040
+   GERDAUH_VAR_tf=0.0126
+   GERDAUH_VAR_tw=0.0079
+*elseif,AR20,EQ,'HP200X53',THEN
+   GERDAUH_VAR_d=0.2040
+   GERDAUH_VAR_bf=0.2070
+   GERDAUH_VAR_tf=0.0113
+   GERDAUH_VAR_tw=0.0113
+*elseif,AR20,EQ,'W200X59',THEN
+   GERDAUH_VAR_d=0.2100
+   GERDAUH_VAR_bf=0.2050
+   GERDAUH_VAR_tf=0.0142
+   GERDAUH_VAR_tw=0.0091
+*elseif,AR20,EQ,'W200X71',THEN
+   GERDAUH_VAR_d=0.2160
+   GERDAUH_VAR_bf=0.2060
+   GERDAUH_VAR_tf=0.0174
+   GERDAUH_VAR_tw=0.0102
+*elseif,AR20,EQ,'W200X86',THEN
+   GERDAUH_VAR_d=0.2220
+   GERDAUH_VAR_bf=0.2090
+   GERDAUH_VAR_tf=0.0206
+   GERDAUH_VAR_tw=0.0130
+*elseif,AR20,EQ,'HP250X62',THEN
+   GERDAUH_VAR_d=0.2460
+   GERDAUH_VAR_bf=0.2560
+   GERDAUH_VAR_tf=0.0107
+   GERDAUH_VAR_tw=0.0105
+*elseif,AR20,EQ,'W250X73',THEN
+   GERDAUH_VAR_d=0.2530
+   GERDAUH_VAR_bf=0.2540
+   GERDAUH_VAR_tf=0.0142
+   GERDAUH_VAR_tw=0.0086
+*elseif,AR20,EQ,'W250X80',THEN
+   GERDAUH_VAR_d=0.2560
+   GERDAUH_VAR_bf=0.2550
+   GERDAUH_VAR_tf=0.0156
+   GERDAUH_VAR_tw=0.0094
+*elseif,AR20,EQ,'HP250X85',THEN
+   GERDAUH_VAR_d=0.2540
+   GERDAUH_VAR_bf=0.2600
+   GERDAUH_VAR_tf=0.0144
+   GERDAUH_VAR_tw=0.0144
+*elseif,AR20,EQ,'W250X89',THEN
+   GERDAUH_VAR_d=0.2600
+   GERDAUH_VAR_bf=0.2650
+   GERDAUH_VAR_tf=0.0173
+   GERDAUH_VAR_tw=0.0107
+*elseif,AR20,EQ,'W250X101',THEN
+   GERDAUH_VAR_d=0.2640
+   GERDAUH_VAR_bf=0.2570
+   GERDAUH_VAR_tf=0.0196
+   GERDAUH_VAR_tw=0.0119
+*elseif,AR20,EQ,'W250X115',THEN
+   GERDAUH_VAR_d=0.2690
+   GERDAUH_VAR_bf=0.2590
+   GERDAUH_VAR_tf=0.0221
+   GERDAUH_VAR_tw=0.0135
+*elseif,AR20,EQ,'HP310X79',THEN
+   GERDAUH_VAR_d=0.2990
+   GERDAUH_VAR_bf=0.3060
+   GERDAUH_VAR_tf=0.0110
+   GERDAUH_VAR_tw=0.0110
+*elseif,AR20,EQ,'HP310X93',THEN
+   GERDAUH_VAR_d=0.3030
+   GERDAUH_VAR_bf=0.3080
+   GERDAUH_VAR_tf=0.0131
+   GERDAUH_VAR_tw=0.0131
+*elseif,AR20,EQ,'W310X97',THEN
+   GERDAUH_VAR_d=0.3080
+   GERDAUH_VAR_bf=0.3050
+   GERDAUH_VAR_tf=0.0154
+   GERDAUH_VAR_tw=0.0099
+*elseif,AR20,EQ,'W310X107',THEN
+   GERDAUH_VAR_d=0.3110
+   GERDAUH_VAR_bf=0.3060
+   GERDAUH_VAR_tf=0.0170
+   GERDAUH_VAR_tw=0.0109
+*elseif,AR20,EQ,'HP310X110',THEN
+   GERDAUH_VAR_d=0.3080
+   GERDAUH_VAR_bf=0.3100
+   GERDAUH_VAR_tf=0.0155
+   GERDAUH_VAR_tw=0.0154
+*elseif,AR20,EQ,'W310X117',THEN
+   GERDAUH_VAR_d=0.3140
+   GERDAUH_VAR_bf=0.3070
+   GERDAUH_VAR_tf=0.0187
+   GERDAUH_VAR_tw=0.0119
+*elseif,AR20,EQ,'HP310X125',THEN
+   GERDAUH_VAR_d=0.3120
+   GERDAUH_VAR_bf=0.3120
+   GERDAUH_VAR_tf=0.0174
+   GERDAUH_VAR_tw=0.0174
+*elseif,AR20,EQ,'W360X91',THEN
+   GERDAUH_VAR_d=0.3530
+   GERDAUH_VAR_bf=0.2540
+   GERDAUH_VAR_tf=0.0164
+   GERDAUH_VAR_tw=0.0095
+*elseif,AR20,EQ,'W360X101',THEN
+   GERDAUH_VAR_d=0.3570
+   GERDAUH_VAR_bf=0.2550
+   GERDAUH_VAR_tf=0.0183
+   GERDAUH_VAR_tw=0.0105
+*elseif,AR20,EQ,'W360X110',THEN
+   GERDAUH_VAR_d=0.3600
+   GERDAUH_VAR_bf=0.2560
+   GERDAUH_VAR_tf=0.0199
+   GERDAUH_VAR_tw=0.0114
+*elseif,AR20,EQ,'W360X122',THEN
+   GERDAUH_VAR_d=0.3630
+   GERDAUH_VAR_bf=0.2570
+   GERDAUH_VAR_tf=0.0217
+   GERDAUH_VAR_tw=0.0130
+*else
+   *msg,WARN
+GERDAUH WARNING: Specified section not found. Command ignored.
+   GERDAUH_VAR_d=-1
+   GERDAUH_VAR_bf=-1
+   GERDAUH_VAR_tf=-1
+   GERDAUH_VAR_tw=-1
+*endif
+
+! Criar seção transversal
+*if,GERDAUH_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
+   SECTYPE,GERDAUH_VAR_num,BEAM,I,arg2,AR22
+   SECDATA,GERDAUH_VAR_bf,GERDAUH_VAR_bf,GERDAUH_VAR_d,GERDAUH_VAR_tf,GERDAUH_VAR_tf,GERDAUH_VAR_tw
+*endif
+
+

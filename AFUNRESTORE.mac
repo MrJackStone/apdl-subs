@@ -1,0 +1,17 @@
+! AFUNRESTORE
+! AFUNRESTORE
+
+parverify,,'afunBackup_','CHAR'
+
+*if,_OUTPUT,eq,1,then
+    *if,upcase(afunBackup_),eq,'DEG',then
+        ! Set to degrees
+        *afun,'DEG'
+        *del,afunBackup_
+        *return,-1
+    *endif
+*endif
+
+! Default behavior: set to radians
+*afun,'RAD'
+*del,afunBackup_

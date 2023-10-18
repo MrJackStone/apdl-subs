@@ -1,0 +1,163 @@
+! VMFUN, output, valuesArray, operation, keyArray, keyLB, keyUB
+! VMFUN,   arg1,        arg2,      arg3,     arg4,  arg5,  arg6
+
+! Description:
+! Applies *VSCFUN operation to a given array masked by its corresponding key-array according
+! to given lower- and upper-boundary limits (valid segments).
+
+! Arguments:
+! arg1: output       -  name of the parameter in which output will be stored
+! arg2: valuesArray  -  1-D array with values to be operated upon by *VSCFUN
+! arg3: operation    -  string representing *VSCFUN operation to apply. Valid operations:
+!                          'MIN'      -  returns minimum masked value (signed)
+!                          'MAX'      -  returns maximum masked value (signed)
+!                          'MEAN'     -  returns mean of masked values
+!                          'SUM'      -  returns sum of masked values
+!                          'ABSMAX'   -  returns absolute maximum masked value
+!                          'ABSMIN'   -  returns absolute minimum masked value
+!                          'SABSMAX'  -  use ABS to calculate MAX, but return signed value
+!                          'SABSMIN'  -  use ABS to calculate MIN, but return signed value
+! arg4: keyArray     -  array to which bounds will be applied to generate mask
+! arg5: keyLB        -  TRUE (1.0) segment lower bounds
+! arg6: keyUB        -  TRUE (1.0) segment upper bounds
+
+! Local parameters:
+! AR20: segCount
+! AR21: valueCount
+! AR22: nthSeg
+! AR23: min
+! AR24: max
+! AR25: parType
+! AR26: outputParm
+! AR27: upcaseOper
+! AR28: maxVal
+! AR29: minVal
+! AR30: maskedTrue
+
+! Global parameters (erased at the end of this subroutine):
+! VMFUN_ARR_mins
+! VMFUN_ARR_maxs
+! VMFUN_ARR_ge
+! VMFUN_ARR_le
+! VMFUN_ARR_mask
+! VMFUN_ARR_tmp
+
+! Output parameters:
+! %arg1% or VMFUN_VAR_output
+
+AR27=UPCASE(arg3)
+
+*get,AR25,PARM,arg1,TYPE
+*if,AR25,NE,3,THEN
+    AR26='VMFUN_VAR_output'
+*else
+    AR26=arg1
+*endif
+
+*get,AR25,PARM,%arg5%,TYPE
+*del,VMFUN_ARR_mins
+*del,VMFUN_ARR_maxs
+*if,AR25,NE,1,THEN
+    *dim,VMFUN_ARR_mins,ARRAY,1
+    *dim,VMFUN_ARR_maxs,ARRAY,1
+    VMFUN_ARR_mins(1)=arg5
+    VMFUN_ARR_maxs(1)=arg6
+*else
+    *vfun,VMFUN_ARR_mins,COPY,%arg5%
+    *vfun,VMFUN_ARR_maxs,COPY,%arg6%
+*endif
+
+*get,AR20,PARM,VMFUN_ARR_mins,DIM,X
+*get,AR21,PARM,%arg4%,DIM,X
+
+*del,VMFUN_ARR_mask
+*dim,VMFUN_ARR_mask,ARRAY,AR21
+*vfill,VMFUN_ARR_mask,RAMP,0,0
+
+*do,AR22,1,AR20,1
+    AR23=VMFUN_ARR_mins(AR22)
+    AR24=VMFUN_ARR_maxs(AR22)
+
+    *if,AR24,GE,A23,THEN
+
+        *del,VMFUN_ARR_ge
+        *voper,VMFUN_ARR_ge,%arg4%,GE,AR23
+
+        *del,VMFUN_ARR_le
+        *voper,VMFUN_ARR_le,%arg4%,LE,AR24
+
+        *del,VMFUN_ARR_tmp
+        *voper,VMFUN_ARR_tmp,VMFUN_ARR_ge,MULT,VMFUN_ARR_le
+
+        *voper,VMFUN_ARR_mask,VMFUN_ARR_mask,MAX,VMFUN_ARR_tmp
+    *endif
+*enddo
+
+*vscfun,AR30,SUM,VMFUN_ARR_mask(1)
+*if,AR30,EQ,0,THEN
+
+    %AR26%=0
+    *msg,WARN
+VMFUN WARNING: Masking excluded all array values. VMFUN outputs zero.
+
+*else
+
+    *if,AR27,EQ,'MIN',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,MIN,%arg2%
+
+    *elseif,AR27,EQ,'MAX',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,MAX,%arg2%
+
+    *elseif,AR27,EQ,'MEAN',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,MEAN,%arg2%
+
+    *elseif,AR27,EQ,'SUM',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,SUM,%arg2%
+
+    *elseif,AR27,EQ,'ABSMAX',THEN
+        *vabs,,1
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,MAX,%arg2%
+
+    *elseif,AR27,EQ,'ABSMIN',THEN
+        *vabs,,1
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,%AR26%,MIN,%arg2%
+
+    *elseif,AR27,EQ,'SABSMAX',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,AR28,MAX,%arg2%
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,AR29,MIN,%arg2%
+        *if,ABS(AR28),GE,ABS(AR29),THEN
+            %AR26%=AR28
+        *else
+            %AR26%=AR29
+        *endif
+
+    *elseif,AR27,EQ,'SABSMIN',THEN
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,AR28,MAX,%arg2%
+        *vmask,VMFUN_ARR_mask(1)
+        *vscfun,AR29,MIN,%arg2%
+        *if,ABS(AR28),LE,ABS(AR29),THEN
+            %AR26%=AR28
+        *else
+            %AR26%=AR29
+        *endif
+
+    *endif
+
+*endif
+
+*del,VMFUN_ARR_ge
+*del,VMFUN_ARR_le
+*del,VMFUN_ARR_mins
+*del,VMFUN_ARR_maxs
+*del,VMFUN_ARR_mask
+*del,VMFUN_ARR_tmp
+
