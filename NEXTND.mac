@@ -31,7 +31,7 @@ AR23=AR22+1
 *if,arg2,gt,1,then
 
   ! Output: array
-  *del,%AR21%
+  *del,%AR21%,,nopr
   *dim,%AR21%,,arg2
   *vfill,%AR21%,ramp,AR23,1
 
