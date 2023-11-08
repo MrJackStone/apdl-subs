@@ -1,0 +1,186 @@
+! SM_PILESUP_RETWALL, wallCsys, geom_params
+! SM_PILESUP_RETWALL,     arg1,        arg2
+
+! Description:
+! Draws solid model entities (keypoints, lines, areas) representing a retention wall supported by
+! a pile cap connected to piles.
+
+! Arguments:
+! arg1: wallCsys     -  local coordinate system, origin at the bottom of the wall
+! arg2: geom_params  -  name of array containing the values of the geometric parameters that define
+!                       this structure. Parameters should be in the following order in the array:
+!                          POS  NAME         DESCRIPTION
+!                            1  wallLength   length of the wall (local Y)
+!                            2  wallHeight   height of the wall at Y=0
+!                            3  wallToe      height of the wall at Y=length
+!                            4  capLength    length of the pile cap (local Y)
+!                            5  capWidth     width of the pilar cap (local X)
+!                            6  capThk       thickness of the pile cap
+!                                            (along Z, optional: separates pile top from pile cap)
+!                            7  pileLength   length of the piles
+!                                            (not including cap thickness)
+!                            8  pileRows     number of pile rows
+!                                            (piles in each row have equal Y)
+!                            9  pileCols     number of piles columns
+!                                            (piles in each column have equal X)
+!                           10  pileOffset   distance between center of pile and edge of pile cap,
+!                                            both in the X and Y local directions
+
+! Local parameters:
+
+
+! Extract values of geometric parameters from array
+wallLength   = %arg2%(1)
+wallHeight   = %arg2%(2)
+wallToe      = %arg2%(3)
+capLength    = %arg2%(4)
+capWidth     = %arg2%(5)
+capThk       = %arg2%(6)
+pileLength   = %arg2%(7)
+pileRows     = %arg2%(8)
+pileCols     = %arg2%(9)
+pileOffset   = %arg2%(10)
+!wallThk      = %arg2%(4)
+!pileDiameter = %arg2%(12)
+
+! Calculated geometric params:
+capOffset=(capLength-wallLength)/2
+
+pileGroupWidth=capWidth-2*pileOffset
+pileXSpacing=pileGroupWidth/(pileCols-1)
+
+pileGroupLength=capLength-2*pileOffset
+pileYSpacing=pileGroupLength/(pileRows-1)
+minPileY=(wallLength-pileGroupLength)/2
+
+*del,pile_x,,nopr
+*dim,pile_x,,pileCols
+*vfill,pile_x(1),ramp,-pileGroupWidth/2,pileXSpacing
+
+*del,pile_y,,nopr
+*dim,pile_y,,pileRows
+*vfill,pile_y(1),ramp,minPileY,pileYSpacing
+
+! Activate wall's local CSYS
+csbackup
+csys,arg1
+
+! Backup current selection
+kbackup
+lbackup
+abackup
+
+! Initialize output selection components
+ksel,u,kp,,all
+lsel,u,line,,all
+asel,u,area,,all
+cmpadd,'COMPK_ref'
+cmpadd,'COMPK_top'
+cmpadd,'COMPK_bot'
+cmpadd,'COMPL_piles'
+cmpadd,'COMPL_pileConnections'
+cmpadd,'COMPA_cap'
+cmpadd,'COMPA_wall'
+
+! Generate keypoint numbers
+nextkp,'KP_nums',8
+
+! Draw wall
+k , KP_nums(1) , 0 , 0          , 0
+k , KP_nums(2) , 0 , wallLength , 0
+k , KP_nums(3) , 0 , wallLength , wallToe
+k , KP_nums(4) , 0 , 0          , wallHeight
+asel,u,area,,all
+a,KP_nums(1:4)
+cm,COMPA_wall,area
+
+! Draw pile cap
+k , KP_nums(5) , -capWidth/2 , -capOffset          , 0
+k , KP_nums(6) , capWidth/2  , -capOffset          , 0
+k , KP_nums(7) , capWidth/2  , capLength-capOffset , 0
+k , KP_nums(8) , -capWidth/2 , capLength-capOffset , 0
+asel,u,area,,all
+a,KP_nums(5:8)
+cm,COMPA_cap,area
+
+! Slice cap at wall
+cmsel,s,COMPA_cap
+csslicexz,0
+csslicexz,wallLength
+cm,COMPA_cap,area
+
+! Slice cap at piles
+cmsel,s,COMPA_cap
+wpcsys,,arg1
+batch_slicexz,'pile_y',1,0
+cm,COMPA_cap,area
+
+! Slice wall at piles
+cmsel,s,COMPA_wall
+wpcsys,,arg1
+batch_slicexz,'pile_y',1,0
+cm,COMPA_wall,area
+
+! Merge cap & wall
+cmsel,s,COMPA_cap
+cmsel,a,COMPA_wall
+lsla,s
+ksll,s
+nummrg,kp
+cm,COMPK_temp,kp
+
+! Draw piles
+nthPile=0
+*do,nthPileRow,1,pileRows,1
+  pileY=pile_y(nthPileRow)
+
+  *do,nthPileCol,1,pileCols,1
+    pileX=pile_x(nthPileCol)
+    nthPile=nthPile+1
+
+    cmsel,s,COMPK_temp
+    refKP=kp(pileX,pileY,0)
+    ksel,s,kp,,refKP
+    cmpadd,'COMPK_ref'
+
+    nextkp,'topKP',1
+    ksel,u,kp,,all
+    k,topKP,pileX,pileY,-capThk
+    cmpadd,'COMPK_top'
+
+    nextkp,'botKP',1
+    ksel,u,kp,,all
+    k,botKP,pileX,pileY,-capThk-pileLength
+    cmpadd,'COMPK_bot'
+
+    ksel,s,kp,,refKP
+    ksel,a,kp,,topKP
+    ksel,a,kp,,botKP
+
+    lsel,u,line,,all
+    l,topKP,botKP
+    cm,COMPL_pile%nthPile%,line
+    cmpadd,'COMPL_piles'
+
+    lsel,u,line,,all
+    l,refKP,topKP
+    cm,COMPL_pileConnection%nthPile%,line
+    cmpadd,'COMPL_pileConnections'
+
+  *enddo
+*enddo
+
+! Clean up
+csrestore
+krestore
+lrestore
+arestore
+cmsel,a,'COMPK_top'
+cmsel,a,'COMPK_bot'
+cmsel,a,'COMPL_piles'
+cmsel,a,'COMPL_pileConnections'
+cmsel,a,'COMPA_cap'
+cmsel,a,'COMPA_wall'
+*del,KP_nums
+*del,pile_x
+*dim,pile_y
