@@ -1,32 +1,73 @@
-! SM_PILESUP_RETWALL, wallCsys, geom_params
-! SM_PILESUP_RETWALL,     arg1,        arg2
+! SM_PILESUP_RETWALL, wallCsys, geom_params, selCompInfix
+! SM_PILESUP_RETWALL,     arg1,        arg2,         arg3
 
 ! Description:
 ! Draws solid model entities (keypoints, lines, areas) representing a retention wall supported by
 ! a pile cap connected to piles.
 
 ! Arguments:
-! arg1: wallCsys     -  local coordinate system, origin at the bottom of the wall
-! arg2: geom_params  -  name of array containing the values of the geometric parameters that define
-!                       this structure. Parameters should be in the following order in the array:
-!                          POS  NAME         DESCRIPTION
-!                            1  wallLength   length of the wall (local Y)
-!                            2  wallHeight   height of the wall at Y=0
-!                            3  wallToe      height of the wall at Y=length
-!                            4  capLength    length of the pile cap (local Y)
-!                            5  capWidth     width of the pilar cap (local X)
-!                            6  capThk       thickness of the pile cap
-!                                            (along Z, optional: separates pile top from pile cap)
-!                            7  pileLength   length of the piles
-!                                            (not including cap thickness)
-!                            8  pileRows     number of pile rows
-!                                            (piles in each row have equal Y)
-!                            9  pileCols     number of piles columns
-!                                            (piles in each column have equal X)
-!                           10  pileOffset   distance between center of pile and edge of pile cap,
-!                                            both in the X and Y local directions
+! arg1: wallCsys      -  local coordinate system, origin at the bottom of the wall
+! arg2: geom_params   -  name of array containing the values of the geometric parameters that define
+!                        this structure. Parameters should be in the following order in the array:
+!                           POS  NAME         DESCRIPTION
+!                             1  wallLength   length of the wall (local Y)
+!                             2  wallHeight   height of the wall at Y=0
+!                             3  wallToe      height of the wall at Y=length
+!                             4  capLength    length of the pile cap (local Y)
+!                             5  capWidth     width of the pilar cap (local X)
+!                             6  capThk       thickness of the pile cap
+!                                             (along Z, optional: separates pile top from pile cap)
+!                             7  pileLength   length of the piles
+!                                             (not including cap thickness)
+!                             8  pileRows     number of pile rows
+!                                             (piles in each row have equal Y)
+!                             9  pileCols     number of piles columns
+!                                             (piles in each column have equal X)
+!                            10  pileOffset   distance between center of pile and edge of pile cap,
+!                                             both in the X and Y local directions
+! arg3: selCompInfix  -  string to be used in the middle of the output component's name as follows:
+!                           COMPx_<infix>_<name>
+!                        This infix has to be at most 10 characters long and defaults to blank.
 
 ! Local parameters:
+! AR21: wallLength
+! AR22: wallHeight
+! AR23: wallToe
+! AR24: capLength
+! AR25: capWidth
+! AR26: capThk
+! AR27: pileLength
+! AR28: pileRows
+! AR29: pileCols
+! AR30: pileOffset
+! AR31: capOffset
+! AR32: pileGroupWidth
+! AR33: pileXSpacing
+! AR34: pileGroupLength
+! AR35: pileYSpacing
+! AR36: minPileY
+! AR37: nthPile
+! AR38: nthPileRow
+! AR39: pileY
+! AR40: nthPileCol
+! AR41: pileX
+! AR42: refKP
+
+! Global parameters (erased at the end of this subroutine)
+! PILESUPRETWALL_ARR_pileX      ! pile_x
+! PILESUPRETWALL_ARR_pileY      ! pile_y
+! PILESUPRETWALL_ARR_KPnums     ! KP_nums
+! PILESUPRETWALL_VAR_topKP      ! topKP
+! PILESUPRETWALL_VAR_botKP      ! botKP
+
+! Output parameters:
+!   Without infix (default):  |  With infix:
+!   COMPK_pileTop             |  COMPK_<infix>_pileTop
+!   COMPK_pileBot             |  COMPK_<infix>_pileBot
+!   COMPL_piles               |  COMPL_<infix>_piles
+!   COMPL_pileConnections     |  COMPL_<infix>_pileConnections
+!   COMPA_cap                 |  COMPA_<infix>_cap
+!   COMPA_wall                |  COMPA_<infix>_wall
 
 
 ! Extract values of geometric parameters from array
@@ -181,6 +222,8 @@ cmsel,a,'COMPL_piles'
 cmsel,a,'COMPL_pileConnections'
 cmsel,a,'COMPA_cap'
 cmsel,a,'COMPA_wall'
-*del,KP_nums
-*del,pile_x
-*dim,pile_y
+*del,KP_nums,,nopr
+*del,pile_x,,nopr
+*del,pile_y,,nopr
+*del,topKP,,nopr
+*del,botKP,,nopr
