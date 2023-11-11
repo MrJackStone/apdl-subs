@@ -30,6 +30,7 @@
 !                        This infix has to be at most 10 characters long and defaults to blank.
 
 ! Local parameters:
+! AR20: parType
 ! AR21: wallLength
 ! AR22: wallHeight
 ! AR23: wallToe
@@ -52,6 +53,15 @@
 ! AR40: nthPileCol
 ! AR41: pileX
 ! AR42: refKP
+! AR42: pileTop_COMPK
+! AR43: pileBot_COMPK
+! AR44: piles_COMPL
+! AR45: pileConnections_COMPL
+! AR46: cap_COMPA
+! AR47: wall_COMPA
+! AR48: ref_COMPK
+! AR49: COMPK_temp
+! AR50: infix
 
 ! Global parameters (erased at the end of this subroutine)
 ! PILESUPRETWALL_ARR_pileX
@@ -68,7 +78,23 @@
 !   COMPL_pileConnections     |  COMPL_<infix>_pileConnections
 !   COMPA_cap                 |  COMPA_<infix>_cap
 !   COMPA_wall                |  COMPA_<infix>_wall
+!   COMPL_pile<num>           |  COMPL_<infix>_pile<num>
+!   COMPL_pileConnection<num> |  COMPL_<infix>_pileConnection<num>
 
+
+! Define names of output selection components
+AR50=''
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+  AR50=strcat(strsub(arg3,1,10),'_')
+*endif
+AR42='COMPK_%AR50%pileTop'
+AR43='COMPK_%AR50%pileBot'
+AR44='COMPL_%AR50%piles'
+AR45='COMPL_%AR50%pileConnections'
+AR46='COMPA_%AR50%cap'
+AR47='COMPA_%AR50%wall'
+AR48='COMPK_%AR50%ref'
 
 ! Extract values of geometric parameters from array
 AR21 = %arg2%(1)
@@ -113,13 +139,13 @@ abackup
 ksel,u,kp,,all
 lsel,u,line,,all
 asel,u,area,,all
-cmpadd,'COMPK_ref'
-cmpadd,'COMPK_top'
-cmpadd,'COMPK_bot'
-cmpadd,'COMPL_piles'
-cmpadd,'COMPL_pileConnections'
-cmpadd,'COMPA_cap'
-cmpadd,'COMPA_wall'
+cmpadd,AR42
+cmpadd,AR43
+cmpadd,AR44
+cmpadd,AR45
+cmpadd,AR46
+cmpadd,AR47
+cmpadd,AR48
 
 ! Generate keypoint numbers
 nextkp,'PILESUPRETWALL_ARR_KPnums',8
@@ -131,7 +157,7 @@ k , PILESUPRETWALL_ARR_KPnums(3) , 0 , AR21 , AR23
 k , PILESUPRETWALL_ARR_KPnums(4) , 0 , 0    , AR22
 asel,u,area,,all
 a,PILESUPRETWALL_ARR_KPnums(1:4)
-cm,COMPA_wall,area
+cm,AR47,area
 
 ! Draw pile cap
 k , PILESUPRETWALL_ARR_KPnums(5) , -AR25/2 , -AR31     , 0
@@ -140,33 +166,33 @@ k , PILESUPRETWALL_ARR_KPnums(7) , AR25/2  , AR24-AR31 , 0
 k , PILESUPRETWALL_ARR_KPnums(8) , -AR25/2 , AR24-AR31 , 0
 asel,u,area,,all
 a,PILESUPRETWALL_ARR_KPnums(5:8)
-cm,COMPA_cap,area
+cm,AR46,area
 
 ! Slice cap at wall
-cmsel,s,COMPA_cap
+cmsel,s,AR46
 csslicexz,0
 csslicexz,AR21
-cm,COMPA_cap,area
+cm,AR46,area
 
 ! Slice cap at piles
-cmsel,s,COMPA_cap
+cmsel,s,AR46
 wpcsys,,arg1
 batch_slicexz,'PILESUPRETWALL_ARR_pileY',1,0
-cm,COMPA_cap,area
+cm,AR46,area
 
 ! Slice wall at piles
-cmsel,s,COMPA_wall
+cmsel,s,AR47
 wpcsys,,arg1
 batch_slicexz,'PILESUPRETWALL_ARR_pileY',1,0
-cm,COMPA_wall,area
+cm,AR47,area
 
 ! Merge cap & wall
-cmsel,s,COMPA_cap
-cmsel,a,COMPA_wall
+cmsel,s,AR46
+cmsel,a,AR47
 lsla,s
 ksll,s
 nummrg,kp
-cm,COMPK_temp,kp
+cm,AR49,kp
 
 ! Draw piles
 AR37=0
@@ -177,20 +203,20 @@ AR37=0
     AR41=PILESUPRETWALL_ARR_pileX(AR40)
     AR37=AR37+1
 
-    cmsel,s,COMPK_temp
+    cmsel,s,AR49
     AR42=kp(AR41,AR39,0)
     ksel,s,kp,,AR42
-    cmpadd,'COMPK_ref'
+    cmpadd,AR48
 
     nextkp,'PILESUPRETWALL_VAR_topKP',1
     ksel,u,kp,,all
     k,PILESUPRETWALL_VAR_topKP,AR41,AR39,-AR26
-    cmpadd,'COMPK_top'
+    cmpadd,AR42
 
     nextkp,'PILESUPRETWALL_VAR_botKP',1
     ksel,u,kp,,all
     k,PILESUPRETWALL_VAR_botKP,AR41,AR39,-AR26-AR27
-    cmpadd,'COMPK_bot'
+    cmpadd,AR43
 
     ksel,s,kp,,AR42
     ksel,a,kp,,PILESUPRETWALL_VAR_topKP
@@ -198,13 +224,13 @@ AR37=0
 
     lsel,u,line,,all
     l,PILESUPRETWALL_VAR_topKP,PILESUPRETWALL_VAR_botKP
-    cm,COMPL_pile%AR37%,line
-    cmpadd,'COMPL_piles'
+    cm,COMPL_%AR50%pile%AR37%,line
+    cmpadd,AR44
 
     lsel,u,line,,all
     l,AR42,PILESUPRETWALL_VAR_topKP
-    cm,COMPL_pileConnection%AR37%,line
-    cmpadd,'COMPL_pileConnections'
+    cm,COMPL_%AR50%pileConnection%AR37%,line
+    cmpadd,AR45
 
   *enddo
 *enddo
@@ -214,12 +240,12 @@ csrestore
 krestore
 lrestore
 arestore
-cmsel,a,'COMPK_top'
-cmsel,a,'COMPK_bot'
-cmsel,a,'COMPL_piles'
-cmsel,a,'COMPL_pileConnections'
-cmsel,a,'COMPA_cap'
-cmsel,a,'COMPA_wall'
+cmsel,a,AR42
+cmsel,a,AR43
+cmsel,a,AR44
+cmsel,a,AR45
+cmsel,a,AR46
+cmsel,a,AR47
 *del,PILESUPRETWALL_ARR_KPnums,,nopr
 *del,PILESUPRETWALL_ARR_pileX,,nopr
 *del,PILESUPRETWALL_ARR_pileY,,nopr
