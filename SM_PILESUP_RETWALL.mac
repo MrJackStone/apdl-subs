@@ -54,11 +54,11 @@
 ! AR42: refKP
 
 ! Global parameters (erased at the end of this subroutine)
-! PILESUPRETWALL_ARR_pileX      ! pile_x
-! PILESUPRETWALL_ARR_pileY      ! pile_y
-! PILESUPRETWALL_ARR_KPnums     ! KP_nums
-! PILESUPRETWALL_VAR_topKP      ! topKP
-! PILESUPRETWALL_VAR_botKP      ! botKP
+! PILESUPRETWALL_ARR_pileX
+! PILESUPRETWALL_ARR_pileY
+! PILESUPRETWALL_ARR_KPnums
+! PILESUPRETWALL_VAR_topKP
+! PILESUPRETWALL_VAR_botKP
 
 ! Output parameters:
 !   Without infix (default):  |  With infix:
@@ -71,36 +71,34 @@
 
 
 ! Extract values of geometric parameters from array
-wallLength   = %arg2%(1)
-wallHeight   = %arg2%(2)
-wallToe      = %arg2%(3)
-capLength    = %arg2%(4)
-capWidth     = %arg2%(5)
-capThk       = %arg2%(6)
-pileLength   = %arg2%(7)
-pileRows     = %arg2%(8)
-pileCols     = %arg2%(9)
-pileOffset   = %arg2%(10)
-!wallThk      = %arg2%(4)
-!pileDiameter = %arg2%(12)
+AR21 = %arg2%(1)
+AR22 = %arg2%(2)
+AR23 = %arg2%(3)
+AR24 = %arg2%(4)
+AR25 = %arg2%(5)
+AR26 = %arg2%(6)
+AR27 = %arg2%(7)
+AR28 = %arg2%(8)
+AR29 = %arg2%(9)
+AR30 = %arg2%(10)
 
 ! Calculated geometric params:
-capOffset=(capLength-wallLength)/2
+AR31=(AR24-AR21)/2
 
-pileGroupWidth=capWidth-2*pileOffset
-pileXSpacing=pileGroupWidth/(pileCols-1)
+AR32=AR25-2*AR30
+AR33=AR32/(AR29-1)
 
-pileGroupLength=capLength-2*pileOffset
-pileYSpacing=pileGroupLength/(pileRows-1)
-minPileY=(wallLength-pileGroupLength)/2
+AR34=AR24-2*AR30
+AR35=AR34/(AR28-1)
+AR36=(AR21-AR34)/2
 
-*del,pile_x,,nopr
-*dim,pile_x,,pileCols
-*vfill,pile_x(1),ramp,-pileGroupWidth/2,pileXSpacing
+*del,PILESUPRETWALL_ARR_pileX,,nopr
+*dim,PILESUPRETWALL_ARR_pileX,,AR29
+*vfill,PILESUPRETWALL_ARR_pileX(1),ramp,-AR32/2,AR33
 
-*del,pile_y,,nopr
-*dim,pile_y,,pileRows
-*vfill,pile_y(1),ramp,minPileY,pileYSpacing
+*del,PILESUPRETWALL_ARR_pileY,,nopr
+*dim,PILESUPRETWALL_ARR_pileY,,AR28
+*vfill,PILESUPRETWALL_ARR_pileY(1),ramp,AR36,AR35
 
 ! Activate wall's local CSYS
 csbackup
@@ -124,42 +122,42 @@ cmpadd,'COMPA_cap'
 cmpadd,'COMPA_wall'
 
 ! Generate keypoint numbers
-nextkp,'KP_nums',8
+nextkp,'PILESUPRETWALL_ARR_KPnums',8
 
 ! Draw wall
-k , KP_nums(1) , 0 , 0          , 0
-k , KP_nums(2) , 0 , wallLength , 0
-k , KP_nums(3) , 0 , wallLength , wallToe
-k , KP_nums(4) , 0 , 0          , wallHeight
+k , PILESUPRETWALL_ARR_KPnums(1) , 0 , 0    , 0
+k , PILESUPRETWALL_ARR_KPnums(2) , 0 , AR21 , 0
+k , PILESUPRETWALL_ARR_KPnums(3) , 0 , AR21 , AR23
+k , PILESUPRETWALL_ARR_KPnums(4) , 0 , 0    , AR22
 asel,u,area,,all
-a,KP_nums(1:4)
+a,PILESUPRETWALL_ARR_KPnums(1:4)
 cm,COMPA_wall,area
 
 ! Draw pile cap
-k , KP_nums(5) , -capWidth/2 , -capOffset          , 0
-k , KP_nums(6) , capWidth/2  , -capOffset          , 0
-k , KP_nums(7) , capWidth/2  , capLength-capOffset , 0
-k , KP_nums(8) , -capWidth/2 , capLength-capOffset , 0
+k , PILESUPRETWALL_ARR_KPnums(5) , -AR25/2 , -AR31     , 0
+k , PILESUPRETWALL_ARR_KPnums(6) , AR25/2  , -AR31     , 0
+k , PILESUPRETWALL_ARR_KPnums(7) , AR25/2  , AR24-AR31 , 0
+k , PILESUPRETWALL_ARR_KPnums(8) , -AR25/2 , AR24-AR31 , 0
 asel,u,area,,all
-a,KP_nums(5:8)
+a,PILESUPRETWALL_ARR_KPnums(5:8)
 cm,COMPA_cap,area
 
 ! Slice cap at wall
 cmsel,s,COMPA_cap
 csslicexz,0
-csslicexz,wallLength
+csslicexz,AR21
 cm,COMPA_cap,area
 
 ! Slice cap at piles
 cmsel,s,COMPA_cap
 wpcsys,,arg1
-batch_slicexz,'pile_y',1,0
+batch_slicexz,'PILESUPRETWALL_ARR_pileY',1,0
 cm,COMPA_cap,area
 
 ! Slice wall at piles
 cmsel,s,COMPA_wall
 wpcsys,,arg1
-batch_slicexz,'pile_y',1,0
+batch_slicexz,'PILESUPRETWALL_ARR_pileY',1,0
 cm,COMPA_wall,area
 
 ! Merge cap & wall
@@ -171,41 +169,41 @@ nummrg,kp
 cm,COMPK_temp,kp
 
 ! Draw piles
-nthPile=0
-*do,nthPileRow,1,pileRows,1
-  pileY=pile_y(nthPileRow)
+AR37=0
+*do,AR38,1,AR28,1
+  AR39=PILESUPRETWALL_ARR_pileY(AR38)
 
-  *do,nthPileCol,1,pileCols,1
-    pileX=pile_x(nthPileCol)
-    nthPile=nthPile+1
+  *do,AR40,1,AR29,1
+    AR41=PILESUPRETWALL_ARR_pileX(AR40)
+    AR37=AR37+1
 
     cmsel,s,COMPK_temp
-    refKP=kp(pileX,pileY,0)
-    ksel,s,kp,,refKP
+    AR42=kp(AR41,AR39,0)
+    ksel,s,kp,,AR42
     cmpadd,'COMPK_ref'
 
-    nextkp,'topKP',1
+    nextkp,'PILESUPRETWALL_VAR_topKP',1
     ksel,u,kp,,all
-    k,topKP,pileX,pileY,-capThk
+    k,PILESUPRETWALL_VAR_topKP,AR41,AR39,-AR26
     cmpadd,'COMPK_top'
 
-    nextkp,'botKP',1
+    nextkp,'PILESUPRETWALL_VAR_botKP',1
     ksel,u,kp,,all
-    k,botKP,pileX,pileY,-capThk-pileLength
+    k,PILESUPRETWALL_VAR_botKP,AR41,AR39,-AR26-AR27
     cmpadd,'COMPK_bot'
 
-    ksel,s,kp,,refKP
-    ksel,a,kp,,topKP
-    ksel,a,kp,,botKP
+    ksel,s,kp,,AR42
+    ksel,a,kp,,PILESUPRETWALL_VAR_topKP
+    ksel,a,kp,,PILESUPRETWALL_VAR_botKP
 
     lsel,u,line,,all
-    l,topKP,botKP
-    cm,COMPL_pile%nthPile%,line
+    l,PILESUPRETWALL_VAR_topKP,PILESUPRETWALL_VAR_botKP
+    cm,COMPL_pile%AR37%,line
     cmpadd,'COMPL_piles'
 
     lsel,u,line,,all
-    l,refKP,topKP
-    cm,COMPL_pileConnection%nthPile%,line
+    l,AR42,PILESUPRETWALL_VAR_topKP
+    cm,COMPL_pileConnection%AR37%,line
     cmpadd,'COMPL_pileConnections'
 
   *enddo
@@ -222,8 +220,8 @@ cmsel,a,'COMPL_piles'
 cmsel,a,'COMPL_pileConnections'
 cmsel,a,'COMPA_cap'
 cmsel,a,'COMPA_wall'
-*del,KP_nums,,nopr
-*del,pile_x,,nopr
-*del,pile_y,,nopr
-*del,topKP,,nopr
-*del,botKP,,nopr
+*del,PILESUPRETWALL_ARR_KPnums,,nopr
+*del,PILESUPRETWALL_ARR_pileX,,nopr
+*del,PILESUPRETWALL_ARR_pileY,,nopr
+*del,PILESUPRETWALL_VAR_topKP,,nopr
+*del,PILESUPRETWALL_VAR_botKP,,nopr
