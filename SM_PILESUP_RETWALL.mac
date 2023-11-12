@@ -130,10 +130,13 @@ AR36=(AR21-AR34)/2
 csbackup
 csys,arg1
 
-! Backup current selection
+! Backup current selection & state
 kbackup
 lbackup
 abackup
+mpopbackup
+
+/uis,msgpop,3
 
 ! Initialize output selection components
 ksel,u,kp,,all
@@ -253,3 +256,4 @@ cmsel,a,AR47
 *del,PILESUPRETWALL_ARR_pileY,,nopr
 *del,PILESUPRETWALL_VAR_topKP,,nopr
 *del,PILESUPRETWALL_VAR_botKP,,nopr
+mpoprestore
