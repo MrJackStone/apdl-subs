@@ -52,7 +52,6 @@
 ! AR39: pileY
 ! AR40: nthPileCol
 ! AR41: pileX
-! AR42: refKP
 ! AR42: pileTop_COMPK
 ! AR43: pileBot_COMPK
 ! AR44: piles_COMPL
@@ -62,6 +61,7 @@
 ! AR48: ref_COMPK
 ! AR49: COMPK_temp
 ! AR50: infix
+! AR51: refKP
 
 ! Global parameters (erased at the end of this subroutine)
 ! PILESUPRETWALL_ARR_pileX
@@ -204,8 +204,8 @@ AR37=0
     AR37=AR37+1
 
     cmsel,s,AR49
-    AR42=kp(AR41,AR39,0)
-    ksel,s,kp,,AR42
+    AR51=kp(AR41,AR39,0)
+    ksel,s,kp,,AR51
     cmpadd,AR48
 
     nextkp,'PILESUPRETWALL_VAR_topKP',1
@@ -218,7 +218,7 @@ AR37=0
     k,PILESUPRETWALL_VAR_botKP,AR41,AR39,-AR26-AR27
     cmpadd,AR43
 
-    ksel,s,kp,,AR42
+    ksel,s,kp,,AR51
     ksel,a,kp,,PILESUPRETWALL_VAR_topKP
     ksel,a,kp,,PILESUPRETWALL_VAR_botKP
 
@@ -228,7 +228,7 @@ AR37=0
     cmpadd,AR44
 
     lsel,u,line,,all
-    l,AR42,PILESUPRETWALL_VAR_topKP
+    l,AR51,PILESUPRETWALL_VAR_topKP
     cm,COMPL_%AR50%pileConnection%AR37%,line
     cmpadd,AR45
 
