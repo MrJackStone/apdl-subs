@@ -172,12 +172,14 @@ cm,AR46,area
 cmsel,s,AR46
 csslicexz,0
 csslicexz,AR21
+cssliceyz,0
 cm,AR46,area
 
 ! Slice cap at piles
 cmsel,s,AR46
 wpcsys,,arg1
 batch_slicexz,'PILESUPRETWALL_ARR_pileY',1,0
+batch_sliceyz,'PILESUPRETWALL_ARR_pileX',1,0
 cm,AR46,area
 
 ! Slice wall at piles
