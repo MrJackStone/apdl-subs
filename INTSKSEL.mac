@@ -1,0 +1,37 @@
+! INTSKSEL, lineCompRoot, lineComp2, lineComp3, lineComp4, lineComp5, lineComp6, lineComp7, lineComp8, lineComp9
+! INTSKSEL,         arg1,      arg2,      arg3,      arg4,      arg5,      arg6,      arg7,      arg8,      arg9
+
+! Description:
+! Selects keypoints that belong simultaneously to lines on the first line selection component and
+! the aggregate of the (up to 8) remaining line selection components.
+
+! Arguments:
+! arg1:      lineCompRoot           -  name of main line selection component
+! arg2~arg9: lineComp2 ~ lineComp9  -  name of second through ninth line selection components
+
+! Local parameters:
+! AR20: parType
+! AR21: nthArg
+
+
+! Backup line selection
+lbackup
+
+! Select keypoints attached to main line selection component
+cmsel,s,%arg1%
+ksll,s
+
+! Add-select remaining line selection components
+lsel,u,line,,all
+*do,AR21,2,9,1
+  *get,AR20,parm,arg%AR21%,type
+  *if,AR20,eq,3,then
+    cmsel,a,arg%AR21%
+  *endif
+*enddo
+
+! Filter keypoint selection
+ksll,r
+
+! Clean up
+lrestore
