@@ -74,6 +74,7 @@
 !   Without infix (default):  |  With infix:
 !   COMPK_pileTop             |  COMPK_<infix>_pileTop
 !   COMPK_pileBot             |  COMPK_<infix>_pileBot
+!   COMPK_ref                 |  COMPK_<infix>_ref
 !   COMPL_piles               |  COMPL_<infix>_piles
 !   COMPL_pileConnections     |  COMPL_<infix>_pileConnections
 !   COMPA_cap                 |  COMPA_<infix>_cap
