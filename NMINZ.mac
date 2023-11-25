@@ -1,0 +1,28 @@
+! NMINZ, outputParm
+! NMINZ, arg1
+
+! Description:
+! Returns the minimum Z coordinate of currently selected nodes.
+
+! Arguments:
+! arg1: outputParm  -  name of output parameter to which value will be assigned
+!                      (defaults to _OUTPUT)
+
+! Local parameters:
+! AR20: parType
+! AR21: minZ
+! AR22: outputParmName
+
+
+! Set name of output parameter
+AR22='_OUTPUT'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR22=arg1
+*endif
+
+! Extract min Z
+*get,AR21,node,,mnloc,z
+
+! Write min Z to output parameter
+%AR22%=AR21
