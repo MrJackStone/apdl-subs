@@ -1,0 +1,78 @@
+! STLPLATE , secNum , thk  , matNum , E    , fy   , Et   , fu   , dens , Poisson
+! STLPLATE , arg1   , arg2 , arg3   , arg4 , arg5 , arg6 , arg7 , arg8 , arg9
+
+! Description:
+! Creates a shell-type cross-section and, optionally, a steel-like material model. The created
+! material model will be either linear-elastic-isotropic (if fy=0) or bilinear-isotropic-hardening
+! (if fy>0).
+
+! Arguments:
+! arg1: secNum   -  number of the shell cross-section to be created. This parameter can be of the
+!                   following types:
+!                      [INT]  > 0: ID number to be assigned to the newly created section;
+!                             = 0: section number will be automatically chosen (lowest available);
+!                      [STR]  ID automatically chosen (lowest available) and assigned to this
+!                             string, which is interpreted as a parameter name
+! arg2: thk      -  thickness of the shell's cross-section
+! arg3: matNum   -  material number to be created and assigned to shell cross-section (default: 1)
+!                   (if this number is negative the material will not be created, only assigned)
+! arg4: E        -  steel elastic modulus (default: 2e11)
+! arg5: fy       -  steel yield stress    (default: 0, linear-elastic material model)
+! arg6: Et       -  steel tangent modulus (default: 0)
+! arg7: fu       -  steel ultimate stress (default: fy)
+! arg8: dens     -  mass density          (default: 7850)
+! arg9: Poisson  -  Poisson's coefficient (default: 0.3)
+
+! Local parameters:
+! AR20: parType
+! AR21: newSecNumber
+! AR22: maxSecNumber
+! AR23: secNumOutputParm
+! AR24: steelMatNum
+! AR25: linearSteel
+
+! Global parameters (erased at the end of this subroutine):
+
+! Output parameters:
+! %arg1% (defaults to 'STLPLATE_VAR_secNum')
+
+
+pbackup
+/prep7
+
+! Set number of cross-section
+*get,AR20,parm,arg1,type
+*if,AR20,eq,0,and,arg1,gt,0,then
+  AR21=arg1
+*else
+  *get,AR22,secp,,num,max
+  AR21=AR22+1
+*endif
+
+! Set name of output parameter to receive number of shell cross-section
+*get,AR20,parm,arg1,type
+AR23='STLPLATE_VAR_secNum'
+*if,AR20,eq,3,then
+  AR23=arg1
+*endif
+%AR23%=AR21
+
+! Create steel material model:
+AR24=(abs(arg3)>1)
+*if,arg3,gt,0,then
+  ! Determine if linear-elastic model is to be used
+  AR25=0
+  *if,arg5,le,0,then
+    AR25=1
+  *endif
+
+  ! Create steel
+  steel,AR24, arg4, arg5, arg6, arg7, arg8, arg9, AR25
+*endif
+
+! Create shell cross-section
+sectype,AR21,'shell'
+secdata,arg2,AR24
+
+! Clean up
+prestore
