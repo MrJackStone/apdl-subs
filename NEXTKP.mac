@@ -1,0 +1,43 @@
+! nextkp, parm, count
+! nextkp, arg1,  arg2
+
+! Description:
+! Returns the next free keypoint numbers.
+
+! Arguments:
+! arg1: parm   -  name of output parameter (string, defaults to _OUTPUT)
+! arg2: count  -  count of keypoint numbers to return (defaults to 1)
+
+! Local parameters:
+! AR20: parType
+! AR21: outputParm
+! AR22: maxDefKP
+! AR23: nextKP
+
+
+! Set name of output parameter
+*get,AR20,parm,arg1,type
+*if,AR20,ne,3,then
+  AR21='_OUTPUT'
+*else
+  AR21=arg1
+*endif
+
+! Calculate next free keypoint number
+*get,AR22,kp,,num,maxd
+AR23=AR22+1
+
+! Return next free keypoint number(s)
+*if,arg2,gt,1,then
+
+  ! Output: array
+  *del,%AR21%,,nopr
+  *dim,%AR21%,,arg2
+  *vfill,%AR21%,ramp,AR23,1
+
+*else
+
+  ! Output: scalar
+  %AR21%=AR23
+
+*endif
