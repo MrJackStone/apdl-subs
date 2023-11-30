@@ -11,6 +11,7 @@
 ! AR26: verTextAnchor
 ! AR27: alignmentOption
 ! AR28: estimatedTitleWidth
+! AR31: windowWidthX
 
 ! Alignment option
 AR27='L'
@@ -25,6 +26,8 @@ AR27='L'
 *get,AR22,graph,arg2,range,ymin
 *get,AR23,graph,arg2,range,ymax
 
+AR31=AR21-AR20
+
 ! Title box height
 AR24=AR22+0.08
 
@@ -33,6 +36,10 @@ AR24=AR22+0.08
     g_annocharwidth,'WNTITLE_VAR_charWidth'
     AR28=strleng(arg1)*WNTITLE_VAR_charWidth
     AR25=AR21-AR28-0.02
+*elseif,AR27,eq,'C',then
+    g_annocharwidth,'WNTITLE_VAR_charWidth'
+    AR28=strleng(arg1)*WNTITLE_VAR_charWidth
+    AR25=AR20+((AR31-AR28)/2)
 *else
     AR25=AR20+0.02
 *endif
