@@ -11,6 +11,7 @@
 ! AR26: verTextAnchor
 ! AR27: alignmentOption
 ! AR28: estimatedTitleWidth
+! AR31: windowWidthX
 
 ! Alignment option
 AR27='L'
