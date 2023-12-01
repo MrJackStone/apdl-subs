@@ -1,16 +1,19 @@
-! UPFCTCALC , outputParm , targetDisp , firstNset , lastNset
-! UPFCTCALC , arg1       , arg2       , arg3      , arg4
+! UPFCTCALC , outputParm , targetDisp , firstNset , lastNset , captureImages
+! UPFCTCALC , arg1       , arg2       , arg3      , arg4     , arg5
 
 ! Description:
 ! Calculates the geometry imperfection import factor to be used in UPGEOM for a given interval of
 ! result sets.
 
 ! Arguments:
-! arg1: outputParm  -  name of array parameter to which results will be written
-!                      (defaults to UPFCTCALC_ARR_factors)
-! arg2: targetDisp  -  desired imperfection magnitude to apply
-! arg3: firstNset   -  number of first result set to be scanned
-! arg4: lastNSet    -  number of last result set to be scanned
+! arg1: outputParm     -  name of array parameter to which results will be written
+!                         (defaults to UPFCTCALC_ARR_factors)
+! arg2: targetDisp     -  desired imperfection magnitude to apply
+! arg3: firstNset      -  number of first result set to be scanned
+! arg4: lastNSet       -  number of last result set to be scanned
+! arg5: captureImages  -  saves images of each mode's deformed shape to external PNG file
+!                           [0] disable (default)
+!                           [1] enable
 
 ! Local parameters:
 ! AR20: parType
@@ -47,6 +50,10 @@ AR22=AR24-AR23+1
   set,,,,,,,AR26
   plnsol,u,sum
   cntrlims,,,'UPFCTCALC_VAR_nthMax'
+  ! Capture image of deformed shape
+  *if,arg5,eq,1,then
+    takepic,'UPFCTCALC_MODE_%AR26%'
+  *endif
   ! Set import factor to zero if max plotted value is also zero
   *if,UPFCTCALC_VAR_nthMax,ne,0,then
     AR25=arg2/UPFCTCALC_VAR_nthMax
