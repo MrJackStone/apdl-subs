@@ -60,9 +60,9 @@ asel,u,area,,all
 AR34='COMPA_IBEAM_FLANGES'
 *if,AR20,eq,3,then
   AR34=strcat('COMPA_',arg4)
-  AR36=strcat(AR34,'_TOP')
-  AR37=strcat(AR34,'_BOT')
 *endif
+AR36=strcat(AR34,'_TOP')
+AR37=strcat(AR34,'_BOT')
 
 ! Web areas
 *get,AR20,parm,arg5,type
