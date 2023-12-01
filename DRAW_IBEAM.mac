@@ -1,124 +1,138 @@
-! DRAW_IBEAM,    L,   bf,   dm
-! DRAW_IBEAM, arg1, arg2, arg3
+! DRAW_IBEAM , L    , bf   , dm   , compFlanges , compWeb
+! DRAW_IBEAM , arg1 , arg2 , arg3 , arg4        , arg5
 
 ! Description:
 ! Draws the six areas of a doubly-symmetric I beam in the active coordinate system (web and each
-! flange split into two areas). The origin of the active CSYS is placed at the intersection between
-! the bottom flange and the web, at the beginning of the beam. Length is drawn along X, depth along
-! Y, and width along Z.
+! flange split into two areas).
+! Length is drawn along X, depth along Y, and width along Z. The origin of the active CSYS is placed
+! at the intersection between the bottom flange and the web, at the beginning of the beam.
+! The created areas are stored in area selection components named as follows:
+!    Flange areas:  COMPA_<flangeSuffix>
+!    Top flange:    COMPA_<flangeSuffix>_TOP
+!    Bottom flange: COMPA_<flangeSuffix>_BOT
+!    Web areas:     COMPA_<webSuffix>
+! Note that the provided suffixes should not be longer than 22 characters and:
+!    <flangeSuffix> (arg4) defaults to 'IBEAM_FLANGES'
+!    <webSuffix>    (arg5) defaults to 'IBEAM_WEB'
 
 ! Arguments:
-! arg1: L   -  span length (X)
-! arg2: bf  -  flange width (Z)
-! arg3: dm  -  section depth (Y)
+! arg1: L            -  span length (X)
+! arg2: bf           -  flange width (Z)
+! arg3: dm           -  section depth (Y)
+! arg4: compFlanges  -  flange area selection component suffix/infix
+! arg5: compWeb      -  web area selection component suffix
 
 ! Local parameters:
-! AR21: nthLine
-! AR22: lnum
+! AR20: parType
 ! AR28: COMPK_NEW
 ! AR29: COMPL_NEW
 ! AR30: COMPA_NEW
-! AR31: lineCount
-! AR32: axisLine
+! AR34: flangeCompName
+! AR35: webCompName
+! AR36: topFlangeCompName
+! AR37: botFlangeCompName
 
 ! Global parameters (erased at the end of this subroutine):
-! DRAW_IBEAM_ARR_LNUMS
-! DRAW_IBEAM_ARR_KPNUMS
+! -
 
 ! Output parameters:
-! DRAW_IBEAM_COMPA_WEB
-!    Area selection component containing the beam's web
-! DRAW_IBEAM_COMPA_FLANGES
-!    Area selection component containing the beam's flanges
+!   COMPA_<flangeSuffix>      (defaults to COMPA_IBEAM_FLANGES)
+!   COMPA_<webSuffix>         (defaults to COMPA_IBEAM_WEB)
+!   COMPA_<flangeSuffix>_TOP  (defaults to COMPA_IBEAM_FLANGES_TOP)
+!   COMPA_<flangeSuffix>_BOT  (defaults to COMPA_IBEAM_FLANGES_BOT)
 
 
-/prep7
-seltol,1e-8
-/uis,MSGPOP,3
-
+!! Prepare environment                                                                            !!
+pbackup
+mpopbackup
 kbackup
 lbackup
 abackup
-
+/prep7
+/uis,MSGPOP,3
 ksel,u,kp,,all
 lsel,u,line,,all
 asel,u,area,,all
 
-! Calculate number of new keypoints
-*get,AR31,KP,0,NUM,MAXD
-*dim,DRAW_IBEAM_ARR_KPNUMS,ARRAY,8
-*vfill,DRAW_IBEAM_ARR_KPNUMS,RAMP,AR31+1,1
-numstr,kp,AR31+1
+!! Set name of output selection components                                                        !!
+! Flange areas
+*get,AR20,parm,arg4,type
+AR34='COMPA_IBEAM_FLANGES'
+*if,AR20,eq,3,then
+  AR34=strcat('COMPA_',arg4)
+  AR36=strcat(AR34,'_TOP')
+  AR37=strcat(AR34,'_BOT')
+*endif
 
-! Draw I section at beginning of beam
-k,DRAW_IBEAM_ARR_KPNUMS(1), 0, 0,      0-arg2/2
-k,DRAW_IBEAM_ARR_KPNUMS(2), 0, 0,      0
-k,DRAW_IBEAM_ARR_KPNUMS(3), 0, 0,      0+arg2/2
-k,DRAW_IBEAM_ARR_KPNUMS(4), 0, 0+arg3, 0-arg2/2
-k,DRAW_IBEAM_ARR_KPNUMS(5), 0, 0+arg3, 0
-k,DRAW_IBEAM_ARR_KPNUMS(6), 0, 0+arg3, 0+arg2/2
-k,DRAW_IBEAM_ARR_KPNUMS(7), 0, arg3/2, 0
+! Web areas
+*get,AR20,parm,arg5,type
+AR35='COMPA_IBEAM_WEB'
+*if,AR20,eq,3,then
+  AR35=strcat('COMPA_',arg5)
+*endif
 
-l, DRAW_IBEAM_ARR_KPNUMS(1), DRAW_IBEAM_ARR_KPNUMS(2)
-l, DRAW_IBEAM_ARR_KPNUMS(2), DRAW_IBEAM_ARR_KPNUMS(3)
-l, DRAW_IBEAM_ARR_KPNUMS(4), DRAW_IBEAM_ARR_KPNUMS(5)
-l, DRAW_IBEAM_ARR_KPNUMS(5), DRAW_IBEAM_ARR_KPNUMS(6)
-l, DRAW_IBEAM_ARR_KPNUMS(2), DRAW_IBEAM_ARR_KPNUMS(7)
-l, DRAW_IBEAM_ARR_KPNUMS(7), DRAW_IBEAM_ARR_KPNUMS(5)
+!! Draw merged areas                                                                              !!
+! Bottom flange: right half (+Z)
+wpcsys,-1
+wprota,,90
+blc4,0,0,arg1,arg2/2
 
-cm,AR29,line
+! Bottom flange: left half (-Z)
+wpcsys,-1
+wprota,,-90
+blc4,0,0,arg1,arg2/2
 
-! Draw axis line
-lsel,u,line,,all
-k,DRAW_IBEAM_ARR_KPNUMS(8),  arg1, 0, -arg2/2
-lstr,DRAW_IBEAM_ARR_KPNUMS(1),DRAW_IBEAM_ARR_KPNUMS(8)
-AR32=lsnext(0)
+! Top flange
+agen,2,all,,,,arg3
 
-! Extrude I section to create areas
-cmsel,s,AR29
-*get,AR31,line,,count
-AR22=0
-*do,AR21,1,AR31,1
-    cmsel,s,AR29
-    AR22=lsnext(AR22)
-    lsel,s,line,,AR22
-    lsel,a,line,,AR32
-    adrag,AR22,,,,,,AR32
-*enddo
-lsla,s
-lsel,a,line,,AR32
-ldele,AR32,,,1
+! Web: bottom half
+wpcsys,-1
+blc4,0,0,arg1,arg3/2
 
-lsla,s
-ksll,s
+! Web: top half
+wpcsys,-1
+wpoffs,,arg3/2
+blc4,0,0,arg1,arg3/2
+
+! Merge new areas
 nummrg,kp
 
+!! Create selection components                                                                    !!
+! New solid model entities
 cm,AR28,kp
 cm,AR29,line
-cm,AR30,AREA
+cm,AR30,area
 
-! Create flanges selection component
-asel,s,loc,y,0
-asel,a,loc,y,arg3
-cmsel,r,ar30
-cm,DRAW_IBEAM_COMPA_FLANGES,area
+! Top flange
+cmsel,s,AR30
+asel,r,loc,y,arg3
+cm,%AR36%,area
 
-! Create web selection component
-asel,s,loc,z,0
-cmsel,r,AR30
-cm,DRAW_IBEAM_COMPA_WEB,area
+! Bottom flange
+cmsel,s,AR30
+asel,r,loc,y,0
+cm,%AR37%,area
 
+! Both flanges
+cmsel,s,%AR36%
+cmsel,a,%AR37%
+cm,%AR34%,area
+
+! Web
+cmsel,s,AR30
+asel,r,loc,z,0
+cm,%AR35%,area
+
+!! Clean up                                                                                       !!
+wpcsys,-1
 krestore
 lrestore
 arestore
-cmsel,a,DRAW_IBEAM_COMPA_WEB
-cmsel,a,DRAW_IBEAM_COMPA_FLANGES
+mpoprestore
+prestore
 cmsel,a,AR28
 cmsel,a,AR29
-
-! Clear
+cmsel,a,AR30
 cmdele,AR28
 cmdele,AR29
 cmdele,AR30
-*del,DRAW_IBEAM_ARR_KPNUMS
-
