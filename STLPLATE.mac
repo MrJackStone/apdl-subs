@@ -62,7 +62,7 @@ AR23='STLPLATE_VAR_secNum'
 
 ! Create steel material model:
 AR24=(abs(arg3)>1)
-*if,arg3,gt,0,then
+*if,arg3,ge,0,then
   ! Determine if linear-elastic model is to be used
   AR25=0
   *if,arg5,le,0,then
