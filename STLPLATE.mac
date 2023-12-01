@@ -41,10 +41,13 @@ pbackup
 /prep7
 
 ! Set number of cross-section
+AR21=0
 *get,AR20,parm,arg1,type
-*if,AR20,eq,0,and,arg1,gt,0,then
+*if,AR20,eq,0,then
   AR21=arg1
-*else
+*endif
+
+*if,AR21,eq,0,then
   *get,AR22,secp,,num,max
   AR21=AR22+1
 *endif
