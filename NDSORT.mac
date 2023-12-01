@@ -83,7 +83,7 @@ AR96='NDSORT_ARR_zcoord'
 *dim,%AR96%,,AR22
 
 ! Change listing formatting settings to remove headers
-/page,nc,,-1,,1
+/page,AR22,,-1,,1
 /header,off,off,off,off,off,off
 
 ! Write node listing to external file
