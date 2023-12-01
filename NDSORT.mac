@@ -107,10 +107,10 @@ orestore
 
 ! Reverse order if descending sort was requested
 *if,AR23,eq,'D',then
-  arrreverse,,%AR93%
-  arrreverse,,%AR94%
-  arrreverse,,%AR95%
-  arrreverse,,%AR96%
+  arrreverse,,AR93
+  arrreverse,,AR94
+  arrreverse,,AR95
+  arrreverse,,AR96
 *endif
 
 ! Clean up
