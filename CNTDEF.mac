@@ -49,9 +49,9 @@
 ebackup
 nbackup
 
-!!
-!! A. ELEMENT TYPES
-!!
+!!                                                                                                !!
+!! A. ELEMENT TYPES                                                                               !!
+!!                                                                                                !!
 ! Create element types
 *get,ar21,etyp,,num,max
 
@@ -95,9 +95,9 @@ keyopt, ar32, 18, 0 ! Sliding behavior:        [0] Finite sliding
 !
 !
 !
-!!
-!! B. REAL CONSTANTS
-!!
+!!                                                                                                !!
+!! B. REAL CONSTANTS                                                                              !!
+!!                                                                                                !!
 *get,ar20,rcon,,num,max
 ar30=ar20+1
 
@@ -134,18 +134,18 @@ rmore,   CNTDEF_ARR_rc(13)
 !
 !
 !
-!!
-!! C. MATERIAL
-!!
+!!                                                                                                !!
+!! C. MATERIAL                                                                                    !!
+!!                                                                                                !!
 *get,ar22,mat,,num,max
 ar33=ar22+1
 mp,mu,ar33,arg6
 !
 !
 !
-!!
-!! D. CREATE ELEMENTS
-!!
+!!                                                                                                !!
+!! D. CREATE ELEMENTS                                                                             !!
+!!                                                                                                !!
 ! Set current RC set & material, same for CONTA & TARGE
 real,ar30
 mat,ar33
@@ -174,9 +174,9 @@ cm,%ar39%,elem
 !
 !
 !
-!!
-!! E. FINISH
-!!
+!!                                                                                                !!
+!! E. FINISH                                                                                      !!
+!!                                                                                                !!
 elrestore
 nrestore
 *del,CNTDEF_ARR_rc
