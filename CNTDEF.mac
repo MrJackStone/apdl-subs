@@ -67,8 +67,8 @@ et,ar32,arg4
 keyopt, ar32,  1, 0 ! Degrees of freedom:      [0] UX, UY
 keyopt, ar32,  2, 0 ! Contact algorithm:       [0] Augmented Lagrangian
 keyopt, ar32,  3, 0 ! Contact stiffness units: [0] FORCE/LENGTH³
-keyopt, ar32,  4, 1 !! Contact detection:       [0] On Gauss point
-keyopt, ar32,  5, 3 !! CNOF/ICONT:              [0] No automated adjustment
+keyopt, ar32,  4, 0 ! Contact detection:       [0] On Gauss point
+keyopt, ar32,  5, 0 ! CNOF/ICONT:              [0] No automated adjustment
 keyopt, ar32,  6, 0 ! Stiffness variation:     [0] Default range
 keyopt, ar32,  7, 0 ! Time increment control:  [0] No control
 keyopt, ar32,  8, 0 ! Symmetric behavior:      [0] Both pairs active, each with its own characteristics
