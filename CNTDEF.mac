@@ -75,7 +75,7 @@ keyopt, ar32,  8, 0 ! Symmetric behavior:      [0] Both pairs active, each with 
 keyopt, ar32,  9, 0 ! Initial penetration/gap: [0] Include both
 keyopt, ar32, 10, 0 ! Stiffness update:        [0] Each iteration
 keyopt, ar32, 11, 0 ! Beam/shell thk. effect:  [0] Exclude
-keyopt, ar32, 12, 0 ! Surface behavior:        [0] Standard
+keyopt, ar32, 12, arg5 ! Surface behavior:        [0] Standard
 keyopt, ar32, 14, 0 ! Fluid pres. penetration: [0] Default
 keyopt, ar32, 15, 0 ! Stabilization damping:   [0] Default
 keyopt, ar32, 18, 0 ! Sliding behavior:        [0] Finite sliding
@@ -162,8 +162,8 @@ esel,r,type,,ar31
 cm,%ar38%,elem
 
 ! select CONTA elements & nodes
-ar36=strcat('COMPN_',arg1)
-ar37=strcat('COMPE_',arg1)
+ar36=strcat('COMPN_',arg2)
+ar37=strcat('COMPE_',arg2)
 ar39=strcat(ar37,'_TARGE')
 type,ar32
 cmsel,s,ar36
