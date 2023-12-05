@@ -1,38 +1,68 @@
-! ENDPNG, name, blackBg
-! ENDPNG, arg1,    arg2
+! ENDPNG , name , blackBg ,      ,      ,      , folder
+! ENDPNG , arg1 , arg2    , arg3 , arg4 , arg5 , arg6
 
 ! Description:
 ! Reverts display to default device, closing PNG file opened by 'GO2PNG' subroutine.
 
-! Argument list:
-! arg1: name  -  name of the image file generated
+! Arguments:
+! arg1: name     -  name of the image file generated
+! arg2: blackBg  -  change background to white (0, default) or keep background black (1)
+! arg3:          -  unused
+! arg4:          -  unused
+! arg5:          -  unused
+! arg6: folder   -  name of the folder in which the file will be saved (optional).
+!                   If a folder name is given, the folder will be created inside the current
+!                   working directory. Defaults to the current working directory.
 
-! Local variable list:
+! Local parameters:
 ! AR20: parType
+! AR24: outputFileName
+! AR25: folderPrefix
+! AR26: renameOpt
+! AR27: newName
 
-*if,arg2,NE,1,THEN
-    /cmap,_TEMPCMAP_,CMP
-    /delete,_TEMPCMAP_,CMP
-    /show,CLOSE
-    /rgb,INDEX, 0, 0, 0, 0
-    /rgb,INDEX, 60, 60, 60,13
-    /rgb,INDEX, 80, 80, 80,14
-    /rgb,INDEX,100,100,100,15
+! Global parameters (erased at the end of this subroutine):
+! ENDPNG_jobname
+
+
+! Set rename file option
+AR26=0
+AR27=''
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR26=1
+  AR27=arg1
+*endif
+
+! Define output file's name, prefixed with the optional folder name
+AR25=''
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  /syp,mkdir,arg6
+  AR25=strcat(arg6,'\')
+*endif
+AR24=strcat(AR25,%AR27%)
+
+! Invert background
+*if,arg2,ne,1,then
+  /cmap,_TEMPCMAP_,cmp
+  /delete,_TEMPCMAP_,cmp
+  /show,CLOSE
+  /rgb,INDEX, 0, 0, 0, 0
+  /rgb,INDEX, 60, 60, 60,13
+  /rgb,INDEX, 80, 80, 80,14
+  /rgb,INDEX,100,100,100,15
 *else
-    /delete,_TEMPCMAP_,CMP
-    /show,CLOSE
+  /delete,_TEMPCMAP_,cmp
+  /show,close
 *endif
 
-*get,AR20,PARM,arg1,TYPE
-*if,AR20,EQ,3,THEN
-   ! Rename file
-   *del,ENDPNG_FileName
-   *get,ENDPNG_FileName,ACTIVE,0,JOBNAM
-   /rename,'%ENDPNG_FileName%000','png',,'%arg1%','png'
+! Rename file
+*if,AR26,eq,1,then
+  *del,ENDPNG_jobname,,nopr
+  *get,ENDPNG_jobname,active,,jobnam
+  /rename,'%ENDPNG_FileName%000','png',,'%AR24%','png'
 *endif
 
-
-
-
-
-
+! Clean up
+*del,ENDPNG_jobname,,nopr

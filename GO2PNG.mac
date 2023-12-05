@@ -1,33 +1,27 @@
-! GO2PNG,  res, VectorMode, blackBg
-! GO2PNG, arg1,       arg2,    arg3
+! GO2PNG , res  , VectorMode , blackBg
+! GO2PNG , arg1 , arg2       , arg3
 
 ! Description:
 ! Redirects output to PNG file. Must be followed by 'ENDPNG' to complete image capture.
 
-! Argument list:
-! arg1: res  -  image resolution (default = 2400)
+! Arguments:
+! arg1: res         -  image resolution (default = 2400)
 ! arg2: VectorMode  -  activates (1) or deactivates (0) vector mode for plot capture
+! arg3: blackBg     -  change background to white (0, default) or keep background black (1)
 
 ! Local parameters:
-! AR21: vectorMode
-! AR22: parmType
+! AR21: resolution
 
-*get,AR22,PARM,arg2,TYPE
-*if,AR22,EQ,0,THEN
-   *if,arg2,EQ,1,THEN
-      AR21=1
-   *elseif,arg2,EQ,2,THEN
-      AR21=0
-   *endif
+
+! Resolution
+AR21=2400
+*if,arg1,gt,0,then
+  AR21=arg1
 *endif
 
-/show,PNG,,AR21
+/show,png,,arg2
 
-*if,arg1,GT,0,THEN
-   /gfile,arg1
-*else
-   /gfile,2400
-*endif
+/gfile,AR21
 
 *if,arg3,NE,1,THEN
     /cmap,_TEMPCMAP_,CMP,,SAVE
