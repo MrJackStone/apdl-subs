@@ -109,11 +109,6 @@ ar31='%C'
     *get,AR23,graph,AR26,contour,ncont
     AR24=AR21+(AR23-1)*AR22
     clims,AR21*AR20,AR24*AR20
-
-    mAR21=AR21
-    mAR22=AR22
-    mAR23=AR23
-    mAR24=AR24
 *endif
 /nopr
 /input,cleanplot_tmp2,tmp
@@ -124,4 +119,3 @@ ar31='%C'
 /delete,cleanplot_tmp1,tmp
 /delete,cleanplot_tmp2,tmp
 /gopr
-
