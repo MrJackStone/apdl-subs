@@ -1,11 +1,11 @@
-! TAKEPIC, FileName, FileSize, VectorMode, graphMode, fileExt
-! TAKEPIC, arg1,     arg2,     arg3,       arg4,      arg5
+! TAKEPIC, FileName, FileSize, VectorMode, graphMode, fileExt, folder
+! TAKEPIC, arg1,     arg2,     arg3,       arg4,      arg5,    arg6
 
 ! Description:
 ! Captures the image currently displayed on the screen. Resolution, file name, vector display
 ! and file format can be set using the arguments.
 
-! Argument list:
+! Arguments:
 ! arg1: FileName    -  name of the output file
 ! arg2: FileSize    -  image resolution (default = 2400)
 ! arg3: VectorMode  -  vector display (wireframe):
@@ -19,94 +19,129 @@
 ! arg5: fileExt     -  image file format
 !                         [0] PNG
 !                         [1] JPEG
+! arg6: folder      -  name of the folder in which the image will be saved. Defaults to the current
+!                      working directory. If a folder name is given, the folder will be created
+!                      inside the current working directory.
 
-! Local variable list:
+! Local parameters:
 ! AR20: ArgType
 ! AR21: WireframeOn
 ! AR22: ParmType
 ! AR23: imgExt
+! AR24: switchFolder
+
+! Global parameters (erased at the end of this subroutine):
+! TAKEPIC_filename
+! TAKEPIC_homedir
+
+
+! Determine whether or not to save to nested folder
+AR24=0
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  AR24=1
+*endif
+
+! Create nested folder
+*if,AR24,eq,1,then
+  *del,TAKEPIC_homedir,,nopr
+  /inquire,TAKEPIC_homedir,directory
+  /syp,mkdir,arg6
+*endif
 
 ! Image file format
 AR23='PNG'
-*get,AR22,PARM,arg5,TYPE
-*if,AR22,EQ,0,THEN
-   *if,arg5,EQ,1,THEN
+*get,AR22,parm,arg5,type
+*if,AR22,eq,0,then
+   *if,arg5,eq,1,then
       AR23='JPEG'
    *endif
 *endif
 
 ! Graphical display definition
-*get,AR20,PARM,arg4,TYPE
-*if,AR20,EQ,0,THEN
-   *if,arg4,EQ,1,THEN
-      /graphics,FULL
-   *elseif,arg4,EQ,2,THEN
-      /graphics,POWER
+*get,AR20,parm,arg4,type
+*if,AR20,eq,0,then
+   *if,arg4,eq,1,then
+      /graphics,full
+   *elseif,arg4,eq,2,then
+      /graphics,power
    *endif
 *endif
 
 ! Vector display definition
-*get,AR21,GRAPH,,DISPLAY
-*get,AR22,PARM,arg3,TYPE
-*if,AR22,EQ,0,THEN
-   *if,arg3,EQ,1,THEN
+*get,AR21,graph,,display
+*get,AR22,parm,arg3,type
+*if,AR22,eq,0,then
+   *if,arg3,eq,1,then
       AR21=1
-   *elseif,arg3,EQ,2,THEN
+   *elseif,arg3,eq,2,then
       AR21=0
    *endif
 *endif
 
 ! Change graphical output
-*if,AR23,EQ,'PNG',THEN
-   /show,PNG,,AR21
-*elseif,AR23,EQ,'JPEG',THEN
-   /show,JPEG,,AR21
+*if,AR23,eq,'PNG',then
+   /show,png,,AR21
+*elseif,AR23,eq,'JPEG',then
+   /show,jpeg,,AR21
 *endif
-! Settings:
-!   Compression off
-PNGR,COMP,ON,-1
-!   Orientation: horizontal
-PNGR,ORIENT,HORIZ
-!   Colored image
-PNGR,COLOR,2
-!   Bitmap text
-PNGR,TMOD,1
+
+! Basic settings
+pngr,comp,on,-1
+pngr,orient,horiz
+pngr,color,2
+pngr,tmod,1
+
 ! Image resolution
-*if,arg2,GT,0,THEN
+*if,arg2,gt,0,then
    /gfile,arg2
 *else
    /gfile,2400
 *endif
+
+! Change destination folder
+*if,AR24,eq,1,then
+  /cwd,%arg6%
+*endif
+
 ! Create temporary color map
-/cmap,_TEMPCMAP_,CMP,,SAVE
-! Invert display
-/rgb,INDEX,100,100,100, 0
-/rgb,INDEX, 80, 80, 80,13
-/rgb,INDEX, 60, 60, 60,14
-/rgb,INDEX, 0, 0, 0,15
+/cmap,_TEMPCMAP_,cmp,,save
+/rgb,index,100,100,100, 0
+/rgb,index, 80, 80, 80,13
+/rgb,index, 60, 60, 60,14
+/rgb,index, 0, 0, 0,15
+
 ! Draw image (creates the file)
 /replot
-! Delete temporary color map
-/cmap,_TEMPCMAP_,CMP
-/delete,_TEMPCMAP_,CMP
-! Reset graphical output
-/show,CLOSE,,AR21
-! Reset display colors
-/rgb,INDEX, 0, 0, 0, 0
-/rgb,INDEX, 60, 60, 60,13
-/rgb,INDEX, 80, 80, 80,14
-/rgb,INDEX,100,100,100,15
 
-*get,AR20,PARM,arg1,TYPE
-*if,AR20,EQ,3,THEN
-   ! Rename file
-   *del,TAKEPIC_FileName
-   *get,TAKEPIC_FileName,ACTIVE,0,JOBNAM
-   *if,AR23,EQ,'PNG',THEN
-      /rename,'%TAKEPIC_FileName%000','png',,'%arg1%','png'
-   *elseif,AR23,EQ,'JPEG',THEN
-      /rename,'%TAKEPIC_FileName%000','jpg',,'%arg1%','jpg'
+! Delete temporary color map
+/cmap,_TEMPCMAP_,cmp
+/delete,_TEMPCMAP_,cmp
+
+! Reset graphical output
+/show,close,,AR21
+/rgb,index, 0, 0, 0, 0
+/rgb,index, 60, 60, 60,13
+/rgb,index, 80, 80, 80,14
+/rgb,index,100,100,100,15
+
+! Rename file
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+   *del,TAKEPIC_filename
+   *get,TAKEPIC_filename,active,0,jobnam
+   *if,AR23,eq,'png',then
+      /rename,'%TAKEPIC_filename%000','png',,'%arg1%','png'
+   *elseif,AR23,eq,'jpeg',then
+      /rename,'%TAKEPIC_filename%000','jpg',,'%arg1%','jpg'
    *endif
 *endif
 
+! Restore home working directory
+*if,AR24,eq,1,then
+  /cwd,TAKEPIC_homedir(1)
+*endif
 
+! Clean up
+*del,TAKEPIC_filename,,nopr
+*del,TAKEPIC_homedir,,nopr
