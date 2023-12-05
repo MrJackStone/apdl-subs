@@ -19,9 +19,9 @@
 ! arg5: fileExt     -  image file format
 !                         [0] PNG
 !                         [1] JPG
-! arg6: folder      -  name of the folder in which the image will be saved. Defaults to the current
-!                      working directory. If a folder name is given, the folder will be created
-!                      inside the current working directory.
+! arg6: folder      -  name of the folder in which the file will be saved (optional).
+!                      If a folder name is given, the folder will be created inside the current
+!                      working directory. Defaults to the current working directory.
 
 ! Local parameters:
 ! AR20: ArgType
@@ -33,7 +33,6 @@
 
 ! Global parameters (erased at the end of this subroutine):
 ! TAKEPIC_filename
-! TAKEPIC_homedir
 
 
 ! Define output file's name, prefixed with the optional folder name

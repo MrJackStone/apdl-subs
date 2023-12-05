@@ -1,5 +1,5 @@
 ! WRVAR , xVar , yVar , fName , append ,      , folder
-! WRVAR , arg1 , arg3 , arg3  , arg4   , arg5 , arg6
+! WRVAR , arg1 , arg2 , arg3  , arg4   , arg5 , arg6
 
 ! Description:
 ! Transfers the contents of two time-history variables (one associated with the X axis and the other
@@ -13,18 +13,19 @@
 !                     [0] Create new file
 !                     [1] Append existing file
 ! arg5:         -  unused
-! arg6: folder  -  name of the folder in which the file will be saved. Defaults to the current
-!                  working directory. If a folder name is given, the folder will be created
-!                  inside the current working directory.
+! arg6: folder  -  name of the folder in which the file will be saved (optional).
+!                  If a folder name is given, the folder will be created inside the current
+!                  working directory. Defaults to the current working directory.
 
 ! Local parameters:
 ! AR20: parmType
 ! AR21: newFileKey
 ! AR22: appendFileKey
-! AR24: switchFolder
+! AR24: outputFileName
+! AR25: folderPrefix
 
 ! Global parameters (erased at the end of this subroutine):
-! WRVAR_STR_homedir
+! -
 
 ! Output parameters:
 !    WRVAR_ARR_xValues
@@ -33,66 +34,31 @@
 !       Array parameter with Y values
 
 
-! Determine whether or not to save to nested folder
-AR24=0
+! Define output file's name, prefixed with the optional folder name
+AR25=''
 *get,AR20,parm,arg6,type
 *if,AR20,eq,3,then
-  AR24=1
-*endif
-
-! Create nested folder
-*if,AR24,eq,1,then
-  *del,WRVAR_STR_homedir,,nopr
-  /inquire,WRVAR_STR_homedir,directory
   /syp,mkdir,arg6
+  AR25=strcat(arg6,'\')
 *endif
+AR24=strcat(AR25,%arg3%)
 
-! Set file creation options
-AR21=0
-AR22=0
-*get,AR20,PARM,arg3,TYPE
-*if,AR20,EQ,3,THEN
-   AR22=STRLENG(arg3)
-   *if,AR22,GT,1,THEN
-      AR21=1
-      *get,AR20,PARM,arg4,TYPE
-      *if,AR20,EQ,0,THEN
-         *if,arg4,EQ,1,THEN
-            AR22=1
-         *endif
-      *endif
-   *endif
+! Set overwite/append option
+AR22=''
+*if,arg4,eq,1,then
+  AR22='APPEND'
 *endif
 
 ! Transfer X values
-*del,WRVAR_ARR_xValues
-VGET,WRVAR_ARR_xValues,arg1
+*del,WRVAR_ARR_xValues,,nopr
+vget,WRVAR_ARR_xValues,arg1
 
 ! Transfer Y values
-*del,WRVAR_ARR_yValues
-VGET,WRVAR_ARR_yValues,arg2
-
-! Change destination folder
-*if,AR24,eq,1,then
-  /cwd,%arg6%
-*endif
+*del,WRVAR_ARR_yValues,,nopr
+vget,WRVAR_ARR_yValues,arg2
 
 ! Write data do file
-*if,AR21,EQ,1,THEN
-   *if,AR22,EQ,1,THEN
-      *cfopen,arg3,'TXT',,APPEND
-   *else
-      *cfopen,arg3,'TXT'
-   *endif
-      *vwrite,WRVAR_ARR_xValues(1),WRVAR_ARR_yValues(1)
-      (E20.8,' ',E20.8)
-   *cfclos
-*endif
-
-! Restore home working directory
-*if,AR24,eq,1,then
-  /cwd,WRVAR_STR_homedir(1)
-*endif
-
-! Clean up
-*del,WRVAR_STR_homedir,,nopr
+*cfopen,arg3,'TXT',,%AR22%
+  *vwrite,WRVAR_ARR_xValues(1),WRVAR_ARR_yValues(1)
+  (E20.8,' ',E20.8)
+*cfclos
