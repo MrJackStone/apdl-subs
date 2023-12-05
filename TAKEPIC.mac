@@ -53,7 +53,7 @@ AR25=''
   /syp,mkdir,arg6
   AR25=strcat(arg6,'\')
 *endif
-AR24=strcat(AR25,%AR27%)
+AR24=strcat(AR25,AR27)
 
 ! Image file format
 AR23='PNG'

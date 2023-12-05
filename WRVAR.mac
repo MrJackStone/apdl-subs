@@ -41,7 +41,7 @@ AR25=''
   /syp,mkdir,arg6
   AR25=strcat(arg6,'\')
 *endif
-AR24=strcat(AR25,%arg3%)
+AR24=strcat(AR25,arg3)
 
 ! Set overwite/append option
 AR22=''
