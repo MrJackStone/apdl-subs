@@ -18,7 +18,7 @@
 !                         [2] PowerGraphics;
 ! arg5: fileExt     -  image file format
 !                         [0] PNG
-!                         [1] JPEG
+!                         [1] JPG
 ! arg6: folder      -  name of the folder in which the image will be saved. Defaults to the current
 !                      working directory. If a folder name is given, the folder will be created
 !                      inside the current working directory.
@@ -28,33 +28,29 @@
 ! AR21: WireframeOn
 ! AR22: ParmType
 ! AR23: imgExt
-! AR24: switchFolder
+! AR24: outputFileName
+! AR25: folderPrefix
 
 ! Global parameters (erased at the end of this subroutine):
 ! TAKEPIC_filename
 ! TAKEPIC_homedir
 
 
-! Determine whether or not to save to nested folder
-AR24=0
+! Define output file's name, prefixed with the optional folder name
+AR25=''
 *get,AR20,parm,arg6,type
 *if,AR20,eq,3,then
-  AR24=1
-*endif
-
-! Create nested folder
-*if,AR24,eq,1,then
-  *del,TAKEPIC_homedir,,nopr
-  /inquire,TAKEPIC_homedir,directory
   /syp,mkdir,arg6
+  AR25=strcat(arg6,'\')
 *endif
+AR24=strcat(AR25,%arg1%)
 
 ! Image file format
 AR23='PNG'
 *get,AR22,parm,arg5,type
 *if,AR22,eq,0,then
    *if,arg5,eq,1,then
-      AR23='JPEG'
+      AR23='JPG'
    *endif
 *endif
 
@@ -82,7 +78,7 @@ AR23='PNG'
 ! Change graphical output
 *if,AR23,eq,'PNG',then
    /show,png,,AR21
-*elseif,AR23,eq,'JPEG',then
+*elseif,AR23,eq,'JPG',then
    /show,jpeg,,AR21
 *endif
 
@@ -97,11 +93,6 @@ pngr,tmod,1
    /gfile,arg2
 *else
    /gfile,2400
-*endif
-
-! Change destination folder
-*if,AR24,eq,1,then
-  /cwd,%arg6%
 *endif
 
 ! Create temporary color map
@@ -130,18 +121,8 @@ pngr,tmod,1
 *if,AR20,eq,3,then
    *del,TAKEPIC_filename
    *get,TAKEPIC_filename,active,0,jobnam
-   *if,AR23,eq,'png',then
-      /rename,'%TAKEPIC_filename%000','png',,'%arg1%','png'
-   *elseif,AR23,eq,'jpeg',then
-      /rename,'%TAKEPIC_filename%000','jpg',,'%arg1%','jpg'
-   *endif
-*endif
-
-! Restore home working directory
-*if,AR24,eq,1,then
-  /cwd,TAKEPIC_homedir(1)
+   /rename,'%TAKEPIC_filename%000','%AR23%',,'%AR24%','%AR23%'
 *endif
 
 ! Clean up
 *del,TAKEPIC_filename,,nopr
-*del,TAKEPIC_homedir,,nopr
