@@ -3,7 +3,7 @@
 
 ! Description:
 ! Transfers the contents of two time-history variables (one associated with the X axis and the other
-! with the Y axis) to array parameters and writes their contents to an external file (.VAR)
+! with the Y axis) to array parameters and writes their contents to an external file (.TXT)
 
 ! Arguments:
 ! arg1: xVar    -  number of time-history variable corresponding to X values
@@ -80,9 +80,9 @@ VGET,WRVAR_ARR_yValues,arg2
 ! Write data do file
 *if,AR21,EQ,1,THEN
    *if,AR22,EQ,1,THEN
-      *cfopen,arg3,'VAR',,APPEND
+      *cfopen,arg3,'TXT',,APPEND
    *else
-      *cfopen,arg3,'VAR'
+      *cfopen,arg3,'TXT'
    *endif
       *vwrite,WRVAR_ARR_xValues(1),WRVAR_ARR_yValues(1)
       (E20.8,' ',E20.8)
