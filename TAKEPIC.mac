@@ -30,10 +30,21 @@
 ! AR23: imgExt
 ! AR24: outputFileName
 ! AR25: folderPrefix
+! AR26: renameOpt
+! AR27: newName
 
 ! Global parameters (erased at the end of this subroutine):
 ! TAKEPIC_filename
 
+
+! Set rename file option
+AR26=0
+AR27=''
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR26=1
+  AR27=arg1
+*endif
 
 ! Define output file's name, prefixed with the optional folder name
 AR25=''
@@ -42,7 +53,7 @@ AR25=''
   /syp,mkdir,arg6
   AR25=strcat(arg6,'\')
 *endif
-AR24=strcat(AR25,%arg1%)
+AR24=strcat(AR25,%AR27%)
 
 ! Image file format
 AR23='PNG'
@@ -116,8 +127,7 @@ pngr,tmod,1
 /rgb,index,100,100,100,15
 
 ! Rename file
-*get,AR20,parm,arg1,type
-*if,AR20,eq,3,then
+*if,AR26,eq,1,then
    *del,TAKEPIC_filename
    *get,TAKEPIC_filename,active,0,jobnam
    /rename,'%TAKEPIC_filename%000','%AR23%',,'%AR24%','%AR23%'
