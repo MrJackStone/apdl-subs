@@ -58,7 +58,7 @@ vget,WRVAR_ARR_xValues,arg1
 vget,WRVAR_ARR_yValues,arg2
 
 ! Write data do file
-*cfopen,arg3,'TXT',,%AR22%
+*cfopen,AR24,'TXT',,%AR22%
   *vwrite,WRVAR_ARR_xValues(1),WRVAR_ARR_yValues(1)
   (E20.8,' ',E20.8)
 *cfclos

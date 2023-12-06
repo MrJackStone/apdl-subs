@@ -61,7 +61,7 @@ AR24=strcat(AR25,AR27)
 *if,AR26,eq,1,then
   *del,ENDPNG_jobname,,nopr
   *get,ENDPNG_jobname,active,,jobnam
-  /rename,'%ENDPNG_FileName%000','png',,'%AR24%','png'
+  /rename,'%ENDPNG_jobname%000','png',,'%AR24%','png'
 *endif
 
 ! Clean up
