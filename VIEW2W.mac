@@ -1,0 +1,16 @@
+! VIEW2W
+
+! Description:
+! Activates display in two windows. Window 1 occupies the left half of the screen and window 2
+! occupies the right half of the screen.
+
+/window,all,dele
+
+/window , 1 , -1    , 0.335 , -1 , 1
+/window , 2 , 0.335 , 1.67  , -1 , 1
+
+/view , 1 , 1 , 1  , 1
+/view , 2 , 1 , -1 , 1
+
+/angle,all,0
+/auto,all
