@@ -1,5 +1,5 @@
-! UPFCTCALC , outputParm , targetDisp , firstNset , lastNset , captureImages
-! UPFCTCALC , arg1       , arg2       , arg3      , arg4     , arg5
+! UPFCTCALC , outputParm , targetDisp , firstNset , lastNset , captureImages , folder , imgNamePrefix
+! UPFCTCALC , arg1       , arg2       , arg3      , arg4     , arg5          , arg6   , arg7
 
 ! Description:
 ! Calculates the geometry imperfection import factor to be used in UPGEOM for a given interval of
@@ -14,6 +14,12 @@
 ! arg5: captureImages  -  saves images of each mode's deformed shape to external PNG file
 !                           [0] disable (default)
 !                           [1] enable
+! arg6: folder         -  name of the folder in which the files will be saved (optional).
+!                         If a folder name is given, the folder will be created inside the current
+!                         working directory. Defaults to the current working directory.
+! arg7: imgNamePrefix  -  string used as prefix to the name of the exported image files.
+!                         Defaults to 'UPFCTCALC'. Applies only if image capture is enabled,
+!                         i.e., arg5=1.
 
 ! Local parameters:
 ! AR20: parType
@@ -23,10 +29,18 @@
 ! AR24: lastValidSet
 ! AR25: factor
 ! AR26: nthNset
+! AR27: fnamePrefix
 
 ! Global parameters (erased at the end of this subroutine):
 ! UPFCTCALC_VAR_nthMax
 
+
+! Set prefix of image file name
+AR27='UPFCTCALC'
+*get,AR20,parm,arg7,type
+*if,AR20,eq,3,then
+  AR27=arg7
+*endif
 
 ! Get name of output parameter
 AR21='UPFCTCALC_ARR_factors'
@@ -52,7 +66,7 @@ AR22=AR24-AR23+1
   cntrlims,,,'UPFCTCALC_VAR_nthMax'
   ! Capture image of deformed shape
   *if,arg5,eq,1,then
-    takepic,'UPFCTCALC_MODE_%AR26%'
+    takepic,'%AR27%_MODE_%AR26%',,,,,arg6
   *endif
   ! Set import factor to zero if max plotted value is also zero
   *if,UPFCTCALC_VAR_nthMax,ne,0,then
