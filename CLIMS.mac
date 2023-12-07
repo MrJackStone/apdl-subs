@@ -1,5 +1,5 @@
-! CLIMS, minContour, maxContour, greyExceeding
-! CLIMS,       arg1,       arg2,          arg3
+! CLIMS , minContour , maxContour , greyExceeding , bandCount
+! CLIMS , arg1       , arg2       , arg3          , arg4
 
 ! Description:
 ! Sets scale limits for contour display.
@@ -11,6 +11,7 @@
 !                         [0] Values below min are colored BLUE, above min are colored RED
 !                         [1] Values below min or above max are colored GREY
 !                         [2] Values below min or above max are colored BLACK
+! arg4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
 
 ! Local parameters:
 ! -
@@ -21,23 +22,51 @@
 ! Output parameters:
 ! -
 
-*if,arg1,EQ,0,AND,arg2,EQ,0,THEN
-    /contour,ALL,9,AUTO
+
+! Get number of contours
+AR22=9
+*if,arg4,gt,0,then
+  AR22=arg4
+*endif
+
+! Apply predefined contour color configurations:
+*if,AR22,eq,9,then
+  ! 9 colors
+  /contour,all,9
+  /color,smin,dgra
+  /color,cntr,blue,1
+  /color,cntr,cblu,2
+  /color,cntr,cyan,3
+  /color,cntr,gcya,4
+  /color,cntr,gree,5
+  /color,cntr,ygre,6
+  /color,cntr,yell,7
+  /color,cntr,oran,8
+  /color,cntr,red,9
+  /color,smax,dgra
+*elseif,AR22,eq,5,then
+  ! 5 colors
+  /contour,all,5
+  /color,cntr,blue,1
+  /color,cntr,cyan,2
+  /color,cntr,gree,3
+  /color,cntr,yell,4
+  /color,cntr,red,5
+*endif
+
+*if,arg1,eq,0,and,arg2,eq,0,then
+    /contour,all,AR22,auto
 *else
-    /contour,ALL,9,arg1,,arg2
+    /contour,all,AR22,arg1,,arg2
 *endif
 
 *if,arg3,eq,1,then
-    /color,SMIN,DGRA
-    /color,SMAX,DGRA
+    /color,smin,dgra
+    /color,smax,dgra
 *elseif,arg3,eq,2,then
-    /color,SMIN,WHIT
-    /color,SMAX,WHIT
+    /color,smin,whit
+    /color,smax,whit
 *else
-    /color,SMIN,BLUE
-    /color,SMAX,RED
+    /color,smin,blue
+    /color,smax,red
 *endif
-
-
-
-
