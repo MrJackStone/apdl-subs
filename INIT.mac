@@ -1,0 +1,24 @@
+! INIT
+! INIT
+
+! Description:
+! This subroutine creates a clean slate to begin a new model. Existing parameters are saved before
+! the clearing operation and restored afterwards. Tipically this is one of the first commands
+! called after a _DATA file is read.
+
+! Arguments:
+! -
+
+! Local parameter:
+! -
+
+
+! Save existing parameters
+parsav,all,'DATA_PARM_BACKUP',parm
+
+! Clear model
+finish
+/clear
+
+! Restore parameters
+parres,new,'DATA_PARM_BACKUP',parm
