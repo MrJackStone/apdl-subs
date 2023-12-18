@@ -10,6 +10,8 @@
 !                          'NONE'         -  single load with value 0
 !                          'COOPER E-80'  -  COOPER E-80 locomotive side view, 18 point loads
 !                                            (peak load at +21.45 ±0.75)
+!                          'CE-80+20'     -  COOPER E-80 +20% (all loads multiplied by 1.2)
+!                                            (peak load at +21.45 ±0.75)
 !                          'CE-80_FRONT'  -  COOPER E-80 cross-section view of heaviest axis,
 !                                            two loads (gauge = 1 meter)
 !                          'TB-360'       -  TB-360 load train locomotive followed/preceded by
@@ -123,6 +125,57 @@ AR39=1
         AR27=1+AR23*(AR26-1)
         *do,AR28,1,AR23,1
             AR29=LOADTRAIN_ARR_refLoads(AR28)*AR31
+            AR30=LOADTRAIN_ARR_refPositions(AR28)
+            LOADTRAIN_ARR_loads(AR27+AR28-1)=AR29
+            LOADTRAIN_ARR_positions(AR27+AR28-1)=AR25+AR30
+        *enddo
+        AR25=AR25+AR30+AR24
+    *enddo
+
+    AR38=0
+    *if,AR32,gt,0,then
+        *do,AR28,AR23*AR22+1,LOADTRAIN_VAR_count,1
+            LOADTRAIN_ARR_positions(AR28)=AR25-AR38
+            LOADTRAIN_ARR_loads(AR28)=AR37*AR31
+            AR38=AR38-1
+        *enddo
+    *endif
+
+  *elseif,AR20,EQ,'CE-80+20',THEN
+    ! Reference COOPER E-80 +20% single configuration
+    AR23=18
+    *dim,LOADTRAIN_ARR_refPositions,ARRAY,AR23
+    *dim,LOADTRAIN_ARR_refLoads,ARRAY,AR23
+    LOADTRAIN_ARR_refPositions(1)  =    0,  2.4,  3.9,  5.4,  6.9,  9.6, 11.1, 12.9, 14.4, 16.8
+    LOADTRAIN_ARR_refPositions(11) = 19.2, 20.7, 22.2, 23.7, 26.4, 27.9, 29.7, 31.2
+    LOADTRAIN_ARR_refLoads(1)  = 181e3, 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3, 181e3
+    LOADTRAIN_ARR_refLoads(11) = 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3
+
+    ! Railway car uniformly distributed linear load value
+    AR37=120e3
+
+    ! Distance between load trains
+    AR24=2.4
+
+    ! Number of point loads representing following railway cars
+    *get,AR21,parm,arg5,type
+    *if,AR21,ne,0,then
+        AR32=0
+    *elseif,arg5,gt,0,then
+        AR32=nint(arg5)
+    *else
+        AR32=0
+    *endif
+
+    ! COOPER E-80 repeated N times
+    LOADTRAIN_VAR_count=AR23*AR22+AR32
+    *dim,LOADTRAIN_ARR_positions,ARRAY,LOADTRAIN_VAR_count
+    *dim,LOADTRAIN_ARR_loads,ARRAY,LOADTRAIN_VAR_count
+    AR25=arg3
+    *do,AR26,1,AR22,1
+        AR27=1+AR23*(AR26-1)
+        *do,AR28,1,AR23,1
+            AR29=LOADTRAIN_ARR_refLoads(AR28)*AR31*1.2
             AR30=LOADTRAIN_ARR_refPositions(AR28)
             LOADTRAIN_ARR_loads(AR27+AR28-1)=AR29
             LOADTRAIN_ARR_positions(AR27+AR28-1)=AR25+AR30
