@@ -112,8 +112,16 @@ pngr,tmod,1
 /rgb,index, 60, 60, 60,14
 /rgb,index, 0, 0, 0,15
 
+! Change the automatically generated name of the image: suppress sequential number (jobname000, jobname001, etc.)
+*if,AR26,eq,1,then
+  /devdisp,psfn,ninc
+*endif
+
 ! Draw image (creates the file)
 /replot
+
+! Restore default behavior: add sequential number to automatically generated image name
+/devdisp,psfn,noninc
 
 ! Delete temporary color map
 /cmap,_TEMPCMAP_,cmp
@@ -130,7 +138,7 @@ pngr,tmod,1
 *if,AR26,eq,1,then
    *del,TAKEPIC_filename
    *get,TAKEPIC_filename,active,0,jobnam
-   /rename,'%TAKEPIC_filename%000','%AR23%',,'%AR24%','%AR23%'
+   /rename,'%TAKEPIC_filename%','%AR23%',,'%AR24%','%AR23%'
 *endif
 
 ! Clean up
