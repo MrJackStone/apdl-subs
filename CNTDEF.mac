@@ -164,7 +164,7 @@ cm,%ar38%,elem
 ! select CONTA elements & nodes
 ar36=strcat('COMPN_',arg2)
 ar37=strcat('COMPE_',arg2)
-ar39=strcat(ar37,'_TARGE')
+ar39=strcat(ar37,'_CONTA')
 type,ar32
 cmsel,s,ar36
 cmsel,s,ar37
@@ -180,5 +180,3 @@ cm,%ar39%,elem
 elrestore
 nrestore
 *del,CNTDEF_ARR_rc
-
-
