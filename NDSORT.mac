@@ -103,10 +103,10 @@ AR96='NDSORT_ARR_zcoord'
 *moper,NDSORT_ARR_temp,NDSORT_ARR_data,sort,,AR24
 
 ! Transfer listing data from table to arrays
-*vfun , %AR93%(1) , copy , NDSORT_ARR_data(1 , 1)
-*vfun , %AR94%(1) , copy , NDSORT_ARR_data(1 , 2)
-*vfun , %AR95%(1) , copy , NDSORT_ARR_data(1 , 3)
-*vfun , %AR96%(1) , copy , NDSORT_ARR_data(1 , 4)
+*vfun , %AR93% , copy , NDSORT_ARR_data(1 , 1)
+*vfun , %AR94% , copy , NDSORT_ARR_data(1 , 2)
+*vfun , %AR95% , copy , NDSORT_ARR_data(1 , 3)
+*vfun , %AR96% , copy , NDSORT_ARR_data(1 , 4)
 
 ! Reverse order if descending sort was requested
 *if,AR23,eq,'D',then
