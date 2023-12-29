@@ -18,13 +18,15 @@
 !                                            arg5 meters of railcars (peak load at 0 ±1)
 !                          'TB-450'       -  TB-450 load train, single truck with 3 axles
 !                                            (peak load at 0)
+!                          'DASH9'        -  two DASH9 locomotives followed by arg5 units of
+!                                            GDE railcars
 ! arg2: repetitions  -  number of times the selected load train will be repeated when filling
 !                       the arrays
 ! arg3: offset       -  location offset applied to load position array
 ! arg4: impactCoef   -  impact coefficient by which each load train force value will be multiplied
 !                       (defaults to 1.0)
 ! arg5: udlLen       -  length of uniformly distributed loads (simulated as point loads 1 meter
-!                       apart) before and after load train
+!                       apart) before and after load train or number of follower railcars
 ! arg6: mirror       -  if activated, mirrors the load train, which is equivalent to redefining the
 !                       position as: POS = -POS. This operation is performed before an offset
 !                       (arg3) is applied.
@@ -52,6 +54,13 @@
 ! AR37: udlRailcars
 ! AR38: rcCounter
 ! AR39: mirrorMultiplier
+! AR40: locomotiveRailcarDist
+! AR41: railcarDistance
+! AR42: nthRailcar
+! AR43: axlesPerRailcar
+! AR44: nthAxle
+! AR50: randomNumFnameSuffix
+! AR51: recordFileName
 
 ! Output parameters:
 ! LOADTRAIN_VAR_count
@@ -63,8 +72,11 @@
 ! LOADTRAIN_ARR_refPositions
 ! LOADTRAIN_ARR_refLoads
 
+
+! Load train name (case-insensitive)
 AR20=UPCASE(arg1)
 
+! Impact multiplier
 *get,AR21,PARM,arg4,TYPE
 *if,AR21,NE,0,OR,arg4,EQ,0,THEN
     AR31=1
@@ -72,6 +84,7 @@ AR20=UPCASE(arg1)
     AR31=arg4
 *endif
 
+! Load train/Locomotive repetitions
 *get,AR21,PARM,arg2,TYPE
 *if,AR21,NE,0,OR,arg2,LE,1,THEN
     AR22=1
@@ -79,15 +92,23 @@ AR20=UPCASE(arg1)
     AR22=arg2
 *endif
 
+! Option: mirror loads
 AR39=1
 *if,arg6,eq,1,then
     AR39=-1
 *endif
 
-*del,LOADTRAIN_ARR_positions
-*del,LOADTRAIN_ARR_loads
-*del,LOADTRAIN_ARR_refPositions
-*del,LOADTRAIN_ARR_refLoads
+! Number of uniformly distributed point loads or following railcars
+AR32=0
+*get,AR21,parm,arg5,type
+*if,AR21,eq,0,then
+  AR32=nint(abs(arg5))
+*endif
+
+*del , LOADTRAIN_ARR_positions    ,  , nopr
+*del , LOADTRAIN_ARR_loads        ,  , nopr
+*del , LOADTRAIN_ARR_refPositions ,  , nopr
+*del , LOADTRAIN_ARR_refLoads     ,  , nopr
 
 
 *if,AR20,EQ,'COOPER E-80',THEN
@@ -105,16 +126,6 @@ AR39=1
 
     ! Distance between load trains
     AR24=2.4
-
-    ! Number of point loads representing following railway cars
-    *get,AR21,parm,arg5,type
-    *if,AR21,ne,0,then
-        AR32=0
-    *elseif,arg5,gt,0,then
-        AR32=nint(arg5)
-    *else
-        AR32=0
-    *endif
 
     ! COOPER E-80 repeated N times
     LOADTRAIN_VAR_count=AR23*AR22+AR32
@@ -157,16 +168,6 @@ AR39=1
     ! Distance between load trains
     AR24=2.4
 
-    ! Number of point loads representing following railway cars
-    *get,AR21,parm,arg5,type
-    *if,AR21,ne,0,then
-        AR32=0
-    *elseif,arg5,gt,0,then
-        AR32=nint(arg5)
-    *else
-        AR32=0
-    *endif
-
     ! COOPER E-80 repeated N times
     LOADTRAIN_VAR_count=AR23*AR22+AR32
     *dim,LOADTRAIN_ARR_positions,ARRAY,LOADTRAIN_VAR_count
@@ -191,6 +192,68 @@ AR39=1
             AR38=AR38-1
         *enddo
     *endif
+
+  *elseif,AR20,eq,'DASH9',then
+    ! Reference DASH9 + GDE railcar configuration:
+
+    ! Locomotive
+    AR23=8
+    *del , LOADTRAIN_ARR_locomotive_pos ,       , nopr
+    *del , LOADTRAIN_ARR_locomotive_for ,       , nopr
+    *dim , LOADTRAIN_ARR_locomotive_pos , array , AR23
+    *dim , LOADTRAIN_ARR_locomotive_for , array , AR23
+    LOADTRAIN_ARR_locomotive_pos(1) =     0 , 2.08  , 3.47  , 5.55  , 12.61 , 14.69 , 16.08 , 18.16
+    LOADTRAIN_ARR_locomotive_for(1) = 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3
+
+    ! Railway car
+    AR43=4
+    *del , LOADTRAIN_ARR_railcar_pos ,       , nopr
+    *del , LOADTRAIN_ARR_railcar_for ,       , nopr
+    *dim , LOADTRAIN_ARR_railcar_pos , array , AR43
+    *dim , LOADTRAIN_ARR_railcar_for , array , AR43
+    LOADTRAIN_ARR_railcar_pos(1) =     0 , 1.73  , 5.50  , 7.23
+    LOADTRAIN_ARR_railcar_for(1) = 275e3 , 275e3 , 275e3 , 275e3
+
+    ! Distance between locomotives
+    AR24=4.91
+
+    ! Distance between locomotive and railcar
+    AR40=3.72
+
+    ! Distance between railcars
+    AR41=2.52
+
+    ! Calculate total number of loads
+    LOADTRAIN_VAR_count=(AR23*AR22)+(AR43*AR32)
+    *dim , LOADTRAIN_ARR_positions , ARRAY , LOADTRAIN_VAR_count
+    *dim , LOADTRAIN_ARR_loads     , ARRAY , LOADTRAIN_VAR_count
+
+    ! Locomotive loads & positions
+    AR27=0
+    AR25=arg3
+    *do,AR26,1,AR22,1
+      *do,AR28,1,AR23,1
+        AR27                          = AR27+1
+        AR29                          = LOADTRAIN_ARR_locomotive_for(AR28)
+        AR30                          = LOADTRAIN_ARR_locomotive_pos(AR28)
+        LOADTRAIN_ARR_loads(AR27)     = AR29*AR31
+        LOADTRAIN_ARR_positions(AR27) = AR25+AR30
+      *enddo
+      AR25=AR25+AR30+AR24
+    *enddo
+
+    ! Railway car loads & positions
+    AR25=AR25-AR24+AR40
+    *do,AR42,1,AR32,1
+      *do,AR44,1,AR43,1
+        AR27                          = AR27+1
+        AR29                          = LOADTRAIN_ARR_railcar_for(AR44)
+        AR30                          = LOADTRAIN_ARR_railcar_pos(AR44)
+        LOADTRAIN_ARR_loads(AR27)     = AR29*AR31
+        LOADTRAIN_ARR_positions(AR27) = AR25+AR30
+      *enddo
+      AR25=AR25+AR30+AR41
+    *enddo
 
 *elseif,AR20,EQ,'TB-32',THEN
     ! Reference TB-32 single configuration
@@ -350,8 +413,26 @@ AR39=1
 
 LOADTRAIN_VAR_length=abs(LOADTRAIN_ARR_positions(1)-LOADTRAIN_ARR_positions(LOADTRAIN_VAR_count))
 
-*del,LOADTRAIN_ARR_refPositions
-*del,LOADTRAIN_ARR_refLoads
+! Write load train configuration to file
+ctime,'LOADTRAIN_VAR_suffix',,'_'
+AR50=rand(100,999)
+AR51='LOADTRAIN_RECORD_%LOADTRAIN_VAR_suffix%_%AR50%'
+*cfopen,%AR51%,'txt'
+  *vwrite,AR20
+Load train name: %S
+  *vwrite,LOADTRAIN_VAR_count
+Number of loads: %I
+  *vwrite,LOADTRAIN_VAR_length
+Load train len.: %F
+  *vwrite,
+  ('Positions            | Forces               ')
+  *vwrite,LOADTRAIN_ARR_positions(1),LOADTRAIN_ARR_loads(1)
+  (F20.8,'  |  ',F20.8)
+*cfclos
 
-
-
+*del , LOADTRAIN_ARR_refPositions   ,  , nopr
+*del , LOADTRAIN_ARR_refLoads       ,  , nopr
+*del , LOADTRAIN_ARR_locomotive_pos ,  , nopr
+*del , LOADTRAIN_ARR_locomotive_for ,  , nopr
+*del , LOADTRAIN_ARR_railcar_pos    ,  , nopr
+*del , LOADTRAIN_ARR_railcar_for    ,  , nopr
