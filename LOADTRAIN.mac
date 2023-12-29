@@ -71,6 +71,11 @@
 ! Global parameters (erased at the end of this subroutine):
 ! LOADTRAIN_ARR_refPositions
 ! LOADTRAIN_ARR_refLoads
+! LOADTRAIN_ARR_locomotive_pos
+! LOADTRAIN_ARR_locomotive_for
+! LOADTRAIN_ARR_railcar_pos
+! LOADTRAIN_ARR_railcar_for
+! LOADTRAIN_ARR_indices
 
 
 ! Load train name (case-insensitive)
@@ -416,7 +421,11 @@ LOADTRAIN_VAR_length=abs(LOADTRAIN_ARR_positions(1)-LOADTRAIN_ARR_positions(LOAD
 ! Write load train configuration to file
 ctime,'LOADTRAIN_VAR_suffix',,'_'
 AR50=rand(100,999)
-AR51='_LOADTRAIN_RECORD_%LOADTRAIN_VAR_suffix%_%AR50%'
+AR51='~LOADTRAIN_LOG_%LOADTRAIN_VAR_suffix%_%AR50%'
+*del,LOADTRAIN_ARR_indices,,nopr
+*dim,LOADTRAIN_ARR_indices,,LOADTRAIN_VAR_count
+*vfill,LOADTRAIN_ARR_indices,ramp,1,1
+
 *cfopen,%AR51%,'txt'
   *vwrite,
   ('LOADTRAIN record: generated load configuration')
@@ -457,9 +466,9 @@ Load train len.: %F
   (' ')
 
   *vwrite,
-  ('Positions            | Forces               ')
-  *vwrite,LOADTRAIN_ARR_positions(1),LOADTRAIN_ARR_loads(1)
-  (F20.8,'  |  ',F20.8)
+  ('Index |            Positions  |                Forces')
+  *vwrite,LOADTRAIN_ARR_indices(1),LOADTRAIN_ARR_positions(1),LOADTRAIN_ARR_loads(1)
+  (F6.0,TL1,' | ',F20.8,'  |  ',F20.8)
 *cfclos
 
 *del , LOADTRAIN_ARR_refPositions   ,  , nopr
@@ -468,3 +477,4 @@ Load train len.: %F
 *del , LOADTRAIN_ARR_locomotive_for ,  , nopr
 *del , LOADTRAIN_ARR_railcar_pos    ,  , nopr
 *del , LOADTRAIN_ARR_railcar_for    ,  , nopr
+*del , LOADTRAIN_ARR_indices        ,  , nopr

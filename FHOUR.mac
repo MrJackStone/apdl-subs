@@ -23,7 +23,7 @@
 ! Set separator
 AR26=':'
 *get,AR27,parm,arg3,type
-*if,arg3,eq,3,then
+*if,AR27,eq,3,then
   AR26=arg3
 *endif
 
