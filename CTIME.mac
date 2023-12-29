@@ -1,8 +1,9 @@
-! CTIME, strTime,   t0
-! CTIME,    arg1, arg2
+! CTIME , strTime , t0   , separator
+! CTIME , arg1    , arg2 , arg3
 
 ! Description:
-! Returns current time (CPU clock) or elapsed time (if t0 is given) as a string (HH:MM:SS).
+! Returns current time (CPU clock) or elapsed time (if t0 is given) as a string (HH:MM:SS). The
+! separator character can be set by arg3, replacing the default ':'.
 
 ! Arguments:
 ! arg1: parm  -  parameter name (string)
@@ -30,7 +31,6 @@
 *endif
 
 ! Convert time to string
-fhour, arg1, AR22
+fhour, arg1, AR22, arg3
 
 _output=%arg1%
-
