@@ -416,14 +416,46 @@ LOADTRAIN_VAR_length=abs(LOADTRAIN_ARR_positions(1)-LOADTRAIN_ARR_positions(LOAD
 ! Write load train configuration to file
 ctime,'LOADTRAIN_VAR_suffix',,'_'
 AR50=rand(100,999)
-AR51='LOADTRAIN_RECORD_%LOADTRAIN_VAR_suffix%_%AR50%'
+AR51='_LOADTRAIN_RECORD_%LOADTRAIN_VAR_suffix%_%AR50%'
 *cfopen,%AR51%,'txt'
+  *vwrite,
+  ('LOADTRAIN record: generated load configuration')
+
+  *vwrite,
+  (' ')
+
   *vwrite,AR20
 Load train name: %S
+  *vwrite,AR22
+Repetitions:     %I
+  *vwrite,arg3
+Initial offset:  %F
+  *vwrite,AR31
+Impact coef.:    %F
+  *vwrite,AR32
+Following loads: %I
+  *if,AR39,eq,1,then
+    *vwrite,
+Mirror loads:    NO
+  *elseif,AR39,eq,-1,then
+    *vwrite,
+Mirror loads:    YES
+  *else
+    *vwrite,
+Mirror loads:    ???
+  *endif
+
+  *vwrite,
+  (' ')
+
   *vwrite,LOADTRAIN_VAR_count
 Number of loads: %I
   *vwrite,LOADTRAIN_VAR_length
 Load train len.: %F
+
+  *vwrite,
+  (' ')
+
   *vwrite,
   ('Positions            | Forces               ')
   *vwrite,LOADTRAIN_ARR_positions(1),LOADTRAIN_ARR_loads(1)
