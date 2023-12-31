@@ -11,6 +11,7 @@
 ! arg2: defType          -  key indicating how the reference line should be defined:
 !                              [0] secant (default)
 !                              [1] tangent to first node
+!                              [2] tangent to second node
 ! arg3: outputLabel      -  label of the path item to be created
 ! arg4: outputScale      -  output path item scaling factor (defaults to 1)
 
@@ -26,6 +27,7 @@
 ! AR27: lastValue
 ! AR28: coef_a
 ! AR29: coef_b
+! AR30: secondToLastValue
 
 
 ! Global parameters (erased at the end of this subroutine):
@@ -40,8 +42,10 @@
 *if,AR20,NE,0,THEN
     AR21='SEC'
 *else
-    *if,arg2,EQ,1,THEN
+    *if,arg2,EQ,1,then
         AR21='TAN'
+    *elseif,arg2,eq,2,THEN
+        AR21='RTAN'
     *else
         AR21='SEC'
     *endif
@@ -63,16 +67,25 @@ pth2arr,arg1
 AR25=PTH2ARR_ARR_OUTPUT(1)
 AR26=PTH2ARR_ARR_OUTPUT(2)
 AR27=PTH2ARR_ARR_OUTPUT(AR23)
+AR30=PTH2ARR_ARR_OUTPUT(AR23-1)
 
-! Calculate reference path parameter:
-! Angular coefficient
+! Calculate reference path parameter: linear & angular coefficients
 *if,AR21,EQ,'SEC',THEN
+    ! Angular coefficient
     AR28=(AR27-AR25)/AR24
+    ! Linear coefficient
+    AR29=AR25
 *elseif,AR21,EQ,'TAN',THEN
+    ! Angular coefficient
     AR28=(AR26-AR25)/AR24
+    ! Linear coefficient
+    AR29=AR25
+*elseif,AR21,EQ,'RTAN',THEN
+    ! Angular coefficient
+    AR28=(AR27-AR30)/AR24
+    ! Linear coefficient
+    AR29=AR30
 *endif
-! Linear coefficient
-AR29=AR25
 
 ! Adjust small values for line coefficients
 *if,abs(AR28),lt,1E-10,then
@@ -96,4 +109,3 @@ pth2arr,arg3,'PTHREBASE_ARR_values'
 
 ! Clear parameters
 *del,PTH2ARR_ARR_OUTPUT
-
