@@ -1,0 +1,55 @@
+! AXANNO , windowNum , position
+! AXANNO , arg1      , arg2
+
+
+buffer=0.05
+textBuffer=0.02
+textOffset=0.025
+size=0.1
+
+! Get window's extents
+*get,windowXMin,graph,arg1,range,xmin
+*get,windowXMax,graph,arg1,range,xmax
+*get,windowYMin,graph,arg1,range,ymin
+*get,windowYMax,graph,arg1,range,ymax
+
+! Top-left position
+xOrigin=windowXMin+buffer
+yOrigin=windowYMax-size-buffer
+
+xHorLineEnd=xOrigin+size
+yHorLineEnd=yOrigin
+
+xVerLineEnd=xOrigin
+yVerLineEnd=yOrigin+size
+
+xHorHead=xHorLineEnd
+yHorHead=yOrigin
+
+xVerHead=xOrigin
+yVerHead=yVerLineEnd
+
+xHorLabel=xHorLineEnd-textOffset
+yHorLabel=yOrigin+textBuffer
+
+xVerLabel=xOrigin+textBuffer
+yVerLabel=yVerLineEnd-textOffset
+
+
+! Draw X axis line
+/line,xOrigin,yOrigin,xHorLineEnd,yHorLineEnd
+
+! Draw Y axis line
+/line,xOrigin,yOrigin,xVerLineEnd,yVerLineEnd
+
+! Draw X axis arrow head
+/lsymbol,xHorHead,yHorHead,0,4,1,0
+
+! Draw Y axis arrow head
+/lsymbol,xVerHead,yVerHead,90,4,1,0
+
+! X axis name
+/tlabel,xHorLabel,yHorLabel,'X'
+
+! Y axis name
+/tlabel,xVerLabel,yVerLabel,'Y'
