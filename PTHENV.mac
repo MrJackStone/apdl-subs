@@ -24,7 +24,7 @@
 ! arg1: option               -  available options:
 !                                  ['CLEAR']   clear envelope history for given paths and labels
 !                                  ['UPDATE']  include active results into envelopes (default)
-! arg2: pathEnvDataParm      -  name of the CHAR array paramter containing path data. This array is
+! arg2: pathEnvDataParm      -  name of the CHAR array parameter containing path data. This array is
 !                               of the format ARRAY(i,j) and should be formatted as follows:
 !                                  j: represents a path
 !                                  i: when i=1, stores the path's name
