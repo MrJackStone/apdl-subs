@@ -217,7 +217,7 @@ AR32=0
     *dim , LOADTRAIN_ARR_railcar_pos , array , AR43
     *dim , LOADTRAIN_ARR_railcar_for , array , AR43
     LOADTRAIN_ARR_railcar_pos(1) =     0 , 1.73  , 5.50  , 7.23
-    LOADTRAIN_ARR_railcar_for(1) = 275e3 , 275e3 , 275e3 , 275e3
+    LOADTRAIN_ARR_railcar_for(1) = 300e3 , 300e3 , 300e3 , 300e3
 
     ! Distance between locomotives
     AR24=4.91
