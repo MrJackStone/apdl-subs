@@ -108,7 +108,7 @@ AR21=strcat(AR20,'_C')
 ! Initialize envelope table
 *get,AR22,parm,%ar11%,type
 *if,AR22,ne,1,then
-    *del,%ar11%
+    *del,%ar11%,,nopr
     *dim,%ar11%,,arg7+1,20
     *do,AR23,1,18,1
         *vfill,%ar11%(1,AR23),ramp,0,0
@@ -221,13 +221,13 @@ pth2arr,'M2','PTH2BEAM_ARR_m2'
 !! MAP ENVELOPE TO PATH
 path,arg5
 
-*del,PTH2BEAM_ARR_cols
+*del,PTH2BEAM_ARR_cols,,nopr
 *dim,PTH2BEAM_ARR_cols,char,20
 PTH2BEAM_ARR_cols( 1)= 'MP_MIN'  , 'MP_MAX'  , 'MB_MIN'  , 'MB_MAX'  , 'N_MIN'   , 'N_MAX'   , 'V_MIN'   , 'V_MAX'   , 'DXT_MIN' , 'DXT_MAX'
 PTH2BEAM_ARR_cols(11)= 'DYT_MIN' , 'DYT_MAX' , 'DZT_MIN' , 'DZT_MAX' , 'DXB_MIN' , 'DXB_MAX' , 'DYB_MIN' , 'DYB_MAX' , 'DZB_MIN' , 'DZB_MAX'
 AR45=4
 *do,AR46,1,20,1
-    *del,PTH2BEAM_ARR_column
+    *del,PTH2BEAM_ARR_column,,nopr
     *dim,PTH2BEAM_ARR_column,array,arg7+1
     *vfun,PTH2BEAM_ARR_column(1),copy,%ar11%(1,AR46)
 
@@ -236,5 +236,22 @@ AR45=4
     arr2pth, 'PTH2BEAM_ARR_column', AR47, AR45
 *enddo
 
-
-
+!! Clean up                                                                                       !!
+pth2mnTopPath=strcat(strsub(AR20,1,6),'_T')
+pth2mnBotPath=strcat(strsub(AR20,1,6),'_B')
+pth2vPath=strsub(AR21,1,6)
+dlfPathName1=strsub(AR42,1,6)
+dlfPathName2=strsub(AR43,1,6)
+dlfPathName3=strsub(AR44,1,6)
+dlfPathName4=strsub(AR42,1,6)
+dlfPathName5=strsub(AR43,1,6)
+dlfPathName6=strsub(AR44,1,6)
+padele,pth2mnTopPath
+padele,pth2mnBotPath
+padele,pth2vPath
+padele,dlfPathName1
+padele,dlfPathName2
+padele,dlfPathName3
+padele,dlfPathName4
+padele,dlfPathName5
+padele,dlfPathName6
