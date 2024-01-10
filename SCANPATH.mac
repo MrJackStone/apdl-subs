@@ -221,11 +221,11 @@ SCANPATH_ARR_vscfunOptions(1)='max', 'min', 'medi', 'mean', 'vari', 'stdv', 'rms
 SCANPATH_ARR_beamOptions(1)='m', 'n', 'v'
 
 ! Label assigned to directly extracted path result
-AR28=strcat(arg1,arg2)
+AR28=strsub(strcat(arg1,arg2),1,8)
 ! Label assigned to calculated path result
 *if,arg3,eq,0,then
     ! Cumulative
-    AR29=strcat('CUM_',AR28)
+    AR29=strsub(strcat('CUM_',AR28),1,8)
 *elseif,arg3,ge,1,and,arg3,le,7,then
     ! VSCFUN option
     AR82=SCANPATH_ARR_vscfunOptions(arg3)
@@ -328,7 +328,7 @@ AR72=0
             clocal,AR27,cart,,,,0,0,0
         *elseif,AR50,eq,-1,then
             ! Global YZ plane
-            clocal,AR27,cart,,,,0,0,90
+            ! clocal,AR27,cart,,,,0,0,-90
         *elseif,AR50,eq,-2,then
             ! Global XZ plane
             clocal,AR27,cart,,,,0,90,0
@@ -450,7 +450,7 @@ AR72=0
 ! Reactivate original path
 paresu,all,SCANPATH_VAR_backupFname,pth
 path,%SCANPATH_VAR_activePathName%
-/delete,SCANPATH_VAR_backupFname,pth
+! /delete,SCANPATH_VAR_backupFname,pth
 
 ! Transfer aggregated virtual cross-section data to path
 arr2pth,'SCANPATH_ARR_aggCsecValues',AR90,SCANPATH_VAR_labelIdx
@@ -477,14 +477,3 @@ csrestore
 *del,SCANPATH_VAR_activePathName
 *del,SCANPATH_ARR_check
 *del,SCANPATH_VAR_labelIdx
-
-! Restore warnings
-!/uis,msgpop,2
-
-
-
-
-
-
-
-

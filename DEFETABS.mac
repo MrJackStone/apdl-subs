@@ -21,13 +21,13 @@
 
 *if,arg1,eq,188,then
     ! BEAM188
-    AR20=10
+    AR20=12
     *del,DEFETABS_ARR_names
     *del,DEFETABS_ARR_numbers
     *dim,DEFETABS_ARR_names,char,AR20
     *dim,DEFETABS_ARR_numbers,,AR20
-    DEFETABS_ARR_names(1)  = 'Ni','Nj','QZi','QZj','QYi','QYj','MYi','MYj','MZi','MZj'
-    DEFETABS_ARR_numbers(1)=   1 , 14 ,   5 ,  18 ,   6 ,  19 ,   2 ,  15 ,   3 ,  16
+    DEFETABS_ARR_names(1)   = 'Ni' , 'Nj' , 'QZi' , 'QZj' , 'QYi' , 'QYj' , 'MYi' , 'MYj' , 'MZi' , 'MZj' , 'TQi' , 'TQj'
+    DEFETABS_ARR_numbers(1) = 1    , 14   , 5     , 18    , 6     , 19    , 2     , 15    , 3     , 16    , 4     , 17
 
 *elseif,arg1,eq,181,then
     ! SHELL181

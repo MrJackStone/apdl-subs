@@ -1,11 +1,13 @@
-! CSHELL_NX
-! CSHELL_NX
+! CSHELL_NX, calcOnly
+! CSHELL_NX, arg1
 
 ! Description:
 ! Plots SHELL181 normal force along X axis diagram (N11).
 
 ! Arguments:
-! -
+! arg1: calcOnly  -  option to calculate the element table but suppress plotting:
+!                      [0] plot element table (default)
+!                      [1] suppress plotting
 
 ! Local parameters:
 ! AR21: seqn_N11
@@ -23,12 +25,13 @@ sadd,'SHELL_%AR24%','TMP_%AR24%',,AR23
 
 etable,'TMP_%AR24%',eras
 
-*cfopen,shelldiagram_tmp,tmp
+*if,arg1,ne,1,then
+  *cfopen,shelldiagram_tmp,tmp
     *vwrite,'SHELL_%AR24%','avg'
 pletab,%C,%C
-*cfclos
-/nopr
-/input,shelldiagram_tmp,tmp
-/delete,shelldiagram_tmp,tmp
-/gopr
-
+  *cfclos
+  /nopr
+  /input,shelldiagram_tmp,tmp
+  /delete,shelldiagram_tmp,tmp
+  /gopr
+*endif
