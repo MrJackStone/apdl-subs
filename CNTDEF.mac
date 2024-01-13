@@ -169,7 +169,7 @@ type,ar32
 cmsel,s,ar36
 cmsel,s,ar37
 esurf
-esel,r,type,,ar31
+esel,r,type,,ar32
 cm,%ar39%,elem
 !
 !
