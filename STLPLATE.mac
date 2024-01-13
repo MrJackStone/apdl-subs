@@ -1,5 +1,5 @@
-! STLPLATE , secNum , thk  , matNum , E    , fy   , Et   , fu   , dens , Poisson
-! STLPLATE , arg1   , arg2 , arg3   , arg4 , arg5 , arg6 , arg7 , arg8 , arg9
+! STLPLATE , secNum , thk  , matNum , E    , fy   , Et   , fu   , dens , Poisson , offset
+! STLPLATE , arg1   , arg2 , arg3   , arg4 , arg5 , arg6 , arg7 , arg8 , arg9    , ar10
 
 ! Description:
 ! Creates a shell-type cross-section and, optionally, a steel-like material model. The created
@@ -22,6 +22,12 @@
 ! arg7: fu       -  steel ultimate stress (default: fy)
 ! arg8: dens     -  mass density          (default: 7850)
 ! arg9: Poisson  -  Poisson's coefficient (default: 0.3)
+! ar10: offset   -  applied offset to cross-section:
+!                     [    0]  no offset (default, midplane)
+!                     [  󰦎 0]  user-defined offset value
+!                     ['BOT']  node offset to the bottom of the section
+!                     ['TOP']  node offset to the top of the section
+!
 
 ! Local parameters:
 ! AR20: parType
@@ -60,6 +66,23 @@ AR23='STLPLATE_VAR_secNum'
 *endif
 %AR23%=AR21
 
+! Section offset option
+AR26='MID'
+AR27=0
+*get,AR20,parm,ar10,type
+*if,AR20,eq,0,then
+  *if,ar10,ne,0,then
+    AR26='USER'
+    AR27=ar10
+  *endif
+*elseif,AR20,eq,3,then
+  *if,upcase(ar10),eq,'BOT',then
+    AR26='BOT'
+  *elseif,upcase(ar10),eq,'TOP',then
+    AR26='TOP'
+  *endif
+*endif
+
 ! Create steel material model:
 AR24=(abs(arg3)>1)
 *if,arg3,ge,0,then
@@ -76,6 +99,7 @@ AR24=(abs(arg3)>1)
 ! Create shell cross-section
 sectype,AR21,'shell'
 secdata,arg2,AR24
+secoffset,%AR26%,AR27
 
 ! Clean up
 prestore
