@@ -1,0 +1,56 @@
+! LASTTIME, outputParm
+! LASTTIME, arg1
+
+! Description:
+! Returns the TIME value of the last converged substep.
+
+! Arguments:
+! arg1: outputParm  -  name of the output parameter to which the last TIME value will be assigned
+!                      (defaults to "LASTTIME_VAR_time")
+
+! Local parameters:
+! AR20: parType
+! AR21: convCheck
+! AR22: lastSS
+! AR23: lastConvergedTime
+! AR31: outputParmName
+
+
+! Prepare environment
+pcbackup
+nbackup
+ebackup
+mpopbackup
+/uis,msgpop,3
+
+! Default arguments
+AR31='LASTTIME_VAR_time'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR31=arg1
+*endif
+
+! Read last substep of last load step
+/post1
+nsel,none
+esel,none
+subset,last
+
+! Collect data to check convergence
+*get , AR21 , active ,, solu , cnvg
+*get , AR22 , active ,, set  , sbst
+
+! Read previous substep if last one has not converged
+*if,AR21,eq,0,or,AR22,eq,999999,then
+  set,prev
+*endif
+
+! Assign last TIME to output parameter
+*get,AR23,active,,set,time
+%AR31%=AR23
+
+! Clean up
+pcrestore
+nrestore
+erestore
+mpoprestore
