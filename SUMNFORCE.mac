@@ -51,4 +51,4 @@ AR23=0
 cmdele,SUMNFORCE_COMPN_selected
 
 nrestore
-erestore
+elrestore

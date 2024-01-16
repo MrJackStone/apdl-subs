@@ -175,6 +175,6 @@ AR37=NZ(arg2)-NZ(arg1)
 
 ! Restaurar seleção
 NRESTORE
-ERESTORE
+elrestore
 
 

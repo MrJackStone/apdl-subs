@@ -165,7 +165,7 @@ etdele,AR21
 arestore
 lrestore
 krestore
-erestore
+elrestore
 nrestore
 
 ! Reactivate automatic display refreshing

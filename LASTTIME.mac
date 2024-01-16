@@ -52,5 +52,5 @@ subset,last
 ! Clean up
 pcrestore
 nrestore
-erestore
+elrestore
 mpoprestore
