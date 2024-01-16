@@ -1,0 +1,23 @@
+! PCRESTORE
+! PCRESTORE
+
+*if,PCBackup_,EQ,0,THEN
+   FINISH
+*elseif,PCBackup_,EQ,17,THEN
+   /prep7
+*elseif,PCBackup_,EQ,21,THEN
+   /solu
+*elseif,PCBackup_,EQ,31,THEN
+   /post1
+*elseif,PCBackup_,EQ,36,THEN
+   /post26
+*elseif,PCBackup_,EQ,41,THEN
+   /opt
+*elseif,PCBackup_,EQ,52,THEN
+   /aux2
+*elseif,PCBackup_,EQ,62,THEN
+   /aux12
+*elseif,PCBackup_,EQ,65,THEN
+   /aux15
+*endif
+

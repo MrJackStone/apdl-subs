@@ -43,7 +43,7 @@
 
 
 !! Prepare environment                                                                            !!
-pbackup
+pcbackup
 mpopbackup
 kbackup
 lbackup
@@ -129,7 +129,7 @@ krestore
 lrestore
 arestore
 mpoprestore
-prestore
+pcrestore
 cmsel,a,AR28
 cmsel,a,AR29
 cmsel,a,AR30

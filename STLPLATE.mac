@@ -43,7 +43,7 @@
 ! %arg1% (defaults to 'STLPLATE_VAR_secNum')
 
 
-pbackup
+pcbackup
 /prep7
 
 ! Set number of cross-section
@@ -102,4 +102,4 @@ secdata,arg2,AR24
 secoffset,%AR26%,AR27
 
 ! Clean up
-prestore
+pcrestore
