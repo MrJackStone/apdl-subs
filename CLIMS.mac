@@ -8,9 +8,13 @@
 ! arg1: minContour     -  minimum value for contour scale
 ! arg2: maxContour     -  maximum value for contour scale
 ! arg3: greyExceeding  -  controls coloring of values outside min/max limits:
-!                         [0] Values below min are colored BLUE, above min are colored RED
-!                         [1] Values below min or above max are colored GREY
-!                         [2] Values below min or above max are colored BLACK
+!                         [0] Values below min colored BLUE;  values above max colored RED (default)
+!                         [1] Values below min colored GREY;  values above max colored GREY
+!                         [2] Values below min colored BLACK; values above max colored BLACK
+!                         [3] Values below min colored BLUE;  values above max colored GREY
+!                         [4] Values below min colored GREY;  values above max colored RED
+!                         [5] Values below min colored BLUE;  values above max colored BLACK
+!                         [6] Values below min colored BLACK; values above max colored RED
 ! arg4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
 
 ! Local parameters:
@@ -66,6 +70,18 @@ AR22=9
 *elseif,arg3,eq,2,then
     /color,smin,whit
     /color,smax,whit
+*elseif,arg3,eq,3,then
+    /color,smin,blue
+    /color,smax,dgra
+*elseif,arg3,eq,4,then
+    /color,smin,dgra
+    /color,smax,red
+*elseif,arg3,eq,5,then
+    /color,smin,blue
+    /color,smax,whit
+*elseif,arg3,eq,6,then
+    /color,smin,whit
+    /color,smax,red
 *else
     /color,smin,blue
     /color,smax,red
