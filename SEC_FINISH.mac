@@ -44,6 +44,6 @@ etdele,SEC_INIT_VAR_etnum
 arestore
 lrestore
 krestore
-erestore
+elrestore
 nrestore
 csrestore

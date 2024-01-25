@@ -4,4 +4,51 @@
 ! Description:
 ! Stores the current value of /uis,MSGPOP, to be later restored by MPOPRESTORE.
 
-*get,MPOPBACKUP_,common,,d3com2,,int,31
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+! AR21: arrLength
+! AR22: lastMPOPvalue
+! AR31: currentMPOPvalue
+
+! Global parameters (erased at the end of this subroutine):
+! MPOPTEMP_ARR_temp
+
+
+! Get current MSGPOP value
+*get,AR31,common,,d3com2,,int,31
+
+! Store value
+*get,AR20,parm,MPOPBACKUP_,type
+*if,AR20,eq,1,then
+  ! If array:
+  *get,AR21,parm,MPOPBACKUP_,dim,x
+
+  *del,MPOPTEMP_ARR_temp,,nopr
+  *dim,MPOPTEMP_ARR_temp,,AR21
+  *vfun,MPOPTEMP_ARR_temp,copy,MPOPBACKUP_
+
+  *del,MPOPBACKUP_,,nopr
+  *dim,MPOPBACKUP_,,AR21+1
+  *vfun,MPOPBACKUP_,copy,MPOPTEMP_ARR_temp
+  MPOPBACKUP_(AR21+1)=AR31
+
+  *del,MPOPTEMP_ARR_temp,,nopr
+
+*elseif,AR20,eq,0,then
+  ! If scalar:
+  AR22=MPOPBACKUP_
+
+  *del,MPOPBACKUP_,,nopr
+  *dim,MPOPBACKUP_,,2
+  MPOPBACKUP_(1)=AR22
+  MPOPBACKUP_(2)=AR31
+
+*else
+  ! If undefined:
+  *del,MPOPBACKUP_,,nopr
+  MPOPBACKUP_=AR31
+
+*enddo

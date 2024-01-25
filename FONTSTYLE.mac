@@ -21,6 +21,7 @@
 ! Local parameters:
 ! AR21: elementType
 ! AR22: fontName
+! AR25: firstChar
 ! AR33: boldFontWeight
 ! AR43: lightFontWeight
 
@@ -31,12 +32,12 @@
 ! Ensure text type is valid (LEGEND, ENTITY, or ANNOTATION)
 parverify,,arg1,'CHAR'
 *if,_OUTPUT,eq,1,then
-    firstChar=upcase(strsub(arg1,1,1))
-    *if,firstChar,eq,'L',then
+    AR25=upcase(strsub(arg1,1,1))
+    *if,AR25,eq,'L',then
         AR21=1
-    *elseif,firstChar,eq,'E',then
+    *elseif,AR25,eq,'E',then
         AR21=2
-    *elseif,firstChar,eq,'A',then
+    *elseif,AR25,eq,'A',then
         AR21=3
     *else
         *msg,warn,arg1
@@ -89,6 +90,6 @@ parverify,,arg4,'SCALAR','EQUAL',1
 *endif
 
 ! Set font style
-/device,font,AR21,AR22,AR23,,,,AR24
+/device,font,AR21,AR22,%AR23%,,,,AR24
 
 *del,_OUTPUT

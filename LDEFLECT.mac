@@ -428,5 +428,5 @@ CMDELE,ListedNodes
 ! Restaurar seleção
 LRESTORE
 KRESTORE
-ERESTORE
+elrestore
 NRESTORE

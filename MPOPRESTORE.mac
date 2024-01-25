@@ -4,5 +4,52 @@
 ! Description:
 ! Restores the value of /uis,MSGPOP, previously stored by MPOPBACKUP.
 
-/uis,msgpop,MPOPBACKUP_
-*del,MPOPBACKUP_,,nopr
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+! AR21: arrLength
+! AR22: restoredMPOPvalue
+! AR31: tempMPOPvalue
+
+
+! Default MSGPOP value
+AR22=2
+
+*get,AR20,parm,MPOPBACKUP_,type
+*if,AR20,eq,1,then
+  ! If array:
+  *get,AR21,parm,MPOPBACKUP_,dim,x
+  AR22=MPOPBACKUP_(AR21)
+
+  *if,AR21,gt,2,then
+    *del,MPOPTEMP_ARR_temp,,nopr
+    *dim,MPOPTEMP_ARR_temp,,AR21
+    *vfun,MPOPTEMP_ARR_temp,copy,MPOPBACKUP_
+
+    *del,MPOPBACKUP_,,nopr
+    *dim,MPOPBACKUP_,,AR21-1
+    *vfun,MPOPBACKUP_,copy,MPOPTEMP_ARR_temp
+
+    *del,MPOPTEMP_ARR_temp,,nopr
+
+  *elseif,AR21,eq,2,then
+    AR31=MPOPBACKUP_(1)
+    *del,MPOPBACKUP_,,nopr
+    MPOPBACKUP_=AR31
+
+  *else
+    *del,MPOPBACKUP_,,nopr
+
+  *endif
+
+*elseif,AR20,eq,0,then
+  ! If scalar:
+  AR22=MPOPBACKUP_
+  *del,MPOPBACKUP_,,nopr
+
+*enddo
+
+! Set MSGPOP value
+/uis,msgpop,AR22

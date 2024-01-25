@@ -1,0 +1,39 @@
+! PST26, convergedOnly
+! PST26, arg1
+
+! Description:
+! Enters /post26 time-history post-processor with default boilerplate commands.
+
+! Arguments:
+! arg1: convergedOnly  -  limits the time range for which data are to be stored
+!                           [0] no limitation (include all time points, default)
+!                           [1] limit time to converged substeps only
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end of this subroutine):
+! PST26_VAR_lasttime
+
+
+! Enter time-history
+mpopbackup
+/uis,msgpop,3
+/post26
+
+! Option: store limited result set
+*if,arg1,eq,1,then
+  lasttime,'PST26_VAR_lasttime'
+  timerange,0,PST26_VAR_lasttime
+*endif
+
+! Boilerplate
+numvar,200
+solu,191,ncmit
+store,merge
+filldata,191,,,,1,1
+realvar,191,191
+
+! Clean up
+*del,PST26_VAR_lasttime,,nopr
+mpoprestore

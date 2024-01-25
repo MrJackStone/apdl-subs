@@ -28,7 +28,7 @@
 ! MXLAMBDA_VAR_lastNSET
 ! MXLAMBDA_VAR_maxNSET
 
-PBACKUP
+pcbackup
 NBACKUP
 EBACKUP
 
@@ -105,11 +105,6 @@ Last lambda NSET: %I
    RESET
 *endif
 
-PRESTORE
+pcrestore
 NRESTORE
 ELRESTORE
-
-
-
-
-

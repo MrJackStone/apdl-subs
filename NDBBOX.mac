@@ -1,5 +1,5 @@
 ! NDBBOX , xmin , xmax , ymin , ymax , zmin , zmax
-! NDBBOX , arg1 , arg2 , arg3 , arg4 , arg5
+! NDBBOX , arg1 , arg2 , arg3 , arg4 , arg5 , arg6
 
 ! Description:
 ! Obtains the bounding box coordinates of the current nodal selection in the active coordinate

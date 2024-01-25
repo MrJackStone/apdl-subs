@@ -238,6 +238,7 @@ PTHENV note: envelope data for '%s' deleted.
             *endif
 
             ! Fill array with copies of the number identifying this result set
+            *del,PTHENV_ARR_setNum,,nopr
             *dim,PTHENV_ARR_setNum,,AR24
             *vfill,PTHENV_ARR_setNum,ramp,arg3,0
 
@@ -325,15 +326,14 @@ PTHENV note: envelope data for '%s' deleted.
 *enddo
 
 ! Clear parameters
-*del,PTHENV_ARR_maxLocMask
-*del,PTHENV_ARR_minLocMask
-*del,PTHENV_ARR_setNum
-*del,PTHENV_ARR_diff
-*del,PTHENV_VAR_labelIdxMax
-*del,PTHENV_VAR_labelIdxMin
-*del,PTHENV_VAR_labelIdxAmx
-*del,PTHENV_VAR_labelIdxAmn
-*del,PTHENV_VAR_labelIdxDif
-*del,PTHENV_VAR_labelIdxMxl
-*del,PTHENV_VAR_labelIdxMnl
-
+*del , PTHENV_ARR_maxLocMask  ,  , nopr
+*del , PTHENV_ARR_minLocMask  ,  , nopr
+*del , PTHENV_ARR_setNum      ,  , nopr
+*del , PTHENV_ARR_diff        ,  , nopr
+*del , PTHENV_VAR_labelIdxMax ,  , nopr
+*del , PTHENV_VAR_labelIdxMin ,  , nopr
+*del , PTHENV_VAR_labelIdxAmx ,  , nopr
+*del , PTHENV_VAR_labelIdxAmn ,  , nopr
+*del , PTHENV_VAR_labelIdxDif ,  , nopr
+*del , PTHENV_VAR_labelIdxMxl ,  , nopr
+*del , PTHENV_VAR_labelIdxMnl ,  , nopr
