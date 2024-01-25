@@ -108,4 +108,4 @@ pcalc,add,arg3,arg3,,AR22
 pth2arr,arg3,'PTHREBASE_ARR_values'
 
 ! Clear parameters
-*del,PTH2ARR_ARR_OUTPUT
+*del,PTH2ARR_ARR_OUTPUT,,nopr
