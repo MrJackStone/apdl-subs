@@ -30,9 +30,9 @@ AR31=UPCASE(arg2)
 
 ! Inicializar vetores
 *get,AR21,KP,,COUNT
-*del,KSORT_ARR_KPList
+*del,KSORT_ARR_KPList,,nopr
 *dim,KSORT_ARR_KPList,ARRAY,AR21
-*del,KSORT_ARR_CoordList
+*del,KSORT_ARR_CoordList,,nopr
 *dim,KSORT_ARR_CoordList,ARRAY,AR21
 AR23=0
 

@@ -92,4 +92,4 @@ parverify,,arg4,'SCALAR','EQUAL',1
 ! Set font style
 /device,font,AR21,AR22,%AR23%,,,,AR24
 
-*del,_OUTPUT
+*del,_OUTPUT,,nopr

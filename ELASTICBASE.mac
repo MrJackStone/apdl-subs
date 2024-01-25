@@ -186,9 +186,9 @@ cmsel,s,%AR29%
 ! Assign attribute numbers to output object
 *get,AR20,parm,arg1,type
 *if,AR20,eq,3,then
-    *del,%arg1%
+    *del,%arg1%,,nopr
     *dim,%arg1%,,7
     %arg1%(1)=AR33,AR32,AR31,AR25,AR26,AR27,AR24
 *endif
 
-*del,ELASTICBASE_ARR_appoStats
+*del,ELASTICBASE_ARR_appoStats,,nopr

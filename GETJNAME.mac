@@ -14,7 +14,7 @@
 ! GETJNAME_ARR_jobname
 
 ! Initialize character array parameter
-*del,GETJNAME_ARR_jobname
+*del,GETJNAME_ARR_jobname,,nopr
 *dim,GETJNAME_ARR_jobname,STRING,248
 
 ! Initialize reading position

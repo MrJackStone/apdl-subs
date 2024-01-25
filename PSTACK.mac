@@ -64,17 +64,17 @@ CM,PSTACK_COMPA_temp,AREA
 AR34=ACOS(-1)
 
 ! Initialize table with coordinate system pointers for each pipe
-*del,PSTACK_CS_TABLE
+*del,PSTACK_CS_TABLE,,nopr
 *dim,PSTACK_CS_TABLE,ARRAY,arg2,arg3
 
 ! Initialize array with column numbers per row
-*del,PSTACK_ColCounts
+*del,PSTACK_ColCounts,,nopr
 *dim,PSTACK_ColCounts,ARRAY,arg2
 
 ! Initialize arrays with X-Y coordinates of first pipe's center on each row
-*del,PSTACK_1stPipe_xCenter
+*del,PSTACK_1stPipe_xCenter,,nopr
 *dim,PSTACK_1stPipe_xCenter,ARRAY,arg2
-*del,PSTACK_1stPipe_yCenter
+*del,PSTACK_1stPipe_yCenter,,nopr
 *dim,PSTACK_1stPipe_yCenter,ARRAY,arg2
 
 *get,AR20,PARM,arg6,TYPE
@@ -228,5 +228,5 @@ LSLA,A
 KSLL,A
 
 CMDELE,PSTACK_COMPA_temp
-*del,PSTACK_1stPipe_xCenter
-*del,PSTACK_1stPipe_yCenter
+*del,PSTACK_1stPipe_xCenter,,nopr
+*del,PSTACK_1stPipe_yCenter,,nopr

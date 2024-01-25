@@ -8,7 +8,7 @@
 ! AR24: MinX
 
 *get,AR20,NODE,0,COUNT
-*del,VAR21
+*del,VAR21,,nopr
 *dim,VAR21,,AR20
 AR23=0
 ! Para cada node selecionado:

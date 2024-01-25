@@ -67,7 +67,7 @@
     ! Restore previous selection
     cmsel,s,CMADD_COMP_temp
     cmdele,CMADD_COMP_temp
-    *del,CMADD_COMP_temp
+    *del,CMADD_COMP_temp,,nopr
 
 *else
     ! Create component

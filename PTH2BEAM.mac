@@ -124,10 +124,10 @@ AR21=strcat(AR20,'_C')
     *enddo
 *endif
 
-*del,PTHS2MN_ARR_bendingMoment
-*del,PTHS2MN_ARR_axialForce
-*del,PTHS2V_ARR_shear
-*del,PTH2DFL_ARR_defl
+*del,PTHS2MN_ARR_bendingMoment,,nopr
+*del,PTHS2MN_ARR_axialForce,,nopr
+*del,PTHS2V_ARR_shear,,nopr
+*del,PTH2DFL_ARR_defl,,nopr
 
 !! CREATE PATH TO MAP ENVELOPE RESULTS
 csbackup

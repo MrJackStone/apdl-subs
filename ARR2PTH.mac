@@ -23,9 +23,9 @@
 ! Output parameters:
 ! -
 
-*del,ARR2PTH_ARR_table
-*del,ARR2PTH_ARR_labels
-*del,ARR2PTH_ARR_points
+*del,ARR2PTH_ARR_table,,nopr
+*del,ARR2PTH_ARR_labels,,nopr
+*del,ARR2PTH_ARR_points,,nopr
 
 PAGET,ARR2PTH_ARR_table,TABLE
 PAGET,ARR2PTH_ARR_labels,LABEL
@@ -58,9 +58,9 @@ PAPUT,ARR2PTH_ARR_points,POINTS
 PAPUT,ARR2PTH_ARR_table,TABLE
 PAPUT,ARR2PTH_ARR_labels,LABEL
 
-*del,ARR2PTH_ARR_table
-*del,ARR2PTH_ARR_labels
-*del,ARR2PTH_ARR_points
+*del,ARR2PTH_ARR_table,,nopr
+*del,ARR2PTH_ARR_labels,,nopr
+*del,ARR2PTH_ARR_points,,nopr
 
 
 

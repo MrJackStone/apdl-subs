@@ -66,10 +66,10 @@ MAT_Concreto_fck=fck
 MAT_Concreto_dens=pc
 MAT_Concreto_Poisson=vc
 MAT_Concreto_ptCount=5
-*del,MAT_Concreto_sigma
+*del,MAT_Concreto_sigma,,nopr
 *dim,MAT_Concreto_sigma,ARRAY,MAT_Concreto_ptCount
 MAT_Concreto_sigma(1)=fc1,fc2,fc3,fc4,fc5
-*del,MAT_Concreto_epsilon
+*del,MAT_Concreto_epsilon,,nopr
 *dim,MAT_Concreto_epsilon,ARRAY,MAT_Concreto_ptCount
 MAT_Concreto_epsilon(1)=epsilon1,epsilon2,epsilon3,epsilon4,epsilon0
 ! Aço

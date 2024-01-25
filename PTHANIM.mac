@@ -64,11 +64,11 @@ AR38=1
 *endif
 
 ! Array to store limit values for each result set
-*del,PTHANIM_ARR_overallAbsmax
+*del,PTHANIM_ARR_overallAbsmax,,nopr
 *dim,PTHANIM_ARR_overallAbsmax,,AR21
-*del,PTHANIM_ARR_overallMax
+*del,PTHANIM_ARR_overallMax,,nopr
 *dim,PTHANIM_ARR_overallMax,,AR21
-*del,PTHANIM_ARR_overallMin
+*del,PTHANIM_ARR_overallMin,,nopr
 *dim,PTHANIM_ARR_overallMin,,AR21
 
 ! Calculate and collect results for each path at each result set
@@ -76,11 +76,11 @@ AR38=1
     set,,,,,,,AR22
 
     ! Array to store limit values for each path
-    *del,PTHANIM_ARR_nthPathAbsmax
+    *del,PTHANIM_ARR_nthPathAbsmax,,nopr
     *dim,PTHANIM_ARR_nthPathAbsmax,,AR23
-    *del,PTHANIM_ARR_nthPathMax
+    *del,PTHANIM_ARR_nthPathMax,,nopr
     *dim,PTHANIM_ARR_nthPathMax,,AR23
-    *del,PTHANIM_ARR_nthPathMin
+    *del,PTHANIM_ARR_nthPathMin,,nopr
     *dim,PTHANIM_ARR_nthPathMin,,AR23
 
     ! Calculate results for each path
@@ -128,7 +128,7 @@ AR38=1
 *vscfun,AR36,min,PTHANIM_ARR_overallMin
 
 ! Calculate relative scale factors for each result set
-*del,PTHANIM_ARR_nthSetScale
+*del,PTHANIM_ARR_nthSetScale,,nopr
 *voper,PTHANIM_ARR_nthSetScale,PTHANIM_ARR_overallAbsmax,div,AR34
 
 ! Force color scale limits
@@ -159,12 +159,12 @@ anim,5,1,0.02
 finish
 
 ! Clear global parameters
-*del,PTHANIM_ARR_nthPathAbsmax
-*del,PTHANIM_ARR_nthPathMax
-*del,PTHANIM_ARR_nthPathMin
-*del,PTHANIM_ARR_nthSetScale
-*del,PTHANIM_ARR_overallAbsmax
-*del,PTHANIM_ARR_overallMax
-*del,PTHANIM_ARR_overallMin
+*del,PTHANIM_ARR_nthPathAbsmax,,nopr
+*del,PTHANIM_ARR_nthPathMax,,nopr
+*del,PTHANIM_ARR_nthPathMin,,nopr
+*del,PTHANIM_ARR_nthSetScale,,nopr
+*del,PTHANIM_ARR_overallAbsmax,,nopr
+*del,PTHANIM_ARR_overallMax,,nopr
+*del,PTHANIM_ARR_overallMin,,nopr
 
 

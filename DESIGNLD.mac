@@ -93,8 +93,8 @@ AR27=DESIGNLD_VAR_characteristicValue*DESIGNLD_VAR_gammaValue*DESIGNLD_VAR_psiVa
 *cfclos
 
 ! Clear global parameters
-*del,DESIGNLD_VAR_loadObjName
-*del,DESIGNLD_VAR_hypothesisName
-*del,DESIGNLD_VAR_gammaValue
-*del,DESIGNLD_VAR_psiValue
-*del,DESIGNLD_VAR_characteristicValue
+*del,DESIGNLD_VAR_loadObjName,,nopr
+*del,DESIGNLD_VAR_hypothesisName,,nopr
+*del,DESIGNLD_VAR_gammaValue,,nopr
+*del,DESIGNLD_VAR_psiValue,,nopr
+*del,DESIGNLD_VAR_characteristicValue,,nopr

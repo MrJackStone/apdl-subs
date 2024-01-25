@@ -28,10 +28,10 @@
 
 /uis,MSGPOP,3
 
-*del,MXNRES_ARR_nn
+*del,MXNRES_ARR_nn,,nopr
 *vget,MXNRES_ARR_nn,NODE,,NLIST
 
-*del,MXNRES_ARR_vals
+*del,MXNRES_ARR_vals,,nopr
 *vget,MXNRES_ARR_vals,NODE,0,arg1,arg2,,,0
 
 AR20=UPCASE(arg3)

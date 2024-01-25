@@ -128,13 +128,13 @@ AR29=chrval(arg3)
                 AR47='%AR37%_%AR27%'
 
                 ! Delete arrays storing envelopes
-                *del,%AR41%
-                *del,%AR42%
-                *del,%AR43%
-                *del,%AR44%
-                *del,%AR45%
-                *del,%AR46%
-                *del,%AR47%
+                *del,%AR41%,,nopr
+                *del,%AR42%,,nopr
+                *del,%AR43%,,nopr
+                *del,%AR44%,,nopr
+                *del,%AR45%,,nopr
+                *del,%AR46%,,nopr
+                *del,%AR47%,,nopr
             *enddo
         *enddo
 
@@ -246,7 +246,7 @@ PTHENV note: envelope data for '%s' deleted.
             *voper,%AR41%,%AR41%,max,%AR30%
 
             ! Calculate location corresponding to max value
-            *del,PTHENV_ARR_maxLocMask
+            *del,PTHENV_ARR_maxLocMask,,nopr
             *voper,PTHENV_ARR_maxLocMask,%AR30%,ge,%AR41%
             *vmask,PTHENV_ARR_maxLocMask
             *vfun,AR46,copy,PTHENV_ARR_setNum
@@ -255,7 +255,7 @@ PTHENV note: envelope data for '%s' deleted.
             *voper,%AR42%,%AR42%,min,%AR30%
 
             ! Calculate location corresponding to min value
-            *del,PTHENV_ARR_minLocMask
+            *del,PTHENV_ARR_minLocMask,,nopr
             *voper,PTHENV_ARR_minLocMask,%AR30%,le,%AR42%
             *vmask,PTHENV_ARR_minLocMask
             *vfun,AR47,copy,PTHENV_ARR_setNum
@@ -272,7 +272,7 @@ PTHENV note: envelope data for '%s' deleted.
 
             ! Calculate difference envelope
             *vabs,1
-            *del,PTHENV_ARR_diff
+            *del,PTHENV_ARR_diff,,nopr
             *voper,PTHENV_ARR_diff,%AR41%,sub,%AR42%
             *vabs,0
             *voper,%AR45%,%AR45%,max,PTHENV_ARR_diff

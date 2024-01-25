@@ -19,6 +19,6 @@ parverify,'CSNEXT_VAR_check',arg1,'CHAR'
 *endif
 
 *get,AR21,cdsy,,num,max
-*del,%AR22%
+*del,%AR22%,,nopr
 %AR22%=((AR21+1)>11)
 

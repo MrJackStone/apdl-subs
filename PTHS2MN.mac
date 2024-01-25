@@ -167,21 +167,21 @@ AR27=0
     ! Transferir tensões na face superior para vetor
     PATH,AR23
     PTH2ARR,AR26
-    *del,PTHS2MN_ARR_topStress
+    *del,PTHS2MN_ARR_topStress,,nopr
     *vfun,PTHS2MN_ARR_topStress,COPY,PTH2ARR_ARR_OUTPUT
 
     ! Transferir tensões na face inferior para vetor
     PATH,AR24
     PTH2ARR,AR26
-    *del,PTHS2MN_ARR_botStress
+    *del,PTHS2MN_ARR_botStress,,nopr
     *vfun,PTHS2MN_ARR_botStress,COPY,PTH2ARR_ARR_OUTPUT
 
     ! Calcular esforços internos
-    *del,PTHS2MN_ARR_stressDifference
-    *del,PTHS2MN_ARR_bendingStress
-    *del,PTHS2MN_ARR_bendingMoment
-    *del,PTHS2MN_ARR_normalStress
-    *del,PTHS2MN_ARR_axialForce
+    *del,PTHS2MN_ARR_stressDifference,,nopr
+    *del,PTHS2MN_ARR_bendingStress,,nopr
+    *del,PTHS2MN_ARR_bendingMoment,,nopr
+    *del,PTHS2MN_ARR_normalStress,,nopr
+    *del,PTHS2MN_ARR_axialForce,,nopr
     *voper,PTHS2MN_ARR_stressDifference, PTHS2MN_ARR_botStress,        SUB,  PTHS2MN_ARR_topStress
     *voper,PTHS2MN_ARR_bendingStress,    PTHS2MN_ARR_stressDifference, DIV,  2
     *voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8
@@ -189,9 +189,9 @@ AR27=0
     *voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9
 
     ! Adicionar vetores calculados às tabelas extraídas dos paths
-    *del,PTHS2MN_ARR_topTable
-    *del,PTHS2MN_ARR_topLabel
-    *del,PTHS2MN_ARR_topPoints
+    *del,PTHS2MN_ARR_topTable,,nopr
+    *del,PTHS2MN_ARR_topLabel,,nopr
+    *del,PTHS2MN_ARR_topPoints,,nopr
     PATH,AR23
     PAGET,PTHS2MN_ARR_topTable,TABLE
     PAGET,PTHS2MN_ARR_topLabel,LABEL
@@ -211,9 +211,9 @@ AR27=0
     PAPUT,PTHS2MN_ARR_topTable,TABLE
     PAPUT,PTHS2MN_ARR_topLabel,LABEL
 
-    *del,PTHS2MN_ARR_botTable
-    *del,PTHS2MN_ARR_botLabel
-    *del,PTHS2MN_ARR_botPoints
+    *del,PTHS2MN_ARR_botTable,,nopr
+    *del,PTHS2MN_ARR_botLabel,,nopr
+    *del,PTHS2MN_ARR_botPoints,,nopr
     PATH,AR24
     PAGET,PTHS2MN_ARR_botTable,TABLE
     PAGET,PTHS2MN_ARR_botLabel,LABEL
@@ -235,14 +235,14 @@ AR27=0
 
 *endif
 
-*del,PTH2ARR_ARR_OUTPUT
-*del,PTHS2MN_ARR_stressDifference
-*del,PTHS2MN_ARR_topTable
-*del,PTHS2MN_ARR_topLabel
-*del,PTHS2MN_ARR_topPoints
-*del,PTHS2MN_ARR_botTable
-*del,PTHS2MN_ARR_botLabel
-*del,PTHS2MN_ARR_botPoints
+*del , PTH2ARR_ARR_OUTPUT           ,  , nopr
+*del , PTHS2MN_ARR_stressDifference ,  , nopr
+*del , PTHS2MN_ARR_topTable         ,  , nopr
+*del , PTHS2MN_ARR_topLabel         ,  , nopr
+*del , PTHS2MN_ARR_topPoints        ,  , nopr
+*del , PTHS2MN_ARR_botTable         ,  , nopr
+*del , PTHS2MN_ARR_botLabel         ,  , nopr
+*del , PTHS2MN_ARR_botPoints        ,  , nopr
 
 
 

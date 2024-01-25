@@ -155,7 +155,7 @@ AR59=AR41
 AR60=AR39
 
 ! Initialize shear force diagram array
-*del,PTHS2V_ARR_shear
+*del,PTHS2V_ARR_shear,,nopr
 *dim,PTHS2V_ARR_shear,ARRAY,arg7+1
 
 ! Loop through fictional cross-sections calculating shear force
@@ -255,9 +255,9 @@ PAPUT,PTHS2V_ARR_table,TABLE
 PAPUT,PTHS2V_ARR_label,LABEL
 
 ! Clear parameters
-*del,PTHS2V_ARR_table
-*del,PTHS2V_ARR_label
-*del,PTHS2V_ARR_points
+*del,PTHS2V_ARR_table,,nopr
+*del,PTHS2V_ARR_label,,nopr
+*del,PTHS2V_ARR_points,,nopr
 
 ! Restore active coordinate system
 csys,AR67

@@ -8,7 +8,7 @@
 ! AR24: MaxX
 
 *get,AR20,KP,0,COUNT
-*del,VAR21
+*del,VAR21,,nopr
 *dim,VAR21,,AR20
 AR23=0
 ! Para cada keypoint selecionado:

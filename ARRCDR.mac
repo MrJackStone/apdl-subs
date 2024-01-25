@@ -23,15 +23,15 @@
 
 *get,AR20,PARM,ARRCDR_ARR_input,DIM,X
 *if,AR20,GT,2,THEN
-   *del,ARRCDR_ARR_output
+   *del,ARRCDR_ARR_output,,nopr
    *dim,ARRCDR_ARR_output,ARRAY,AR20-1
    *do,AR21,2,AR20,1
       ARRCDR_ARR_output(AR21-1)=ARRCDR_ARR_input(AR21)
    *enddo
 *elseif,AR20,EQ,2,THEN
-   *del,ARRCDR_ARR_output
+   *del,ARRCDR_ARR_output,,nopr
    ARRCDR_ARR_output=ARRCDR_ARR_input(2)
 *else
-   *del,ARRCDR_ARR_output
+   *del,ARRCDR_ARR_output,,nopr
 *endif
 

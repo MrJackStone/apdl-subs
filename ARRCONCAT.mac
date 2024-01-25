@@ -34,14 +34,14 @@
 
 
 ! Initialize: names of local parameters (subroutine arguments)
-*del,ARRCONCAT_ARR_argNames
+*del,ARRCONCAT_ARR_argNames,,nopr
 *dim,ARRCONCAT_ARR_argNames,char,10
 ARRCONCAT_ARR_argNames(1)='arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8', 'arg9', 'ar10', 'ar11'
 
-*del,ARRCONCAT_ARR_dims
+*del,ARRCONCAT_ARR_dims,,nopr
 *dim,ARRCONCAT_ARR_dims,,10
 
-*del,ARRCONCAT_ARR_varNames
+*del,ARRCONCAT_ARR_varNames,,nopr
 *dim,ARRCONCAT_ARR_varNames,string,248,10
 
 ! Loop over arguments, collect dimension of each array and name of each variable
@@ -78,7 +78,7 @@ ARRCONCAT_ARR_argNames(1)='arg2', 'arg3', 'arg4', 'arg5', 'arg6', 'arg7', 'arg8'
 *vscfun,AR25,sum,ARRCONCAT_ARR_dims
 
 ! Initialize output array
-*del,%arg1%
+*del,%arg1%,,nopr
 *dim,%arg1%,,AR25
 
 ! Initialize head index
@@ -102,9 +102,9 @@ AR26=1
 *enddo
 
 ! Clear global parameters
-*del,ARRCONCAT_ARR_argNames
-*del,ARRCONCAT_ARR_dims
-*del,ARRCONCAT_ARR_varNames
+*del,ARRCONCAT_ARR_argNames,,nopr
+*del,ARRCONCAT_ARR_dims,,nopr
+*del,ARRCONCAT_ARR_varNames,,nopr
 
 /eof
 
@@ -115,12 +115,12 @@ AR26=1
     *vfill,a1,ramp,1,1
     *dim,a2,,5
     *vfill,a2,ramp,-20,-1
-    *del,s1
+    *del,s1,,nopr
     s1=15
-    *del,s2
+    *del,s2,,nopr
     s2=0.95
-    *del,varWithUpToThirtyTwoCharLongName
-    *del,varWithUpToThirtyTwoCharLongName
+    *del,varWithUpToThirtyTwoCharLongName,,nopr
+    *del,varWithUpToThirtyTwoCharLongName,,nopr
     varWithUpToThirtyTwoCharLongName=0.36
 
     ! EXPECT:

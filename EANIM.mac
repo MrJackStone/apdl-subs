@@ -5,7 +5,7 @@
 
 setCount=arg2-arg1+1
 
-*del,ABSMax
+*del,ABSMax,,nopr
 *dim,ABSMax,ARRAY,setCount
 i=0
 *do,nthSet,arg1,arg2,1
@@ -23,7 +23,7 @@ i=0
 *enddo
 
 *vscfun,PeakVal,MAX,ABSMax
-*del,Factors
+*del,Factors,,nopr
 *voper,Factors,ABSMax,DIV,PeakVal*0.5
 
 /eshape,0

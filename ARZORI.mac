@@ -53,7 +53,7 @@ AR36=0
     *get,AR40,kp,,count
 
     ! List keypoints
-    *del,ARZORI_ARR_klist
+    *del,ARZORI_ARR_klist,,nopr
     *dim,ARZORI_ARR_klist,,AR40
     *do,AR42,1,AR40,1
         *get,AR22,area,AR36,loop,1,line,AR42
@@ -92,6 +92,6 @@ AR36=0
 
 *enddo
 
-*del,ARZORI_ARR_klist
+*del,ARZORI_ARR_klist,,nopr
 
 

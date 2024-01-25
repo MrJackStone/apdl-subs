@@ -144,14 +144,14 @@ PCALC,ADD,AR31,'S',,AR43,,AR44
 
 ! Store path values in arrays
 PTH2ARR,AR26
-*del,PTH2DFL_ARR_disp
+*del,PTH2DFL_ARR_disp,,nopr
 *vfun,PTH2DFL_ARR_disp,COPY,PTH2ARR_ARR_OUTPUT
 PTH2ARR,AR32
-*del,PTH2DFL_ARR_defl
+*del,PTH2DFL_ARR_defl,,nopr
 *vfun,PTH2DFL_ARR_defl,COPY,PTH2ARR_ARR_OUTPUT
 
 ! Clear parameters
-*del,PTH2ARR_ARR_OUTPUT
+*del,PTH2ARR_ARR_OUTPUT,,nopr
 
 
 

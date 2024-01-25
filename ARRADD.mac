@@ -26,7 +26,7 @@
 ! Montar vetor a partir dos escalares fornecidos
 *if,arg1,GT,0,THEN
    ! Inicializar vetor de novos valores
-   *del,ARRADD_ARR_new
+   *del,ARRADD_ARR_new,,nopr
    *dim,ARRADD_ARR_new,ARRAY,arg1
 
    ! Escalares: 1
@@ -85,7 +85,7 @@
 *get,AR24,PARM,ARRADD_ARR_new,TYPE
 *if,AR24,EQ,0,THEN
    AR21=ARRADD_ARR_new
-   *del,ARRADD_ARR_new
+   *del,ARRADD_ARR_new,,nopr
    *dim,ARRADD_ARR_new,ARRAY,1
    ARRADD_ARR_new(1)=AR21
 *endif
@@ -93,7 +93,7 @@
 *get,AR22,PARM,ARRADD_ARR_new,DIM,X
 
 ! Inicializar vetor de saída
-*del,ARRADD_ARR_output
+*del,ARRADD_ARR_output,,nopr
 *dim,ARRADD_ARR_output,ARRAY,AR20+AR22
 
 ! Copiar elementos do vetor original para o vetor de saída
@@ -104,5 +104,5 @@
    ARRADD_ARR_output(AR20+AR23)=ARRADD_ARR_new(AR23)
 *enddo
 
-*del,ARRADD_ARR_new
+*del,ARRADD_ARR_new,,nopr
 

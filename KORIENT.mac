@@ -97,23 +97,23 @@ Operação concluída! %/&
 
 ! Excluir componentes e variáveis
 CMDELE,TempLines
-*del,LCount
-*del,nthLine
-*del,xVal
-*del,yVal
-*del,zVal
-*del,KPMax
-*del,OriKp
-*del,EleNumber
-*del,MatNumber
-*del,SecNumber
-*del,DeltaX
-*del,DeltaY
-*del,DeltaZ
-*del,IgnoredLines
-*del,OrientedLines
-*del,ElemDiv
-*del,ElemSize
+*del,LCount,,nopr
+*del,nthLine,,nopr
+*del,xVal,,nopr
+*del,yVal,,nopr
+*del,zVal,,nopr
+*del,KPMax,,nopr
+*del,OriKp,,nopr
+*del,EleNumber,,nopr
+*del,MatNumber,,nopr
+*del,SecNumber,,nopr
+*del,DeltaX,,nopr
+*del,DeltaY,,nopr
+*del,DeltaZ,,nopr
+*del,IgnoredLines,,nopr
+*del,OrientedLines,,nopr
+*del,ElemDiv,,nopr
+*del,ElemSize,,nopr
 
 ! Reativar exibição padrão de mensagens
 /uis,MSGPOP,2

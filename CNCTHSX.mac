@@ -30,9 +30,9 @@
 AR20=20
 
 ! Inicializar vetores de temperaturas e deformações
-*del,CNCTHSX_ARR_ThermStrain
+*del,CNCTHSX_ARR_ThermStrain,,nopr
 *dim,CNCTHSX_ARR_ThermStrain,ARRAY,AR20
-*del,CNCTHSX_ARR_Temps
+*del,CNCTHSX_ARR_Temps,,nopr
 *dim,CNCTHSX_ARR_Temps,ARRAY,AR20
 
 ! Calcular incremento de temperatura (com base no número de pontos da curva)

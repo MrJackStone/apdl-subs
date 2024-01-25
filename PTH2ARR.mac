@@ -54,8 +54,8 @@ AR21=0
     *enddo
 *endif
 
-*del,PTH2ARR_ARR_POINTS
-*del,PTH2ARR_ARR_TABLE
-*del,PTH2ARR_ARR_LABEL
+*del,PTH2ARR_ARR_POINTS,,nopr
+*del,PTH2ARR_ARR_TABLE,,nopr
+*del,PTH2ARR_ARR_LABEL,,nopr
 
 

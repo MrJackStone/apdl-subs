@@ -79,7 +79,7 @@ AR27=0
 *endif
 
 
-*del,%arg1%
+*del,%arg1%,,nopr
 
 ! Case A: from-to-increment
 *if,AR22*AR23*AR24,eq,1,then

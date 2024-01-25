@@ -4,12 +4,12 @@
 ! List of all nodes
 nbackup
 nsel,s,node,,all
-*del,NSLCOMP_ARR_nnum
+*del,NSLCOMP_ARR_nnum,,nopr
 *vget,NSLCOMP_ARR_nnum,node,,nlist
 nrestore
 
 ! Node selection flag
-*del,NSLCOMP_ARR_selected
+*del,NSLCOMP_ARR_selected,,nopr
 *vget,NSLCOMP_ARR_selected,node,,nsel
 
 ! Scale input value array
@@ -18,16 +18,16 @@ nrestore
 *else
     AR20=arg5
 *endif
-*del,NSLCOMP_ARR_temp
+*del,NSLCOMP_ARR_temp,,nopr
 *voper, NSLCOMP_ARR_temp , %arg4% , mult , AR20
 
 ! Compress input value array
-*del,%arg1%
+*del,%arg1%,,nopr
 *vmask, NSLCOMP_ARR_selected
 *vfun , %arg1% , comp , NSLCOMP_ARR_temp
 
 ! Compress node number array
-*del,%arg2%
+*del,%arg2%,,nopr
 *vmask, NSLCOMP_ARR_selected
 *vfun , %arg2% , comp , NSLCOMP_ARR_nnum
 

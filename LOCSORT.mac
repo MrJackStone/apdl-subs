@@ -78,11 +78,11 @@ LOCSORT ERROR: Invalid entity type or direction. LOCSORT command is ignored.
 
     ! Initialize arrays
     *get,AR23,node,,count
-    *del,LOCSORT_ARR_coord
+    *del,LOCSORT_ARR_coord,,nopr
     *dim,LOCSORT_ARR_coord,,AR23
-    *del,LOCSORT_ARR_ndNum
+    *del,LOCSORT_ARR_ndNum,,nopr
     *dim,LOCSORT_ARR_ndNum,,AR23
-    *del,%arg1%
+    *del,%arg1%,,nopr
     *dim,%arg1%,,AR23
 
     ! Collect entity numbers and coordinates
@@ -105,8 +105,8 @@ LOCSORT ERROR: Invalid entity type or direction. LOCSORT command is ignored.
 *endif
 
 ! Clear array parameters
-*del,LOCSORT_ARR_coord
-*del,LOCSORT_ARR_ndNum
+*del,LOCSORT_ARR_coord,,nopr
+*del,LOCSORT_ARR_ndNum,,nopr
 
 
 

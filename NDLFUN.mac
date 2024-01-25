@@ -94,7 +94,7 @@ AR37=NZ(arg2)-NZ(arg1)
 
    ! Gerar corrente de nós
    NDSTR, arg1, arg9
-   *del,NDLFUN_ARR_Nodes
+   *del,NDLFUN_ARR_Nodes,,nopr
    *vfun,NDLFUN_ARR_Nodes,COPY,NDSTR_ARR_NodeList
 
    *get,AR21,NODE,,COUNT
@@ -171,7 +171,7 @@ AR37=NZ(arg2)-NZ(arg1)
 *endif
 
 ! Excluir variáveis globais
-*del,NDLFUN_ARR_Nodes
+*del,NDLFUN_ARR_Nodes,,nopr
 
 ! Restaurar seleção
 NRESTORE

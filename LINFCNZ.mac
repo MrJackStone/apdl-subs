@@ -1,11 +1,11 @@
 ! LINFCNZ,    a,    b, name
 ! LINFCNZ, arg1, arg2, arg3
 
-*del,_FNCNAME
-*del,_FNCMTID
-*del,_FNC_C1
-*del,_FNC_C2
-*del,_FNCCSYS
+*del,_FNCNAME,,nopr
+*del,_FNCMTID,,nopr
+*del,_FNC_C1,,nopr
+*del,_FNC_C2,,nopr
+*del,_FNCCSYS,,nopr
 *set,_FNCNAME,arg3
 *dim,_FNC_C1,,1
 *dim,_FNC_C2,,1

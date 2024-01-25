@@ -1,6 +1,6 @@
 ! CSBACKUP
 ! CSBACKUP
 
-*del,CSBackup_
+*del,CSBackup_,,nopr
 *get,CSBackup_,active,,csys
 

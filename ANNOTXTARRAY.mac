@@ -40,9 +40,9 @@
 *get,AR21,parm,%arg1%,dim,y
 
 ! Calculate X-Y coordinates of each annotation
-*del,ANNOTXTARRAY_ARR_X
+*del,ANNOTXTARRAY_ARR_X,,nopr
 *dim,ANNOTXTARRAY_ARR_X,,AR21
-*del,ANNOTXTARRAY_ARR_Y
+*del,ANNOTXTARRAY_ARR_Y,,nopr
 *dim,ANNOTXTARRAY_ARR_Y,,AR21
 *if,upcase(arg5),eq,'X',then
     *vfill,ANNOTXTARRAY_ARR_X,ramp,arg2,arg4
@@ -94,7 +94,7 @@ g_annocharwidth,'ANNOTXTARRAY_VAR_charWidth'
 *enddo
 
 ! Clear parameters
-*del,ANNOTXTARRAY_ARR_X
-*del,ANNOTXTARRAY_ARR_Y
-*del,ANNOTXTARRAY_VAR_charWidth
+*del,ANNOTXTARRAY_ARR_X,,nopr
+*del,ANNOTXTARRAY_ARR_Y,,nopr
+*del,ANNOTXTARRAY_VAR_charWidth,,nopr
 

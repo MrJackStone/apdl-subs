@@ -58,7 +58,7 @@ NSLE,S
 *if,AR24,GT,0,THEN
 
    ! Inicializar vetor
-   *del,AR25
+   *del,AR25,,nopr
    *dim,AR25,,AR24
 
    ! Para cada elemento:
@@ -85,7 +85,7 @@ NSLE,S
       _OUTPUT=AR28
    *elseif,AR23,EQ,'ALL',THEN
       ! Retornar todos os valores
-      *del,_OUTPUT
+      *del,_OUTPUT,,nopr
       *dim,_OUTPUT,,AR24
       *voper,_OUTPUT,AR25,ADD
    *endif

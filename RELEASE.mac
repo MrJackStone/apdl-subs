@@ -102,26 +102,26 @@ ESLN,R,0
 *endif
 
 ! Excluir variáveis
-*del,LNum
-*del,KPPos
-*del,RefKP
-*del,NCount
-*del,ECount
-*del,ENum
-*del,NNum
-*del,EFirstNode
-*del,ESecondNode
-*del,NPosition
-*del,NXVal
-*del,NYVal
-*del,NZVal
-*del,MaxNode
-*del,NewNode
-*del,Bckp_MAT
-*del,Bckp_TYPE
-*del,Bckp_REAL
-*del,Bckp_ESYS
-*del,Bckp_SECN
+*del , LNum        ,  , nopr
+*del , KPPos       ,  , nopr
+*del , RefKP       ,  , nopr
+*del , NCount      ,  , nopr
+*del , ECount      ,  , nopr
+*del , ENum        ,  , nopr
+*del , NNum        ,  , nopr
+*del , EFirstNode  ,  , nopr
+*del , ESecondNode ,  , nopr
+*del , NPosition   ,  , nopr
+*del , NXVal       ,  , nopr
+*del , NYVal       ,  , nopr
+*del , NZVal       ,  , nopr
+*del , MaxNode     ,  , nopr
+*del , NewNode     ,  , nopr
+*del , Bckp_MAT    ,  , nopr
+*del , Bckp_TYPE   ,  , nopr
+*del , Bckp_REAL   ,  , nopr
+*del , Bckp_ESYS   ,  , nopr
+*del , Bckp_SECN   ,  , nopr
 
 ! Restaurar seleção prévia
 KRESTORE

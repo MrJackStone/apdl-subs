@@ -1,5 +1,5 @@
 ! Inicializar tabela de temperaturas
-*del,TABLE_ISO834
+*del,TABLE_ISO834,,nopr
 *dim,TABLE_ISO834,TABLE,61,1,,TIME
 
 ! Instantes de tempo (em segundos)

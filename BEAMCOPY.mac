@@ -59,4 +59,4 @@ cmsel,s,AR20
 cmsel,a,%arg6%
 
 ! Clear parameters
-*del,BEAMCOPY_ARR_sortedNodes
+*del,BEAMCOPY_ARR_sortedNodes,,nopr

@@ -16,6 +16,6 @@
 ! Output parameters:
 ! NBackup_  -  node named selection component
 
-*del,NBackup_
+*del,NBackup_,,nopr
 CM,NBackup_,NODE
 

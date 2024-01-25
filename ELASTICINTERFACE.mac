@@ -174,7 +174,7 @@ AR45=0
     cmsel,r,AR49
     ! Get apportioned area
     AR51=ndnext(0)
-    *del,ELASTICINTERFACE_ARR_nodematch
+    *del,ELASTICINTERFACE_ARR_nodematch,,nopr
     *voper,ELASTICINTERFACE_ARR_nodematch,ELASTICINTERFACE_ARR_appoAreas(1,1),eq,AR51
     *vscfun,AR52,first,ELASTICINTERFACE_ARR_nodematch
     *if,AR52,eq,0,then
@@ -221,11 +221,11 @@ Corresponding spring element (%I) will be set to material number 999 for debuggi
 ! Assign attribute numbers to output object
 *get,AR20,parm,arg1,type
 *if,AR20,eq,3,then
-    *del,%arg1%
+    *del,%arg1%,,nopr
     *dim,%arg1%,,7
     %arg1%(1)=AR33,0,AR31,0,0,0,0
 *endif
 
-*del,ELASTICINTERFACE_ARR_appoAreas
-*del,ELASTICINTERFACE_ARR_nodematch
+*del,ELASTICINTERFACE_ARR_appoAreas,,nopr
+*del,ELASTICINTERFACE_ARR_nodematch,,nopr
 

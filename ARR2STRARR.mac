@@ -26,7 +26,7 @@
 *get,AR21,parm,%arg2%,dim,x
 *get,AR22,parm,%arg2%,dim,y
 
-*del,%arg1%
+*del,%arg1%,,nopr
 *dim,%arg1%,string,248,AR21,AR22
 
 *do,AR23,1,AR21,1
@@ -37,4 +37,4 @@
     *enddo
 *enddo
 
-*del,ARR2STRARR_VAR_stringNumber
+*del,ARR2STRARR_VAR_stringNumber,,nopr

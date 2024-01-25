@@ -10,19 +10,19 @@
 *get,AR20,PARM,%arg2%,TYPE
 
 *if,AR20,EQ,-1,THEN
-    *del,%arg2%
+    *del,%arg2%,,nopr
     *dim,%arg2%,%arg3%,1
     %arg2%(1)=arg1
 *else
     *get,AR21,PARM,%arg2%,DIM,X
     AR22=AR21+1
-    *del,CONS_ARR_temp
+    *del,CONS_ARR_temp,,nopr
     *vfun,CONS_ARR_temp,COPY,%arg2%
-    *del,%arg2%
+    *del,%arg2%,,nopr
     *dim,%arg2%,%arg3%,AR22
     %arg2%(1)=arg1
     *vfun,%arg2%(2),COPY,CONS_ARR_temp
-    *del,CONS_ARR_temp
+    *del,CONS_ARR_temp,,nopr
 *endif
 
 

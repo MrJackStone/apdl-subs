@@ -42,7 +42,7 @@ AR22=UPCASE(arg7)
 *set,%arg1%(0,3,1),   0, 99, 0, 1, -2, 0, 0
 !!
 
-!*del,%arg1%
+!*del,%arg1%,,nopr
 !*dim,%arg1%,TABLE,2,,,X,,,0
 !*if,arg6,GT,0,THEN
 !    %arg1%(1,0)=0,arg6

@@ -37,7 +37,7 @@ AR21=0
     *get,AR25,parm,%AR23%,dim,y
 *enddo
 
-*del,ARRLIMS_ARR_allRows
+*del,ARRLIMS_ARR_allRows,,nopr
 *dim,ARRLIMS_ARR_allRows,,AR21,AR25
 
 AR26=1
@@ -50,7 +50,7 @@ AR26=1
     AR26=AR26+AR24
 *enddo
 
-*del,%arg1%
+*del,%arg1%,,nopr
 *dim,%arg1%,,2,AR25
 *do,AR27,1,AR25,1
     *vscfun,AR28,min,ARRLIMS_ARR_allRows(1,AR27)

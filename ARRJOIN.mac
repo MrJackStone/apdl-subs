@@ -13,7 +13,7 @@
 ! ARRJOIN_VAR_parmName
 
 
-*del,ARRJOIN_ARR_mask
+*del,ARRJOIN_ARR_mask,,nopr
 *dim,ARRJOIN_ARR_mask,,17
 *vfill,ARRJOIN_ARR_mask,ramp,0,0
 
@@ -88,7 +88,7 @@ AR23=0
     *endif
 *enddo
 
-*del,%arg1%
+*del,%arg1%,,nopr
 *dim,%arg1%,,AR23
 
 AR25=1
@@ -124,6 +124,4 @@ AR25=1
     *endif
 *enddo
 
-!*del,ARRJOIN_ARR_mask
-
-
+*del,ARRJOIN_ARR_mask,,nopr

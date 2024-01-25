@@ -39,7 +39,7 @@ pdef,%ACTVPATH_VAR_dummyLabel%,u,x
 
 ! Get path count
 *get,AR21,path,,numpath
-*del,ACTVPATH_ARR_pathNames
+*del,ACTVPATH_ARR_pathNames,,nopr
 *dim,ACTVPATH_ARR_pathNames,char,AR21
 
 ! Get all path names
@@ -55,7 +55,7 @@ AR27=0
     AR23=ACTVPATH_ARR_pathNames(AR22)
     path,%AR23%
     ! Get path's labels
-    *del,ACTVPATH_ARR_LABEL
+    *del,ACTVPATH_ARR_LABEL,,nopr
     paget,ACTVPATH_ARR_LABEL,label
     *get,AR24,parm,ACTVPATH_ARR_LABEL,dim,x
     ! Look for matching label name
@@ -94,7 +94,7 @@ paresu,all,ACTVPATH_VAR_backupFname,pth
 *endif
 
 ! Clear parameters
-*del,ACTVPATH_VAR_dummyLabel
-*del,ACTVPATH_ARR_LABEL
-*del,ACTVPATH_VAR_backupFname
+*del,ACTVPATH_VAR_dummyLabel,,nopr
+*del,ACTVPATH_ARR_LABEL,,nopr
+*del,ACTVPATH_VAR_backupFname,,nopr
 

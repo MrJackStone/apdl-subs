@@ -31,7 +31,7 @@
 ! Gerar componente com nós selecionados
 CM,AR20,NODE
 *get,AR21,NODE,,COUNT
-*del,NDSTR_ARR_NodeList
+*del,NDSTR_ARR_NodeList,,nopr
 *dim,NDSTR_ARR_NodeList,ARRAY,AR21
 
 ! Obter tipo de seleção dos nós

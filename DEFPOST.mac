@@ -26,14 +26,14 @@ sabs
 
 sadd,'ZEROS','UX','UX',1,-1
 
-*del,ETNames
+*del,ETNames,,nopr
 *dim,ETNames,CHAR,19
 ETNames(1)=  'MX', 'MY',  'NX',  'NY',  'QX',  'QY',  'UX',  'UY',  'UZ'
 ETNames(10)= 'Ni', 'Nj', 'QZi', 'QZj', 'QYi', 'QYj', 'MYi', 'MYj', 'MZi', 'MZj'
 
 etenv,arg3,arg4,'ETNames'
 
-*del,env_etnames
+*del,env_etnames,,nopr
 *dim,env_etnames,char,19*4
 *do,nthET,1,19,1
     baseName=ETNames(nthET)

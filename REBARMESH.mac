@@ -49,7 +49,7 @@ LBACKUP
 ! Calculate X position of each vertical rebar
 AR20=NINT(((arg1-2*arg5)/arg3)+0.5)
 AR21=(arg1-((AR20-1)*arg3))/2
-*del,REBARMESH_ARR_X
+*del,REBARMESH_ARR_X,,nopr
 *dim,REBARMESH_ARR_X,ARRAY,AR20
 AR22=AR21
 *do,AR23,1,AR20,1
@@ -63,7 +63,7 @@ AR25=arg2-arg6
 ! Calculate Y position of each horizontal rebar
 AR26=NINT(((arg2-2*arg6)/arg4)+0.5)
 AR27=(arg2-((AR26-1)*arg4))/2
-*del,REBARMESH_ARR_Y
+*del,REBARMESH_ARR_Y,,nopr
 *dim,REBARMESH_ARR_Y,ARRAY,AR26
 AR28=AR27
 *do,AR23,1,AR26,1
@@ -105,8 +105,8 @@ CM,REBARMESH_COMPL_horRebars,LINE
 CM,REBARMESH_COMPK_horRebars,KP
 
 ! Clear parameters
-*del,REBARMESH_ARR_X
-*del,REBARMESH_ARR_Y
+*del,REBARMESH_ARR_X,,nopr
+*del,REBARMESH_ARR_Y,,nopr
 
 ! Restore previous selection and add newly created entities to it
 KRESTORE

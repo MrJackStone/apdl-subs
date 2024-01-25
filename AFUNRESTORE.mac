@@ -7,11 +7,11 @@ parverify,,'afunBackup_','CHAR'
     *if,upcase(afunBackup_),eq,'DEG',then
         ! Set to degrees
         *afun,'DEG'
-        *del,afunBackup_
+        *del,afunBackup_,,nopr
         *return,-1
     *endif
 *endif
 
 ! Default behavior: set to radians
 *afun,'RAD'
-*del,afunBackup_
+*del,afunBackup_,,nopr

@@ -42,7 +42,7 @@
 ! GRSEQ_VAR_frameNumber
 
 ! Obter diretório atual
-*del,GRSEQ_STR_mainDir
+*del,GRSEQ_STR_mainDir,,nopr
 /inquire,GRSEQ_STR_mainDir,DIRECTORY
 
 ! Criar diretório para armazenar as imagens
@@ -58,8 +58,8 @@ VARDEL,199
 VARDEL,200
 
 ! Transferir valores das variáveis (abscissas e ordenadas) para os vetores
-*del,GRSEQ_ARR_xVector
-*del,GRSEQ_ARR_yVector
+*del,GRSEQ_ARR_xVector,,nopr
+*del,GRSEQ_ARR_yVector,,nopr
 VGET,GRSEQ_ARR_xVector,arg1
 VGET,GRSEQ_ARR_yVector,arg2
 
@@ -100,9 +100,9 @@ VGET,GRSEQ_ARR_yVector,arg2
     /title,%GRSEQ_VAR_frameNumber%
 
    ! Criar vetores temporários com os valores das abscissas e das ordenadas
-   *del,GRSEQ_ARR_tempX
+   *del,GRSEQ_ARR_tempX,,nopr
    *dim,GRSEQ_ARR_tempX,ARRAY,AR26
-   *del,GRSEQ_ARR_tempY
+   *del,GRSEQ_ARR_tempY,,nopr
    *dim,GRSEQ_ARR_tempY,ARRAY,AR26
    *do,i,1,AR26,1
       GRSEQ_ARR_tempX(i)=GRSEQ_ARR_xVector(i)
@@ -138,12 +138,12 @@ VGET,GRSEQ_ARR_yVector,arg2
 *abfini
 
 ! Apagar vetores
-*del,GRSEQ_ARR_xVector
-*del,GRSEQ_ARR_yVector
-*del,GRSEQ_ARR_tempX
-*del,GRSEQ_ARR_tempY
-*del,GRSEQ_STR_mainDir
-*del,GRSEQ_VAR_frameNumber
+*del,GRSEQ_ARR_xVector,,nopr
+*del,GRSEQ_ARR_yVector,,nopr
+*del,GRSEQ_ARR_tempX,,nopr
+*del,GRSEQ_ARR_tempY,,nopr
+*del,GRSEQ_STR_mainDir,,nopr
+*del,GRSEQ_VAR_frameNumber,,nopr
 
 
 

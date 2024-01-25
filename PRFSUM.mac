@@ -15,7 +15,7 @@ AR21=0
 *enddo
 *vscfun,AR24,sum,PRFSUM_ARR_f
 
-*del,PRFSUM_ARR_f
+*del,PRFSUM_ARR_f,,nopr
 
 *msg,ui,AR24
 Total force: %g

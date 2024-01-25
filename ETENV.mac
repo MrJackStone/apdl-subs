@@ -3,11 +3,11 @@
 
 *get,AR21,PARM,%arg3%,DIM,X
 
-*del,ETENV_ARR_MXETNames
+*del,ETENV_ARR_MXETNames,,nopr
 *dim,ETENV_ARR_MXETNames,CHAR,AR21
-*del,ETENV_ARR_MNETNames
+*del,ETENV_ARR_MNETNames,,nopr
 *dim,ETENV_ARR_MNETNames,CHAR,AR21
-*del,ETENV_ARR_ABETNames
+*del,ETENV_ARR_ABETNames,,nopr
 *dim,ETENV_ARR_ABETNames,CHAR,AR21
 *do,AR22,1,AR21,1
     AR25=%arg3%(AR22)

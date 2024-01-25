@@ -108,7 +108,7 @@ AR29=1+AR33
 AR30=1+AR32
 
 ! Create table
-*del,ANNOTABLE_ARR_table
+*del,ANNOTABLE_ARR_table,,nopr
 *dim,ANNOTABLE_ARR_table,string,248,AR27,AR28
 
 ! Set header/label intersection field
@@ -142,7 +142,7 @@ AR30=1+AR32
 *enddo
 
 ! Calculate column widths
-*del,ANNOTABLE_ARR_colWidths
+*del,ANNOTABLE_ARR_colWidths,,nopr
 *dim,ANNOTABLE_ARR_colWidths,,AR28
 *do,AR43,1,AR28,1
     AR38=0
@@ -156,7 +156,7 @@ AR30=1+AR32
 *enddo
 
 ! Calculate row heights
-*del,ANNOTABLE_ARR_rowHeights
+*del,ANNOTABLE_ARR_rowHeights,,nopr
 *dim,ANNOTABLE_ARR_rowHeights,,AR27
 *vfill,ANNOTABLE_ARR_rowHeights,ramp,AR22,0
 
@@ -174,7 +174,7 @@ AR44=arg5
     ! Get column width
     AR23=ANNOTABLE_ARR_colWidths(AR43)
     ! Copy column data to 1-D array
-    *del,ANNOTABLE_ARR_column
+    *del,ANNOTABLE_ARR_column,,nopr
     *dim,ANNOTABLE_ARR_column,string,248,AR27
     *do,AR42,1,AR27,1
         ANNOTABLE_ARR_column(1,AR42)=ANNOTABLE_ARR_table(1,AR42,AR43)
@@ -204,11 +204,11 @@ AR44=arg5
     anno,AR55,AR56,arg4
 *endif
 
-*del,ANNOTABLE_ARR_colWidths
-*del,ANNOTABLE_ARR_rowHeights
-*del,ANNOTABLE_ARR_labelRowHeights
-*del,ANNOTABLE_ARR_labelColWidths
-*del,ANNOTABLE_VAR_charWidth
-*del,ANNOTABLE_ARR_column
+*del,ANNOTABLE_ARR_colWidths,,nopr
+*del,ANNOTABLE_ARR_rowHeights,,nopr
+*del,ANNOTABLE_ARR_labelRowHeights,,nopr
+*del,ANNOTABLE_ARR_labelColWidths,,nopr
+*del,ANNOTABLE_VAR_charWidth,,nopr
+*del,ANNOTABLE_ARR_column,,nopr
 
 

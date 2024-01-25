@@ -62,18 +62,18 @@ AR27=0
       *if,AR27,EQ,1,THEN
 
          ! Criar o vetor de saída
-         *del,ARRDEL_ARR_output
+         *del,ARRDEL_ARR_output,,nopr
          *dim,ARRDEL_ARR_output,ARRAY,1
          ARRDEL_ARR_output(1)=AR23
 
       *else
 
          ! Criar vetor temporário
-         *del,ARRDEL_ARR_temp
+         *del,ARRDEL_ARR_temp,,nopr
          *dim,ARRDEL_ARR_temp,ARRAY,AR27
          *vfun,ARRDEL_ARR_temp,COPY,ARRDEL_ARR_output
          ! Incrementar vetor de saída
-         *del,ARRDEL_ARR_output
+         *del,ARRDEL_ARR_output,,nopr
          *dim,ARRDEL_ARR_output,ARRAY,AR27
          *vfun,ARRDEL_ARR_output,COPY,ARRDEL_ARR_temp
          ARRDEL_ARR_output(AR27)=AR23
@@ -87,7 +87,7 @@ AR27=0
 ! Caso todos os elementos tenham sido removidos:
 *if,AR27,EQ,0,THEN
    ! Definir vetor de saída como zero
-   *del,ARRDEL_ARR_output
+   *del,ARRDEL_ARR_output,,nopr
    ARRDEL_ARR_output=0
 *endif
 

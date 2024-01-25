@@ -26,8 +26,8 @@ cm,AR20,node
 cm,AR21,elem
 
 *get,AR22,node,,count
-*del,GETNPRES_ARR_nodes
-*del,GETNPRES_ARR_pressures
+*del,GETNPRES_ARR_nodes,,nopr
+*del,GETNPRES_ARR_pressures,,nopr
 *dim,GETNPRES_ARR_nodes,array,AR22
 *dim,GETNPRES_ARR_pressures,array,AR22
 

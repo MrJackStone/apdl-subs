@@ -17,48 +17,48 @@ EPLOT
 PLETAB,FX,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-FX','png'
 
 PLETAB,FY,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-FY','png'
 
 PLETAB,MX,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-MX','png'
 
 PLETAB,MY,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-MY','png'
 
 PLETAB,MT,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-MT','png'
 
 PLETAB,QX,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-QX','png'
 
 PLETAB,QY,1
 TAKEPIC
 ! Renomear o arquivo criado
-*del,FileName
+*del,FileName,,nopr
 *get,FileName,ACTIVE,0,JOBNAM
 /rename,'%FileName%000','png',,'%FileName%-QY','png'

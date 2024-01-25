@@ -1,6 +1,6 @@
 ! AFUNBACKUP
 ! AFUNBACKUP
 
-*del,afunBackup_
+*del,afunBackup_,,nopr
 getafun,'afunBackup_'
 

@@ -53,7 +53,7 @@
     *get,AR20,parm,%arg3%,type
     *if,AR20,eq,4,then
         *get,AR28,parm,%arg3%,dim,x
-        *del,MPATHPLOT_ARR_pathNames
+        *del,MPATHPLOT_ARR_pathNames,,nopr
         *dim,MPATHPLOT_ARR_pathNames,char,AR28
         *do,AR22,1,AR28,1
             MPATHPLOT_ARR_pathNames(AR22)=%arg3%(AR22)
@@ -65,7 +65,7 @@
     *get,AR20,parm,%arg4%,type
     *if,AR20,eq,4,then
         *get,AR28,parm,%arg4%,dim,x
-        *del,MPATHPLOT_ARR_labels
+        *del,MPATHPLOT_ARR_labels,,nopr
         *dim,MPATHPLOT_ARR_labels,char,AR28
         *do,AR22,1,AR28,1
             MPATHPLOT_ARR_labels(AR22)=%arg4%(AR22)
@@ -76,10 +76,10 @@
 ! Get number of paths to be plotted
 *get,AR21,PARM,MPATHPLOT_ARR_pathNames,DIM,X
 
-*del,MPATHPLOT_ARR_min
-*del,MPATHPLOT_ARR_max
-*del,MPATHPLOT_ARR_absmax
-*del,MPATHPLOT_ARR_scales
+*del,MPATHPLOT_ARR_min,,nopr
+*del,MPATHPLOT_ARR_max,,nopr
+*del,MPATHPLOT_ARR_absmax,,nopr
+*del,MPATHPLOT_ARR_scales,,nopr
 *dim,MPATHPLOT_ARR_min,ARRAY,AR21
 *dim,MPATHPLOT_ARR_max,ARRAY,AR21
 *dim,MPATHPLOT_ARR_absmax,ARRAY,AR21
@@ -135,17 +135,7 @@
 *enddo
 
 ! Clear parameters
-!*del,MPATHPLOT_ARR_min
-!*del,MPATHPLOT_ARR_max
-!*del,MPATHPLOT_ARR_absmax
-!*del,MPATHPLOT_ARR_scales
-
-
-
-
-
-
-
-
-
-
+!*del,MPATHPLOT_ARR_min,,nopr
+!*del,MPATHPLOT_ARR_max,,nopr
+!*del,MPATHPLOT_ARR_absmax,,nopr
+!*del,MPATHPLOT_ARR_scales,,nopr

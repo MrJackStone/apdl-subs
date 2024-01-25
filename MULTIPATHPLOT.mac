@@ -51,10 +51,10 @@ AR20=-0.05
 ! Get number of paths to be plotted
 *get,AR21,PARM,MULTIPATHPLOT_ARR_pathNames,DIM,X
 
-*del,MULTIPATHPLOT_ARR_min
-*del,MULTIPATHPLOT_ARR_max
-*del,MULTIPATHPLOT_ARR_absmax
-*del,MULTIPATHPLOT_ARR_scales
+*del,MULTIPATHPLOT_ARR_min,,nopr
+*del,MULTIPATHPLOT_ARR_max,,nopr
+*del,MULTIPATHPLOT_ARR_absmax,,nopr
+*del,MULTIPATHPLOT_ARR_scales,,nopr
 *dim,MULTIPATHPLOT_ARR_min,ARRAY,AR21
 *dim,MULTIPATHPLOT_ARR_max,ARRAY,AR21
 *dim,MULTIPATHPLOT_ARR_absmax,ARRAY,AR21
@@ -133,9 +133,9 @@ ENDPNG,arg1
 CLIMS
 
 ! Clear parameters
-*del,MULTIPATHPLOT_ARR_min
-*del,MULTIPATHPLOT_ARR_max
-*del,MULTIPATHPLOT_ARR_absmax
-*del,MULTIPATHPLOT_ARR_scales
+*del,MULTIPATHPLOT_ARR_min,,nopr
+*del,MULTIPATHPLOT_ARR_max,,nopr
+*del,MULTIPATHPLOT_ARR_absmax,,nopr
+*del,MULTIPATHPLOT_ARR_scales,,nopr
 
 

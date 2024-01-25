@@ -27,13 +27,13 @@
 
 
 ! Initialize string arrays
-*del,MKDIRS_STR_resName
+*del,MKDIRS_STR_resName,,nopr
 *dim,MKDIRS_STR_resName,string,248
-*del,MKDIRS_STR_resPath
+*del,MKDIRS_STR_resPath,,nopr
 *dim,MKDIRS_STR_resPath,string,248
-*del,MKDIRS_STR_imgName
+*del,MKDIRS_STR_imgName,,nopr
 *dim,MKDIRS_STR_imgName,string,248
-*del,MKDIRS_STR_imgPath
+*del,MKDIRS_STR_imgPath,,nopr
 *dim,MKDIRS_STR_imgPath,string,248
 
 ! Get current directory (main directory)
@@ -71,9 +71,9 @@ MKDIRS_STR_imgPath(1)=strcat(MKDIRS_STR_resPath(1),strcat('\',MKDIRS_STR_imgName
 /cwd,MKDIRS_STR_current(1)
 
 ! Set output parameters
-*del,PATH_main
-*del,PATH_res
-*del,PATH_img
+*del,PATH_main,,nopr
+*del,PATH_res,,nopr
+*del,PATH_img,,nopr
 *dim,PATH_main,string,248
 *dim,PATH_res,string,248
 *dim,PATH_img,string,248
@@ -82,9 +82,9 @@ PATH_res(1)=MKDIRS_STR_resPath(1)
 PATH_img(1)=MKDIRS_STR_imgPath(1)
 
 ! Clear parameters
-*del,MKDIRS_STR_resName
-*del,MKDIRS_STR_resPath
-*del,MKDIRS_STR_imgName
-*del,MKDIRS_STR_imgPath
-*del,MKDIRS_STR_current
+*del,MKDIRS_STR_resName,,nopr
+*del,MKDIRS_STR_resPath,,nopr
+*del,MKDIRS_STR_imgName,,nopr
+*del,MKDIRS_STR_imgPath,,nopr
+*del,MKDIRS_STR_current,,nopr
 

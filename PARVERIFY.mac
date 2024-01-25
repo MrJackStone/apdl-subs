@@ -59,7 +59,7 @@
 
 ! Initialize array of available types
 AR20=7
-*del,PARVERIFY_ARR_types
+*del,PARVERIFY_ARR_types,,nopr
 *dim,PARVERIFY_ARR_types,char,AR20
 PARVERIFY_ARR_types(1)='UNDEF','SCALAR','ARRAY','TABLE','CHAR','CHR_ARR','STR_ARR'
 
@@ -219,6 +219,6 @@ AR30=0
     %AR42%=AR33*AR35*AR36*AR37
 *endif
 
-*del,PARVERIFY_ARR_types
+*del,PARVERIFY_ARR_types,,nopr
 
 

@@ -1,6 +1,8 @@
 ! DEFLECT,KPB,KPE,Dir,DType,TanNode,Key
 ! DEFLECT,arg1,arg2,arg3,arg4
 
+! TODO: parms to args
+
 ! Dir:
 !   'X'      : flecha na direção X
 !   'Y'      : flecha na direção Y
@@ -245,7 +247,7 @@ Não há nó adjacente a KPE que pertença a elemento adjacente às linhas selec
    *get,NCount,NODE,0,COUNT
 
    ! Inicializar o vetor de número de nós sobre a linha
-   *del,OrderedNodes
+   *del,OrderedNodes,,nopr
    *dim,OrderedNodes,,NCount
 
    ! Caso o keypoint de referência seja o primeiro da linha:
@@ -301,7 +303,7 @@ Descontinuidade nodal detectada no alinhamento entre KPB e KPE para as linhas se
    Denom=SQRT(DeltaX12**2+DeltaY12**2+DeltaZ12**2)
 
    ! Inicializar o vetor de resultados
-   *del,U_NValue
+   *del,U_NValue,,nopr
    *dim,U_NValue,,NCount
 
    ! Para cada elemento:
@@ -354,7 +356,7 @@ Descontinuidade nodal detectada no alinhamento entre KPB e KPE para as linhas se
       _OUTPUT=MaxVal
    *elseif,Key,EQ,'ALL',THEN
       ! Retornar todos os valores
-      *del,_OUTPUT
+      *del,_OUTPUT,,nopr
       *dim,_OUTPUT,,NCount
       *voper,_OUTPUT,U_NValue,ADD
    *endif
@@ -374,67 +376,67 @@ CMDELE,LineElements
 CMDELE,ListedNodes
 
 ! Excluir parâmetros
-*del,A3Type
-*del,A4Type
-*del,A6Type
-*del,DeltaX12
-*del,DeltaX1P
-*del,DeltaY12
-*del,DeltaY1P
-*del,DeltaZ12
-*del,DeltaZ1P
-*del,Denom
-*del,Dir
-*del,DType
-*del,ECount
-*del,FirstNode
-*del,i
-*del,Key
-*del,KPB
-*del,KPE
-*del,LastNode
-*del,MaxVal
-*del,MinVal
-*del,N1DeltaX
-*del,N1DeltaY
-*del,N1DeltaZ
-*del,N2DeltaX
-*del,N2DeltaY
-*del,N2DeltaZ
-*del,NCount
-*del,NDeltaX
-*del,NDeltaY
-*del,NDeltaZ
-*del,NNum
-*del,nthNode
-*del,NX
-*del,NY
-*del,NZ
-*del,OrderedNodes
-*del,ROT1X
-*del,ROT1Y
-*del,ROT1Z
-*del,ROT2X
-*del,ROT2Y
-*del,ROT2Z
-*del,SelectedNodesCount
-*del,TanNode
-*del,TERMO1
-*del,TERMO2
-*del,TERMO3
-*del,U_NValue
-*del,X1
-*del,X1Nodal
-*del,X2
-*del,X2Nodal
-*del,Y1
-*del,Y1Nodal
-*del,Y2
-*del,Y2Nodal
-*del,Z1
-*del,Z1Nodal
-*del,Z2
-*del,Z2Nodal
+*del , A3Type             ,  , nopr
+*del , A4Type             ,  , nopr
+*del , A6Type             ,  , nopr
+*del , DeltaX12           ,  , nopr
+*del , DeltaX1P           ,  , nopr
+*del , DeltaY12           ,  , nopr
+*del , DeltaY1P           ,  , nopr
+*del , DeltaZ12           ,  , nopr
+*del , DeltaZ1P           ,  , nopr
+*del , Denom              ,  , nopr
+*del , Dir                ,  , nopr
+*del , DType              ,  , nopr
+*del , ECount             ,  , nopr
+*del , FirstNode          ,  , nopr
+*del , i                  ,  , nopr
+*del , Key                ,  , nopr
+*del , KPB                ,  , nopr
+*del , KPE                ,  , nopr
+*del , LastNode           ,  , nopr
+*del , MaxVal             ,  , nopr
+*del , MinVal             ,  , nopr
+*del , N1DeltaX           ,  , nopr
+*del , N1DeltaY           ,  , nopr
+*del , N1DeltaZ           ,  , nopr
+*del , N2DeltaX           ,  , nopr
+*del , N2DeltaY           ,  , nopr
+*del , N2DeltaZ           ,  , nopr
+*del , NCount             ,  , nopr
+*del , NDeltaX            ,  , nopr
+*del , NDeltaY            ,  , nopr
+*del , NDeltaZ            ,  , nopr
+*del , NNum               ,  , nopr
+*del , nthNode            ,  , nopr
+*del , NX                 ,  , nopr
+*del , NY                 ,  , nopr
+*del , NZ                 ,  , nopr
+*del , OrderedNodes       ,  , nopr
+*del , ROT1X              ,  , nopr
+*del , ROT1Y              ,  , nopr
+*del , ROT1Z              ,  , nopr
+*del , ROT2X              ,  , nopr
+*del , ROT2Y              ,  , nopr
+*del , ROT2Z              ,  , nopr
+*del , SelectedNodesCount ,  , nopr
+*del , TanNode            ,  , nopr
+*del , TERMO1             ,  , nopr
+*del , TERMO2             ,  , nopr
+*del , TERMO3             ,  , nopr
+*del , U_NValue           ,  , nopr
+*del , X1                 ,  , nopr
+*del , X1Nodal            ,  , nopr
+*del , X2                 ,  , nopr
+*del , X2Nodal            ,  , nopr
+*del , Y1                 ,  , nopr
+*del , Y1Nodal            ,  , nopr
+*del , Y2                 ,  , nopr
+*del , Y2Nodal            ,  , nopr
+*del , Z1                 ,  , nopr
+*del , Z1Nodal            ,  , nopr
+*del , Z2                 ,  , nopr
+*del , Z2Nodal            ,  , nopr
 
 ! Restaurar seleção
 LRESTORE

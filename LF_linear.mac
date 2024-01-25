@@ -31,10 +31,10 @@
 AR20=arg2/arg4
 
 ! Deletar parâmetros
-*del,_FNCNAME
-*del,_FNCMTID
-*del,_FNC_C1
-*del,_FNCCSYS
+*del,_FNCNAME,,nopr
+*del,_FNCMTID,,nopr
+*del,_FNC_C1,,nopr
+*del,_FNCCSYS,,nopr
 *set,_FNCNAME,arg1
 *dim,_FNC_C1,,3
 *set,_FNC_C1(2),AR20

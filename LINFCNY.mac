@@ -1,7 +1,7 @@
 ! LINFCNY,    a,    b, name
 ! LINFCNY, arg1, arg2, arg3
 
-*del,%arg3%
+*del,%arg3%,,nopr
 *dim,%arg3%,TABLE,6,3,1,,,,0
 
 ! Begin of equation: coefA*{Y}+coefB

@@ -28,15 +28,15 @@
 ! NUM2STR_VAR_outputVarName
 
 
-*del,NUM2STR_FILE_nested
-*del,NUM2STR_VAR_fieldWidth
-*del,NUM2STR_VAR_formatKey
-*del,NUM2STR_VAR_input
-*del,NUM2STR_VAR_inputVarName
-*del,NUM2STR_VAR_nestedFileVarName
-*del,NUM2STR_VAR_output
-*del,NUM2STR_VAR_outputPrecision
-*del,NUM2STR_VAR_outputVarName
+*del , NUM2STR_FILE_nested           ,  , nopr
+*del , NUM2STR_VAR_fieldWidth        ,  , nopr
+*del , NUM2STR_VAR_formatKey         ,  , nopr
+*del , NUM2STR_VAR_input             ,  , nopr
+*del , NUM2STR_VAR_inputVarName      ,  , nopr
+*del , NUM2STR_VAR_nestedFileVarName ,  , nopr
+*del , NUM2STR_VAR_output            ,  , nopr
+*del , NUM2STR_VAR_outputPrecision   ,  , nopr
+*del , NUM2STR_VAR_outputVarName     ,  , nopr
 
 ! Check parameters:
 parverify,,arg1,'CHAR'
@@ -86,7 +86,7 @@ NUM2STR command is ignored.
     *msg,warn,arg3
 NUM2STR error: invalid format (%s).%/&
 NUM2STR command is ignored.
-    *del,%NUM2STR_VAR_output%
+    *del,%NUM2STR_VAR_output%,,nopr
     *return,-1
 *endif
 
@@ -120,13 +120,13 @@ NUM2STR_VAR_inputVarName='NUM2STR_VAR_input'
 ! Remove spaces
 %NUM2STR_VAR_output%=strcomp(%NUM2STR_VAR_output%)
 
-*del,NUM2STR_FILE_nested
-*del,NUM2STR_VAR_fieldWidth
-*del,NUM2STR_VAR_formatKey
-*del,NUM2STR_VAR_input
-*del,NUM2STR_VAR_inputVarName
-*del,NUM2STR_VAR_nestedFileVarName
-*del,NUM2STR_VAR_output
-*del,NUM2STR_VAR_outputPrecision
-*del,NUM2STR_VAR_outputVarName
+*del , NUM2STR_FILE_nested           ,  , nopr
+*del , NUM2STR_VAR_fieldWidth        ,  , nopr
+*del , NUM2STR_VAR_formatKey         ,  , nopr
+*del , NUM2STR_VAR_input             ,  , nopr
+*del , NUM2STR_VAR_inputVarName      ,  , nopr
+*del , NUM2STR_VAR_nestedFileVarName ,  , nopr
+*del , NUM2STR_VAR_output            ,  , nopr
+*del , NUM2STR_VAR_outputPrecision   ,  , nopr
+*del , NUM2STR_VAR_outputVarName     ,  , nopr
 

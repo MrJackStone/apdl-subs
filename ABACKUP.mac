@@ -1,6 +1,6 @@
 ! ABACKUP
 
-*del,ABackup_
+*del,ABackup_,,nopr
 
 ! Created named component with currently selected areas
 CM,ABackup_,AREA

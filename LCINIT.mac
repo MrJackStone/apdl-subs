@@ -83,6 +83,6 @@ AR23=%arg1%(3,1,arg2)
 
 *cfclos
 
-*del,LCINIT_VAR_time
+*del,LCINIT_VAR_time,,nopr
 
 

@@ -1,12 +1,12 @@
 ! PARFCNZ,    a,    b,    c, name
 ! PARFCNZ, arg1, arg2, arg3, arg4
 
-*del,_FNCNAME
-*del,_FNCMTID
-*del,_FNC_C1
-*del,_FNC_C2
-*del,_FNC_C3
-*del,_FNCCSYS
+*del,_FNCNAME,,nopr
+*del,_FNCMTID,,nopr
+*del,_FNC_C1,,nopr
+*del,_FNC_C2,,nopr
+*del,_FNC_C3,,nopr
+*del,_FNCCSYS,,nopr
 *set,_FNCNAME,arg4
 *dim,_FNC_C1,,1
 *dim,_FNC_C2,,1

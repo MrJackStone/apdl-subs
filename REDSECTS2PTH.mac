@@ -26,11 +26,11 @@
 
 sectCount=20
 
-*del,MPATHPLOT_ARR_pathNames
+*del,MPATHPLOT_ARR_pathNames,,nopr
 *dim,MPATHPLOT_ARR_pathNames,char,sectCount
-*del,MPATHPLOT_ARR_labels
+*del,MPATHPLOT_ARR_labels,,nopr
 *dim,MPATHPLOT_ARR_labels,char,sectCount
-*del,sect_cum_sy
+*del,sect_cum_sy,,nopr
 *dim,sect_cum_sy,,sectCount
 
 *get,pathNodeCount,path,,node
@@ -39,7 +39,7 @@ divsPerSegment=(dataPointCount-1)/(pathNodeCount-1)
 
 *get,parType,parm,arg6,type
 *if,parType,eq,0,then
-    *del,SCANPATH_ARR_planeNodes
+    *del,SCANPATH_ARR_planeNodes,,nopr
     *dim,SCANPATH_ARR_planeNodes,,1
     SCANPATH_ARR_planeNodes(1)=arg6
 *elseif,parType,eq,3,then
@@ -49,7 +49,7 @@ divsPerSegment=(dataPointCount-1)/(pathNodeCount-1)
         *if,arrLength,ne,pathNodeCount-1,then
             *return,-1
         *else
-            *del,SCANPATH_ARR_planeNodes
+            *del,SCANPATH_ARR_planeNodes,,nopr
             *dim,SCANPATH_ARR_planeNodes,,arrLength
             *vfun,SCANPATH_ARR_planeNodes,copy,%arg6%
         *endif
@@ -117,7 +117,7 @@ segmentOffset=0
     localYi=ymin
     localYj=ymax
 
-    *del,xs
+    *del,xs,,nopr
     *dim,xs,,divsPerSegment
     *vfill,xs(1),ramp,xmin,deltaX
 

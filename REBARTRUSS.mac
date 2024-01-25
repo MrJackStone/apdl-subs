@@ -54,7 +54,7 @@ AR22=(arg1-((AR20-1)*arg4))/2
 AR23=(arg2-((AR21)*(arg5+arg6)-arg6))/2
 
 ! X coordinate of each truss
-*del,REBARTRUSS_ARR_X
+*del,REBARTRUSS_ARR_X,,nopr
 *dim,REBARTRUSS_ARR_X,ARRAY,AR20
 AR24=AR22
 *do,AR25,1,AR20,1
@@ -63,7 +63,7 @@ AR24=AR22
 *enddo
 
 ! Y coordinate of the bottom of each segment
-*del,REBARTRUSS_ARR_Y
+*del,REBARTRUSS_ARR_Y,,nopr
 *dim,REBARTRUSS_ARR_Y,ARRAY,AR21
 AR26=AR23
 *do,AR27,1,AR21,1

@@ -71,7 +71,7 @@ cm,AR24,elem
 *get,AR25,node,,count
 
 ! Initialize apportioned area array
-*del,%AR22%
+*del,%AR22%,,nopr
 *dim,%AR22%,,AR25,2
 
 ! Set node pool selection component
@@ -118,7 +118,7 @@ cmsel,s,AR24
 *vscfun,AR98,rms ,%AR22%(1,2)
 
 ! Assign stats to output array
-*del,%AR21%
+*del,%AR21%,,nopr
 *dim,%AR21%,,8
 %AR21%(1)=AR91,AR92,AR93,AR94,AR95,AR96,AR97,AR98
 

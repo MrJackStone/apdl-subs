@@ -64,9 +64,9 @@ AR22=arg4+0.01 !0.02
 
 ! Create full lists of path names and envelope labels
 *get,AR23,parm,PLPTHENV_ARR_paths,dim,x
-*del,MPATHPLOT_ARR_pathNames
+*del,MPATHPLOT_ARR_pathNames,,nopr
 *dim,MPATHPLOT_ARR_pathNames,char,2*AR23
-*del,MPATHPLOT_ARR_labels
+*del,MPATHPLOT_ARR_labels,,nopr
 *dim,MPATHPLOT_ARR_labels,char,2*AR23
 AR24=strcat(upcase(arg6),'_MIN')
 AR25=strcat(upcase(arg6),'_MAX')

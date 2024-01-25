@@ -49,17 +49,17 @@ cm,AR20,node
 cm,AR21,elem
 *get,AR22,node,,count
 
-*del,GENSTRESS_ARR_nn
+*del,GENSTRESS_ARR_nn,,nopr
 *dim,GENSTRESS_ARR_nn,,AR22
-*del,GENSTRESS_ARR_nx
+*del,GENSTRESS_ARR_nx,,nopr
 *dim,GENSTRESS_ARR_nx,,AR22
-*del,GENSTRESS_ARR_ny
+*del,GENSTRESS_ARR_ny,,nopr
 *dim,GENSTRESS_ARR_ny,,AR22
-*del,GENSTRESS_ARR_fx
+*del,GENSTRESS_ARR_fx,,nopr
 *dim,GENSTRESS_ARR_fx,,AR22
-*del,GENSTRESS_ARR_fy
+*del,GENSTRESS_ARR_fy,,nopr
 *dim,GENSTRESS_ARR_fy,,AR22
-*del,GENSTRESS_ARR_fz
+*del,GENSTRESS_ARR_fz,,nopr
 *dim,GENSTRESS_ARR_fz,,AR22
 
 AR23=0
@@ -111,7 +111,7 @@ AR23=0
 ! X bending moment
 *get,AR34,parm,arg4,type
 *if,AR34,eq,3,then
-    *del,GENSTRESS_ARR_mx
+    *del,GENSTRESS_ARR_mx,,nopr
     *voper,GENSTRESS_ARR_mx,GENSTRESS_ARR_fz,mult,GENSTRESS_ARR_ny
     *vscfun,%arg4%,sum,GENSTRESS_ARR_mx
 *endif
@@ -119,7 +119,7 @@ AR23=0
 ! Y bending moment
 *get,AR34,parm,arg5,type
 *if,AR34,eq,3,then
-    *del,GENSTRESS_ARR_my
+    *del,GENSTRESS_ARR_my,,nopr
     *voper,GENSTRESS_ARR_my,GENSTRESS_ARR_fz,mult,GENSTRESS_ARR_nx
     *vscfun,%arg5%,sum,GENSTRESS_ARR_my
 *endif
@@ -127,26 +127,26 @@ AR23=0
 ! Z bending moment
 *get,AR34,parm,arg6,type
 *if,AR34,eq,3,then
-    *del,GENSTRESS_ARR_mz1
+    *del,GENSTRESS_ARR_mz1,,nopr
     *voper,GENSTRESS_ARR_mz1,GENSTRESS_ARR_fx,mult,GENSTRESS_ARR_ny
-    *del,GENSTRESS_ARR_mz2
+    *del,GENSTRESS_ARR_mz2,,nopr
     *voper,GENSTRESS_ARR_mz2,GENSTRESS_ARR_fy,mult,GENSTRESS_ARR_nx
     *voper,GENSTRESS_ARR_mz,GENSTRESS_ARR_mz1,add,GENSTRESS_ARR_mz2
     *vscfun,%arg6%,sum,GENSTRESS_ARR_mz
 *endif
 
 
-*del,GENSTRESS_ARR_nn
-*del,GENSTRESS_ARR_nx
-*del,GENSTRESS_ARR_ny
-*del,GENSTRESS_ARR_fx
-*del,GENSTRESS_ARR_fy
-*del,GENSTRESS_ARR_fz
-*del,GENSTRESS_ARR_mx
-*del,GENSTRESS_ARR_my
-*del,GENSTRESS_ARR_mz1
-*del,GENSTRESS_ARR_mz2
-*del,GENSTRESS_ARR_mz
+*del,GENSTRESS_ARR_nn,,nopr
+*del,GENSTRESS_ARR_nx,,nopr
+*del,GENSTRESS_ARR_ny,,nopr
+*del,GENSTRESS_ARR_fx,,nopr
+*del,GENSTRESS_ARR_fy,,nopr
+*del,GENSTRESS_ARR_fz,,nopr
+*del,GENSTRESS_ARR_mx,,nopr
+*del,GENSTRESS_ARR_my,,nopr
+*del,GENSTRESS_ARR_mz1,,nopr
+*del,GENSTRESS_ARR_mz2,,nopr
+*del,GENSTRESS_ARR_mz,,nopr
 
 nrestore
 elrestore

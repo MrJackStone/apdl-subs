@@ -47,5 +47,5 @@ clocal,arg1,cart,arg2,arg3,arg4,rotXY,,-rotZX
 clocal,arg1,cart,,,,,arg8
 
 ! Clear local parameters
-*del,CSBY2P_VAR_rotXY
-*del,CSBY2P_VAR_rotXZ
+*del,CSBY2P_VAR_rotXY,,nopr
+*del,CSBY2P_VAR_rotXZ,,nopr

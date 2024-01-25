@@ -11,10 +11,10 @@
 ! arg3: freq       -  frequência da carga harmônica
 
 ! Deletar parâmetros
-*del,_FNCNAME
-*del,_FNCMTID
-*del,_FNC_C1
-*del,_FNCCSYS
+*del,_FNCNAME,,nopr
+*del,_FNCMTID,,nopr
+*del,_FNC_C1,,nopr
+*del,_FNCCSYS,,nopr
 *set,_FNCNAME,arg1
 *dim,_FNC_C1,,1
 *set,_FNC_C1(1),arg3

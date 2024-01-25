@@ -17,6 +17,6 @@
 
 CMSEL,S,NBackup_
 CMDELE,NBackup_
-*del,NBackup_
+*del,NBackup_,,nopr
 
 

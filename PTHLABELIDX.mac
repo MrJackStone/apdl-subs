@@ -20,7 +20,7 @@
 
 
 ! Get list of path's existing labels
-*del,PTHLABELIDX_ARR_labels
+*del,PTHLABELIDX_ARR_labels,,nopr
 paget,PTHLABELIDX_ARR_labels,label
 
 ! Get number of labels (including blank)
@@ -40,5 +40,5 @@ AR23=0
 %arg1%=AR23
 
 ! Clear parameters
-*del,PTHLABELIDX_ARR_labels
+*del,PTHLABELIDX_ARR_labels,,nopr
 

@@ -102,7 +102,7 @@ keyopt, ar32, 18, 0 ! Sliding behavior:        [0] Finite sliding
 ar30=ar20+1
 
 ! Initialize array with default real constant values
-*del,CNTDEF_ARR_rc
+*del,CNTDEF_ARR_rc,,nopr
 *dim,CNTDEF_ARR_rc,,13
 !                  R1 [01],   R2 [02],   FKN [03],     FTOLN [04], ICONT [05], PINB [06]
 CNTDEF_ARR_rc(1) = 0,         0,         1,            0.1,        0,          0
@@ -179,4 +179,4 @@ cm,%ar39%,elem
 !!                                                                                                !!
 elrestore
 nrestore
-*del,CNTDEF_ARR_rc
+*del,CNTDEF_ARR_rc,,nopr

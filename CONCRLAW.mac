@@ -67,8 +67,8 @@
 *endif
 
 ! Inicializar vetores
-*del,CONCRLAW_ARR_eVector
-*del,CONCRLAW_ARR_sVector
+*del,CONCRLAW_ARR_eVector,,nopr
+*del,CONCRLAW_ARR_sVector,,nopr
 *dim,CONCRLAW_ARR_eVector,ARRAY,AR22
 *dim,CONCRLAW_ARR_sVector,ARRAY,AR22
 

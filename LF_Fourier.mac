@@ -11,9 +11,9 @@
 ! arg2: value      -  valor representando o peso do indivíduo
 
 ! Deletar parâmetros
-*del,_FNCNAME
-*del,_FNCMTID
-*del,_FNCCSYS
+*del,_FNCNAME,,nopr
+*del,_FNCMTID,,nopr
+*del,_FNCCSYS,,nopr
 *set,_FNCNAME,arg1
 *set,_FNCCSYS,0
 *dim,%_FNCNAME%,TABLE,6,64,1,,,,%_FNCCSYS%

@@ -7,13 +7,13 @@ CM,COMPN_tempDCP,NODE
 *do,nthCP,1,CPCount,1
    CMSEL,S,COMPN_tempDCP
    ! Determine which DOF is coupled
-   *del,DOFnum
+   *del,DOFnum,,nopr
    *get,DOFnum,CP,nthCP,DOF
    *get,pType,PARM,DOFnum,TYPE
    *if,pType,EQ,0,THEN
       ! Get number of nodes in the coupling set
       *get,CPNodeCount,CP,nthCP,NTERM
-      *del,NodeList
+      *del,NodeList,,nopr
       *dim,NodeList,ARRAY,CPNodeCount
       *do,nthNode,1,CPNodeCount,1
          *get,NodeNum,CP,nthCP,TERM,nthNode,NODE

@@ -3,5 +3,5 @@
 ! Select last backed up element named selection component
 CMSEL,S,EBackup_
 CMDELE,EBackup_
-*del,EBackup_
+*del,EBackup_,,nopr
 

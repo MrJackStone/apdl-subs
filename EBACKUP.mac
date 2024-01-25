@@ -1,6 +1,6 @@
 ! EBACKUP
 
-*del,EBackup_
+*del,EBackup_,,nopr
 
 ! ! Created named component with currently selected elements
 CM,EBackup_,ELEM

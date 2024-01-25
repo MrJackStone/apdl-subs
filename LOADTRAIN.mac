@@ -404,8 +404,8 @@ AR32=0
 
 *elseif,AR20,EQ,'NONE',THEN
     ! No load
-    *del,LOADTRAIN_ARR_positions
-    *del,LOADTRAIN_ARR_loads
+    *del,LOADTRAIN_ARR_positions,,nopr
+    *del,LOADTRAIN_ARR_loads,,nopr
     *dim,LOADTRAIN_ARR_positions,ARRAY,1
     *dim,LOADTRAIN_ARR_loads,ARRAY,1
     LOADTRAIN_ARR_positions(1)=0
@@ -422,7 +422,7 @@ LOADTRAIN_VAR_length=abs(LOADTRAIN_ARR_positions(1)-LOADTRAIN_ARR_positions(LOAD
 ctime,'LOADTRAIN_VAR_suffix',,'_'
 AR50=nint(rand(100,999))
 AR51='~LOADTRAIN_LOG_%LOADTRAIN_VAR_suffix%_%AR50%'
-*del,LOADTRAIN_ARR_indices,,nopr
+*del,LOADTRAIN_ARR_indices,,nopr,,nopr
 *dim,LOADTRAIN_ARR_indices,,LOADTRAIN_VAR_count
 *vfill,LOADTRAIN_ARR_indices,ramp,1,1
 

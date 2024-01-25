@@ -1,6 +1,6 @@
 ! KBACKUP
 
-*del,KBackup_
+*del,KBackup_,,nopr
 
 ! Created named component with currently selected keypoints
 CM,KBackup_,KP

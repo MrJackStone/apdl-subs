@@ -52,7 +52,7 @@
 
 ! Set sorted input parameter name
 AR28='ARRUNIQ_ARR_sorted'
-*del,%AR28%
+*del,%AR28%,,nopr
 
 ! Sort input array
 *get,AR25,parm,arg3,type
@@ -73,7 +73,7 @@ AR28='ARRUNIQ_ARR_sorted'
 
 ! Initialize output array
 AR21=1
-*del,%AR27%
+*del,%AR27%,,nopr
 *dim,%AR27%,ARRAY,AR21
 AR22=%AR28%(1)
 %AR27%(1)=AR22
@@ -91,12 +91,12 @@ AR22=%AR28%(1)
       AR21=AR21+1
 
       ! Fill temporary array with output values
-      *del,ARRUNIQ_ARR_tempArray
+      *del,ARRUNIQ_ARR_tempArray,,nopr
       *dim,ARRUNIQ_ARR_tempArray,ARRAY,AR21
       *vfun,ARRUNIQ_ARR_tempArray,COPY,%AR27%
 
       ! Append new value to output array
-      *del,%AR27%
+      *del,%AR27%,,nopr
       *dim,%AR27%,ARRAY,AR21
       *vfun,%AR27%,COPY,ARRUNIQ_ARR_tempArray
       %AR27%(AR21)=AR24
@@ -109,5 +109,5 @@ AR22=%AR28%(1)
 *enddo
 
 ! Clear parameters
-*del,ARRUNIQ_ARR_tempArray
+*del,ARRUNIQ_ARR_tempArray,,nopr
 

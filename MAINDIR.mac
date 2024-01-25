@@ -24,7 +24,7 @@
 
 *if,arg1,EQ,0,THEN
    ! Obter diretório atual
-   *del,MAINDIR_STR_DirPath
+   *del,MAINDIR_STR_DirPath,,nopr
    /inquire,MAINDIR_STR_DirPath,DIRECTORY
 *elseif,arg1,EQ,1,THEN
    ! Verificar se o diretório principal já havia sido definido

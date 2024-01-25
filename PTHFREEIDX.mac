@@ -22,7 +22,7 @@
 
 
 ! Get list of path's existing labels
-*del,PTHFREEIDX_ARR_labels
+*del,PTHFREEIDX_ARR_labels,,nopr
 paget,PTHFREEIDX_ARR_labels,label
 
 ! Get number of labels (including blank)
@@ -70,4 +70,4 @@ PTHFREEIDX returned 5.
 %arg1%=AR23
 
 ! Clear parameters
-*del,PTHFREEIDX_ARR_labels
+*del,PTHFREEIDX_ARR_labels,,nopr
