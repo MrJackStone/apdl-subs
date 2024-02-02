@@ -1,0 +1,42 @@
+! ARGDEFAULT , outputParmName , argValue , argType , defaultValue
+! ARGDEFAULT , arg1           , arg2     , arg3    , arg4
+
+! Descriptions:
+! Assigns a default value to a parameter if another parameter's value (presumably the value of an
+! ARxxx local parameter) does not match a given type. Otherwise (that is, if the type check is
+! successful), the value of the checked parameter is assigned to the output parameter.
+! See also: PARDEFAULT.
+
+! Arguments:
+! arg1: outputParmName  -  name of parameter to which the default value will be assigned
+! arg2: parName         -  name of parameter whose type will be checked
+! arg3: parType         -  expected parameter type to check against:
+!                            'UNDEF'    (undefined)
+!                            'SCALAR'   (scalar number)
+!                            'ARRAY'    (number array)
+!                            'TABLE'    (table)
+!                            'CHAR'     (character scalar)
+!                            'CHR_ARR'  (character array)
+!                            'STR_ARR'  (string array)
+! arg4: defaultValue    -  value assigned to the appropriate parameter
+
+! Local parameters:
+! -
+
+! Global parameters (erased at the end of this subroutine):
+! ARGDEFAULT_VAR_name
+! ARGDEFAULT_VAR_check
+
+
+*del,ARGDEFAULT_VAR_name,,nopr
+ARGDEFAULT_VAR_name=arg2
+
+parverify,'ARGDEFAULT_VAR_check','ARGDEFAULT_VAR_name',arg3
+*if,ARGDEFAULT_VAR_check,eq,0,then
+  %arg1%=arg4
+*else
+  %arg1%=arg2
+*endif
+
+*del , ARGDEFAULT_VAR_name  ,, nopr
+*del , ARGDEFAULT_VAR_check ,, nopr

@@ -7,7 +7,7 @@
 
 ! Arguments:
 ! arg1: output     -  name of output parameter to which result is written (defaults to _OUTPUT)
-! arg2: parameter  -  name of parameter which will be checked
+! arg2: parameter  -  name of parameter that will be checked
 ! arg3: type       -  type to compare the parameter (arg2) against:
 !                        ['UNDEF',  -1] Undefined
 !                        ['SCALAR',  0] Scalar (number)

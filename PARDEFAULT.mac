@@ -1,0 +1,42 @@
+! PARDEFAULT , parName , parType , defaultValue
+! PARDEFAULT , arg1    , arg2    , arg3
+
+! Descriptions:
+! Assigns a default value to a parameter if it fails a type check.
+
+! Arguments:
+! arg1: parName       -  name of parameter whose type will be checked and to which the default
+!                        value might be assigned
+! arg2: parType       -  expected parameter type to check against:
+!                          'UNDEF'    (undefined)
+!                          'SCALAR'   (scalar number)
+!                          'ARRAY'    (number array)
+!                          'TABLE'    (table)
+!                          'CHAR'     (character scalar)
+!                          'CHR_ARR'  (character array)
+!                          'STR_ARR'  (string array)
+! arg3: defaultValue  -  value assigned to the checked parameter
+
+! Local parameters:
+! AR20: parType
+! AR21: outputParm
+
+! Global parameters (erased at the end of this subroutine):
+! PARDEFAULT_VAR_check
+
+
+! Determine parameter to which default value will be assigned
+AR21=arg2
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR21=arg1
+*endif
+
+! Confirm type or assign default
+parverify,'PARDEFAULT_VAR_check',arg1,arg2
+*if,PARDEFAULT_VAR_check,eq,0,then
+  AR21=arg3
+*endif
+
+! Clean up
+*del,PARDEFAULT_VAR_check,,nopr
