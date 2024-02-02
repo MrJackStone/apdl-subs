@@ -32,6 +32,8 @@
 ARGDEFAULT_VAR_name=arg2
 
 parverify,'ARGDEFAULT_VAR_check','ARGDEFAULT_VAR_name',arg3
+
+*del,%arg1%,,nopr
 *if,ARGDEFAULT_VAR_check,eq,0,then
   %arg1%=arg4
 *else
