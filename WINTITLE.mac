@@ -1,0 +1,92 @@
+! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize
+! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6
+
+! Description:
+! Adds titles (annotations) to windows.
+
+! Arguments:
+! arg1: winNumber         -  number of window to which the title will be added (1 through 5).
+!                            If equal to -1, add title to the whole display.
+! arg2: leftJustified     -  left-justified portion of the title
+! arg3: centered          -  centered portion of the title
+! arg4: rightJustified    -  right-justified portion of the title
+! arg5: vertPosition      -  vertical position of the title, with the following options:
+!                               [0] bottom (default)
+!                               [1] centered (mid-height)
+!                               [2] top
+! arg6: adjustWindowSize  -  determines whether or not to reduce the size of the window to fit the
+!                            title (applies only to top or bottom vertical alignment)
+!                               [0] no adjustment (keep window size unchanged)
+!                               [1] adjust (reduce) window size
+
+! Local parameters:
+! AR21: xMin
+! AR22: xMax
+! AR23: yMin
+! AR24: yMax
+! AR31: targetWindow
+! AR32: resizeWindow
+
+
+AR31=((arg1>1)<5)
+
+! Resize window option
+AR32=0
+*if,arg5,eq,0,or,arg5,eq,2,then
+  *if,arg1,ne,-1,then
+    *if,arg6,eq,1,then
+      AR32=1
+    *endif
+  *endif
+*endif
+
+! Get window size
+*if,arg1,eq,-1,then
+  ! Apply title to whole display:
+  AR21 = -1.00
+  AR22 =  1.67
+  AR23 = -1.00
+  AR24 =  1.00
+
+*else
+  *get,AR21,graph,AR31,range,xmin
+  *get,AR22,graph,AR31,range,xmax
+  *get,AR23,graph,AR31,range,ymin
+  *get,AR24,graph,AR31,range,ymax
+
+*endif
+
+! Set font-dependent parameters
+g_annocharwidth,'WINTITLE_VAR_charWidth'
+horMargin=0.02
+
+boxHeight=WINTITLE_VAR_charWidth+2*horMargin
+
+yBaseline=yMin
+*if,arg5,eq,1,then
+  yBaseline=ymax-boxHeight
+*elseif,arg5,eq,2,then
+  yBaseline=(ymax+ymin-boxHeight)/2
+*endif
+
+argdefault , 'WINTITLE_VAR_centered' , arg3 , 'CHAR' , ' '
+argdefault , 'WINTITLE_CAR_right'    , arg3 , 'CHAR' , ' '
+
+centeredWidth = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_centered)
+rightWidth    = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_right)
+
+xLeftJustified  = xMin+horMargin
+xCentered       = (xMin+xMax-centeredWidth)/2
+xRightJustified = xMax-horMargin-rightWidth
+
+yTextAnchor = yBaseline+horMargin
+
+! Resize window
+*if,AR32,eq,1,then
+  /window,arg2,AR20,AR21,AR24,AR23
+*endif
+
+
+/eof
+! argdefault , 'WINTITLE_VAR_left'     , arg2 , 'CHAR' , ' '
+! leftWidth     = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_left)

@@ -23,6 +23,7 @@
 ! AR25: xMid
 ! AR26: yMid
 
+
 /window,all,dele
 
 *if,arg3,ge,1,and,arg3,le,5,then
@@ -53,7 +54,7 @@ AR26=(AR24+AR23)/2
 *endif
 
 *if,arg2,ne,2,then
-  /view , 1 , 1 , 1  , 1
+  /view , 1 , 1 ,  1 , 1
   /view , 2 , 1 , -1 , 1
   /angle , all , 0
   /auto  , all
