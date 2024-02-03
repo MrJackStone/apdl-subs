@@ -1,16 +1,60 @@
-! VIEW2W
+! VIEW2W , layout , keepView , insideWindow
+! VIEW2W , arg1   , arg2     , arg3
 
 ! Description:
 ! Activates display in two windows. Window 1 occupies the left half of the screen and window 2
 ! occupies the right half of the screen.
 
+! Arguments:
+! arg1: layout        -  defines how the two windows are arranged:
+!                           [0] left-right split (default)
+!                           [1] top-bottom split
+! arg2: keepView      -  key to determine whether or not to change view settings for the two windows
+!                           [0] set isometric view for both windows (default)
+!                           [1] do not change view settings for either window
+! arg3: insideWindow  -  number of the window inside of which this split will be created
+!                        (defaults to 0, using the entire screen space)
+
+! Local parameters:
+! AR21: xMin
+! AR22: xMax
+! AR23: yMin
+! AR24: yMax
+! AR25: xMid
+! AR26: yMid
+
 /window,all,dele
 
-/window , 1 , -1    , 0.335 , -1 , 1
-/window , 2 , 0.335 , 1.67  , -1 , 1
+*if,arg3,ge,1,and,arg3,le,5,then
+  *get,AR21,graph,arg3,range,xmin
+  *get,AR22,graph,arg3,range,xmax
+  *get,AR23,graph,arg3,range,ymin
+  *get,AR24,graph,arg3,range,ymax
+*else
+  AR21 = -1.00
+  AR22 =  1.67
+  AR23 = -1.00
+  AR24 =  1.00
+*endif
 
-/view , 1 , 1 , 1  , 1
-/view , 2 , 1 , -1 , 1
+AR25=(AR22+AR21)/2
+AR26=(AR24+AR23)/2
 
-/angle,all,0
-/auto,all
+*if,arg1,eq,1,then
+  ! Top-bottom split:
+  /window , 1 , AR21 , AR22 , AR26 , AR24
+  /window , 2 , AR21 , AR22 , AR23 , AR26
+
+*else
+  ! Left-right split:
+  /window , 1 , AR21 , AR25 , AR23 , AR24
+  /window , 2 , AR25 , AR22 , AR23 , AR24
+
+*endif
+
+*if,arg2,ne,2,then
+  /view , 1 , 1 , 1  , 1
+  /view , 2 , 1 , -1 , 1
+  /angle , all , 0
+  /auto  , all
+*endif
