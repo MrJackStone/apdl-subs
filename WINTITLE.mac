@@ -1,0 +1,133 @@
+! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize
+! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6
+
+! Description:
+! Adds titles (annotations) to windows.
+
+! Arguments:
+! arg1: winNumber         -  number of window to which the title will be added (1 through 5).
+!                            If equal to -1, add title to the whole display.
+! arg2: leftJustified     -  left-justified portion of the title
+! arg3: centered          -  centered portion of the title
+! arg4: rightJustified    -  right-justified portion of the title
+! arg5: vertPosition      -  vertical position of the title, with the following options:
+!                               [0] bottom (default)
+!                               [1] centered (mid-height)
+!                               [2] top
+! arg6: adjustWindowSize  -  determines whether or not to reduce the size of the window to fit the
+!                            title (applies only to top or bottom vertical alignment)
+!                               [0] no adjustment (keep window size unchanged)
+!                               [1] adjust (reduce) window size
+
+! Local parameters:
+! AR21: xMin
+! AR22: xMax
+! AR23: yMin
+! AR24: yMax
+! AR31: targetWindow
+! AR32: resizeWindow
+! AR33: margin
+! AR34: boxHeight
+! AR35: yBaseline
+! AR36: centeredWidth
+! AR37: rightWidth
+! AR38: xLeftJustified
+! AR39: xCentered
+! AR40: xRightJustified
+! AR41: yTextAnchor
+
+! Global parameters (erased at the end of this subroutine):
+! WINTITLE_VAR_charWidth
+! WINTITLE_VAR_left
+! WINTITLE_VAR_centered
+! WINTITLE_VAR_right
+
+
+AR31=((arg1>1)<5)
+
+! Resize window option
+AR32=0
+*if,arg5,eq,0,or,arg5,eq,2,then
+  *if,arg1,ne,-1,then
+    *if,arg6,eq,1,then
+      AR32=1
+    *endif
+  *endif
+*endif
+
+! Get window size
+*if,arg1,eq,-1,then
+  ! Apply title to whole display:
+  AR21 = -1.00
+  AR22 =  1.67
+  AR23 = -1.00
+  AR24 =  1.00
+
+*else
+  *get,AR21,graph,AR31,range,AR21
+  *get,AR22,graph,AR31,range,AR22
+  *get,AR23,graph,AR31,range,AR23
+  *get,AR24,graph,AR31,range,AR24
+
+*endif
+
+! Set font-dependent parameters
+g_annocharwidth,'WINTITLE_VAR_charWidth'
+AR33 = WINTITLE_VAR_charWidth*(2/3)
+AR34 = WINTITLE_VAR_charWidth+(2*AR33)
+
+AR35=AR23
+*if,arg5,eq,1,then
+  AR35=AR24-AR34
+*elseif,arg5,eq,2,then
+  AR35=(AR24+AR23-AR34)/2
+*endif
+
+argdefault , 'WINTITLE_VAR_left'     , arg2 , 'CHAR' , ' '
+argdefault , 'WINTITLE_VAR_centered' , arg3 , 'CHAR' , ' '
+argdefault , 'WINTITLE_VAR_right'    , arg4 , 'CHAR' , ' '
+
+AR36 = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_centered)
+AR37 = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_right)
+
+AR38 = AR21+AR33
+AR39 = (AR21+AR22-AR36)/2
+AR40 = AR22-AR33-AR37
+
+AR41 = AR35+AR33
+
+! Resize window
+*if,AR32,eq,1,then
+  *if,arg5,eq,0,then
+    AR23=AR23+AR34
+  *elseif,arg5,eq,2,then
+    AR24=AR24-AR34
+  *endif
+  /window,AR31,AR21,AR22,AR23,AR24
+*endif
+
+! Draw box
+/anum,,7
+p4gon,AR21,AR35,AR22,AR35+AR34
+/anum,,1
+/tspec,15,1,4
+
+! Write titles
+*cfopen,wintitle_tmp,tmp
+    *vwrite,AR38,AR41,WINTITLE_VAR_left
+/tlabel,%g,%g,%s
+    *vwrite,AR39,AR41,WINTITLE_VAR_centered
+/tlabel,%g,%g,%s
+    *vwrite,AR40,AR41,WINTITLE_VAR_right
+/tlabel,%g,%g,%s
+*cfclos
+/nopr
+/input,wintitle_tmp,tmp
+/delete,wintitle_tmp,tmp
+/gopr
+
+! Clean up
+*del , WINTITLE_VAR_charWidth ,  , nopr
+*del , WINTITLE_VAR_left      ,  , nopr
+*del , WINTITLE_VAR_centered  ,  , nopr
+*del , WINTITLE_VAR_right     ,  , nopr
