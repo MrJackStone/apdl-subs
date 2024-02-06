@@ -1,5 +1,5 @@
-! VIEW2W , layout , keepView , insideWindow
-! VIEW2W , arg1   , arg2     , arg3
+! VIEW2W , layout , keepView , insideWindow , keepExisting , windowA , windowB
+! VIEW2W , arg1   , arg2     , arg3         , arg4         , arg5    , arg6
 
 ! Description:
 ! Activates display in two windows. Window 1 occupies the left half of the screen and window 2
@@ -14,6 +14,12 @@
 !                           [1] do not change view settings for either window
 ! arg3: insideWindow  -  number of the window inside of which this split will be created
 !                        (defaults to 0, using the entire screen space)
+! arg4: keepExisting  -  key to determine whether or not to delete all current windows (default) or
+!                        keep the remaining existing window layout:
+!                           [0] delete all windows (default)
+!                           [1] keep current layout
+! arg5: windowA       -  number of top/left window (must be between 1 and 5, and defaults to 1)
+! arg6: windowB       -  number of bottom/right window (must be between 1 and 5, and defaults to 2)
 
 ! Local parameters:
 ! AR21: xMin
@@ -22,10 +28,21 @@
 ! AR24: yMax
 ! AR25: xMid
 ! AR26: yMid
+! AR31: windowAnumber
+! AR32: windowBnumber
+
+! Global parameters (erased at the end of this subroutine):
+! VIEW2W_VAR_windowA
+! VIEW2W_VAR_windowB
 
 
-/window,all,dele
+! Set numbers for windows A and B
+argdefault,'VIEW2W_VAR_windowA',arg5,'SCALAR',1
+argdefault,'VIEW2W_VAR_windowB',arg6,'SCALAR',2
+AR31=((VIEW2W_VAR_windowA>1)<5)
+AR32=((VIEW2W_VAR_windowB>1)<5)
 
+! Calculate bounding box for the created layout
 *if,arg3,ge,1,and,arg3,le,5,then
   *get,AR21,graph,arg3,range,xmin
   *get,AR22,graph,arg3,range,xmax
@@ -41,21 +58,31 @@
 AR25=(AR22+AR21)/2
 AR26=(AR24+AR23)/2
 
+! Create window layout
+*if,arg4,ne,1,then
+  /window,all,dele
+*endif
+
 *if,arg1,eq,1,then
   ! Top-bottom split:
-  /window , 1 , AR21 , AR22 , AR26 , AR24
-  /window , 2 , AR21 , AR22 , AR23 , AR26
+  /window , AR31 , AR21 , AR22 , AR26 , AR24
+  /window , AR32 , AR21 , AR22 , AR23 , AR26
 
 *else
   ! Left-right split:
-  /window , 1 , AR21 , AR25 , AR23 , AR24
-  /window , 2 , AR25 , AR22 , AR23 , AR24
+  /window , AR31 , AR21 , AR25 , AR23 , AR24
+  /window , AR32 , AR25 , AR22 , AR23 , AR24
 
 *endif
 
-*if,arg2,ne,2,then
+! Set view
+*if,arg2,ne,1,then
   /view , 1 , 1 ,  1 , 1
   /view , 2 , 1 , -1 , 1
   /angle , all , 0
   /auto  , all
 *endif
+
+! Clean up
+*del , VIEW2W_VAR_windowA ,  , nopr
+*del , VIEW2W_VAR_windowB ,  , nopr
