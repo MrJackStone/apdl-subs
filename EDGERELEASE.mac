@@ -1,0 +1,63 @@
+! EDGERELEASE , nodes , sideOneElements , sideTwoElements ,
+! EDGERELEASE , arg1  , arg2            , arg3
+
+! Description:
+! Detaches elements from their nodes that exist in the given nodal selection set and replaces
+! them with new nodes at the exact same locations.
+
+! Arguments:
+! arg1: nodes     -  node selection component
+! arg2: elements  -  element selection component
+
+! Local parameters:
+! AR21: nc
+! AR22: nnum
+! AR23: nthNode
+! AR24: COMPE_temp
+! AR25: ec
+! AR26: enum
+! AR27: nthElem
+
+! Global parameters (erased at the end of this subroutine):
+! EDGERELEASE_VAR_index
+! EDGERELEASE_VAR_newNode
+
+
+! Count nodes
+cmsel,s,%arg1%
+*get,AR21,node,,count
+
+! Replace each node for each element:
+AR22=0
+*do,AR23,1,AR21,1
+  ! Select nth-node
+  cmsel,s,%arg1%
+  AR22=ndnext(AR22)
+  nsel,s,node,,AR22
+
+  ! Create matching node
+  nextnd,'EDGERELEASE_VAR_newNode'
+  n,EDGERELEASE_VAR_newNode,nx(AR22),ny(AR22),nz(AR22)
+
+  ! Modify each adjacent element:
+  cmsel,s,%arg2%
+  esln,r
+  cm,AR24,elem
+  *get,AR25,elem,,count
+  AR26=0
+  *do,AR27,1,AR25,1
+    AR26=elnext(AR26)
+
+    ! Get node's index position
+    getndpos,'EDGERELEASE_VAR_index',AR22,AR26
+
+    ! Suspend solid model checking to change element node
+    modmsh,nocheck
+    emodif,AR26,-EDGERELEASE_VAR_index,EDGERELEASE_VAR_newNode
+    modmsh,check
+  *enddo
+*enddo
+
+! Clean up
+*del , EDGERELEASE_VAR_index   ,  , nopr
+*del , EDGERELEASE_VAR_newNode ,  , nopr
