@@ -64,10 +64,10 @@ AR32=0
   AR24 =  1.00
 
 *else
-  *get,AR21,graph,AR31,range,AR21
-  *get,AR22,graph,AR31,range,AR22
-  *get,AR23,graph,AR31,range,AR23
-  *get,AR24,graph,AR31,range,AR24
+  *get,AR21,graph,AR31,range,xmin
+  *get,AR22,graph,AR31,range,xmax
+  *get,AR23,graph,AR31,range,ymin
+  *get,AR24,graph,AR31,range,ymax
 
 *endif
 
@@ -78,9 +78,11 @@ AR34 = WINTITLE_VAR_charWidth+(2*AR33)
 
 AR35=AR23
 *if,arg5,eq,1,then
-  AR35=AR24-AR34
-*elseif,arg5,eq,2,then
+  ! Vertical position: centered
   AR35=(AR24+AR23-AR34)/2
+*elseif,arg5,eq,2,then
+  ! Vertical position: top
+  AR35=AR24-AR34
 *endif
 
 argdefault , 'WINTITLE_VAR_left'     , arg2 , 'CHAR' , ' '
