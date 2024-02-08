@@ -1,5 +1,5 @@
-! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize , bgColor
-! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6             , arg7
+! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize , bgColor , fgColor
+! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6             , arg7    , arg8
 
 ! Description:
 ! Adds titles (annotations) to windows.
@@ -19,6 +19,9 @@
 !                               [0] no adjustment (keep window size unchanged)
 !                               [1] adjust (reduce) window size
 ! arg7: bgColor           -  box background color (0 through 15, or -1 for transparent background)
+! arg8: fgColor           -  text color, numbers 0 through 15 following /TSPEC command except for:
+!                               [ 0] black (default, color #15)
+!                               [-1] white (color #0)
 
 ! Local parameters:
 ! AR21: xMin
@@ -55,6 +58,14 @@ AR25=1
   AR25=0
 *endif
 AR26=((arg7>0)<15)
+
+! Set text color
+AR27=((arg8>0)<15)
+*if,arg8,eq,-1,then
+  AR27=0
+*elseif,arg8,eq,0,then
+  AR27=15
+*endif
 
 ! Resize window option
 AR32=0
@@ -124,8 +135,7 @@ AR41 = AR35+AR33
 /anum,,7
 p4gon,AR21,AR35,AR22,AR35+AR34
 /anum,,1
-/tspec,15,1,4
-/pspec
+/tspec,AR27,1,4
 
 ! Write titles
 *cfopen,wintitle_tmp,tmp
@@ -142,6 +152,8 @@ p4gon,AR21,AR35,AR22,AR35+AR34
 /gopr
 
 ! Clean up
+/tspec
+/pspec
 *del , WINTITLE_VAR_charWidth ,  , nopr
 *del , WINTITLE_VAR_left      ,  , nopr
 *del , WINTITLE_VAR_centered  ,  , nopr
