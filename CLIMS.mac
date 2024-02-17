@@ -8,13 +8,13 @@
 ! arg1: minContour     -  minimum value for contour scale
 ! arg2: maxContour     -  maximum value for contour scale
 ! arg3: greyExceeding  -  controls coloring of values outside min/max limits:
-!                         [0] Values below min colored BLUE;  values above max colored RED (default)
-!                         [1] Values below min colored GREY;  values above max colored GREY
-!                         [2] Values below min colored BLACK; values above max colored BLACK
-!                         [3] Values below min colored BLUE;  values above max colored GREY
-!                         [4] Values below min colored GREY;  values above max colored RED
-!                         [5] Values below min colored BLUE;  values above max colored BLACK
-!                         [6] Values below min colored BLACK; values above max colored RED
+!                           [0] Values below min colored BLUE;  values above max colored RED (default)
+!                           [1] Values below min colored GREY;  values above max colored GREY
+!                           [2] Values below min colored BLACK; values above max colored BLACK
+!                           [3] Values below min colored BLUE;  values above max colored GREY
+!                           [4] Values below min colored GREY;  values above max colored RED
+!                           [5] Values below min colored BLUE;  values above max colored BLACK
+!                           [6] Values below min colored BLACK; values above max colored RED
 ! arg4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
 
 ! Local parameters:
