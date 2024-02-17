@@ -1,0 +1,108 @@
+! ARRADD, key,  value1, value2, value3, value4, value5, value6, value7, value8, value9, value10
+! ARRADD, arg1,   arg2,   arg3,   arg4,   arg5,   arg6,   arg7,   arg8,   arg9,   ar10,    ar11
+
+! Descrição:
+! Esta subrotina adiciona elemento(s) ao final de um vetor.
+
+! Lista de argumentos:
+! arg1: key  -  número de valores escalares (argumentos arg2 a arg11) a adicionar ao vetor
+!               (key=0 faz com que a subrotina ignore os valores de arg2 a arg11);
+! arg2-ar11: value1-value10 - valores (escalares) a adicionar ao vetor;
+
+! Lista de argumentos implícitos:
+! ARRADD_ARR_input  -  vetor original
+! ARRADD_ARR_new    -  novo(s) elemento(s) a serem adicionados ao final do vetor original
+
+! Lista de variáveis locais:
+! AR20: inputLength
+! AR21: temp
+! AR22: newElemsLength
+! AR23: nthNew
+! AR24: parType
+
+! Lista de variáveis de saída
+! ARRADD_ARR_output
+
+! Montar vetor a partir dos escalares fornecidos
+*if,arg1,GT,0,THEN
+   ! Inicializar vetor de novos valores
+   *del,ARRADD_ARR_new,,nopr
+   *dim,ARRADD_ARR_new,ARRAY,arg1
+
+   ! Escalares: 1
+   ARRADD_ARR_new(1)=arg2
+
+   ! Escalares: 2
+   *if,arg1,GT,1,THEN
+      ARRADD_ARR_new(2)=arg3
+
+      ! Escalares: 3
+      *if,arg1,GT,2,THEN
+         ARRADD_ARR_new(3)=arg4
+
+         ! Escalares: 4
+         *if,arg1,GT,3,THEN
+            ARRADD_ARR_new(4)=arg5
+
+            ! Escalares: 5
+            *if,arg1,GT,4,THEN
+               ARRADD_ARR_new(5)=arg6
+
+               ! Escalares: 6
+               *if,arg1,GT,5,THEN
+                  ARRADD_ARR_new(6)=arg7
+
+                  ! Escalares: 7
+                  *if,arg1,GT,6,THEN
+                     ARRADD_ARR_new(7)=arg8
+
+                     ! Escalares: 8
+                     *if,arg1,GT,7,THEN
+                        ARRADD_ARR_new(8)=arg9
+
+                        ! Escalares: 9
+                        *if,arg1,GT,8,THEN
+                           ARRADD_ARR_new(9)=ar10
+
+                           ! Escalares: 10
+                           *if,arg1,GT,9,THEN
+                              ARRADD_ARR_new(10)=ar11
+                           *endif
+
+                        *endif
+                     *endif
+                  *endif
+               *endif
+            *endif
+         *endif
+      *endif
+   *endif
+*endif
+
+! Obter dimensão do vetor de entrada
+*get,AR20,PARM,ARRADD_ARR_input,DIM,X
+! Converter lista de elementos a serem adicionados em array (caso o valor seja escalar)
+*get,AR24,PARM,ARRADD_ARR_new,TYPE
+*if,AR24,EQ,0,THEN
+   AR21=ARRADD_ARR_new
+   *del,ARRADD_ARR_new,,nopr
+   *dim,ARRADD_ARR_new,ARRAY,1
+   ARRADD_ARR_new(1)=AR21
+*endif
+! Obter dimensão do vetor de elementos a adicionar
+*get,AR22,PARM,ARRADD_ARR_new,DIM,X
+
+! Inicializar vetor de saída
+*del,ARRADD_ARR_output,,nopr
+*dim,ARRADD_ARR_output,ARRAY,AR20+AR22
+
+! Copiar elementos do vetor original para o vetor de saída
+*vfun,ARRADD_ARR_output,COPY,ARRADD_ARR_input
+
+! Copiar novos elementos para o vetor de saída
+*do,AR23,1,AR22
+   ARRADD_ARR_output(AR20+AR23)=ARRADD_ARR_new(AR23)
+*enddo
+
+*del,ARRADD_ARR_new,,nopr
+

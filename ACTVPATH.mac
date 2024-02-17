@@ -94,7 +94,6 @@ paresu,all,ACTVPATH_VAR_backupFname,pth
 *endif
 
 ! Clear parameters
-*del,ACTVPATH_VAR_dummyLabel,,nopr
-*del,ACTVPATH_ARR_LABEL,,nopr
-*del,ACTVPATH_VAR_backupFname,,nopr
-
+*del , ACTVPATH_VAR_dummyLabel  ,  , nopr
+*del , ACTVPATH_ARR_LABEL       ,  , nopr
+*del , ACTVPATH_VAR_backupFname ,  , nopr

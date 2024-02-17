@@ -27,15 +27,15 @@ sabs
 sadd,'ZEROS','UX','UX',1,-1
 
 *del,ETNames,,nopr
-*dim,ETNames,CHAR,19
+*dim,ETNames,CHAR,21
 ETNames(1)=  'MX', 'MY',  'NX',  'NY',  'QX',  'QY',  'UX',  'UY',  'UZ'
-ETNames(10)= 'Ni', 'Nj', 'QZi', 'QZj', 'QYi', 'QYj', 'MYi', 'MYj', 'MZi', 'MZj'
+ETNames(10)= 'Ni', 'Nj', 'QZi', 'QZj', 'QYi', 'QYj', 'MYi', 'MYj', 'MZi', 'MZj', 'TQi', 'TQj'
 
 etenv,arg3,arg4,'ETNames'
 
 *del,env_etnames,,nopr
-*dim,env_etnames,char,19*4
-*do,nthET,1,19,1
+*dim,env_etnames,char,21*4
+*do,nthET,1,21,1
     baseName=ETNames(nthET)
     env_etnames(nthET*4-3)=strcat('EMN_',baseName)
     env_etnames(nthET*4-2)=strcat('EMX_',baseName)
@@ -43,7 +43,7 @@ etenv,arg3,arg4,'ETNames'
     env_etnames(nthET*4-0)=strcat('DW_',baseName)
 *enddo
 
-*do,i,1,19*4,1
+*do,i,1,21*4,1
     et_name=env_etnames(i)
     str_length=strleng(et_name)
     start_pos=str_length-1
