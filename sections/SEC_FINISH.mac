@@ -36,8 +36,8 @@ etdele,SEC_INIT_VAR_etnum
 
 ! Import cross-section
 *if,arg2,gt,0,then
-  sectype,arg2,beam,mesh,arg1
-  secread,arg1,sect,,mesh
+    sectype,arg2,beam,mesh,arg1
+    secread,arg1,sect,,mesh
 *endif
 
 ! Restore previous selection
