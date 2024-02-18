@@ -450,7 +450,7 @@ AR72=0
 ! Reactivate original path
 paresu,all,SCANPATH_VAR_backupFname,pth
 path,%SCANPATH_VAR_activePathName%
-! /delete,SCANPATH_VAR_backupFname,pth
+/delete,SCANPATH_VAR_backupFname,pth
 
 ! Transfer aggregated virtual cross-section data to path
 arr2pth,'SCANPATH_ARR_aggCsecValues',AR90,SCANPATH_VAR_labelIdx
@@ -461,19 +461,19 @@ SCANPATH_VAR_pathLabel=AR90
 csrestore
 
 ! Clear parameters
-*del,SCANPATH_VAR_xyRotation
-*del,SCANPATH_VAR_xzRotation
-*del,SCANPATH_VAR_mthGlobalX1
-*del,SCANPATH_VAR_mthGlobalY1
-*del,SCANPATH_VAR_mthGlobalZ1
-*del,SCANPATH_VAR_mthGlobalX2
-*del,SCANPATH_VAR_mthGlobalY2
-*del,SCANPATH_VAR_mthGlobalZ2
-*del,SCANPATH_ARR_vscfunOptions
-*del,SCANPATH_ARR_beamOptions
-*del,SCANPATH_ARR_planeNodes
-*del,SCANPATH_ARR_xAtDivs
-*del,SCANPATH_ARR_csecVals
-*del,SCANPATH_VAR_activePathName
-*del,SCANPATH_ARR_check
-*del,SCANPATH_VAR_labelIdx
+*del , SCANPATH_VAR_xyRotation     ,  , nopr
+*del , SCANPATH_VAR_xzRotation     ,  , nopr
+*del , SCANPATH_VAR_mthGlobalX1    ,  , nopr
+*del , SCANPATH_VAR_mthGlobalY1    ,  , nopr
+*del , SCANPATH_VAR_mthGlobalZ1    ,  , nopr
+*del , SCANPATH_VAR_mthGlobalX2    ,  , nopr
+*del , SCANPATH_VAR_mthGlobalY2    ,  , nopr
+*del , SCANPATH_VAR_mthGlobalZ2    ,  , nopr
+*del , SCANPATH_ARR_vscfunOptions  ,  , nopr
+*del , SCANPATH_ARR_beamOptions    ,  , nopr
+*del , SCANPATH_ARR_planeNodes     ,  , nopr
+*del , SCANPATH_ARR_xAtDivs        ,  , nopr
+*del , SCANPATH_ARR_csecVals       ,  , nopr
+*del , SCANPATH_VAR_activePathName ,  , nopr
+*del , SCANPATH_ARR_check          ,  , nopr
+*del , SCANPATH_VAR_labelIdx       ,  , nopr

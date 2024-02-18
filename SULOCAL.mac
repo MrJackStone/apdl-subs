@@ -88,8 +88,8 @@ SULOCAL_ARR_axisNames(1)='X','Y','Z'
 *enddo
 
 ! Clear global parameters
-!*del,SULOCAL_ARR_LCSorigin
-!*del,SULOCAL_ARR_rotMatrix
-!*del,SULOCAL_ARR_tranRotMatrix
-!*del,SULOCAL_ARR_translationVector
-!*del,SULOCAL_ARR_axisNames
+*del , SULOCAL_ARR_LCSorigin         ,  , nopr
+*del , SULOCAL_ARR_rotMatrix         ,  , nopr
+*del , SULOCAL_ARR_tranRotMatrix     ,  , nopr
+*del , SULOCAL_ARR_translationVector ,  , nopr
+*del , SULOCAL_ARR_axisNames         ,  , nopr

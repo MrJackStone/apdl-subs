@@ -1,3 +1,6 @@
+!! TODO: rename to `NDCHAIN`
+!! TODO: incorporate "accept coincident" (from `NDSTR2`) as an option
+
 ! NDSTR, firstNode, reselectElems
 ! NDSTR, arg1,      arg2
 

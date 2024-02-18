@@ -1,3 +1,5 @@
+!! TODO: merge with `SEC_ICOMP2` & `SEC_ICOMPINV`
+
 ! SEC_ICOMP,bfInf,bfSup,d   ,tfInf,tfSup,tw  ,bEsq,bDir,hConc,steelMat,concMat,name
 ! SEC_ICOMP,arg1 ,arg2 ,arg3,arg4 ,arg5 ,arg6,arg7,arg8,arg9 ,ar10    ,ar11   ,ar12
 

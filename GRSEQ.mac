@@ -1,3 +1,5 @@
+!! TODO: make this entire macro an option of `GRANIM`
+
 ! GRSEQ, xVarNum, yVarNum, --,   xRangeMode, yRangeMode, folderName
 ! GRSEQ, arg1,    arg2,    arg3, arg4,       arg5,       arg6
 
