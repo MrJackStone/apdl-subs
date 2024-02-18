@@ -1,3 +1,6 @@
+!! TODO: add argument for monosymmetric section
+!! TODO: merge with `IBEAMSTF` to add option to include stiffeners
+
 ! DRAW_IBEAM , L    , bf   , dm   , compFlanges , compWeb
 ! DRAW_IBEAM , arg1 , arg2 , arg3 , arg4        , arg5
 

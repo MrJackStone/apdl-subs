@@ -1,3 +1,6 @@
+!! TODO: copy algorithm from `NDSORT`
+!! TODO: merge with `LOCSORT`
+
 ! KSORT, dir,  order
 ! KSORT, arg1, arg2
 

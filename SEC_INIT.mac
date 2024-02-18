@@ -24,18 +24,19 @@ kbackup
 ebackup
 nbackup
 csbackup
-asel, u, area, , all
-lsel, u, line, , all
-ksel, u, kp  , , all
-esel, u, elem, , all
-nsel, u, node, , all
+mpopbackup
+asel,none
+lsel,none
+ksel,none
+esel,none
+nsel,none
 csys,0
 wpcsys,-1
 
 ! Turn off display updating
 /prep7
 /nopr
-IMMED,0
+immed,0
 /uis,replot,0
 /uis,msgpop,3
 

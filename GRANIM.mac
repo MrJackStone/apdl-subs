@@ -133,13 +133,10 @@ VGET,GRANIM_ARR_yVector,arg2
 /seg,OFF
 
 ! Apagar vetores
-!*del,GRANIM_ARR_xVector,,nopr
-!*del,GRANIM_ARR_yVector,,nopr
-!*del,GRANIM_ARR_tempX,,nopr
-!*del,GRANIM_ARR_tempY,,nopr
+*del , GRANIM_ARR_xVector ,  , nopr
+*del , GRANIM_ARR_yVector ,  , nopr
+*del , GRANIM_ARR_tempX   ,  , nopr
+*del , GRANIM_ARR_tempY   ,  , nopr
 
 ! Iniciar animação
 ANIM,5,1,AR21
-
-
-

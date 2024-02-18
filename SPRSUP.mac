@@ -129,9 +129,9 @@ cm,AR31,elem
 
 ! Restore previous selection and add created entities
 nrestore
-cmsel,a,AR30  !! this was commented until 01/12/22, don't know why
+cmsel,a,AR30
 elrestore
-cmsel,a,AR31  !! this was commented until 01/12/22, don't know why
+cmsel,a,AR31
 
 
 

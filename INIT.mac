@@ -13,7 +13,7 @@
 ! arg1: defaultsMacro  -  name of a macro file to be called after clearing the model and before
 !                         restoring the original param values
 
-! Local parameter:
+! Local parameters:
 ! -
 
 
