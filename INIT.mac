@@ -24,6 +24,9 @@ parsav,all,'DATA_PARM_BACKUP',parm
 finish
 /clear
 
+! Restore parameters
+parres,new,'DATA_PARM_BACKUP',parm
+
 ! Load defaults
 %arg1%
 
