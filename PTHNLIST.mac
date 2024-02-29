@@ -1,0 +1,55 @@
+! PTHNLIST , pathName , nodeArrayName , nSets , nDiv
+! PTHNLIST , arg1     , arg2          , arg3  , arg4
+
+! Description:
+! Creates a path following the nodes listed in an array.
+
+! Arguments:
+! arg1: pathName       -  path name
+! arg2: nodeArrayName  -  name of array parameter containing list of node numbers
+! arg3: nSets          -  number of data sets (defaults to 30)
+! arg4: nDiv           -  number of divisions between points (defaults to 20)
+
+! Local parameters:
+! AR21: pathPointCount
+! AR22: nthPoint
+! AR23: nodeNum
+
+! Global parameters (erased at the end of this subroutine):
+! PTHNLIST_VAR_check
+! PTHNLIST_VAR_nDivs
+! PTHNLIST_VAR_nSets
+
+
+! Check input params
+parverify,'PTHNLIST_VAR_check',arg1,'CHAR'
+*if,PTHNLIST_VAR_check,eq,0,then
+  *msg,warn
+PTHNLIST error: arg1 must be a string (name of the path).%/&
+PTHNLIST command ignored.
+  *return,-1
+*endif
+
+parverify,'PTHNLIST_VAR_check',arg2,'ARRAY'
+*if,PTHNLIST_VAR_check,eq,0,then
+  *msg,warn
+PTHNLIST error: arg2 must be the name of an array parameter.%/&
+PTHNLIST command ignored.
+  *return,-1
+*endif
+
+argdefault , 'PTHNLIST_VAR_nSets' , arg3 , 'SCALAR' , 30
+argdefault , 'PTHNLIST_VAR_nDivs' , arg4 , 'SCALAR' , 20
+
+! Create path
+*get,AR21,parm,%arg2%,dim,x
+path,%arg1%,AR21,PTHNLIST_VAR_nSets,PTHNLIST_VAR_nDivs
+*do,AR22,1,AR21,1
+  AR23=%arg2%(AR22)
+  ppath,AR22,AR23
+*enddo
+
+! Clean up
+*del , PTHNLIST_VAR_check ,, nopr
+*del , PTHNLIST_VAR_nDivs ,, nopr
+*del , PTHNLIST_VAR_nSets ,, nopr
