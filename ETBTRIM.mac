@@ -1,0 +1,96 @@
+! ETBTRIM , newLabel , existingLabel , rule , val1 , val2
+! ETBTRIM , arg1     , arg2          , arg3 , arg4 , arg5
+
+! Description:
+! Creates an element table by applying a trimming operation to an existing element table.
+
+! Arguments:
+! arg1: newLabel       -  name of the new element table to be created (defaults to ARG2)
+! arg2: existingLabel  -  name of the element table to which the trimming operation will be applied
+! arg3: rule           -  trimming rule to be applied. Options are:
+!                           ['GT'] keep only values greater than ARG3
+!                           ['LT'] keep only values smaller than ARG3
+!                           ['BW'] keep only values between ARG3 and ARG4
+! arg4: val1           -  value to be used as lower limit for trimming operation
+! arg5: val2           -  value to be used as upper limit for trimming operation
+
+! Local parameters:
+! AR21: applyLowerLim
+! AR22: applyUpperLim
+! AR23: lowerLimLabel
+! AR24: upperLimLabel
+! AR31: tempArg1
+! AR32: tempArg2
+! AR33: tempArg3
+! AR34: COMPE_temp
+
+! Global parameters (erased at the end of this subroutine):
+! ETBTRIM_VAR_ruleCheck
+! ETBTRIM_VAR_outputLabel
+
+
+! Check input params
+AR31=arg1
+AR32=arg2
+AR33=arg3
+
+argdefault,'ETBTRIM_VAR_outputLabel',AR31,'CHAR',AR32
+
+parverify,'ETBTRIM_VAR_ruleCheck',AR33,'CHAR'
+*if,ETBTRIM_VAR_ruleCheck,ne,1,then
+  *msg,warn
+ETBTRIM error: invalid arg3 (rule must be a string).%/&
+ETBTRIM command is ignored.
+  *return,-1
+*endif
+
+AR21=0
+AR22=0
+*if,upcase(arg3),eq,'GT',then
+  AR21=1
+*elseif,upcase(arg3),eq,'LT',then
+  AR22=1
+*elseif,upcase(arg3),eq,'BW',then
+  AR21=1
+  AR22=1
+*else
+  *msg,warn
+ETBTRIM error: invalid rule (must be either 'GT', 'LT', or 'BW').%/&
+ETBTRIM command is ignored.
+  *return,-1
+*endif
+
+! Create trimming ETABLES
+AR23='_LLIM'
+sadd,AR23,arg2,,1
+detab,all,AR23,arg4
+
+AR24='_ULIM'
+sadd,AR24,arg2,,1
+detab,all,AR24,arg5
+
+! Apply trimming operation(s) to output etable
+sadd,ETBTRIM_VAR_outputLabel,arg2,,1
+
+! Lower limit
+*if,AR21,eq,1,then
+  smax,ETBTRIM_VAR_outputLabel,ETBTRIM_VAR_outputLabel,AR23
+  cm,AR34,elem
+  esel,r,etab,%ETBTRIM_VAR_outputLabel%,arg4,arg4
+  detab,all,%ETBTRIM_VAR_outputLabel%,arg4-1e20
+  cmsel,s,AR34
+*endif
+
+! Upper limit
+*if,AR22,eq,1,then
+  smin,ETBTRIM_VAR_outputLabel,ETBTRIM_VAR_outputLabel,AR24
+  esel,r,etab,%ETBTRIM_VAR_outputLabel%,arg5,arg5
+  detab,all,%ETBTRIM_VAR_outputLabel%,arg5+1e20
+  cmsel,s,AR34
+*endif
+
+! Clean up
+etable,AR23,erase
+etable,AR24,erase
+*del,ETBTRIM_VAR_outputLabel,,nopr
+*del,ETBTRIM_VAR_ruleCheck,,nopr
