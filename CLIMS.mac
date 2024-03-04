@@ -29,7 +29,7 @@
 
 ! Get number of contours
 AR22=9
-*if,arg4,gt,0,then
+*if,arg4,ne,0,then
   AR22=arg4
 *endif
 
@@ -48,6 +48,20 @@ AR22=9
   /color,cntr,oran,8
   /color,cntr,red,9
   /color,smax,dgra
+*elseif,AR22,eq,-9,then
+  ! 9 colors, reversed order
+  /contour,all,9
+  /color,smin,dgra
+  /color,cntr,blue,9
+  /color,cntr,cblu,8
+  /color,cntr,cyan,7
+  /color,cntr,gcya,6
+  /color,cntr,gree,5
+  /color,cntr,ygre,4
+  /color,cntr,yell,3
+  /color,cntr,oran,2
+  /color,cntr,red,1
+  /color,smax,dgra
 *elseif,AR22,eq,5,then
   ! 5 colors
   /contour,all,5
@@ -59,9 +73,9 @@ AR22=9
 *endif
 
 *if,arg1,eq,0,and,arg2,eq,0,then
-    /contour,all,AR22,auto
+    /contour,all,abs(AR22),auto
 *else
-    /contour,all,AR22,arg1,,arg2
+    /contour,all,abs(AR22),arg1,,arg2
 *endif
 
 *if,arg3,eq,1,then
