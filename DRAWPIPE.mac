@@ -1,0 +1,130 @@
+! draw_pipe , diameter , length , keepBegCap , keepEndCap , compSuffix
+! draw_pipe , arg1     , arg2   , arg3       , arg4       , arg5
+
+! Description:
+! Draws the cylindrical areas of a pipe centered at the working plane.
+! The following selection components are created, using the string passed through ARG5:
+!    COMPA_<arg5>     -  lateral (cylindrical) pipe areas
+!    COMPA_<arg5>Beg  -  beginning cap areas
+!    COMPA_<arg5>End  -  end cap areas
+!    COMPL_<arg5>     -  all lines
+!    COMPL_<arg5>Beg  -  beginning circular perimeter
+!    COMPL_<arg5>End  -  end circular perimeter
+
+! Arguments:
+! arg1: diameter    -  diameter of the pipe
+! arg2: length      -  length of the pipe
+! arg3: keepBegKap  -  key to determine whether or not to delete the circular area (cap) at the
+!                      beginning of the pipe:
+!                         [0] delete cap (default)
+!                         [1] keep cap
+! arg4: keepEndKap  -  key to determine whether or not to delete the circular area (cap) at the
+!                      end of the pipe:
+!                         [0] delete cap (default)
+!                         [1] keep cap
+! arg5: compSuffix  -  string used as suffix to name selection components. Defaults to 'PIPE'.
+
+
+! Local parameters:
+! AR25: selCompSuf
+! AR28: COMPL_temp
+! AR29: COMPA_temp
+! AR31: compaPipeName
+! AR32: compaPipeBegName
+! AR33: compaPipeEndName
+! AR34: complPipeName
+! AR35: complPipeBegName
+! AR36: complPipeEndName
+
+! Global parameters (erased at the end of this subroutine):
+! DRAWPIPE_VAR_tempCS
+
+
+! Check input parameters
+AR25='PIPE'
+*get,AR20,parm,arg5,type
+*if,AR20,ne,3,then
+  AR25=arg5
+*endif
+
+! Set selection component names
+AR31='COMPA_%AR25%'
+AR32='COMPA_%AR25%Beg'
+AR33='COMPA_%AR25%End'
+AR34='COMPL_%AR25%'
+AR35='COMPL_%AR25%Beg'
+AR36='COMPL_%AR25%End'
+
+! Prepare environment
+kbackup
+lbackup
+abackup
+vbackup
+csbackup
+ksel,none
+lsel,none
+asel,none
+vsel,none
+
+csnext,'DRAWPIPE_VAR_tempCS'
+cswpla,DRAWPIPE_VAR_tempCS,cart
+
+! Draw cylinder, delete volume
+cyl4,0,0,arg1/2,,,,arg2
+vdele,all,,,0
+cm,AR29,area
+cm,AR28,line
+
+! Delete beginning cap
+*if,arg3,ne,1,then
+  cmsel,s,AR29
+  asel,r,loc,z,0
+  lsla,s
+  adele,all,,,0
+
+  cm,%AR35%,line
+
+  asel,none
+  cm,%AR32%,area
+
+  cmsel,s,AR29
+*endif
+
+! Delete end cap
+*if,arg4,ne,1,then
+  cmsel,s,AR29
+  asel,r,loc,z,arg2
+  lsla,s
+  adele,all,,,0
+
+  cm,%AR36%,line
+
+  asel,none
+  cm,%AR33%,area
+
+  cmsel,s,AR29
+*endif
+
+! Create selection components
+cmsel,s,AR29
+cmsel,u,%AR32%
+cmsel,u,%AR33%
+cm,%AR31%,area
+
+cmsel,s,%AR31%
+lsla,s
+cmsel,a,%AR34%
+cmsel,a,%AR35%
+cm,%AR34%,line
+
+! Clean up
+krestore
+lrestore
+arestore
+vrestore
+csrestore
+cmsel,a,AR29
+cmsel,a,AR28
+csdele,DRAWPIPE_VAR_tempCS
+
+*del,DRAWPIPE_VAR_tempCS,,nopr
