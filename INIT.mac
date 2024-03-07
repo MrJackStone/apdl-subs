@@ -1,13 +1,17 @@
-! INIT
-! INIT
+! INIT, defaultsMacro
+! INIT, arg1
 
 ! Description:
 ! This subroutine creates a clean slate to begin a new model. Existing parameters are saved before
 ! the clearing operation and restored afterwards. Tipically this is one of the first commands
-! called after a _DATA file is read.
+! called after a _DATA file is read. Optionally, a macro file name can be passed. This macro will
+! be executed after clearing the model and before loading the backed up params. It is useful,
+! therefore, to have this macro set default values for params before all params have their values
+! updated with the call to PARRES.
 
 ! Arguments:
-! -
+! arg1: defaultsMacro  -  name of a macro file to be called after clearing the model and before
+!                         restoring the original param values
 
 ! Local parameter:
 ! -
@@ -22,3 +26,9 @@ finish
 
 ! Restore parameters
 parres,new,'DATA_PARM_BACKUP',parm
+
+! Load defaults
+%arg1%
+
+! Restore parameters
+parres,change,'DATA_PARM_BACKUP',parm

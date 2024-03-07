@@ -1,0 +1,41 @@
+! GETNDPOS , output , node , elem
+! GETNDPOS , arg1   , arg2 , arg3
+
+! Description:
+! Returns the index position of a given node for an element that contains that node. Returns
+! zero if the node is not attached to the element.
+
+! Arguments:
+! arg1: output  -  name of output parameter to which the value will be assigned
+!                  (defaults to GETNDPOS_VAR_index)
+! arg2: node    -  number of node to be searched
+! arg3: elem    -  number of element in which node will be searched
+
+! Local parameters:
+! AR20: parType
+! AR21: indexPosition
+! AR22: nthPos
+! AR23: nnum
+
+
+! Set name of output parameter
+AR91='GETNDPOS_VAR_index'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR91=arg1
+*endif
+
+! Initialize node index position
+AR21=0
+
+! Look for node in element
+*do,AR22,1,20,1
+  AR23=nelem(arg3,AR22)
+  *if,AR23,eq,arg2,then
+    AR21=AR22
+    *exit
+  *endif
+*enddo
+
+! Assign index to output parameter
+%AR91%=AR21

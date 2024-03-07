@@ -23,10 +23,16 @@
 ! AR22: nodeCount
 ! AR23: sortOrder
 ! AR24: dirIndex
+! AR25: NDSORT_COMPN_backup
 
 ! Global parameters (erased at the end of this subroutine):
 ! NDSORT_ARR_data
+! NDSORT_ARR_mask
 ! NDSORT_ARR_temp
+! NDSORT_ARR_tempNodes
+! NDSORT_ARR_tempXs
+! NDSORT_ARR_tempYs
+! NDSORT_ARR_tempZs
 
 ! Output parameters:
 ! %arg3% (defaults to 'NDSORT_ARR_nodes')
@@ -39,6 +45,7 @@
 mpopbackup
 obackup
 /uis,msgpop,3
+cm,AR25,node
 
 ! Set argument defaults
 AR23='A'
@@ -87,26 +94,48 @@ AR96='NDSORT_ARR_zcoord'
   AR24=4
 *endif
 
-! Count selected nodes, initialize related arrays
-*get,AR22,node,,count
+! Prepare arrays to be used
+*del , NDSORT_ARR_tempNodes ,, nopr
+*del , NDSORT_ARR_tempXs    ,, nopr
+*del , NDSORT_ARR_tempYs    ,, nopr
+*del , NDSORT_ARR_tempZs    ,, nopr
+*del , NDSORT_ARR_temp      ,, nopr
+*del , NDSORT_ARR_data      ,, nopr
 
-*del , NDSORT_ARR_data ,  , nopr
-*dim , NDSORT_ARR_data ,  , AR22 , 4
+! Count nodes, initialize related arrays
+nsel,all
+*get,AR22,node,,count
+*dim,NDSORT_ARR_data,,AR22,5
 
 ! Extract nodal coordinates
-*vget , NDSORT_ARR_data(1 , 1) , node ,  , nlist
-*vget , NDSORT_ARR_data(1 , 2) , node ,  , loc   , x
-*vget , NDSORT_ARR_data(1 , 3) , node ,  , loc   , y
-*vget , NDSORT_ARR_data(1 , 4) , node ,  , loc   , z
+*vget , NDSORT_ARR_data(1 , 1) , node ,, nlist
+*vget , NDSORT_ARR_data(1 , 2) , node ,, loc   , x
+*vget , NDSORT_ARR_data(1 , 3) , node ,, loc   , y
+*vget , NDSORT_ARR_data(1 , 4) , node ,, loc   , z
+
+! Extract nodal selection state
+cmsel,s,AR25
+*vget , NDSORT_ARR_data(1 , 5) , node ,, nsel
 
 ! Sort Nx4 matrix in ascending order of the chosen coordinate
 *moper,NDSORT_ARR_temp,NDSORT_ARR_data,sort,,AR24
 
 ! Transfer listing data from table to arrays
-*vfun , %AR93% , copy , NDSORT_ARR_data(1 , 1)
-*vfun , %AR94% , copy , NDSORT_ARR_data(1 , 2)
-*vfun , %AR95% , copy , NDSORT_ARR_data(1 , 3)
-*vfun , %AR96% , copy , NDSORT_ARR_data(1 , 4)
+*vfun , NDSORT_ARR_tempNodes , copy , NDSORT_ARR_data(1 , 1)
+*vfun , NDSORT_ARR_tempXs    , copy , NDSORT_ARR_data(1 , 2)
+*vfun , NDSORT_ARR_tempYs    , copy , NDSORT_ARR_data(1 , 3)
+*vfun , NDSORT_ARR_tempZs    , copy , NDSORT_ARR_data(1 , 4)
+*vfun , NDSORT_ARR_mask      , copy , NDSORT_ARR_data(1 , 5)
+
+! Compress arrays to keep only data for selected nodes
+*vmask, NDSORT_ARR_mask
+*vfun , %AR93% , comp , NDSORT_ARR_tempNodes
+*vmask, NDSORT_ARR_mask
+*vfun , %AR94% , comp , NDSORT_ARR_tempXs
+*vmask, NDSORT_ARR_mask
+*vfun , %AR95% , comp , NDSORT_ARR_tempYs
+*vmask, NDSORT_ARR_mask
+*vfun , %AR96% , comp , NDSORT_ARR_tempZs
 
 ! Reverse order if descending sort was requested
 *if,AR23,eq,'D',then
@@ -117,8 +146,13 @@ AR96='NDSORT_ARR_zcoord'
 *endif
 
 ! Clean up
-*del,NDSORT_ARR_data,,nopr
-*del,NDSORT_ARR_temp,,nopr
+*del , NDSORT_ARR_data      ,, nopr
+*del , NDSORT_ARR_mask      ,, nopr
+*del , NDSORT_ARR_temp      ,, nopr
+*del , NDSORT_ARR_tempNodes ,, nopr
+*del , NDSORT_ARR_tempXs    ,, nopr
+*del , NDSORT_ARR_tempYs    ,, nopr
+*del , NDSORT_ARR_tempZs    ,, nopr
 mpoprestore
 
 /eof

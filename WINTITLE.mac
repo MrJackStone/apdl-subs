@@ -1,5 +1,5 @@
-! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize
-! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6
+! WINTITLE , winNumber , leftJustified , centered , rightJustified , vertPosition , adjustWindowSize , bgColor , fgColor
+! WINTITLE , arg1      , arg2          , arg3     , arg4           , arg5         , arg6             , arg7    , arg8
 
 ! Description:
 ! Adds titles (annotations) to windows.
@@ -18,17 +18,54 @@
 !                            title (applies only to top or bottom vertical alignment)
 !                               [0] no adjustment (keep window size unchanged)
 !                               [1] adjust (reduce) window size
+! arg7: bgColor           -  box background color (0 through 15, or -1 for transparent background)
+! arg8: fgColor           -  text color, numbers 0 through 15 following /TSPEC command except for:
+!                               [ 0] black (default, color #15)
+!                               [-1] white (color #0)
 
 ! Local parameters:
 ! AR21: xMin
 ! AR22: xMax
 ! AR23: yMin
 ! AR24: yMax
+! AR25: filledBackground
+! AR26: validBgColor
 ! AR31: targetWindow
 ! AR32: resizeWindow
+! AR33: margin
+! AR34: boxHeight
+! AR35: yBaseline
+! AR36: centeredWidth
+! AR37: rightWidth
+! AR38: xLeftJustified
+! AR39: xCentered
+! AR40: xRightJustified
+! AR41: yTextAnchor
+
+! Global parameters (erased at the end of this subroutine):
+! WINTITLE_VAR_charWidth
+! WINTITLE_VAR_left
+! WINTITLE_VAR_centered
+! WINTITLE_VAR_right
 
 
+! Set valid targed window number
 AR31=((arg1>1)<5)
+
+! Set box background color
+AR25=1
+*if,arg7,eq,-1,then
+  AR25=0
+*endif
+AR26=((arg7>0)<15)
+
+! Set text color
+AR27=((arg8>0)<15)
+*if,arg8,eq,-1,then
+  AR27=0
+*elseif,arg8,eq,0,then
+  AR27=15
+*endif
 
 ! Resize window option
 AR32=0
@@ -58,35 +95,66 @@ AR32=0
 
 ! Set font-dependent parameters
 g_annocharwidth,'WINTITLE_VAR_charWidth'
-horMargin=0.02
+AR33 = WINTITLE_VAR_charWidth*(2/3)
+AR34 = WINTITLE_VAR_charWidth+(2*AR33)
 
-boxHeight=WINTITLE_VAR_charWidth+2*horMargin
-
-yBaseline=yMin
+AR35=AR23
 *if,arg5,eq,1,then
-  yBaseline=ymax-boxHeight
+  ! Vertical position: centered
+  AR35=(AR24+AR23-AR34)/2
 *elseif,arg5,eq,2,then
-  yBaseline=(ymax+ymin-boxHeight)/2
+  ! Vertical position: top
+  AR35=AR24-AR34
 *endif
 
+argdefault , 'WINTITLE_VAR_left'     , arg2 , 'CHAR' , ' '
 argdefault , 'WINTITLE_VAR_centered' , arg3 , 'CHAR' , ' '
-argdefault , 'WINTITLE_CAR_right'    , arg3 , 'CHAR' , ' '
+argdefault , 'WINTITLE_VAR_right'    , arg4 , 'CHAR' , ' '
 
-centeredWidth = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_centered)
-rightWidth    = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_right)
+AR36 = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_centered)
+AR37 = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_right)
 
-xLeftJustified  = xMin+horMargin
-xCentered       = (xMin+xMax-centeredWidth)/2
-xRightJustified = xMax-horMargin-rightWidth
+AR38 = AR21+AR33
+AR39 = (AR21+AR22-AR36)/2
+AR40 = AR22-AR33-AR37
 
-yTextAnchor = yBaseline+horMargin
+AR41 = AR35+AR33
 
 ! Resize window
 *if,AR32,eq,1,then
-  /window,arg2,AR20,AR21,AR24,AR23
+  *if,arg5,eq,0,then
+    AR23=AR23+AR34
+  *elseif,arg5,eq,2,then
+    AR24=AR24-AR34
+  *endif
+  /window,AR31,AR21,AR22,AR23,AR24
 *endif
 
+! Draw box
+/pspec,AR26,AR25,1
+/anum,,7
+p4gon,AR21,AR35,AR22,AR35+AR34
+/anum,,1
+/tspec,AR27,1,4
 
-/eof
-! argdefault , 'WINTITLE_VAR_left'     , arg2 , 'CHAR' , ' '
-! leftWidth     = WINTITLE_VAR_charWidth*strleng(WINTITLE_VAR_left)
+! Write titles
+*cfopen,wintitle_tmp,tmp
+    *vwrite,AR38,AR41,WINTITLE_VAR_left
+/tlabel,%g,%g,%s
+    *vwrite,AR39,AR41,WINTITLE_VAR_centered
+/tlabel,%g,%g,%s
+    *vwrite,AR40,AR41,WINTITLE_VAR_right
+/tlabel,%g,%g,%s
+*cfclos
+/nopr
+/input,wintitle_tmp,tmp
+/delete,wintitle_tmp,tmp
+/gopr
+
+! Clean up
+/tspec
+/pspec
+*del , WINTITLE_VAR_charWidth ,  , nopr
+*del , WINTITLE_VAR_left      ,  , nopr
+*del , WINTITLE_VAR_centered  ,  , nopr
+*del , WINTITLE_VAR_right     ,  , nopr

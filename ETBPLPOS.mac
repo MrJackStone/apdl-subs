@@ -1,0 +1,41 @@
+! ETBPLPOS , etName , avglab
+! ETBPLPOS , arg1   , arg2
+
+! Description:
+! Plots an element table but colors with contours only the positive values. Negative values are set
+! to zero and plotted in grey.
+
+! Arguments:
+! arg1: etName  -  name of element table to plot
+! arg2: avglab  -  sets AVGLAB of PLETAB command:
+!                    [0] NOAV (default)
+!                    [1] AVG
+
+! Local parameters:
+! AR21: avglab
+! AR22: trimmedEtabLabel
+! AR31: tempArg1
+
+
+! Check input params
+AR31=arg1
+
+AR21='NOAV'
+*if,arg2,eq,1,then
+  AR21='AVG'
+*endif
+
+! Trim element table
+AR22=strcat(strsub(arg1,1,7),'8')
+etbtrim,AR22,AR31,'GT',0
+
+! Plot trimmed element table
+*del,vals,,nopr
+*vget,vals,elem,,etab,AR22
+*vscfun,maxval,max,vals
+
+! /color,smin,dgra
+! /contour,all,9,0,,maxval
+clims,0,maxval,4
+pletab,AR22,AR21
+clims
