@@ -32,7 +32,7 @@ AR21='DELTAS2ROTS_VAR_thetaXY'
   AR21=arg1
 *endif
 
-AR21='DELTAS2ROTS_VAR_thetaZX'
+AR22='DELTAS2ROTS_VAR_thetaZX'
 *get,AR20,parm,arg2,type
 *if,AR20,eq,3,then
   AR22=arg2
