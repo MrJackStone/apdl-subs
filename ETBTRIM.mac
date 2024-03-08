@@ -84,6 +84,7 @@ sadd,ETBTRIM_VAR_outputLabel,arg2,,1
 ! Upper limit
 *if,AR22,eq,1,then
   smin,ETBTRIM_VAR_outputLabel,ETBTRIM_VAR_outputLabel,AR24
+  cm,AR34,elem
   esel,r,etab,%ETBTRIM_VAR_outputLabel%,arg5,arg5
   detab,all,%ETBTRIM_VAR_outputLabel%,arg5+1e20
   cmsel,s,AR34
