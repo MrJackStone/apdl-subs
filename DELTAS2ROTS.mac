@@ -1,0 +1,52 @@
+! deltas2rots , thetaXYparm , thetaZXparm , deltaX , deltaY , deltaZ
+! deltas2rots , arg1        , arg2        , arg3   , arg4   , arg5
+
+! Description:
+! Calculates the two rotation angles (in XY and ZX planes) that make the X axis point in the
+! direction of a point defined by its relative X, Y, and Z coordinates.
+
+! Arguments:
+! arg1: thetaXYparm  -  name of parameter to which the XY angle will be assigned
+!                       (defaults to DELTAS2ROTS_VAR_thetaXY)
+! arg2: thetaZXparm  -  name of parameter to which the ZX angle will be assigned
+!                       (defaults to DELTAS2ROTS_VAR_thetaZX)
+! arg3: deltaX       -  relative X coordinate of the target point
+! arg4: deltaY       -  relative Y coordinate of the target point
+! arg5: deltaZ       -  relative Z coordinate of the target point
+
+! Local parameters:
+! AR20: parType
+! AR21: outputXY
+! AR22: outputZX
+! AR23: deltaHor
+
+! Global parameters (erased at the end of this subroutine):
+! DELTAS2ROTS_VAR_tempXY
+! DELTAS2ROTS_VAR_tempZX
+
+
+! Check input params
+AR21='DELTAS2ROTS_VAR_thetaXY'
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR21=arg1
+*endif
+
+AR21='DELTAS2ROTS_VAR_thetaZX'
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+  AR22=arg2
+*endif
+
+! Calculate rotations
+AR23 = sqrt(arg3**2+arg4**2)
+posang , 'DELTAS2ROTS_VAR_tempXY' , arg3 , arg4
+posang , 'DELTAS2ROTS_VAR_tempZX' , AR23 , arg5
+
+! Adjust ZX rotation direction & assign to output parameters
+%AR21% = DELTAS2ROTS_VAR_tempXY
+%AR22% = 360-DELTAS2ROTS_VAR_tempZX
+
+! Clean up
+*del,DELTAS2ROTS_VAR_tempXY,,nopr
+*del,DELTAS2ROTS_VAR_tempZX,,nopr
