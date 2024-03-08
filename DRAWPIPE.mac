@@ -113,8 +113,8 @@ cm,%AR31%,area
 
 cmsel,s,%AR31%
 lsla,s
-cmsel,a,%AR34%
 cmsel,a,%AR35%
+cmsel,a,%AR36%
 cm,%AR34%,line
 
 ! Clean up
