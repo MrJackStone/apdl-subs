@@ -1,5 +1,5 @@
-! draw_pipe , diameter , length , keepBegCap , keepEndCap , compSuffix
-! draw_pipe , arg1     , arg2   , arg3       , arg4       , arg5
+! drawpipe , diameter , length , keepBegCap , keepEndCap , compSuffix
+! drawpipe , arg1     , arg2   , arg3       , arg4       , arg5
 
 ! Description:
 ! Draws the cylindrical areas of a pipe centered at the working plane.
@@ -43,7 +43,7 @@
 ! Check input parameters
 AR25='PIPE'
 *get,AR20,parm,arg5,type
-*if,AR20,ne,3,then
+*if,AR20,eq,3,then
   AR25=arg5
 *endif
 
