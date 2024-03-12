@@ -131,6 +131,7 @@ AR41 = AR35+AR33
 *endif
 
 ! Draw box
+/lspec,15,0,1
 /pspec,AR26,AR25,1
 /anum,,7
 p4gon,AR21,AR35,AR22,AR35+AR34
