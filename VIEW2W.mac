@@ -22,6 +22,7 @@
 ! arg6: windowB       -  number of bottom/right window (must be between 1 and 5, and defaults to 2)
 
 ! Local parameters:
+! AR20: parType
 ! AR21: xMin
 ! AR22: xMax
 ! AR23: yMin
@@ -32,15 +33,20 @@
 ! AR32: windowBnumber
 
 ! Global parameters (erased at the end of this subroutine):
-! VIEW2W_VAR_windowA
-! VIEW2W_VAR_windowB
-
+! -
 
 ! Set numbers for windows A and B
-argdefault,'VIEW2W_VAR_windowA',arg5,'SCALAR',1
-argdefault,'VIEW2W_VAR_windowB',arg6,'SCALAR',2
-AR31=((VIEW2W_VAR_windowA>1)<5)
-AR32=((VIEW2W_VAR_windowB>1)<5)
+AR31=1
+*get,AR20,parm,arg5,type
+*if,AR20,eq,0,then
+  AR31=((arg5>1)<5)
+*endif
+
+AR32=2
+*get,AR20,parm,arg6,type
+*if,AR20,eq,0,then
+  AR32=((arg6>1)<5)
+*endif
 
 ! Calculate bounding box for the created layout
 *if,arg3,ge,1,and,arg3,le,5,then
@@ -82,7 +88,3 @@ AR26=(AR24+AR23)/2
   /angle , all , 0
   /auto  , all
 *endif
-
-! Clean up
-*del , VIEW2W_VAR_windowA ,  , nopr
-*del , VIEW2W_VAR_windowB ,  , nopr
