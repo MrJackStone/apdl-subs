@@ -39,13 +39,17 @@
 AR31=1
 *get,AR20,parm,arg5,type
 *if,AR20,eq,0,then
-  AR31=((arg5>1)<5)
+  *if,arg5,gt,0,then
+    AR31=((arg5>1)<5)
+  *endif
 *endif
 
 AR32=2
 *get,AR20,parm,arg6,type
 *if,AR20,eq,0,then
-  AR32=((arg6>1)<5)
+  *if,arg6,gt,0,then
+    AR32=((arg6>1)<5)
+  *endif
 *endif
 
 ! Calculate bounding box for the created layout
