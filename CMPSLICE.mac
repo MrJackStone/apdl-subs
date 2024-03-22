@@ -24,7 +24,7 @@ cm,%arg1%,area
 
 ! Slice second using first component
 cmsel,s,%arg1%
-cmsel,s,%arg2%
+cmsel,a,%arg2%
 asba,%arg2%,%arg1%,,delete,keep
 cmsel,u,%arg1%
 cm,%arg2%,area
