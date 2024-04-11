@@ -1,5 +1,5 @@
-! PTH2V, topNode1, topNode2, botNode1, botNode2, pathName, stressKey, pathDiv,    -, sectArea, avgKey
-! PTH2V,     arg1,     arg2,     arg3,     arg4,     arg5,      arg6,    arg7, arg8,     arg9,   ar10
+! PTH2V , topNode1 , topNode2 , botNode1 , botNode2 , pathName , stressKey , pathDiv , -    , sectArea , avgKey , scaleFactor
+! PTH2V , arg1     , arg2     , arg3     , arg4     , arg5     , arg6      , arg7    , arg8 , arg9     , ar10   , ar11
 
 ! Description:
 ! Converts shear stresses along N sections into a shear force diagram. The sections are limited
@@ -10,37 +10,39 @@
 ! distribution is mapped onto it.
 
 ! Arguments:
-! arg1: topNode1   -  node that marks the beginning of the top cross-sectional boundary
-! arg2: topNode2   -  node that marks the end of the top cross-sectional boundary
-! arg3: botNode1   -  node that marks the beginning of the bottom cross-sectional boundary
-! arg4: botNode2   -  node that marks the end of the bottom cross-sectional boundary
-! arg5: pathName   -  name of the mid-depth path created to map shear force results
-! arg6: stressKey  -  string indicating which stress to use to calculate shear force:
-!                        ['X']    X normal stress
-!                        ['Y']    Y normal stress
-!                        ['Z']    Z normal stress
-!                        ['XY']   XY shear stress
-!                        ['YZ']   YZ shear stress
-!                        ['XZ']   XZ shear stress
-!                        ['1']    first principal stress
-!                        ['2']    second principal stress
-!                        ['3']    third principal stress
-!                        ['INT']  stress intensity
-!                        ['EQV']  equivalent von Mises stress
-!                     NOTE: this subroutine is intended to be used to aggregate shear stresses,
-!                           though the same algorithm can be applied off-label using other stress
-!                           keys for purposes unrelated to the high-level interpretation of a
-!                           resultant cross-sectional shear force distribution.
-! arg7: pathDiv    -  number of divisions along the path defined by cross-sectional boundaries
-! arg8: [blank]    -  unused.
-! arg9: sectArea   -  area of the fictional cross-section (perpendicular to the paths)
-! ar10: avgKey     -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
-!                        [0] AVG  (take average value, default)
-!                        [1] NOAV (don't take average value)
+! arg1: topNode1     -  node that marks the beginning of the top cross-sectional boundary
+! arg2: topNode2     -  node that marks the end of the top cross-sectional boundary
+! arg3: botNode1     -  node that marks the beginning of the bottom cross-sectional boundary
+! arg4: botNode2     -  node that marks the end of the bottom cross-sectional boundary
+! arg5: pathName     -  name of the mid-depth path created to map shear force results
+! arg6: stressKey    -  string indicating which stress to use to calculate shear force:
+!                          ['X']    X normal stress
+!                          ['Y']    Y normal stress
+!                          ['Z']    Z normal stress
+!                          ['XY']   XY shear stress
+!                          ['YZ']   YZ shear stress
+!                          ['XZ']   XZ shear stress
+!                          ['1']    first principal stress
+!                          ['2']    second principal stress
+!                          ['3']    third principal stress
+!                          ['INT']  stress intensity
+!                          ['EQV']  equivalent von Mises stress
+!                       NOTE: this subroutine is intended to be used to aggregate shear stresses,
+!                             though the same algorithm can be applied off-label using other stress
+!                             keys for purposes unrelated to the high-level interpretation of a
+!                             resultant cross-sectional shear force distribution.
+! arg7: pathDiv      -  number of divisions along the path defined by cross-sectional boundaries
+! arg8: [blank]      -  unused.
+! arg9: sectArea     -  area of the fictional cross-section (perpendicular to the paths)
+! ar10: avgKey       -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
+!                          [0] AVG  (take average value, default)
+!                          [1] NOAV (don't take average value)
+! ar11: scaleFactor  -  multiplier applied to the calculated shear force value (tipically set to
+!                       1e-3 to convert N into kN)
+
 
 ! Local parameters:
-! AR20: avglab
-! AR21: parType
+! AR20: parType
 ! AR23: nthSec
 ! AR24: shearForce
 ! AR25: upcaseSKey
@@ -85,6 +87,8 @@
 ! AR65: zm_b
 ! AR66: zm_e
 ! AR67: activeCS
+! AR70: avglab
+! AR80: appliedScale
 
 ! Global parameters (erased at the end of this subroutine):
 ! PTHS2V_ARR_table
@@ -99,18 +103,27 @@
 *get,AR67,active,,csys
 csys,0
 
+! Set scale factor
+AR80=1
+*get,AR20,parm,ar11,type
+*if,AR20,eq,0,then
+  *if,ar11,ne,0,then
+    AR80=ar11
+  *endif
+*endif
+
 ! Averaging key
-AR20='AVG'
-*get,AR21,PARM,ar10,TYPE
-*if,AR21,EQ,0,THEN
+AR70='AVG'
+*get,AR20,PARM,ar10,TYPE
+*if,AR20,EQ,0,THEN
     *if,ar10,EQ,1,THEN
-        AR20='NOAV'
+        AR70='NOAV'
     *endif
 *endif
 
 ! Path names
-*get,AR21,PARM,arg5,TYPE
-*if,AR21,EQ,3,THEN
+*get,AR20,PARM,arg5,TYPE
+*if,AR20,EQ,3,THEN
     AR30=STRSUB(arg5,1,8)
 *else
     AR30='S2V'
@@ -170,40 +183,40 @@ AR60=AR39
     AR25=UPCASE(arg6)
     *if,AR25,EQ,'X',THEN
         AR26='SX'
-        PDEF,AR26,S,X,AR20
+        PDEF,AR26,S,X,AR70
     *elseif,AR25,EQ,'Y',THEN
         AR26='SY'
-        PDEF,AR26,S,Y,AR20
+        PDEF,AR26,S,Y,AR70
     *elseif,AR25,EQ,'Z',THEN
         AR26='SZ'
-        PDEF,AR26,S,Z,AR20
+        PDEF,AR26,S,Z,AR70
     *elseif,AR25,EQ,'XY',THEN
         AR26='SXY'
-        PDEF,AR26,S,XY,AR20
+        PDEF,AR26,S,XY,AR70
     *elseif,AR25,EQ,'YZ',THEN
         AR26='SYZ'
-        PDEF,AR26,S,YZ,AR20
+        PDEF,AR26,S,YZ,AR70
     *elseif,AR25,EQ,'XZ',THEN
         AR26='SXZ'
-        PDEF,AR26,S,XZ,AR20
+        PDEF,AR26,S,XZ,AR70
     *elseif,AR25,EQ,'1',THEN
         AR26='S1'
-        PDEF,AR26,S,1,AR20
+        PDEF,AR26,S,1,AR70
     *elseif,AR25,EQ,'2',THEN
         AR26='S2'
-        PDEF,AR26,S,2,AR20
+        PDEF,AR26,S,2,AR70
     *elseif,AR25,EQ,'3',THEN
         AR26='S3'
-        PDEF,AR26,S,3,AR20
+        PDEF,AR26,S,3,AR70
     *elseif,AR25,EQ,'INT',THEN
         AR26='SINT'
-        PDEF,AR26,S,INT,AR20
+        PDEF,AR26,S,INT,AR70
     *elseif,AR25,EQ,'EQV',THEN
         AR26='SEQV'
-        PDEF,AR26,S,EQV,AR20
+        PDEF,AR26,S,EQV,AR70
     *else
         AR26=AR25
-        pdef,AR26,etab,AR26,AR20
+        pdef,AR26,etab,AR26,AR70
         !AR27=1
         !*msg,WARN,AR27
 !'PTHS2V error (%I): INVALID STRESS KEY. PTHS2V COMMAND IS IGNORED.'
@@ -213,7 +226,7 @@ AR60=AR39
     ! Calculate shear force at fictional cross-section
     PCALC,INTG,'nthV',AR26,S,arg9
     *get,AR24,PATH,,LAST,'nthV'
-    PTHS2V_ARR_shear(AR23)=AR24
+    PTHS2V_ARR_shear(AR23)=AR24*AR80
 
     ! Update cross-section position for next iteration
     AR55=AR55+AR52

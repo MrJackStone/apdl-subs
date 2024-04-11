@@ -1,11 +1,11 @@
-! PTHS2MN, topNode1, topNode2, botNode1, botNode2, pathNameRoot, stressKey, pathDiv,    W,    A, avgKey
-! PTHS2MN,     arg1,     arg2,     arg3,     arg4,         arg5,      arg6,    arg7, arg8, arg9,   ar10
+! PTHS2MN , topNode1 , topNode2 , botNode1 , botNode2 , pathNameRoot , stressKey , pathDiv , W    , A    , avgKey , scaleFactor
+! PTHS2MN , arg1     , arg2     , arg3     , arg4     , arg5         , arg6      , arg7    , arg8 , arg9 , ar10   , ar11
 
 ! Descrição:
 ! Esta subrotina converte tensões ao longo de dois paths (interpretados como as faces superior e
 ! inferior da seção transversal de uma barra) em esforços internos de flexão reta (momento fletor)
 ! e de força axial (força normal, de tração ou compressão). Os valores dos esforços internos são
-! registrados em ambos os paths, sendo o momento fletor identificados com o label 'M' e a força
+! registrados em ambos os paths, sendo o momento fletor identificado com o label 'M' e a força
 ! normal identificada com o label 'N'. Esta subrotina presume seção transversal constante e com
 ! dupla simetria ao longo do eixo da barra (comprimento dos paths), e o usuário precisa fornecer
 ! as propriedades geométricas da seção transversal.
@@ -42,10 +42,12 @@
 !                        elementos adjacentes (argumento 'avglab' do comando 'PDEF')
 !                           [0] AVG  (tirar média, default)
 !                           [1] NOAV (não tirar média)
+! ar11: scaleFactor   -  multiplier applied to the calculated bending moment and axial force values
+!                        (tipically set to 1e-3 to convert Nm and N into kNm and kN, respectively)
+
 
 ! Lista de variáveis locais:
-! AR20: avglab
-! AR21: parType
+! AR20: parType
 ! AR22: pathPrefix
 ! AR23: topPathName
 ! AR24: botPathName
@@ -54,6 +56,8 @@
 ! AR27: errorKey
 ! AR28: i
 ! AR29: nthValue
+! AR80: appliedScale
+! AR40: avglab
 
 ! Lista de variáveis globais (apagadas ao final da subrotina):
 ! PTH2ARR_ARR_OUTPUT
@@ -74,18 +78,26 @@
 ! PTHS2MN_ARR_axialForce
 
 
+! Set scale factor
+AR80=1
+*get,AR20,parm,ar11,type
+*if,AR20,eq,0,then
+  *if,ar11,ne,0,then
+    AR80=ar11
+  *endif
+*endif
 
-AR20='AVG'
-*get,AR21,PARM,ar10,TYPE
-*if,AR21,EQ,0,THEN
+AR40='AVG'
+*get,AR20,PARM,ar10,TYPE
+*if,AR20,EQ,0,THEN
     *if,ar10,EQ,1,THEN
-        AR20='NOAV'
+        AR40='NOAV'
     *endif
 *endif
 
 ! Nomes dos paths
-*get,AR21,PARM,arg5,TYPE
-*if,AR21,EQ,3,THEN
+*get,AR20,PARM,arg5,TYPE
+*if,AR20,EQ,3,THEN
     AR22=STRSUB(arg5,1,6)
 *else
     AR22='S2MN'
@@ -121,40 +133,40 @@ AR27=0
     AR25=UPCASE(arg6)
     *if,AR25,EQ,'X',THEN
         AR26='SX'
-        PDEF,AR26,S,X,AR20
+        PDEF,AR26,S,X,AR40
     *elseif,AR25,EQ,'Y',THEN
         AR26='SY'
-        PDEF,AR26,S,Y,AR20
+        PDEF,AR26,S,Y,AR40
     *elseif,AR25,EQ,'Z',THEN
         AR26='SZ'
-        PDEF,AR26,S,Z,AR20
+        PDEF,AR26,S,Z,AR40
     *elseif,AR25,EQ,'XY',THEN
         AR26='SXY'
-        PDEF,AR26,S,XY,AR20
+        PDEF,AR26,S,XY,AR40
     *elseif,AR25,EQ,'YZ',THEN
         AR26='SYZ'
-        PDEF,AR26,S,YZ,AR20
+        PDEF,AR26,S,YZ,AR40
     *elseif,AR25,EQ,'XZ',THEN
         AR26='SXZ'
-        PDEF,AR26,S,XZ,AR20
+        PDEF,AR26,S,XZ,AR40
     *elseif,AR25,EQ,'1',THEN
         AR26='S1'
-        PDEF,AR26,S,1,AR20
+        PDEF,AR26,S,1,AR40
     *elseif,AR25,EQ,'2',THEN
         AR26='S2'
-        PDEF,AR26,S,2,AR20
+        PDEF,AR26,S,2,AR40
     *elseif,AR25,EQ,'3',THEN
         AR26='S3'
-        PDEF,AR26,S,3,AR20
+        PDEF,AR26,S,3,AR40
     *elseif,AR25,EQ,'INT',THEN
         AR26='SINT'
-        PDEF,AR26,S,INT,AR20
+        PDEF,AR26,S,INT,AR40
     *elseif,AR25,EQ,'EQV',THEN
         AR26='SEQV'
-        PDEF,AR26,S,EQV,AR20
+        PDEF,AR26,S,EQV,AR40
     *else
         AR26=AR25
-        pdef,AR26,etab,AR26,AR20
+        pdef,AR26,etab,AR26,AR40
         !AR27=1
         !*msg,WARN,AR27
 !'PTHS2MN error (%I): INVALID STRESS KEY. PTHS2MN COMMAND IS IGNORED.'
@@ -184,9 +196,9 @@ AR27=0
     *del,PTHS2MN_ARR_axialForce,,nopr
     *voper,PTHS2MN_ARR_stressDifference, PTHS2MN_ARR_botStress,        SUB,  PTHS2MN_ARR_topStress
     *voper,PTHS2MN_ARR_bendingStress,    PTHS2MN_ARR_stressDifference, DIV,  2
-    *voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8
+    *voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8*AR80
     *voper,PTHS2MN_ARR_normalStress,     PTHS2MN_ARR_topStress,        ADD,  PTHS2MN_ARR_bendingStress
-    *voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9
+    *voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9*AR80
 
     ! Adicionar vetores calculados às tabelas extraídas dos paths
     *del,PTHS2MN_ARR_topTable,,nopr
@@ -243,8 +255,3 @@ AR27=0
 *del , PTHS2MN_ARR_botTable         ,  , nopr
 *del , PTHS2MN_ARR_botLabel         ,  , nopr
 *del , PTHS2MN_ARR_botPoints        ,  , nopr
-
-
-
-
-
