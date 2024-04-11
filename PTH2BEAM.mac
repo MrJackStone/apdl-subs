@@ -1,5 +1,5 @@
-! pth2beam, topNode1, topNode2, botNode1, botNode2, pathNameRoot, dflKey, pathDiv,    W,    A, avgKey, lcEnv
-! pth2beam,     arg1,     arg2,     arg3,     arg4,         arg5,   arg6,    arg7, arg8, arg9,   ar10,  ar11
+! pth2beam , topNode1 , topNode2 , botNode1 , botNode2 , pathNameRoot , dflKey , pathDiv , W    , A    , avgKey , lcEnv , planeOnly
+! pth2beam , arg1     , arg2     , arg3     , arg4     , arg5         , arg6   , arg7    , arg8 , arg9 , ar10   , ar11  , ar12
 
 ! Description:
 ! Calculates beam internal reactions based on SHELL181 stresses. Results are stored in a load case
@@ -58,6 +58,10 @@
 !                           [0] AVG  (default)
 !                           [1] NOAV
 ! ar11: lcEnv         -  parameter name of table containing results envelope
+! ar12: planeOnly     -  determines whether or not to extract off-plane results:
+!                           [0] off (extract off-plane results)
+!                           [1] on (extract only in-plane results)
+
 
 ! Local parameters:
 ! AR20: pthRoot
@@ -188,18 +192,6 @@ pth2dfl,arg1,arg2,,,AR42,'X',arg7,,0,1,arg6
 *voper, %ar11%(1, 9) , %ar11%(1, 9) , min , PTH2DFL_ARR_defl(1)
 *voper, %ar11%(1,10) , %ar11%(1,10) , max , PTH2DFL_ARR_defl(1)
 
-! Y deflection, top face
-AR43=strcat(AR20,'_TY')
-pth2dfl,arg1,arg2,,,AR43,'Y',arg7,,0,1,arg6
-*voper, %ar11%(1,11) , %ar11%(1,11) , min , PTH2DFL_ARR_defl(1)
-*voper, %ar11%(1,12) , %ar11%(1,12) , max , PTH2DFL_ARR_defl(1)
-
-! Z deflection, top face
-AR44=strcat(AR20,'_TZ')
-pth2dfl,arg1,arg2,,,AR44,'Z',arg7,,0,1,arg6
-*voper, %ar11%(1,13) , %ar11%(1,13) , min , PTH2DFL_ARR_defl(1)
-*voper, %ar11%(1,14) , %ar11%(1,14) , max , PTH2DFL_ARR_defl(1)
-
 ! X deflection, bottom face
 AR42=strcat(AR20,'_BX')
 pth2dfl,arg3,arg4,,,AR42,'X',arg7,,0,1,arg6
@@ -212,19 +204,35 @@ pth2dfl,arg3,arg4,,,AR43,'Y',arg7,,0,1,arg6
 *voper, %ar11%(1,17) , %ar11%(1,17) , min , PTH2DFL_ARR_defl(1)
 *voper, %ar11%(1,18) , %ar11%(1,18) , max , PTH2DFL_ARR_defl(1)
 
-! Z deflection, bottom face
-AR44=strcat(AR20,'_BZ')
-pth2dfl,arg3,arg4,,,AR44,'Z',arg7,,0,1,arg6
-*voper, %ar11%(1,19) , %ar11%(1,19) , min , PTH2DFL_ARR_defl(1)
-*voper, %ar11%(1,20) , %ar11%(1,20) , max , PTH2DFL_ARR_defl(1)
+! Y deflection, top face
+AR43=strcat(AR20,'_TY')
+pth2dfl,arg1,arg2,,,AR43,'Y',arg7,,0,1,arg6
+*voper, %ar11%(1,11) , %ar11%(1,11) , min , PTH2DFL_ARR_defl(1)
+*voper, %ar11%(1,12) , %ar11%(1,12) , max , PTH2DFL_ARR_defl(1)
+
+*if,ar12,ne,1,then
+  ! Z deflection, top face
+  AR44=strcat(AR20,'_TZ')
+  pth2dfl,arg1,arg2,,,AR44,'X',arg7,,0,1,arg6
+  *voper, %ar11%(1,13) , %ar11%(1,13) , min , PTH2DFL_ARR_defl(1)
+  *voper, %ar11%(1,14) , %ar11%(1,14) , max , PTH2DFL_ARR_defl(1)
+
+  ! Z deflection, bottom face
+  AR44=strcat(AR20,'_BZ')
+  pth2dfl,arg3,arg4,,,AR44,'X',arg7,,0,1,arg6
+  *voper, %ar11%(1,19) , %ar11%(1,19) , min , PTH2DFL_ARR_defl(1)
+  *voper, %ar11%(1,20) , %ar11%(1,20) , max , PTH2DFL_ARR_defl(1)
+*endif
 
 
 !! OFF-PLANE BENDING
-path,arg5
-pdef,'M2',etab,'M11',1
-pth2arr,'M2','PTH2BEAM_ARR_m2'
-*voper, %ar11%(1, 3) , %ar11%(1, 3) , min , PTH2BEAM_ARR_m2(1)
-*voper, %ar11%(1, 4) , %ar11%(1, 4) , max , PTH2BEAM_ARR_m2(1)
+*if,ar12,ne,1,then
+  path,arg5
+  pdef,'M2',etab,'M11',1
+  pth2arr,'M2','PTH2BEAM_ARR_m2'
+  *voper, %ar11%(1, 3) , %ar11%(1, 3) , min , PTH2BEAM_ARR_m2(1)
+  *voper, %ar11%(1, 4) , %ar11%(1, 4) , max , PTH2BEAM_ARR_m2(1)
+*endif
 
 
 !! MAP ENVELOPE TO PATH
