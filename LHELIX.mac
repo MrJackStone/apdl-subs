@@ -59,6 +59,8 @@ AR40='COMPK_%AR26%'
 csbackup
 lbackup
 kbackup
+lsel,none
+ksel,none
 
 ! Activate cylindrical CSYS aligned with helix's axis
 csnext,'LHELIX_VAR_cylin'
