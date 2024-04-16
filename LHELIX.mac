@@ -1,0 +1,115 @@
+! LHELIX , radius , pitch , phi  , loops , angStep , compSuffix
+! LHELIX , arg1   , arg2  , arg3 , arg4  , arg5    , arg6
+
+! Description:
+! Draws a helix-shaped line in the active CSYS. The helix's axis is parallel to the Z axis and
+! starts at Z=0.
+
+! Arguments:
+! arg1: radius      -  radius of the helix
+! arg2: pitch       -  distance between loops measured along the helix's axial direction
+!                      (set to 0 if defining helix geometry based on the PHI angle instead)
+! arg3: phi         -  maximum angle of the helical path measured along the helix's axis
+!                      (used only if arg2=0)
+! arg4: loops       -  number of times the helix turns (can be decimal for incomplete turns)
+! arg5: angStep     -  angular increment between consecutive keypoints defining helical lines
+!                      (defaults to 90 degrees and can't exceed 180 degrees)
+! arg6: compSuffix  -  string used as component's name suffix (COMPL_%arg6%)
+!                      (defaults to 'HELIX')
+
+! Local parameters:
+! AR22: hPitch
+! AR23: hPhi
+! AR25: thetaStep
+! AR26: cmSuffix
+! AR31: unitPitch
+! AR32: ki
+! AR33: kj
+! AR34: theta
+! AR35: totalAngle
+! AR36: nthZ
+! AR37: kmaxd
+! AR38: lastZ
+! AR39: lineCompName
+! AR40: kpCompName
+
+
+! Check input parameters
+AR22=arg2
+*if,arg2,eq,0,then
+  afunbackup
+  *afun,deg
+  AR22=2*pi*arg1/tan(arg3)
+  afunrestore
+*endif
+
+AR25=90
+*if,arg5,ne,0,then
+  AR25=(arg5<180)
+*endif
+
+AR26='HELIX'
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  AR26=arg6
+*endif
+AR39='COMPL_%AR26%'
+AR40='COMPK_%AR26%'
+
+! Prepare environment
+csbackup
+lbackup
+kbackup
+
+! Activate cylindrical CSYS aligned with helix's axis
+csnext,'LHELIX_VAR_cylin'
+clocal,LHELIX_VAR_cylin,cylin,0,0,0
+
+! Calculate necessary geometric parameters
+unitPitch=hPitch/360
+
+! Draw helical lines for which the final angle is a multiple of the angular step
+ki=0
+*do,theta,0,totalAngle,90
+  nthZ=theta*unitPitch
+  *get,kmaxd,kp,,num,maxd
+  kj=kmaxd+1
+
+  ! Draw keypoint on helical line
+  k,kj,radius,theta,nthZ
+
+  ! Draw helical line
+  *if,ki,ne,0,then
+    l,ki,kj
+  *endif
+
+  ! Update previous keypoint on helical line
+  ki=kj
+*enddo
+
+! Draw last helical line when there is angular remainder
+*if,theta,ne,totalAngle,then
+  lastZ=totalAngle*unitPitch
+  *get,kmaxd,kp,,num,maxd
+  kj=kmaxd+1
+
+  ! Draw last keypoint
+  k,kj,radius,totalAngle,lastZ
+
+  ! Draw last helical segment
+  l,ki,kj
+*endif
+
+! Create selection component with the helix's lines
+cm,%AR39%,line
+cm,%AR40%,kp
+
+! Clean up
+csrestore
+lrestore
+krestore
+cmsel,a,%AR39%
+cmsel,a,%AR40%
+
+csdele,LHELIX_VAR_cylin
+*del,LHELIX_VAR_cylin
