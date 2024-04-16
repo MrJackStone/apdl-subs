@@ -14,6 +14,12 @@
 ! AR22: length
 ! AR23: activeCS
 
+! Global parameters:
+! CSBACKUP_
+
+! Global parameters (erased at the end of this subroutine):
+! CSBACKUP_ARR_temp
+
 
 ! Update size of array that stores values
 *get,ar20,parm,CSBACKUP_,type

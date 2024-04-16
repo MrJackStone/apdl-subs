@@ -12,6 +12,13 @@
 ! AR21: length
 ! AR22: restoredValue
 
+! Global parameters:
+! CSBACKUP_
+
+! Global parameters (erased at the end of this subroutine):
+! CSBACKUP_ARR_temp
+
+
 *get,ar20,parm,CSBACKUP_,type
 
 ! Abort if no record is found
