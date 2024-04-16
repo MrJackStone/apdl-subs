@@ -18,15 +18,15 @@
 
 *if,ar20,ne,0,then
   *msg,warn
-EKRESTORE error: invalid backup parameter type (expected scalar).%/&
-EKRESTORE command is ignored.
+KRESTORE error: invalid backup parameter type (expected scalar).%/&
+KRESTORE command is ignored.
   *return,-1
 *endif
 
 *if,KBACKUP_,eq,0,then
   *msg,warn
-EKRESTORE error: no backed up selection to restore.%/&
-EKRESTORE command is ignored.
+KRESTORE error: no backed up selection to restore.%/&
+KRESTORE command is ignored.
   *return,-1
 *endif
 

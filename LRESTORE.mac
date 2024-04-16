@@ -18,15 +18,15 @@
 
 *if,ar20,ne,0,then
   *msg,warn
-ELRESTORE error: invalid backup parameter type (expected scalar).%/&
-ELRESTORE command is ignored.
+LRESTORE error: invalid backup parameter type (expected scalar).%/&
+LRESTORE command is ignored.
   *return,-1
 *endif
 
 *if,LBACKUP_,eq,0,then
   *msg,warn
-ELRESTORE error: no backed up selection to restore.%/&
-ELRESTORE command is ignored.
+LRESTORE error: no backed up selection to restore.%/&
+LRESTORE command is ignored.
   *return,-1
 *endif
 
