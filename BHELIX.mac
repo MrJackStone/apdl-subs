@@ -1,0 +1,163 @@
+! BHELIX , rad1 , rad2 , w1   , w2   , pitch , phi  , loops , angStep , cmSuffix
+! BHELIX , arg1 , arg2 , arg3 , arg4 , arg5  , arg6 , arg7  , arg8    , arg9
+
+! Description:
+! Draws a helical blade. The helix's axis is parallel to the active CSYS's Z direction and starts
+! at Z=0. Blade areas are approximately perpendicular to the axis of the helix.
+
+! Arguments:
+! arg1: rad1      -  inner radius at the beginning of the helix
+! arg2: rad2      -  inner radius at the end of the helix
+! arg3: w1        -  blade width at the beginning of the helix
+! arg4: w2        -  blade width at the end of the helix
+! arg5: pitch     -  distance between loops along axial direction
+!                    (set to 0 if defining helix geometry based on PHI instead)
+! arg6: phi       -  maximum angle of the helical path measured along the helix's axis
+!                    (used only if arg5=0)
+! arg7: loops     -  number of times the helix turns (can be fractional)
+! arg8: angStep   -  angular increment between consecutive keypoints along the helical lines
+!                    (defaults to 90 degrees and can't exceed 180 degrees)
+! arg9: cmSuffix  -  string used as component's name suffix (COMPx_%arg9%)
+!                    (defaults to 'HELIX')
+
+! Local parameters:
+! AR20: parType
+! AR21: zmax
+! AR22: zmin
+! AR23: height
+! AR24: deltaWidth
+! AR25: lc
+! AR26: lnum
+! AR27: nthLine
+! AR29: cmSuffix
+! AR31: innerHelixLcmName
+! AR32: innerHelixKcmName
+! AR33: innerHelixAcmName
+! AR41: k1
+! AR42: k2
+! AR43: x1coord
+! AR44: y1coord
+! AR45: z1coord
+! AR46: x2coord
+! AR47: y2coord
+! AR48: z2coord
+! AR51: deltaW1
+! AR52: deltaW2
+! AR53: kA
+! AR54: kB
+
+
+! Prepare environment
+csbackup
+abackup
+lbackup
+kbackup
+asel,none
+lsel,none
+ksel,none
+*del , BHELIX_VAR_radius  ,  , nopr
+*del , BHELIX_VAR_pitch   ,  , nopr
+*del , BHELIX_VAR_loops   ,  , nopr
+*del , BHELIX_VAR_phi     ,  , nopr
+*del , BHELIX_VAR_angstep ,  , nopr
+*del , BHELIX_VAR_cmsuf   ,  , nopr
+*del , BHELIX_VAR_cylin   ,  , nopr
+
+
+! Check input parameters
+ar29='HELIX'
+*get,ar20,parm,ARG9,type
+*if,ar20,eq,3,then
+  ar29=ARG9
+*endif
+
+BHELIX_VAR_radius  = ARG1
+BHELIX_VAR_pitch   = ARG5
+BHELIX_VAR_phi     = ARG6
+BHELIX_VAR_loops   = ARG7
+BHELIX_VAR_angstep = ARG8
+
+ar31 = 'COMPL_%ar29%'
+ar32 = 'COMPK_%ar29%'
+ar33 = 'COMPA_%ar29%'
+
+! Draw inner helical lines
+lhelix,BHELIX_VAR_radius,BHELIX_VAR_pitch,BHELIX_VAR_phi,BHELIX_VAR_loops,BHELIX_VAR_angstep,ar29
+
+
+
+! Calculate necessary geometric parameters
+cmsel,s,%ar32%
+*get,zmax,kp,,mxloc,z
+*get,zmin,kp,,mnloc,z
+height     = zmax-zmin
+deltaWidth = ARG3-ARG4
+
+! Activate cylindrical CSYS aligned with helix's axis
+csnext,'BHELIX_VAR_cylin'
+clocal,BHELIX_VAR_cylin,cylin,0,0,0
+
+! Draw blade areas
+asel,none
+cm,%ar33%,area
+
+cmsel,s,%ar31%
+*get,lc,line,,count
+lnum=0
+
+*do,nthLine,1,lc,1
+  cmsel,s,%ar31%
+  lnum=lsnext(lnum)
+
+  *get,k1,line,lnum,kp,1
+  *get,k2,line,lnum,kp,2
+
+  x1coord=kx(k1)
+  y1coord=ky(k1)
+  z1coord=kz(k1)
+  deltaW1=ARG4+deltaWidth*(z1coord/height)
+
+  x2coord=kx(k2)
+  y2coord=ky(k2)
+  z2coord=kz(k2)
+  deltaW2=ARG4+deltaWidth*(z2coord/height)
+
+  *get,kmax,kp,,num,maxd
+  kA=kmax+1
+  kB=kmax+2
+
+  k,kA,x1coord+deltaW1,y1coord,z1coord
+  k,kB,x2coord+deltaW2,y2coord,z2coord
+
+  asel,none
+  ksel,s,kp,,k1
+  ksel,a,kp,,k2
+  ksel,a,kp,,kA
+  ksel,a,kp,,kB
+  lslk,s,1
+  l,k1,kA
+  l,kA,kB
+  l,kB,k2
+  al,all
+
+  cmpadd,ar33
+*enddo
+
+! Clean up
+csrestore
+krestore
+lrestore
+arestore
+cmsel,a,%ar31%
+cmsel,a,%ar32%
+cmsel,a,%ar33%
+
+csdele,BHELIX_VAR_cylin
+
+*del , BHELIX_VAR_cylin   ,  , nopr
+*del , BHELIX_VAR_radius  ,  , nopr
+*del , BHELIX_VAR_pitch   ,  , nopr
+*del , BHELIX_VAR_loops   ,  , nopr
+*del , BHELIX_VAR_phi     ,  , nopr
+*del , BHELIX_VAR_angstep ,  , nopr
+*del , BHELIX_VAR_cmsuf   ,  , nopr
