@@ -14,7 +14,7 @@
 !                         restoring the original param values
 
 ! Local parameter:
-! -
+! AR20: parType
 
 
 ! Save existing parameters
@@ -28,7 +28,10 @@ finish
 parres,new,'DATA_PARM_BACKUP',parm
 
 ! Load defaults
-%arg1%
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  %arg1%
+*endif
 
 ! Restore parameters
 parres,change,'DATA_PARM_BACKUP',parm
