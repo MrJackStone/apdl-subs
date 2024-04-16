@@ -51,4 +51,4 @@
   *del,MPOPBACKUP_,,nopr
   MPOPBACKUP_=AR31
 
-*enddo
+*endif
