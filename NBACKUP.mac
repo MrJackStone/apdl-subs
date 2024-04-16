@@ -1,21 +1,27 @@
 ! NBACKUP
+! NBACKUP
 
 ! Description:
-! Creates a node named selection component to serve as a backup of currently selected nodes.
-! Usually followed by 'NRESTORE' command to restore backed up nodal selection.
+! Creates a node component that can be restored with NRESTORE.
 
 ! Arguments:
 ! -
 
 ! Local parameters:
-! -
+! AR20: parType
 
-! Global parameters (erased at the end on this subroutine):
-! -
+! Global parameters:
+! NBACKUP_
 
-! Output parameters:
-! NBackup_  -  node named selection component
 
-*del,NBackup_,,nopr
-CM,NBackup_,NODE
+*get,ar20,parm,NBACKUP_,type
 
+*if,ar20,ne,0,then
+  *del,NBACKUP_,,nopr
+  NBACKUP_=1
+*else
+  NBACKUP_=NBACKUP_+1
+*endif
+
+! Create selection component
+cm,NBACKUP_CM_%NBACKUP_%,node
