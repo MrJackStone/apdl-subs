@@ -1,7 +1,28 @@
 ! KBACKUP
+! KBACKUP
 
-*del,KBackup_,,nopr
+! Description:
+! Creates a keypoint component that can be restored with KRESTORE.
 
-! Created named component with currently selected keypoints
-CM,KBackup_,KP
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! KBACKUP_
+
+
+*get,ar20,parm,KBACKUP_,type
+
+*if,ar20,ne,0,then
+  *del,KBACKUP_,,nopr
+  KBACKUP_=1
+*else
+  KBACKUP_=KBACKUP_+1
+*endif
+
+! Create selection component
+cm,KBACKUP_CM_%KBACKUP_%,kp
 
