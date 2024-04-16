@@ -19,10 +19,9 @@
 
 ! Local parameters:
 ! AR22: hPitch
-! AR23: hPhi
 ! AR25: thetaStep
 ! AR26: cmSuffix
-! AR31: unitPitch
+! AR31: pitchPhiRatio
 ! AR32: ki
 ! AR33: kj
 ! AR34: theta
@@ -66,38 +65,39 @@ csnext,'LHELIX_VAR_cylin'
 clocal,LHELIX_VAR_cylin,cylin,0,0,0
 
 ! Calculate necessary geometric parameters
-unitPitch=hPitch/360
+AR31=AR22/360
+AR35=arg4*360
 
 ! Draw helical lines for which the final angle is a multiple of the angular step
-ki=0
-*do,theta,0,totalAngle,90
-  nthZ=theta*unitPitch
-  *get,kmaxd,kp,,num,maxd
-  kj=kmaxd+1
+AR32=0
+*do,AR34,0,AR35,AR25
+  AR36=AR34*AR31
+  *get,AR37,kp,,num,maxd
+  AR33=AR37+1
 
   ! Draw keypoint on helical line
-  k,kj,radius,theta,nthZ
+  k,AR33,arg1,AR34,AR36
 
   ! Draw helical line
-  *if,ki,ne,0,then
-    l,ki,kj
+  *if,AR32,ne,0,then
+    l,AR32,AR33
   *endif
 
   ! Update previous keypoint on helical line
-  ki=kj
+  AR32=AR33
 *enddo
 
 ! Draw last helical line when there is angular remainder
-*if,theta,ne,totalAngle,then
-  lastZ=totalAngle*unitPitch
-  *get,kmaxd,kp,,num,maxd
-  kj=kmaxd+1
+*if,AR34,ne,AR35,then
+  AR38=AR35*AR31
+  *get,AR37,kp,,num,maxd
+  AR33=AR37+1
 
   ! Draw last keypoint
-  k,kj,radius,totalAngle,lastZ
+  k,AR33,arg1,AR35,AR38
 
   ! Draw last helical segment
-  l,ki,kj
+  l,AR32,AR33
 *endif
 
 ! Create selection component with the helix's lines
