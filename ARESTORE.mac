@@ -1,7 +1,38 @@
 ! ARESTORE
+! ARESTORE
+
+! Description:
+! Selects the area selection component created by ABACKUP.
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! ABACKUP_
+
+
+*get,ar20,parm,ABACKUP_,type
+
+*if,ar20,ne,0,then
+  *msg,warn
+ARESTORE error: invalid backup parameter type (expected scalar).%/&
+ARESTORE command is ignored.
+  *return,-1
+*endif
+
+*if,ABACKUP_,eq,0,then
+  *msg,warn
+ARESTORE error: no backed up selection to restore.%/&
+ARESTORE command is ignored.
+  *return,-1
+*endif
 
 ! Select last backed up area named selection component
-CMSEL,S,ABackup_
-CMDELE,ABackup_
-*del,ABackup_,,nopr
+cmsel,s,ABACKUP_CM_%ABACKUP_%
+
+! Update backup counter
+ABACKUP_=ABACKUP_-1
 

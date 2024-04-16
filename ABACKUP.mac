@@ -1,7 +1,28 @@
 ! ABACKUP
+! ABACKUP
 
-*del,ABackup_,,nopr
+! Description:
+! Creates an area component that can be restored with ARESTORE.
 
-! Created named component with currently selected areas
-CM,ABackup_,AREA
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! ABACKUP_
+
+
+*get,ar20,parm,ABACKUP_,type
+
+*if,ar20,ne,0,then
+  *del,ABACKUP_,,nopr
+  ABACKUP_=1
+*else
+  ABACKUP_=ABACKUP_+1
+*endif
+
+! Create selection component
+cm,ABACKUP_CM_%ABACKUP_%,area
 
