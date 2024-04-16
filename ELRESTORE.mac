@@ -1,7 +1,37 @@
 ! ELRESTORE
+! ELRESTORE
+
+! Description:
+! Selects the element selection component created by EBACKUP.
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! EBACKUP_
+
+
+*get,ar20,parm,EBACKUP_,type
+
+*if,ar20,ne,0,then
+  *msg,warn
+ELRESTORE error: invalid backup parameter type (expected scalar).%/&
+ELRESTORE command is ignored.
+  *return,-1
+*endif
+
+*if,EBACKUP_,eq,0,then
+  *msg,warn
+ELRESTORE error: no backed up selection to restore.%/&
+ELRESTORE command is ignored.
+  *return,-1
+*endif
 
 ! Select last backed up element named selection component
-CMSEL,S,EBackup_
-CMDELE,EBackup_
-*del,EBackup_,,nopr
+cmsel,s,EBACKUP_CM_%EBACKUP_%
 
+! Update backup counter
+EBACKUP_=EBACKUP_-1

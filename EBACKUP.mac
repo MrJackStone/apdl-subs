@@ -1,7 +1,27 @@
 ! EBACKUP
+! EBACKUP
 
-*del,EBackup_,,nopr
+! Description:
+! Creates an element selection component that can be restored with ELRESTORE.
 
-! ! Created named component with currently selected elements
-CM,EBackup_,ELEM
+! Arguments:
+! -
 
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! EBACKUP_
+
+
+*get,ar20,parm,EBACKUP_,type
+
+*if,ar20,ne,0,then
+  *del,EBACKUP_,,nopr
+  EBACKUP_=1
+*else
+  EBACKUP_=EBACKUP_+1
+*endif
+
+! Create selection component
+cm,EBACKUP_CM_%EBACKUP_%,elem
