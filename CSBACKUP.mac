@@ -1,6 +1,45 @@
 ! CSBACKUP
 ! CSBACKUP
 
-*del,CSBackup_,,nopr
-*get,CSBackup_,active,,csys
+! Description:
+! Stores the number of the active CSYS. If the active CSYS is then changed, it can be restored
+! with CSRESTORE.
 
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+! AR21: index
+! AR22: length
+! AR23: activeCS
+
+
+! Update size of array that stores values
+*get,ar20,parm,CSBACKUP_,type
+*if,ar20,ne,1,then
+  *del,CSBACKUP_,,nopr
+  *dim,CSBACKUP_,,1
+
+  AR21=1
+
+*else
+  *get,AR22,parm,CSBACKUP_,dim,x
+
+  *del  , CSBACKUP_ARR_temp ,      , nopr
+  *dim  , CSBACKUP_ARR_temp ,      , AR22
+  *vfun , CSBACKUP_ARR_temp , copy , CSBACKUP_
+  *del  , CSBACKUP_         ,      , nopr
+  *dim  , CSBACKUP_         ,      , AR22+1
+  *vfun , CSBACKUP_         , copy , CSBACKUP_ARR_temp
+  *del  , CSBACKUP_ARR_temp ,      , nopr
+
+  AR21=AR22+1
+
+*endif
+
+! Get current value
+*get,AR23,active,,csys
+
+! Store current value
+CSBACKUP_(AR21)=AR23
