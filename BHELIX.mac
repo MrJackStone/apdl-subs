@@ -49,6 +49,7 @@
 
 
 ! Prepare environment
+mpopbackup
 csbackup
 abackup
 lbackup
@@ -56,6 +57,7 @@ kbackup
 asel,none
 lsel,none
 ksel,none
+/uis,msgpop,4
 *del , BHELIX_VAR_radius  ,  , nopr
 *del , BHELIX_VAR_pitch   ,  , nopr
 *del , BHELIX_VAR_loops   ,  , nopr
@@ -63,7 +65,6 @@ ksel,none
 *del , BHELIX_VAR_angstep ,  , nopr
 *del , BHELIX_VAR_cmsuf   ,  , nopr
 *del , BHELIX_VAR_cylin   ,  , nopr
-
 
 ! Check input parameters
 ar29='HELIX'
@@ -132,7 +133,7 @@ AR26=0
   k,AR54,AR46+AR52,AR47,AR48
 
   ! Draw remaining blade lines and blade area
-  asel,none
+  cmsel,s,%ar33%
   ksel,s,kp,,AR41
   ksel,a,kp,,AR42
   ksel,a,kp,,AR53
@@ -144,7 +145,7 @@ AR26=0
   al,all
 
   ! Update blade area component
-  cmpadd,ar33
+  cm,%ar33%,area
 *enddo
 
 ! Merge blade solid model
@@ -152,6 +153,7 @@ cmsel,s,%ar32%
 nummrg,kp
 
 ! Clean up
+mpoprestore
 csrestore
 krestore
 lrestore
