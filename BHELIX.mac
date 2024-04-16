@@ -45,6 +45,7 @@
 ! AR52: deltaW2
 ! AR53: kA
 ! AR54: kB
+! AR55: kmax
 
 
 ! Prepare environment
@@ -84,14 +85,12 @@ ar33 = 'COMPA_%ar29%'
 ! Draw inner helical lines
 lhelix,BHELIX_VAR_radius,BHELIX_VAR_pitch,BHELIX_VAR_phi,BHELIX_VAR_loops,BHELIX_VAR_angstep,ar29
 
-
-
 ! Calculate necessary geometric parameters
 cmsel,s,%ar32%
-*get,zmax,kp,,mxloc,z
-*get,zmin,kp,,mnloc,z
-height     = zmax-zmin
-deltaWidth = ARG3-ARG4
+*get,AR21,kp,,mxloc,z
+*get,AR22,kp,,mnloc,z
+AR23 = AR21-AR22
+AR24 = ARG3-ARG4
 
 ! Activate cylindrical CSYS aligned with helix's axis
 csnext,'BHELIX_VAR_cylin'
@@ -102,46 +101,55 @@ asel,none
 cm,%ar33%,area
 
 cmsel,s,%ar31%
-*get,lc,line,,count
-lnum=0
+*get,AR25,line,,count
+AR26=0
 
-*do,nthLine,1,lc,1
+*do,AR27,1,AR25,1
   cmsel,s,%ar31%
-  lnum=lsnext(lnum)
+  AR26=lsnext(AR26)
 
-  *get,k1,line,lnum,kp,1
-  *get,k2,line,lnum,kp,2
+  *get,AR41,line,AR26,kp,1
+  *get,AR42,line,AR26,kp,2
 
-  x1coord=kx(k1)
-  y1coord=ky(k1)
-  z1coord=kz(k1)
-  deltaW1=ARG4+deltaWidth*(z1coord/height)
+  ! Get position of first keypoint
+  AR43=kx(AR41)
+  AR44=ky(AR41)
+  AR45=kz(AR41)
+  AR51=ARG4+AR24*(AR45/AR23)
 
-  x2coord=kx(k2)
-  y2coord=ky(k2)
-  z2coord=kz(k2)
-  deltaW2=ARG4+deltaWidth*(z2coord/height)
+  ! Get position of second keypoint
+  AR46=kx(AR42)
+  AR47=ky(AR42)
+  AR48=kz(AR42)
+  AR52=ARG4+AR24*(AR48/AR23)
 
-  *get,kmax,kp,,num,maxd
-  kA=kmax+1
-  kB=kmax+2
+  ! Draw offset keypoints
+  *get,AR55,kp,,num,maxd
+  AR53=AR55+1
+  AR54=AR55+2
 
-  k,kA,x1coord+deltaW1,y1coord,z1coord
-  k,kB,x2coord+deltaW2,y2coord,z2coord
+  k,AR53,AR43+AR51,AR44,AR45
+  k,AR54,AR46+AR52,AR47,AR48
 
+  ! Draw remaining blade lines and blade area
   asel,none
-  ksel,s,kp,,k1
-  ksel,a,kp,,k2
-  ksel,a,kp,,kA
-  ksel,a,kp,,kB
+  ksel,s,kp,,AR41
+  ksel,a,kp,,AR42
+  ksel,a,kp,,AR53
+  ksel,a,kp,,AR54
   lslk,s,1
-  l,k1,kA
-  l,kA,kB
-  l,kB,k2
+  l,AR41,AR53
+  l,AR53,AR54
+  l,AR54,AR42
   al,all
 
+  ! Update blade area component
   cmpadd,ar33
 *enddo
+
+! Merge blade solid model
+cmsel,s,%ar32%
+nummrg,kp
 
 ! Clean up
 csrestore
