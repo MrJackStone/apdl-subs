@@ -1,6 +1,29 @@
-! VBackup
+! VBACKUP
+! VBACKUP
 
-*del,VBackup_
+! Description:
+! Creates a volume component that can be restored with VRESTORE.
 
-! Criar backup de áreas selecionadas
-CM,VBackup_,VOLU
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! VBACKUP_
+
+
+*get,ar20,parm,VBACKUP_,type
+
+*if,ar20,ne,0,then
+  *del,VBACKUP_,,nopr
+  VBACKUP_=1
+*else
+  VBACKUP_=VBACKUP_+1
+*endif
+
+! Create selection component
+cm,VBACKUP_CM_%VBACKUP_%,volu
+
+

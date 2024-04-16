@@ -1,6 +1,39 @@
-! VRestore
+! VRESTORE
+! VRESTORE
 
-! Selecionar volumes armazenados em backup
-CMSEL,S,VBackup_
-CMDELE,VBackup_
-*del,VBackup_
+! Description:
+! Selects the volume selection component created by VBACKUP.
+
+! Arguments:
+! -
+
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! VBACKUP_
+
+
+*get,ar20,parm,VBACKUP_,type
+
+*if,ar20,ne,0,then
+  *msg,warn
+VRESTORE error: invalid backup parameter type (expected scalar).%/&
+VRESTORE command is ignored.
+  *return,-1
+*endif
+
+*if,VBACKUP_,eq,0,then
+  *msg,warn
+VRESTORE error: no backed up selection to restore.%/&
+VRESTORE command is ignored.
+  *return,-1
+*endif
+
+! Select last backed up keypoint named selection component
+cmsel,s,VBACKUP_CM_%VBACKUP_%
+
+! Update backup counter
+VBACKUP_=VBACKUP_-1
+
+
