@@ -11,10 +11,10 @@
 !                      (set to 0 if defining helix geometry based on the PHI angle instead)
 ! arg3: phi         -  maximum angle of the helical path measured along the helix's axis
 !                      (used only if arg2=0)
-! arg4: loops       -  number of times the helix turns (can be decimal for incomplete turns)
+! arg4: loops       -  number of times the helix turns (can be fracional for incomplete turns)
 ! arg5: angStep     -  angular increment between consecutive keypoints defining helical lines
 !                      (defaults to 90 degrees and can't exceed 180 degrees)
-! arg6: compSuffix  -  string used as component's name suffix (COMPL_%arg6%)
+! arg6: compSuffix  -  string used as component's name suffix (COMPx_%arg6%)
 !                      (defaults to 'HELIX')
 
 ! Local parameters:
@@ -61,6 +61,7 @@ lbackup
 kbackup
 lsel,none
 ksel,none
+*del,LHELIX_VAR_cylin
 
 ! Activate cylindrical CSYS aligned with helix's axis
 csnext,'LHELIX_VAR_cylin'
