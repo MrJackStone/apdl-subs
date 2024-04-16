@@ -1,7 +1,27 @@
 ! LBACKUP
+! LBACKUP
 
-*del,LBackup_,,nopr
+! Description:
+! Creates a line component that can be restored with LRESTORE.
 
-! ! Created named component with currently selected lines
-CM,LBackup_,LINE
+! Arguments:
+! -
 
+! Local parameters:
+! AR20: parType
+
+! Global parameters:
+! LBACKUP_
+
+
+*get,ar20,parm,LBACKUP_,type
+
+*if,ar20,ne,0,then
+  *del,LBACKUP_,,nopr
+  LBACKUP_=1
+*else
+  LBACKUP_=LBACKUP_+1
+*endif
+
+! Create selection component
+cm,LBACKUP_CM_%LBACKUP_%,line
