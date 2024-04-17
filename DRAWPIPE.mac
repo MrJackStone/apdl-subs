@@ -1,5 +1,5 @@
-! drawpipe , diameter , length , keepBegCap , keepEndCap , compSuffix
-! drawpipe , arg1     , arg2   , arg3       , arg4       , arg5
+! drawpipe , diameter , length , keepBegCap , keepEndCap , compSuffix , radialDivs
+! drawpipe , arg1     , arg2   , arg3       , arg4       , arg5       , arg6
 
 ! Description:
 ! Draws the cylindrical areas of a pipe centered at the working plane.
@@ -23,12 +23,18 @@
 !                         [0] delete cap (default)
 !                         [1] keep cap
 ! arg5: compSuffix  -  string used as suffix to name selection components. Defaults to 'PIPE'.
+! arg6: radialDivs  -  number of radial segments in which the pipe will be divided
+!                      (must be an even number and defaults to 2)
 
 
 ! Local parameters:
+! AR24: nthSlice
 ! AR25: selCompSuf
+! AR26: sectors
+! AR27: angIncrement
 ! AR28: COMPL_temp
 ! AR29: COMPA_temp
+! AR30: sliceCount
 ! AR31: compaPipeName
 ! AR32: compaPipeBegName
 ! AR33: compaPipeEndName
@@ -46,6 +52,17 @@ AR25='PIPE'
 *if,AR20,eq,3,then
   AR25=arg5
 *endif
+
+ar26=2
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,0,then
+  *if,ARG6,gt,2,then
+    ar26=(ARG6-mod(ARG6,2)>2)
+  *endif
+*endif
+
+ar27 = 360/ar26
+ar30 = ar26/2
 
 ! Set selection component names
 AR31='COMPA_%AR25%'
@@ -72,6 +89,17 @@ cswpla,DRAWPIPE_VAR_tempCS,cart
 ! Draw cylinder, delete volume
 cyl4,0,0,arg1/2,,,,arg2
 vdele,all,,,0
+
+! Slice radially
+*do,ar24,1,ar30-1,1
+  wprota,ar27*ar24
+  wprota,,90
+  asbw,all,,delete
+  wprota,,-90
+  wprota,-ar27*ar24
+*enddo
+
+! Create selection components
 cm,AR29,area
 cm,AR28,line
 
