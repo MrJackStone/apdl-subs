@@ -1,0 +1,64 @@
+! ETBSQSUM , outputTable , table1 , table2 , scaleFactor
+! ETBSQSUM , arg1        , arg2   , arg3   , arg4
+
+! Description:
+! Performs a hypothenuse calculation (square root of the sum of squares) of two existing element
+! tables and optionally applies a scale factor to the resulting table.
+
+! Arguments:
+! arg1: outputTable  -  name of the table to be created
+! arg2: table1       -  name of the first table used in the operation
+! arg3: outputTable  -  name of the second table used in the operation
+! arg4: outputTable  -  optional scale factor applied to the results table (defaults to 1)
+
+! Local parameters:
+! AR20: parType
+! AR24: scale
+
+
+! Check input parameters
+ar24 = 1
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,0,then
+  *if,ARG4,ne,0,then
+    ar24 = ARG4
+  *endif
+*endif
+
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,warn
+ETBSQSUM error: ARG1 must be a string (element table name).%/&
+ETBSQSUM command ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,warn
+ETBSQSUM error: ARG2 must be a string (element table name).%/&
+ETBSQSUM command ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG3,type
+*if,ar20,ne,3,then
+  *msg,warn
+ETBSQSUM error: ARG3 must be a string (element table name).%/&
+ETBSQSUM command ignored.
+  *return,-1
+*endif
+
+
+! Calculate hypothenuse
+sexp , 'SQS_1'  , '%arg2%' ,         , 2
+sexp , 'SQS_2'  , '%arg3%' ,         , 2
+sadd , 'SQS_3'  , 'SQS_1'  , 'SQS_2' , 1    , 1
+sexp , 'SQS_4'  , 'SQS_3'  ,         , 0.5
+sadd , '%arg1%' , 'SQS_4'  ,         , ar24
+
+! Clean up
+etable , 'SQS_1' , eras
+etable , 'SQS_2' , eras
+etable , 'SQS_3' , eras
+etable , 'SQS_4' , eras
