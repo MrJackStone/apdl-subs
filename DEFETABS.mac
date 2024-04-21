@@ -3,6 +3,7 @@
 
 ! Arguments:
 ! arg1: elemType  -  number identifying element type: 180, 181, or 188
+!                    (0 for DOFs)
 ! arg2: prefix    -  element table name prefix (max 5 characters)
 ! arg3: scale     -  element table scale factor (usually 1e-3, to convert to kN)
 ! arg4: freeze    -  determines if the created element tables will be of type CALC,
@@ -17,30 +18,53 @@
 ! AR23: et_lab
 ! AR24: et_num
 ! AR25: nthET
+! AR26: nthItem
 
 
 *if,arg1,eq,188,then
     ! BEAM188
     AR20=12
-    *del,DEFETABS_ARR_names,,nopr
-    *del,DEFETABS_ARR_numbers,,nopr
-    *dim,DEFETABS_ARR_names,char,AR20
-    *dim,DEFETABS_ARR_numbers,,AR20
-    DEFETABS_ARR_names(1)   = 'Ni' , 'Nj' , 'QZi' , 'QZj' , 'QYi' , 'QYj' , 'MYi' , 'MYj' , 'MZi' , 'MZj' , 'TQi' , 'TQj'
-    DEFETABS_ARR_numbers(1) = 1    , 14   , 5     , 18    , 6     , 19    , 2     , 15    , 3     , 16    , 4     , 17
+    *del , DEFETABS_ARR_names ,      , nopr
+    *del , DEFETABS_ARR_items ,      , nopr
+    *del , DEFETABS_ARR_comps ,      , nopr
+    *dim , DEFETABS_ARR_names , char , AR20
+    *dim , DEFETABS_ARR_items , char , AR20
+    *dim , DEFETABS_ARR_comps ,      , AR20
+
+    DEFETABS_ARR_names(1) = 'Ni'    , 'Nj'    , 'QZi'   , 'QZj'   , 'QYi'   , 'QYj'   , 'MYi'   , 'MYj'   , 'MZi'   , 'MZj'   , 'TQi'   , 'TQj'
+    DEFETABS_ARR_items(1) = 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc'
+    DEFETABS_ARR_comps(1) = 1       , 14      , 5       , 18      , 6       , 19      , 2       , 15      , 3       , 16      , 4       , 17
 
 *elseif,arg1,eq,181,then
     ! SHELL181
     AR20=6
-    *del,DEFETABS_ARR_names,,nopr
-    *del,DEFETABS_ARR_numbers,,nopr
-    *dim,DEFETABS_ARR_names,char,AR20
-    *dim,DEFETABS_ARR_numbers,,AR20
-    DEFETABS_ARR_names(1)  ='MX','QX','NX','MY','QY','NY'
-    DEFETABS_ARR_numbers(1)=  5 ,  7 ,  1 ,  4 ,  8 ,  2
+    *del , DEFETABS_ARR_names ,      , nopr
+    *del , DEFETABS_ARR_items ,      , nopr
+    *del , DEFETABS_ARR_comps ,      , nopr
+    *dim , DEFETABS_ARR_names , char , AR20
+    *dim , DEFETABS_ARR_items , char , AR20
+    *dim , DEFETABS_ARR_comps ,      , AR20
+
+    DEFETABS_ARR_names(1) = 'MX'    , 'QX'    , 'NX'    , 'MY'    , 'QY'    , 'NY'
+    DEFETABS_ARR_items(1) = 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc' , 'smisc'
+    DEFETABS_ARR_comps(1) = 5       , 7       , 1       , 4       , 8       , 2
 
 *elseif,arg1,eq,180,then
     ! LINK180
+
+*elseif,arg1,eq,0,then
+    ! Structural DOFs
+    AR20=6
+    *del , DEFETABS_ARR_names ,      , nopr
+    *del , DEFETABS_ARR_items ,      , nopr
+    *del , DEFETABS_ARR_comps ,      , nopr
+    *dim , DEFETABS_ARR_names , char , AR20
+    *dim , DEFETABS_ARR_items , char , AR20
+    *dim , DEFETABS_ARR_comps , char , AR20
+
+    DEFETABS_ARR_names(1) = 'UX' , 'UY' , 'UZ' , 'ROTX' , 'ROTY' , 'ROTZ'
+    DEFETABS_ARR_items(1) = 'U'  , 'U'  , 'U'  , 'ROT'  , 'ROT'  , 'ROT'
+    DEFETABS_ARR_comps(1) = 'X'  , 'Y'  , 'Z'  , 'X'    , 'Y'    , 'Z'
 
 *endif
 
@@ -53,9 +77,12 @@
 
 
 *do,AR25,1,AR20,1
-    AR23=strcat(AR22,DEFETABS_ARR_names(AR25))
-    AR24=DEFETABS_ARR_numbers(AR25)
-    etable,AR23,smisc,AR24
+    AR23 = strcat(AR22,DEFETABS_ARR_names(AR25))
+    AR26 = DEFETABS_ARR_items(AR25)
+    AR24 = DEFETABS_ARR_comps(AR25)
+
+    etable,AR23,AR26,AR24
+
     *if,arg3,ne,1,and,arg3,ne,0,then
         sadd,AR23,AR23,,arg3
     *endif
@@ -65,3 +92,6 @@
     *endif
 *enddo
 
+*del , DEFETABS_ARR_names ,  , nopr
+*del , DEFETABS_ARR_comps ,  , nopr
+*del , DEFETABS_ARR_items ,  , nopr
