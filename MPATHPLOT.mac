@@ -60,6 +60,8 @@
         *enddo
     *endif
 *endif
+*get,ar28,parm,MPATHPLOT_ARR_pathNames,dim,x
+
 *get,AR20,parm,arg4,type
 *if,AR20,eq,3,then
     *get,AR20,parm,%arg4%,type
@@ -69,6 +71,12 @@
         *dim,MPATHPLOT_ARR_labels,char,AR28
         *do,AR22,1,AR28,1
             MPATHPLOT_ARR_labels(AR22)=%arg4%(AR22)
+        *enddo
+    *else
+        *del , MPATHPLOT_ARR_labels ,      , nopr
+        *dim , MPATHPLOT_ARR_labels , char , ar28
+        *do,ar22,1,ar28,1
+          MPATHPLOT_ARR_labels(ar22) = arg4
         *enddo
     *endif
 *endif
