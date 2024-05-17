@@ -1,0 +1,180 @@
+! RNDPOLY , x_coords , y_coords , corner_r , cmRoot , linesOnly
+! RNDPOLY , ARG1     , ARG2     , ARG3     , ARG4   , ARG5
+
+! Description:
+! Draws a polygonal shape with rounded corners.
+
+! Arguments:
+! ARG1: x_coords
+! ARG2: y_coords
+! ARG3: corner_r
+! ARG4: cmRoot
+! ARG5: linesOnly
+
+! Local parameters:
+! ar20: parType
+! ar21: xVertexCount
+! ar22: yVertexCount
+! ar23: vertexCount
+! ar24: cmSuffix
+! ar25: compaName
+! ar26: complName
+! ar27: compkName
+! ar28: nthVertex
+! ar29: cornerRadius
+! ar30: kpNum
+! ar31: l1
+! ar32: l2
+! ar33: l1Length
+! ar34: l2Length
+! ar35: minLength
+
+
+!! A.  Check input parameters                                                                     !!
+! Check x-coordinates
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,warn
+rndpoly warning: arg1 (x_coords) must be a string (name of an array parameter).%/&
+rndpoly command is ignored.
+  *return,-1
+*endif
+
+! Check y-coordinates
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,warn
+rndpoly warning: arg2 (y_coords) must be a string (name of an array parameter).%/&
+rndpoly command is ignored.
+  *return,-1
+*endif
+
+! Check corner count
+*get,ar21,parm,%arg1%,dim,x
+*get,ar22,parm,%arg2%,dim,x
+ar23=(ar21<ar22)
+
+*if,ar23,gt,100,then
+  *msg,warn,ar23
+RNDPOLY warning: maximum number of vertices exceeded (%I > 100).%/&
+RNDPOLY command is ignored.
+  *return,-1
+*endif
+
+! Check corner radii
+*del,RNDPOLY_ARR_radii,,nopr
+*dim,RNDPOLY_ARR_radii,,ar23
+
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ! If string, ensure it represents array parameter name
+  *get,ar20,parm,%ARG3%,type
+  *if,ar20,eq,1,then
+    *vfun,RNDPOLY_ARR_radii,copy,%ARG3%(1)
+  *else
+    *msg,warn
+RNDPOLY warning: invalid parameter type assigned to ARG3 (corner_r).%/&
+RNDPOLY command is ignored.
+    *return,-1
+  *endif
+
+*elseif,ar20,eq,0,then
+  ! If scalar, apply value to all corners
+  *vfill,RNDPOLY_ARR_radii,ramp,ARG3,0
+
+*else
+  *msg,warn
+RNDPOLY warning: invalid parameter type for ARG3.%/&
+RNDPOLY command is ignored.
+  *return,-1
+*endif
+
+! Component names
+ar24='RNDPOLY'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar24=ARG4
+*endif
+ar25='COMPA_%ar24%'
+ar26='COMPL_%ar24%'
+ar27='COMPK_%ar24%'
+
+
+!! B.  Prepare environment                                                                        !!
+abackup
+lbackup
+kbackup
+asel,none
+lsel,none
+ksel,none
+
+
+!! C.  Draw straight-edged contour shape                                                          !!
+! Draw keypoints & lines
+ptxy,%arg1%(1:ar23),%arg2%(1:ar23)
+poly
+adele,all
+
+! Store entities
+cm,%ar26%,line
+cm,%ar27%,kp
+*del,RNDPOLY_ARR_kps,,nopr
+*vget,RNDPOLY_ARR_kps,kp,,klist
+
+
+!! D.  Round corners                                                                              !!
+*do,ar28,1,ar23,1
+  ar29=RNDPOLY_ARR_radii(ar28)
+
+  *if,ar29,le,0,cycle
+
+  ar30=RNDPOLY_ARR_kps(ar28)
+  ksel,s,kp,,ar30
+  lslk,s
+  cmsel,r,%ar26%
+  ar31=lsnext(0)
+  ar32=lsnext(ar31)
+
+  ! Check valid fillet radius
+  *get,ar33,line,ar31,leng
+  *get,ar34,line,ar32,leng
+  ar35=(ar33<ar34)
+
+  *if,ar29,gt,ar35,then
+    *msg,warn,ar28,ar35
+RNDPOLY warning: provided radius exceeds side length for corner #%I.%/&
+The fillet radius will be reduced to the maximum allowable value of %G.
+    ar29=ar35
+  *endif
+
+  ! Apply fillet
+  cmsel,s,%ar26%
+  cmsel,s,%ar27%
+
+  lfillt,ar31,ar32,ar29
+
+  cm,%ar26%,line
+  cm,%ar27%,kp
+
+*enddo
+
+
+!! E.  Draw inner area (optional)                                                                 !!
+cmsel,s,%ar26%
+*if,ARG5,ne,1,then
+  al,all
+*else
+  asel,none
+*endif
+cm,%ar25%,area
+
+
+!! F.  Clean up                                                                                   !!
+arestore
+lrestore
+krestore
+cmsel,a,%ar25%
+cmsel,a,%ar26%
+cmsel,a,%ar27%
+*del,RNDPOLY_ARR_radii,,nopr
+*del,RNDPOLY_ARR_kps,,nopr
