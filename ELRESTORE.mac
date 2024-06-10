@@ -30,8 +30,9 @@ ELRESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up element named selection component
+! Select & delete last backed up named selection component
 cmsel,s,EBACKUP_CM_%EBACKUP_%
+cmdele,EBACKUP_CM_%EBACKUP_%
 
 ! Update backup counter
 EBACKUP_=EBACKUP_-1

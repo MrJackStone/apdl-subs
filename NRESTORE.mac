@@ -30,8 +30,9 @@ NRESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up keypoint named selection component
+! Select & delete last backed up named selection component
 cmsel,s,NBACKUP_CM_%NBACKUP_%
+cmdele,NBACKUP_CM_%NBACKUP_%
 
 ! Update backup counter
 NBACKUP_=NBACKUP_-1

@@ -30,8 +30,9 @@ VRESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up keypoint named selection component
+! Select & delete last backed up named selection component
 cmsel,s,VBACKUP_CM_%VBACKUP_%
+cmdele,VBACKUP_CM_%VBACKUP_%
 
 ! Update backup counter
 VBACKUP_=VBACKUP_-1

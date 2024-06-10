@@ -30,8 +30,9 @@ LRESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up line named selection component
+! Select & delete last backed up named selection component
 cmsel,s,LBACKUP_CM_%LBACKUP_%
+cmdele,LBACKUP_CM_%LBACKUP_%
 
 ! Update backup counter
 LBACKUP_=LBACKUP_-1

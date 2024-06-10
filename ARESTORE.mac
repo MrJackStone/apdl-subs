@@ -30,8 +30,9 @@ ARESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up area named selection component
+! Select & delete last backed up named selection component
 cmsel,s,ABACKUP_CM_%ABACKUP_%
+cmdele,ABACKUP_CM_%ABACKUP_%
 
 ! Update backup counter
 ABACKUP_=ABACKUP_-1

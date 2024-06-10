@@ -30,8 +30,9 @@ KRESTORE command is ignored.
   *return,-1
 *endif
 
-! Select last backed up keypoint named selection component
+! Select & delete last backed up named selection component
 cmsel,s,KBACKUP_CM_%KBACKUP_%
+cmdele,KBACKUP_CM_%KBACKUP_%
 
 ! Update backup counter
 KBACKUP_=KBACKUP_-1
