@@ -1,0 +1,14 @@
+! CMWSLICE, cmName
+! CMWSLICE, ARG1
+
+! Description:
+! Slices an area selection component at the working's planes current position and rebuilds the
+! selection component after the operation, keeping the original name.
+
+! Arguments:
+! ARG1: cmaName  -  name of the area selection component to be operated upon
+
+
+cmsel,s,%ARG1%
+asbw,%ARG1%,,delete
+cm,%ARG1%,area
