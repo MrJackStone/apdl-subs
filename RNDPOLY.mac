@@ -141,8 +141,8 @@ cm,%ar27%,kp
   ar35=(ar33<ar34)
 
   *if,ar29,gt,ar35,then
-    *msg,warn,ar28,ar35
-RNDPOLY warning: provided radius exceeds side length for corner #%I.%/&
+    *msg,warn,ar29,ar28,ar35
+RNDPOLY warning: provided radius of %G exceeds side length for corner #%I.%/&
 The fillet radius will be reduced to the maximum allowable value of %G.
     ar29=ar35
   *endif
