@@ -1,0 +1,167 @@
+! DRAWCONE , botDiam , topDiam , height , keepBegCap , keepEndCap , compSuffix , radialDivs
+! DRAWCONE , ARG1    , ARG2    , ARG3   , ARG4       , ARG5       , ARG6       , ARG7
+
+! Description:
+! Draws conical areas centered at the working plane.
+! The following selection components are created, using the string passed through ARG6:
+!    COMPA_<ARG6>     -  lateral (conical) areas
+!    COMPA_<ARG6>Beg  -  beginning cap areas
+!    COMPA_<ARG6>End  -  end cap areas
+!    COMPL_<ARG6>     -  all lines
+!    COMPL_<ARG6>Beg  -  beginning circular perimeter
+!    COMPL_<ARG6>End  -  end circular perimeter
+
+! Arguments:
+! ARG1: botDiam     -  conical diameter at the bottom
+! ARG2: topDiam     -  conical diameter at the top
+! ARG3: length      -  length of the cone
+! ARG4: keepBegKap  -  key to determine whether or not to delete the circular area (cap) at the
+!                      beginning of the cone:
+!                         [0] delete cap (default)
+!                         [1] keep cap
+! ARG5: keepEndKap  -  key to determine whether or not to delete the circular area (cap) at the
+!                      end of the cone:
+!                         [0] delete cap (default)
+!                         [1] keep cap
+! ARG6: compSuffix  -  string used as suffix to name selection components. Defaults to 'CONE'.
+! ARG7: radialDivs  -  number of radial segments in which the cone will be divided
+!                      (must be an even number and defaults to 2)
+
+
+! Local parameters:
+! AR24: nthSlice
+! AR25: selCompSuf
+! AR26: sectors
+! AR27: angIncrement
+! AR28: COMPL_temp
+! AR29: COMPA_temp
+! AR30: sliceCount
+! AR31: compaConeName
+! AR32: compaConeBegName
+! AR33: compaConeEndName
+! AR34: complConeName
+! AR35: complConeBegName
+! AR36: complConeEndName
+
+! Global parameters (erased at the end of this subroutine):
+! DRAWCONE_VAR_cartCS
+! DRAWCONE_VAR_cylnCS
+
+
+! Check input parameters
+ar25='CONE'
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,3,then
+  ar25=ARG6
+*endif
+
+ar26=2
+*get,ar20,parm,ARG7,type
+*if,ar20,eq,0,then
+  *if,ARG7,gt,2,then
+    ar26=(ARG7-mod(ARG7,2)>2)
+  *endif
+*endif
+
+ar27 = 360/ar26
+ar30 = ar26/2
+
+! Set selection component names
+ar31='COMPA_%ar25%'
+ar32='COMPA_%ar25%Beg'
+ar33='COMPA_%ar25%End'
+ar34='COMPL_%ar25%'
+ar35='COMPL_%ar25%Beg'
+ar36='COMPL_%ar25%End'
+
+! Prepare environment
+smdbackup
+csbackup
+ksel,none
+lsel,none
+asel,none
+vsel,none
+
+csnext,'DRAWCONE_VAR_cartCS'
+cswpla,DRAWCONE_VAR_cartCS,cart
+csnext,'DRAWCONE_VAR_cylnCS'
+cswpla,DRAWCONE_VAR_cylnCS,cylin
+csys,DRAWCONE_VAR_cartCS
+
+! Draw cone, delete volume
+cone,ARG1/2,ARG2/2,0,ARG3
+vdele,all,,,0
+
+! Slice radially
+*do,ar24,1,ar30-1,1
+  wprota,ar27*ar24
+  wprota,,90
+  asbw,all,,delete
+  wprota,,-90
+  wprota,-ar27*ar24
+*enddo
+
+! Create selection components
+cm,ar29,area
+cm,ar28,line
+
+! Delete beginning cap
+*if,ARG4,ne,1,then
+  cmsel,s,ar29
+  asel,r,loc,z,0
+  lsla,s
+  csys,DRAWCONE_VAR_cylnCS
+  lsel,u,loc,x,ARG1/2
+  csys,DRAWCONE_VAR_cartCS
+  adele,all,,,0
+  ldele,all,,,1
+
+  cm,%ar35%,line
+
+  asel,none
+  cm,%ar32%,area
+
+  cmsel,s,ar29
+*endif
+
+! Delete end cap
+*if,ARG5,ne,1,then
+  cmsel,s,ar29
+  asel,r,loc,z,ARG3
+  lsla,s
+  csys,DRAWCONE_VAR_cylnCS
+  lsel,u,loc,x,ARG2/2
+  csys,DRAWCONE_VAR_cartCS
+  adele,all,,,0
+  ldele,all,,,1
+
+  cm,%ar36%,line
+
+  asel,none
+  cm,%ar33%,area
+
+  cmsel,s,ar29
+*endif
+
+! Create selection components
+cmsel,s,ar29
+cmsel,u,%ar32%
+cmsel,u,%ar33%
+cm,%ar31%,area
+
+cmsel,s,%ar31%
+lsla,s
+cmsel,a,%ar35%
+cmsel,a,%ar36%
+cm,%ar34%,line
+
+! Clean up
+smdrestore
+csrestore
+cmsel,a,ar29
+cmsel,a,ar28
+csdele,DRAWCONE_VAR_cartCS
+csdele,DRAWCONE_VAR_cylnCS
+
+*del,DRAWCONE_VAR_cartCS,,nopr
+*del,DRAWCONE_VAR_cylnCS,,nopr
