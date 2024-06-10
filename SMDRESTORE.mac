@@ -1,0 +1,13 @@
+! SMDRESTORE
+
+! Description:
+! Restores all solid model selection to previous back up state created by SMDBACKUP.
+
+! Arguments:
+! -
+
+
+krestore
+lrestore
+arestore
+vrestore

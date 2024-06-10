@@ -1,0 +1,13 @@
+! SMDBACKUP
+
+! Description:
+! Backs up current selection for all solid model entities. Issue SMDRESTORE to restore selection.
+
+! Arguments:
+! -
+
+
+kbackup
+lbackup
+abackup
+vbackup
