@@ -43,7 +43,8 @@
 ! AR36: complPipeEndName
 
 ! Global parameters (erased at the end of this subroutine):
-! DRAWPIPE_VAR_tempCS
+! DRAWPIPE_VAR_cartCS
+! DRAWPIPE_VAR_cylnCS
 
 
 ! Check input parameters
@@ -83,8 +84,11 @@ lsel,none
 asel,none
 vsel,none
 
-csnext,'DRAWPIPE_VAR_tempCS'
-cswpla,DRAWPIPE_VAR_tempCS,cart
+csnext,'DRAWPIPE_VAR_cartCS'
+cswpla,DRAWPIPE_VAR_cartCS,cart
+csnext,'DRAWPIPE_VAR_cylnCS'
+cswpla,DRAWPIPE_VAR_cylnCS,cylin
+csys,DRAWPIPE_VAR_cartCS
 
 ! Draw cylinder, delete volume
 cyl4,0,0,arg1/2,,,,arg2
@@ -108,7 +112,11 @@ cm,AR28,line
   cmsel,s,AR29
   asel,r,loc,z,0
   lsla,s
+  csys,DRAWPIPE_VAR_cylnCS
+  lsel,u,loc,x,ARG1/2
+  csys,DRAWPIPE_VAR_cartCS
   adele,all,,,0
+  ldele,all,,,1
 
   cm,%AR35%,line
 
@@ -123,7 +131,11 @@ cm,AR28,line
   cmsel,s,AR29
   asel,r,loc,z,arg2
   lsla,s
+  csys,DRAWPIPE_VAR_cylnCS
+  lsel,u,loc,x,ARG1/2
+  csys,DRAWPIPE_VAR_cartCS
   adele,all,,,0
+  ldele,all,,,1
 
   cm,%AR36%,line
 
@@ -153,6 +165,8 @@ vrestore
 csrestore
 cmsel,a,AR29
 cmsel,a,AR28
-csdele,DRAWPIPE_VAR_tempCS
+csdele,DRAWPIPE_VAR_cartCS
+csdele,DRAWPIPE_VAR_cylnCS
 
-*del,DRAWPIPE_VAR_tempCS,,nopr
+*del,DRAWPIPE_VAR_cartCS,,nopr
+*del,DRAWPIPE_VAR_cylnCS,,nopr
