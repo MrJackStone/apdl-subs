@@ -1,0 +1,101 @@
+! CMBBOX , cmName , xmin , xmax , ymin , ymax , zmin , zmax
+! CMBBOX , ARG1   , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7
+
+! Description:
+! Extracts the bounding box coordinates of a solid model selection component. The name of the
+! selection component is assumed to be of the format COMPx_..., in which 'x' is either K, L, A,
+! or V.
+
+! Arguments:
+! ARG1: cmName  -  name of SM selection component for which the bounding box will be calculated
+! ARG2: xmin    -  name of param to which XMIN value will be assigned (defaults to CMBBOX_xmin)
+! ARG3: xmax    -  name of param to which XMAX value will be assigned (defaults to CMBBOX_xmax)
+! ARG4: ymin    -  name of param to which YMIN value will be assigned (defaults to CMBBOX_ymin)
+! ARG5: ymax    -  name of param to which YMAX value will be assigned (defaults to CMBBOX_ymax)
+! ARG6: zmin    -  name of param to which ZMIN value will be assigned (defaults to CMBBOX_zmin)
+! ARG7: zmax    -  name of param to which ZMAX value will be assigned (defaults to CMBBOX_zmax)
+
+! Local parameters:
+! ar20: parType
+! ar21: cmType
+! ar22: xminParm
+! ar23: xmaxParm
+! ar24: yminParm
+! ar25: ymaxParm
+! ar26: zminParm
+! ar27: zmaxParm
+
+
+! Check input params
+ar22='CMBBOX_xmin'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar22=ARG2
+*endif
+
+ar23='CMBBOX_xmax'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar23=ARG3
+*endif
+
+ar24='CMBBOX_ymin'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar24=ARG4
+*endif
+
+ar25='CMBBOX_ymax'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,3,then
+  ar25=ARG5
+*endif
+
+ar26='CMBBOX_zmin'
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,3,then
+  ar26=ARG6
+*endif
+
+ar27='CMBBOX_zmax'
+*get,ar20,parm,ARG7,type
+*if,ar20,eq,3,then
+  ar27=ARG7
+*endif
+
+ar21=upcase(strsub(ARG1,5,1))
+
+! Prepare environment
+kbackup
+lbackup
+abackup
+vbackup
+
+! Select main component
+cmsel,s,%ARG1%
+
+! Select attached lower order entities all the way down to keypoints
+*if,ar21,eq,'L',then
+  ksll,s
+*elseif,ar21,eq,'A',then
+  lsla,s
+  ksll,s
+*elseif,ar21,eq,'V',then
+  aslv,s
+  lsla,s
+  ksll,s
+*endif
+
+! Transfer bounding box to params
+*get , %ar22% , kp ,  , mnloc , x
+*get , %ar23% , kp ,  , mxloc , x
+*get , %ar24% , kp ,  , mnloc , y
+*get , %ar25% , kp ,  , mxloc , y
+*get , %ar26% , kp ,  , mnloc , z
+*get , %ar27% , kp ,  , mxloc , z
+
+! Clean up
+krestore
+lrestore
+arestore
+vrestore
