@@ -1,5 +1,0 @@
-! ERestore
-
-! Selecionar elementos armazenados em backup
-CMSEL,S,EBackup_
-
