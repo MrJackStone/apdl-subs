@@ -7,6 +7,8 @@
   AR21=arg1
 *endif
 
+wpstyl,,,,,,,,0
+
 /triad,off
 
 /annot,dele
