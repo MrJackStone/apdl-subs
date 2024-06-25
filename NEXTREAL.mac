@@ -1,0 +1,28 @@
+! NEXTREAL, output
+! NEXTREAL, ARG1
+
+! Description:
+! Returns an undefined real constant set number.
+
+! Arguments:
+! ARG1: output  -  name of the parameter to which the results will be assigned (defaults to _OUTPUT)
+
+! Local parameters:
+! ar20: parType
+! ar21: maxRcon
+! ar22: outputParmName
+
+
+! Check input params
+ar22='_OUTPUT'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar22=ARG1
+*endif
+
+! Get max real constant defined
+*get,ar21,rcon,,num,max
+
+! Save next RCON to output param
+*del,%ar22%,,nopr
+%ar22%=((ar21+1)>1)
