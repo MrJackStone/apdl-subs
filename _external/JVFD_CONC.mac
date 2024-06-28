@@ -1,0 +1,210 @@
+!GENFICONC,fc,NumMat
+
+!Descrição:
+!Essa rotina gera um modelo constitutivo de concreto para análises em incêndio.
+!São introduzidas as propriedades térmicas e mecânicas de concreto de densidade normal
+!com temperatura variando de 20 a 1200 C.
+!A entrada do valor do fck e do módulo de elasticidade deve ser feita em Pa.
+!Por padrão, todas as unidades do modelo devem estar no SI.
+
+
+!!									!!
+!! 1. CÁLCULOS PRELIMINARES						!!
+!!									!!
+
+fc_ = arg1
+matNum_ = arg2
+
+! Geração dos arrays com os valores de kcT e ecuT
+*DIM,vecTemp_,ARRAY,13  !temperatura
+*DIM,vecKCT_ ,ARRAY,13  !redução de fc
+*DIM,vecEpsCU_,ARRAY,13  !deformação correspondente ao pico
+
+
+vecTemp_(1) = 20
+vecKCT_(1) = 1
+vecEpsCU_(1) = 2.5e-3
+
+vecTemp_(2) = 100
+vecKCT_(2) = 1
+vecEpsCU_(2) = 4.0e-3
+
+vecTemp_(3) = 200
+vecKCT_(3) = 0.95
+vecEpsCU_(3) = 5.5e-3
+
+vecTemp_(4) = 300
+vecKCT_(4) = 0.85
+vecEpsCU_(4) = 7.0e-3
+
+vecTemp_(5) = 400
+vecKCT_(5) = 0.75
+vecEpsCU_(5) = 10.0e-3
+
+vecTemp_(6) = 500
+vecKCT_(6) = .60
+vecEpsCU_(6) = 15.0e-3
+
+vecTemp_(7) = 600
+vecKCT_(7) = .45
+vecEpsCU_(7) = 25e-3
+
+vecTemp_(8) = 700
+vecKCT_(8) = .30
+vecEpsCU_(8) = 25e-3
+
+vecTemp_(9) = 800
+vecKCT_(9) = .15
+vecEpsCU_(9) = 25e-3
+
+vecTemp_(10) = 900
+vecKCT_(10) = .08
+vecEpsCU_(10) = 25e-3
+
+vecTemp_(11) = 1000
+vecKCT_(11) = .04
+vecEpsCU_(11) = 25e-3
+
+vecTemp_(12) = 1100
+vecKCT_(12) = .01
+vecEpsCU_(12) = 25e-3
+
+vecTemp_(13) = 1200
+vecKCT_(13) = 0
+vecEpsCU_(13) = 25e-3
+
+
+!!									!!
+!! 2. DEFINIÇÃO DAS PROPRIEDADES TÉRMICAS				!!
+!!									!!
+!Definição da emissividade e da densidade
+MP,EMIS,matNum_,0.5
+MP,DENS,matNum_,2500
+
+!Criação de um vetor com os valores de temperaturas
+*DIM,vecTemAux_,ARRAY,60    !Vetor auxiliar de temperaturas
+tempAux1_ = 20
+tempAux2_ = tempAux1_
+*DO,I,1,60
+	vecTemAux_(I) = tempAux2_
+	tempAux2_ = tempAux2_+20
+*ENDDO
+
+*DO,I,1,60,1
+	tempAux3_ = vecTemAux_(I)
+
+	! Cálculo da condutividade
+    condAux_ = 2-0.2451*(tempAux3_/100)+0.0107*(tempAux3_/100)**2   !Cálculo com base no limite superior
+    !condAux_ = 1.36-0.136*(tempAux3_/100)+0.0057*(tempAux3_/100)**2 !Cálculo com base no limite inferior
+
+
+	!Cálculo do calor específico
+	*IF,tempAux3_,LE,100,THEN
+		calAux_ = 900
+	*ELSEIF,tempAux3_,LE,200,THEN
+		calAux_ = 900+(tempAux3_-100)
+	*ELSEIF,tempAux3_,LE,400,THEN
+		calAux_ = 1000+(tempAux3_-200)/2
+	*ELSE
+		calAux_ = 1100
+	*ENDIF
+
+	MAT,matNum_
+	MPTEMP,I,tempAux3_
+	MPDATA,C,matNum_,I,calAux_
+	MPDATA,KXX,matNum_,I,condAux_
+*ENDDO
+
+!!									!!
+!! 2. DEFINIÇÃO DAS PROPRIEDADES ESTRUTURAIS				!!
+!!									!!
+MPTEMP,,,,,,,,
+*DO,I,1,13,1
+	MAT,matNum_
+	MPTEMP,I,vecTemp_(I)
+    *IF,vecTemp_(I),NE,1200,THEN
+        MPDATA,EX,matNum_,I,vecKCT_(I)*fc_/vecEpsCU_(I)*1.5
+    *ELSE
+        MPDATA,EX,matNum_,I,1
+    *ENDIF
+	MPDATA,PRXY,matNum_,I,0.2
+	*IF,vecTemp_(I),LE,700,THEN
+		epsTerm_ = -1.25E-4+(9E-6)*vecTemp_(I)+(2.3E-11)*vecTemp_(I)**3
+	*ELSE
+		epsTerm_ = 14E-3
+	*ENDIF
+	MPDATA,THSX,matNum_,I,epsTerm_
+*ENDDO
+
+MPTEMP,,,,,,,,
+
+TB,CONC,matNum_,6,,DP
+*DO,I,1,12,2
+    Rc=fc_*vecKCT_(I)        ! uni-axial compressive strength [N/m²]
+    Rb=1.2*Rc      ! bi-axial compressive strength [N/m²]
+    Rt=0.11*Rc       ! uni-axial tensile strength [N/m²]
+    delt=0.25      ! dilatancy factor in tension [-]
+    delc=1.00      ! dilatancy factor in compression [-]
+    MAT,matNum_
+    TBTEMP,vecTemp_(I)
+    *IF,vecTemp_(I),NE,1200,THEN
+        TBDATA, 1, Rc, Rt, Rb
+    *ELSE
+        TBDATA, 1, 0.1, 0.01, 0.12
+    *ENDIF
+*ENDDO
+
+TB,CONC,matNum_,6,,DILA
+*DO,I,1,12,2
+    delt=0.25      ! dilatancy factor in tension [-]
+    delc=1.00      ! dilatancy factor in compression [-]
+    MAT,matNum_
+    TBTEMP,vecTemp_(I)
+    TBDATA,matNum_,delt,delc
+*ENDDO
+
+TB,CONC,matNum_,6,,HSD2
+*DO,I,1,12,2
+    Rc=fc_*vecKCT_(I)        ! uni-axial compressive strength [N/m²]
+    Ec = vecKCT_(I)*fc_/vecEpsCU_(I)*1.5 !Módulo de elasticidade tangente inicial
+    EpsU = vecEpsCU_(I)
+    Rb=1.2*Rc      ! bi-axial compressive strength [N/m²]
+    Rt=0.11*Rc       ! uni-axial tensile strength [N/m²]
+    delt=0.25      ! dilatancy factor in tension [-]
+    delc=1.00      ! dilatancy factor in compression [-]
+    MAT,matNum_
+    TBTEMP,vecTemp_(I)
+
+    ! hardening/softening - uni-axial stress-strain curve -------------------------
+    ! compression
+    Oci=0.33               ! relative stress level at start of hardening
+    Ocu=0.85               ! relative stress level at ku (mlaw=1)
+    Ocr=0.2                ! residual relative stress level
+    kcm=vecEpsCU_(I)-Rc/Ec        ! plastic strain at uni-axial compressive strength
+    kcu=vecEpsCU_(I)*1.75-Ocu*Rc/Ec   ! plastic strain defining start of exponential softening law
+
+    ! tension
+    Otr=0.1                ! residual relativ stress level in tension
+    Gft=100                ! area specific fracture energy [Nm/m²] (mlaw=1)
+    *IF,vecTemp_(I),NE,1200,THEN
+        TBDATA, 1, kcm, kcu, Oci, Ocu, Ocr
+        TBDATA, 6, Gft, Otr
+    *ELSE
+        TBDATA, 1, 0.1, 0.01, 0.12
+    *ENDIF
+*ENDDO
+
+MPTEMP,,,,,,,,
+TB,CONCR,SlabMat,,,MSOL
+TBDATA,1,2,1,1e-3,100,10,1e-20
+
+*DEL,,PRM_
+
+
+
+
+
+
+
+
+
