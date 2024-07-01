@@ -121,7 +121,13 @@ cm,ar28,line
   asel,none
   cm,%ar32%,area
 
+*else
   cmsel,s,ar29
+  asel,r,loc,z,0
+  lsla,s
+  cm,%ar32%,area
+  cm,%ar35%,line
+
 *endif
 
 ! Delete end cap
@@ -140,7 +146,13 @@ cm,ar28,line
   asel,none
   cm,%ar33%,area
 
+*else
   cmsel,s,ar29
+  asel,r,loc,z,ARG3
+  lsla,s
+  cm,%ar33%,area
+  cm,%ar36%,line
+
 *endif
 
 ! Create selection components
