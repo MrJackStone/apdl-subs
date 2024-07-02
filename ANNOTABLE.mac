@@ -68,7 +68,7 @@
 
 ! Calculate resolution-dependent parameters
 g_annocharwidth,'ANNOTABLE_VAR_charWidth'
-AR21= 0!!ANNOTABLE_VAR_charWidth*0.5
+AR21= ANNOTABLE_VAR_charWidth*0.5
 AR24=ANNOTABLE_VAR_charWidth*0.3
 AR31=ANNOTABLE_VAR_charWidth*0.35  ! Y offset applied to annotation so that no characters
                                    ! (like underscore) are below baseline

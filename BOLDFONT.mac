@@ -15,10 +15,16 @@
   /device,font,2,Arial,1000,0,-21,0,0,,, ! Entity font
   /device,font,1,Arial,1000,0,-21,0,0,,, ! Legend font
   /device,text,1,100                     ! Legend size (default = 100)
+  /device,text,2,100                     ! Legend size (default = 100)
+  /device,text,3,100                     ! Legend size (default = 100)
   g_annobold,1
 
 *else
-  /device,font
+  /device,font,3,Courier*New,400,0,-21,0,0,,,
+  /device,font,2,Courier*New,400,0,-21,0,0,,,
+  /device,font,1,Courier*New,400,0,-21,0,0,,,
+  /device,text,1,100
+  /device,text,2,100
   g_annobold,-1
 
 *endif
