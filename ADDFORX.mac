@@ -1,12 +1,39 @@
-! addforx
+! ADDFORX, outputParm
+! ADDFORX, ARG1
 
-*get,NC,NODE,,COUNT
-nthNode=0
-totFor=0
-*do,i,1,NC,1
-   nthNode=NDNEXT(nthNode)
-   *get,xFor,NODE,nthNode,F,FX
-   totFor=totFor+xFor
+! Description:
+! Sums all nodal forces along the X direction applied to the current node selection.
+
+! Arguments:
+! ARG1: outputParm  -  name of parameter to which the result is assigned (defaults to '_OUTPUT')
+
+! Local parameters:
+! ar20: parType
+! ar21: nnum
+! ar22: forceSum
+! ar23: nthNode
+! ar24: nthForce
+! ar25: parmName
+
+
+! Check arguments
+ar25 = '_OUTPUT'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar25 = ARG1
+*endif
+
+! Sum forces
+*get,nc,node,,count
+
+ar21=0
+ar22=0
+
+*do,ar23,1,nc,1
+   ar21=ndnext(ar21)
+   *get,ar24,node,ar21,f,fx
+   ar22=ar22+ar24
 *enddo
 
-_OUTPUT=totFor
+! Assign to output param
+%ar25%=ar22

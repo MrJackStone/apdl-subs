@@ -1,58 +1,61 @@
 ! ANNOTABLE, data_values, row_labels, column_headers, tableTitle, xllc, yllc, cellAlignment
-! ANNOTABLE,        arg1,       arg2,           arg3,       arg4, arg5, arg6,          arg7
+! ANNOTABLE,        ARG1,       ARG2,           ARG3,       ARG4, ARG5, ARG6,          ARG7
 
 ! Description:
 ! Draws a table filled with data passed as arrays of characters.
 
 ! Arguments:
-! arg1: data_values    -  2D array parameter of strings with value of every data field of the table.
+! ARG1: data_values    -  2D array parameter of strings with value of every data field of the table.
 !                         An array of chars can also be provided (will be converted to string array)
-! arg2: row_labels     -  array parameter of strings with label of each row (optional).
+!                         Format: (248 , row , col)
+! ARG2: row_labels     -  array parameter of strings with label of each row (optional).
 !                         An array of chars can also be provided (will be converted to string array)
-! arg3: column_headers -  array parameter of strings with header of each column (optional).
+!                         Format: (248 , row)
+! ARG3: column_headers -  array parameter of strings with header of each column (optional).
 !                         An array of chars can also be provided (will be converted to string array)
-! arg4: tableTitle     -  table's title, written above it (optional)
-! arg5: xllc           -  X coordinate (in window display units) of the table's lower left corner
+!                         Format: (248 , col)
+! ARG4: tableTitle     -  table's title, written above it (optional)
+! ARG5: xllc           -  X coordinate (in window display units) of the table's lower left corner
 !                         (defaults to 0.0)
-! arg6: yllc           -  Y coordinate (in window display units) of the table's lower left corner
+! ARG6: yllc           -  Y coordinate (in window display units) of the table's lower left corner
 !                        (defaults to 0.0)
-! arg7: cellAlignment  -  horizontal placement of text within each cell:
+! ARG7: cellAlignment  -  horizontal placement of text within each cell:
 !                            [0] left-justified
 !                            [1] centered
 !                            [2] right-justified
 
 ! Local parameters:
-! AR20: parType
-! AR21: horizontalMargin
-! AR22: rowHeight
-! AR23: colWidth
-! AR24: verticalMargin
-! AR25: dataRowCount
-! AR26: dataColCount
-! AR27: tableRowCount
-! AR28: tableColCount
-! AR29: firstDataRow
-! AR30: firstDataCol
-! AR31: verAdjustment
-! AR32: hasRowLabels
-! AR33: hasColumnHeaders
-! AR34: correspTableRow
-! AR35: correspTableCol
-! AR37: charCount
-! AR38: maxCharCount
-! AR39: string
-! AR40: totalHeight
-! AR41: totalWidth
-! AR42: nthRow
-! AR43: nthCol
-! AR44: xprev
-! AR45: xNthCell
-! AR46: ymax
-! AR50: titleCharCount
-! AR51: titleWidth
-! AR52: titleLeftPadding
-! AR55: xTitle
-! AR56: yTitle
+! ar20: parType
+! ar21: horizontalMargin
+! ar22: rowHeight
+! ar23: colWidth
+! ar24: verticalMargin
+! ar25: dataRowCount
+! ar26: dataColCount
+! ar27: tableRowCount
+! ar28: tableColCount
+! ar29: firstDataRow
+! ar30: firstDataCol
+! ar31: verAdjustment
+! ar32: hasRowLabels
+! ar33: hasColumnHeaders
+! ar34: correspTableRow
+! ar35: correspTableCol
+! ar37: charCount
+! ar38: maxCharCount
+! ar39: string
+! ar40: totalHeight
+! ar41: totalWidth
+! ar42: nthRow
+! ar43: nthCol
+! ar44: xprev
+! ar45: xNthCell
+! ar46: ymax
+! ar50: titleCharCount
+! ar51: titleWidth
+! ar52: titleLeftPadding
+! ar55: xTitle
+! ar56: yTitle
 
 ! Global parameters (erased at the end of this subroutine):
 ! ANNOTABLE_ARR_colWidths
@@ -68,140 +71,140 @@
 
 ! Calculate resolution-dependent parameters
 g_annocharwidth,'ANNOTABLE_VAR_charWidth'
-AR21= ANNOTABLE_VAR_charWidth*0.5
-AR24=ANNOTABLE_VAR_charWidth*0.3
-AR31=ANNOTABLE_VAR_charWidth*0.35  ! Y offset applied to annotation so that no characters
+ar21= ANNOTABLE_VAR_charWidth*0.5
+ar24=ANNOTABLE_VAR_charWidth*0.3
+ar31=ANNOTABLE_VAR_charWidth*0.35  ! Y offset applied to annotation so that no characters
                                    ! (like underscore) are below baseline
-AR22=ANNOTABLE_VAR_charWidth*1.6+2*AR24
+ar22=ANNOTABLE_VAR_charWidth*1.6+2*ar24
 
 ! Check if column headers were provided
-AR33=0
-parverify,,arg3,'STR_ARR'
-*get,AR20,parm,arg3,type
-*if,AR20,eq,3,then
-    *get,AR20,parm,%arg3%,type
-    *if,AR20,eq,5,then
-        AR33=1
+ar33=0
+parverify,,ARG3,'STR_ARR'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+    *get,ar20,parm,%ARG3%,type
+    *if,ar20,eq,5,then
+        ar33=1
     *endif
 *endif
 
 ! Check if row labels were provided
-AR32=0
-*get,AR20,parm,arg2,type
-*if,AR20,eq,3,then
-    *get,AR20,parm,%arg2%,type
-    *if,AR20,eq,5,then
-        AR32=1
+ar32=0
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+    *get,ar20,parm,%ARG2%,type
+    *if,ar20,eq,5,then
+        ar32=1
     *endif
 *endif
 
 ! Get size of data table
-*get,AR25,parm,%arg1%,dim,y
-*get,AR26,parm,%arg1%,dim,z
+*get,ar25,parm,%ARG1%,dim,y
+*get,ar26,parm,%ARG1%,dim,z
 
 ! Calculate table's total number of rows and columns
-AR27=AR25+AR33
-AR28=AR26+AR32
+ar27=ar25+ar33
+ar28=ar26+ar32
 
 ! Calculate data row offset
-AR29=1+AR33
-AR30=1+AR32
+ar29=1+ar33
+ar30=1+ar32
 
 ! Create table
 *del,ANNOTABLE_ARR_table,,nopr
-*dim,ANNOTABLE_ARR_table,string,248,AR27,AR28
+*dim,ANNOTABLE_ARR_table,string,248,ar27,ar28
 
 ! Set header/label intersection field
-*if,AR33,eq,1,and,AR32,eq,1,then
+*if,ar33,eq,1,and,ar32,eq,1,then
     ANNOTABLE_ARR_table(1,1,1)=' '
 *endif
 
 ! Fill table with column headers
-*if,AR33,eq,1,then
-    *do,AR43,1,AR26,1
-        AR35=AR43+AR30-1
-        ANNOTABLE_ARR_table(1,1,AR35)=%arg3%(1,AR43)
+*if,ar33,eq,1,then
+    *do,ar43,1,ar26,1
+        ar35=ar43+ar30-1
+        ANNOTABLE_ARR_table(1,1,ar35)=%ARG3%(1,ar43)
     *enddo
 *endif
 
 ! Fill table with row labels
-*if,AR32,eq,1,then
-    *do,AR42,1,AR25,1
-        AR34=AR42+AR29-1
-        ANNOTABLE_ARR_table(1,AR34,1)=%arg2%(1,AR42)
+*if,ar32,eq,1,then
+    *do,ar42,1,ar25,1
+        ar34=ar42+ar29-1
+        ANNOTABLE_ARR_table(1,ar34,1)=%ARG2%(1,ar42)
     *enddo
 *endif
 
 ! Fill table with data
-*do,AR42,1,AR25,1
-    AR34=AR42+AR29-1
-    *do,AR43,1,AR26,1
-        AR35=AR43+AR30-1
-        ANNOTABLE_ARR_table(1,AR34,AR35)=%arg1%(1,AR42,AR43)
+*do,ar42,1,ar25,1
+    ar34=ar42+ar29-1
+    *do,ar43,1,ar26,1
+        ar35=ar43+ar30-1
+        ANNOTABLE_ARR_table(1,ar34,ar35)=%ARG1%(1,ar42,ar43)
     *enddo
 *enddo
 
 ! Calculate column widths
 *del,ANNOTABLE_ARR_colWidths,,nopr
-*dim,ANNOTABLE_ARR_colWidths,,AR28
-*do,AR43,1,AR28,1
-    AR38=0
-    *do,AR42,1,AR27,1
-        AR39=ANNOTABLE_ARR_table(1,AR42,AR43)
-        AR37=strleng(AR39)
-        AR38=(AR38>AR37)
+*dim,ANNOTABLE_ARR_colWidths,,ar28
+*do,ar43,1,ar28,1
+    ar38=0
+    *do,ar42,1,ar27,1
+        ar39=ANNOTABLE_ARR_table(1,ar42,ar43)
+        ar37=strleng(ar39)
+        ar38=(ar38>ar37)
     *enddo
-    AR23=AR38*ANNOTABLE_VAR_charWidth+2*AR21
-    ANNOTABLE_ARR_colWidths(AR43)=AR23
+    ar23=ar38*ANNOTABLE_VAR_charWidth+2*ar21
+    ANNOTABLE_ARR_colWidths(ar43)=ar23
 *enddo
 
 ! Calculate row heights
 *del,ANNOTABLE_ARR_rowHeights,,nopr
-*dim,ANNOTABLE_ARR_rowHeights,,AR27
-*vfill,ANNOTABLE_ARR_rowHeights,ramp,AR22,0
+*dim,ANNOTABLE_ARR_rowHeights,,ar27
+*vfill,ANNOTABLE_ARR_rowHeights,ramp,ar22,0
 
 ! Calculate overall table size
-*vscfun,AR41,sum,ANNOTABLE_ARR_colWidths
-*vscfun,AR40,sum,ANNOTABLE_ARR_rowHeights
-AR46=arg6+AR40
+*vscfun,ar41,sum,ANNOTABLE_ARR_colWidths
+*vscfun,ar40,sum,ANNOTABLE_ARR_rowHeights
+ar46=ARG6+ar40
 
 ! Draw table grid lines
-annogrid,arg5,arg6,'ANNOTABLE_ARR_rowHeights','ANNOTABLE_ARR_colWidths'
+annogrid,ARG5,ARG6,'ANNOTABLE_ARR_rowHeights','ANNOTABLE_ARR_colWidths'
 
 ! Draw annotations, column by column
-AR44=arg5
-*do,AR43,1,AR28,1
+ar44=ARG5
+*do,ar43,1,ar28,1
     ! Get column width
-    AR23=ANNOTABLE_ARR_colWidths(AR43)
+    ar23=ANNOTABLE_ARR_colWidths(ar43)
     ! Copy column data to 1-D array
     *del,ANNOTABLE_ARR_column,,nopr
-    *dim,ANNOTABLE_ARR_column,string,248,AR27
-    *do,AR42,1,AR27,1
-        ANNOTABLE_ARR_column(1,AR42)=ANNOTABLE_ARR_table(1,AR42,AR43)
+    *dim,ANNOTABLE_ARR_column,string,248,ar27
+    *do,ar42,1,ar27,1
+        ANNOTABLE_ARR_column(1,ar42)=ANNOTABLE_ARR_table(1,ar42,ar43)
     *enddo
     ! Account for margin in calculating text position
-    AR45=AR44+AR21
+    ar45=ar44+ar21
     ! Create annotations
-    annotxtarray,'ANNOTABLE_ARR_column',AR45,AR46-AR22+AR24+AR31,-AR22,'Y',AR23-2*AR21,arg7
+    annotxtarray,'ANNOTABLE_ARR_column',ar45,ar46-ar22+ar24+ar31,-ar22,'Y',ar23-2*ar21,ARG7
     ! Update horizontal position
-    AR44=AR44+AR23
+    ar44=ar44+ar23
 *enddo
 
 ! Strike top left cell when column headers and row labels exist
-*if,AR33,eq,1,and,AR32,eq,1,then
+*if,ar33,eq,1,and,ar32,eq,1,then
     /anum,,4
-    /line,arg5,AR46,arg5+ANNOTABLE_ARR_colWidths(1),AR46-AR22
+    /line,ARG5,ar46,ARG5+ANNOTABLE_ARR_colWidths(1),ar46-ar22
 *endif
 
 ! Create table title annotation
-*get,AR20,parm,arg4,type
-*if,AR20,eq,3,then
-    AR50=strleng(arg4)
-    AR51=AR50*ANNOTABLE_VAR_charWidth
-    AR52=(AR41-AR51)/2
-    AR55=arg5+AR52
-    AR56=AR46+AR24+AR31
-    anno,AR55,AR56,arg4
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+    ar50=strleng(ARG4)
+    ar51=ar50*ANNOTABLE_VAR_charWidth
+    ar52=(ar41-ar51)/2
+    ar55=ARG5+ar52
+    ar56=ar46+ar24+ar31
+    anno,ar55,ar56,ARG4
 *endif
 
 *del,ANNOTABLE_ARR_colWidths,,nopr

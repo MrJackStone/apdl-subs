@@ -1,13 +1,37 @@
-! SMDBACKUP
+! SMDBACKUP, select
+! SMDBACKUP, ARG1
 
 ! Description:
 ! Backs up current selection for all solid model entities. Issue SMDRESTORE to restore selection.
 
 ! Arguments:
-! -
+! ARG1: select  -  selection command to be applied after backing up current selection:
+!                     ['NONE'] unselect all solid model entities
+!                     ['ALL']  select all solid model entities
 
 
+! Back up entities
 kbackup
 lbackup
 abackup
 vbackup
+
+! Perform selection (optional)
+*get,ar20,parm,ARG1,type
+
+*if,ar20,eq,3,then
+
+  *if,upcase(ARG1),eq,'ALL',then
+    ksel,all
+    lsel,all
+    asel,all
+    vsel,all
+
+  *elseif,upcase(ARG1),eq,'NONE',then
+    ksel,none
+    lsel,none
+    asel,none
+    vsel,none
+
+  *endif
+*endif

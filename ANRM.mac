@@ -1,19 +1,37 @@
 ! ANRM, ANum,  dir
-! ANRM, arg1, arg2
+! ANRM, ARG1, ARG2
 
-AR20=UPCASE(arg2)
+! Description:
+! Obtains the cartesian component in a chosen direction of the unit array normal to a given area.
 
-*get,AR21,AREA,arg1,LOOP,1,LINE,1
-*get,AR22,AREA,arg1,LOOP,1,LINE,2
-*get,AR23,LINE,AR21,KP,1
-*get,AR24,LINE,AR21,KP,2
-*get,AR25,LINE,AR22,KP,2
+! Arguments:
+! ARG1: anum  -  number of area whose normal direction will be extracted
+! ARG2: dir   -  component of normal unit array to extract ('X', 'Y', or 'Z')
 
-*if,AR20,EQ,'X',THEN
-    ANRM_output=NORMKX(AR23,AR24,AR25)
-*elseif,AR20,EQ,'Y',THEN
-    ANRM_output=NORMKY(AR23,AR24,AR25)
-*elseif,AR20,EQ,'Z',THEN
-    ANRM_output=NORMKZ(AR23,AR24,AR25)
+! Local parameters:
+! ar20: dirUpcase
+! ar21: line1
+! ar22: line2
+! ar23: kp1
+! ar24: kp2
+! ar25: kp3
+
+
+ar20 = upcase(ARG2)
+
+*get , ar21 , area , ARG1 , loop , 1 , line , 1
+*get , ar22 , area , ARG1 , loop , 1 , line , 2
+*get , ar23 , line , ar21 , kp   , 1
+*get , ar24 , line , ar21 , kp   , 2
+*get , ar25 , line , ar22 , kp   , 2
+
+*if,ar20,eq,'X',then
+    ANRM_output=normkx(ar23,ar24,ar25)
+
+*elseif,ar20,eq,'Y',then
+    ANRM_output=normky(ar23,ar24,ar25)
+
+*elseif,ar20,eq,'Z',then
+    ANRM_output=normkz(ar23,ar24,ar25)
+
 *endif
-

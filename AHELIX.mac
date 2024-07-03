@@ -1,123 +1,126 @@
-! AHELIX
-! radius = arg1
-! phi = arg2
-! width = arg3
-! direction = arg4
-! theta0 = arg5
+! AHELIX , radius , phi  , width , direction , theta0
+! AHELIX , ARG1   , ARG2 , ARG3  , ARG4      , ARG5
+
+! Description:
+! Draws a flat helical band (area) with its axis along the global Z direction.
+
+! Arguments:
+! ARG1: radius      -  radius of the helix (in the X-Y plane)
+! ARG2: phi         -  angle in the Z-Y plane, related to helical pitch
+! ARG3: width       -  width of the helical band
+! ARG4: direction   -  +1 for positive Z, -1 for negative Z
+! ARG5: theta0      -  initial (at Z=0) helical angle in the X-Y plane
+
+! TODO: needed improvements
+! - formalize sub (use local params, clean up, etc.)
+! - use local CSYS, remove arguments
+! - option to give PITCH instead of PHI
 
 
-radius=arg1
-phi=arg2
-width=arg3
-direction=arg4
-theta0=arg5
+! Prepare environment
+smdbackup,'none'
+csbackup
+afunbackup
+*afun,rad
 
-KBACKUP
-LBACKUP
-ABACKUP
+pi           = acos(-1)
+phiDeg       = ARG2
+phiRad       = phiDeg*pi/180
+circ         = 2*pi*ARG1
+pitch        = circ/tan(phiRad)
+betaRad      = atan(-circ/pitch)
+betaDeg      = betaRad*180/pi
+ellipseWidth = abs(2*ARG1/cos(betaRad))
 
-ASEL,U,AREA,,ALL
-LSEL,U,LINE,,ALL
-KSEL,U,KP,,ALL
-
-*afun,RAD
-pi=ACOS(-1)
-*afun,DEG
-pitch=2*PI*radius/TAN(phi)
-*afun,RAD
-beta=ATAN(-2*pi*radius/pitch)
 
 /prep7
 
 ! First helical line
-HELIX,radius,phi,1,direction,theta0
-CM,COMPL_helix1,LINE
-CM,COMPK_helix1,KP
+helix,ARG1,phiDeg,1,ARG4,ARG5
+cm,COMPL_helix1,LINE
+cm,COMPK_helix1,KP
 
-CMSEL,S,COMPK_helix1
-KSEL,R,LOC,Z,0*pitch/4
+cmsel,S,COMPK_helix1
+ksel,R,LOC,Z,0*pitch/4
 *get,H1_K1,KP,,NUM,MIN
 
-CMSEL,S,COMPK_helix1
-KSEL,R,LOC,Z,1*pitch/4
+cmsel,S,COMPK_helix1
+ksel,R,LOC,Z,1*pitch/4
 *get,H1_K2,KP,,NUM,MIN
 
-CMSEL,S,COMPK_helix1
-KSEL,R,LOC,Z,2*pitch/4
+cmsel,S,COMPK_helix1
+ksel,R,LOC,Z,2*pitch/4
 *get,H1_K3,KP,,NUM,MIN
 
-CMSEL,S,COMPK_helix1
-KSEL,R,LOC,Z,3*pitch/4
+cmsel,S,COMPK_helix1
+ksel,R,LOC,Z,3*pitch/4
 *get,H1_K4,KP,,NUM,MIN
 
-CMSEL,S,COMPK_helix1
-KSEL,R,LOC,Z,4*pitch/4
+cmsel,S,COMPK_helix1
+ksel,R,LOC,Z,4*pitch/4
 *get,H1_K5,KP,,NUM,MIN
 
-CMSEL,S,COMPL_helix1
-CMSEL,S,COMPK_helix1
+cmsel,S,COMPL_helix1
+cmsel,S,COMPK_helix1
 *get,KP1,KP,,NUM,MIN
-KSEL,S,KP,,KP1
-LSLK,S,0
-KSLL,S
+ksel,S,KP,,KP1
+lslk,S,0
+ksll,S
 *get,KP2,KP,,NUM,MAX
 *get,KMaxD,KP,,NUM,MAXD
 KPahead=KMaxD+1
 KPbehind=KMaxD+2
-CMSEL,S,COMPL_helix1
-CMSEL,S,COMPK_helix1
+cmsel,S,COMPL_helix1
+cmsel,S,COMPK_helix1
 
-beta=ATAN(-2*pi*radius/pitch)*180/pi
-ellipseWidth=ABS(2*radius/COS(beta*pi/180))
+kwpave,KP2
+wpoffs,,-ARG1
+wprota,,,betaDeg
+cswpla,20,CART
+k,KPahead,ellipseWidth/2,0,0
+k,KPbehind,-ellipseWidth/2,0,0
 
-KWPAVE,KP2
-WPOFFS,,-radius
-WPROTA,,,beta
-CSWPLA,20,CART
-K,KPahead,ellipseWidth/2,0,0
-K,KPbehind,-ellipseWidth/2,0,0
-
-CSWPLA,40,CYLIN,radius/(ellipseWidth/2)
-LSEL,U,LINE,,ALL
-L,KP2,KPahead
+cswpla,40,CYLIN,ARG1/(ellipseWidth/2)
+lsel,U,LINE,,ALL
+l,KP2,KPahead
 *get,Lahead,LINE,,NUM,MIN
-LSEL,U,LINE,,ALL
-L,KP2,KPbehind
+lsel,U,LINE,,ALL
+l,KP2,KPbehind
 *get,Lbehind,LINE,,NUM,MIN
 
-CSYS,0
-WPCSYS
+csys,0
+wpcsys
 
-LSEL,S,LINE,,Lahead
-LSEL,A,LINE,,Lbehind
-LSUM
+lsel,S,LINE,,Lahead
+lsel,A,LINE,,Lbehind
+lsum
 *get,LAlen,LINE,Lahead,LENG
 *get,LBlen,LINE,Lbehind,LENG
 *get,KMaxD,KP,,NUM,MAXD
 KDivA=KMaxD+1
 KDivB=KMaxD+2
-LDIV,Lahead,width/(2*LAlen),KDivA,,0
-LDIV,Lbehind,width/(2*LBlen),KDivB,,0
+ldiv,Lahead,ARG3/(2*LAlen),KDivA,,0
+ldiv,Lbehind,ARG3/(2*LBlen),KDivB,,0
 
-thetaA=ACOS(KX(KDivA)/radius)
-thetaB=ACOS(KX(KDivB)/radius)
-theta0ahead=(2*pi*KZ(KDivA)/pitch)-thetaA
-theta0behind=(2*pi*KZ(KDivB)/pitch)-thetaB
+thetaA       = acos(kx(KDivA)/ARG1)
+thetaB       = acos(kx(KDivB)/ARG1)
+theta0ahead  = (2*pi*kz(KDivA)/pitch)-thetaA
+theta0behind = (2*pi*kz(KDivB)/pitch)-thetaB
 
-LDELE,ALL,,,1
-CMSEL,S,COMPL_helix1
-CMSEL,S,COMPK_helix1
+ldele,ALL,,,1
+cmsel,S,COMPL_helix1
+cmsel,S,COMPK_helix1
 
-CSYS,0
+csys,0
 
 *get,LCount,LINE,,COUNT
 *do,i,1,LCount-1,1
     *get,L1,LINE,,NUM,MIN
-    LSEL,S,LINE,,L1
-    KSLL,S
-    LSLK,S
+    lsel,S,LINE,,L1
+    ksll,S
+    lslk,S
     *get,L2,LINE,,NUM,MAX
-    LCOMB,L1,L2,DELETE
+    lcomb,L1,L2,DELETE
 *enddo
 *get,HelicalLine,LINE,,NUM,MIN
 *get,KPMaxD,KP,,NUM,MAXD
@@ -126,31 +129,32 @@ KAux2=KPMaxD+2
 KAux3=KPMaxD+3
 KAux4=KPMaxD+4
 
-K,KAux1,0,0,0
-K,KAux2,radius,0,0
-K,KAux3,radius*COS(theta0ahead),radius*SIN(theta0ahead),0
-K,KAux4,radius*COS(theta0behind),radius*SIN(theta0behind),0
-LSEL,U,LINE,,ALL
-LARC,KAux2,KAux3,KAux1,radius
+k,KAux1,0,0,0
+k,KAux2,ARG1,0,0
+k,KAux3,ARG1*COS(theta0ahead),ARG1*SIN(theta0ahead),0
+k,KAux4,ARG1*COS(theta0behind),ARG1*SIN(theta0behind),0
+lsel,U,LINE,,ALL
+larc,KAux2,KAux3,KAux1,ARG1
 *get,Path1,LINE,,NUM,MIN
-LSEL,U,LINE,,ALL
-LARC,KAux2,KAux4,KAux1,radius
+lsel,U,LINE,,ALL
+larc,KAux2,KAux4,KAux1,ARG1
 *get,Path2,LINE,,NUM,MIN
 
-LSEL,S,LINE,,HelicalLine
-LSEL,A,LINE,,Path1
-LSEL,A,LINE,,Path2
+lsel,S,LINE,,HelicalLine
+lsel,A,LINE,,Path1
+lsel,A,LINE,,Path2
 
-ASEL,U,AREA,,ALL
-ADRAG,HelicalLine,,,,,,Path1
+asel,U,AREA,,ALL
+adrag,HelicalLine,,,,,,Path1
 *get,A1,AREA,,NUM,MIN
-ASEL,U,AREA,,ALL
-ADRAG,HelicalLine,,,,,,Path2
+asel,U,AREA,,ALL
+adrag,HelicalLine,,,,,,Path2
 *get,A2,AREA,,NUM,MIN
 
-ASEL,S,AREA,,A1
-ASEL,A,AREA,,A2
-ANORM,A2,1
+asel,S,AREA,,A1
+asel,A,AREA,,A2
+anorm,A2,1
 
-
-
+! Clean up
+afunrestore
+csrestore

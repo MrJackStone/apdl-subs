@@ -1,6 +1,18 @@
 ! AFUNBACKUP
 ! AFUNBACKUP
 
+! Description:
+! Stores the current value of *AFUN (degrees or radians), to be later restored with AFUNRESTORE.
+
+! Arguments:
+! -
+
+! Local parameters:
+! -
+
+! Global output parameters:
+! afunBackup_
+
+
 *del,afunBackup_,,nopr
 getafun,'afunBackup_'
-

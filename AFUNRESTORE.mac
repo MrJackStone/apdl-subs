@@ -1,6 +1,20 @@
 ! AFUNRESTORE
 ! AFUNRESTORE
 
+! Description:
+! Restores the *AFUN setting to the value last backed up by AFUNBACKUP.
+
+! Arguments:
+! -
+
+! Local parameters:
+! -
+
+! Global parameters:
+! afunBackup_
+! _OUTPUT
+
+
 parverify,,'afunBackup_','CHAR'
 
 *if,_OUTPUT,eq,1,then
