@@ -1,7 +1,19 @@
-! BOUSSINESQ, parmNF, parmNN, selCount, force,   QX,   QY,   QZ, stressDir, gravDir, N_set
-! BOUSSINESQ,   arg1,   arg2,     arg3,  arg4, arg5, arg6, arg7,      arg8,    arg9,  ar10
+! BOUSSINESQ , parmNF , parmNN , selCount , force , QX   , QY   , QZ   , stressDir , gravDir , N_set , dynFct
+! BOUSSINESQ , ARG1   , ARG2   , ARG3     , ARG4  , ARG5 , ARG6 , ARG7 , ARG8      , ARG9    , AR10  , AR11
 
-! arg8: stressDir  -  stress increase direction key: 'H' or 'V' (for horizontal and vertical)
+! ARG8: stressDir  -  stress increase direction key: 'H' or 'V' (for horizontal and vertical)
+! AR11: dynFct     -  determines whether or not to apply dynamic impact factor
+!                        ['OFF']    -  no impact factor applied (default)
+!                        ['AREMA']  -  calculate impact factor as per AREMA (chapter 8)
+
+
+AREMAimpactFactor = 0
+*get,ar20,parm,AR11,type
+*if,ar20,eq,3,then
+  *if,upcase(AR11),eq,'AREMA',then
+    AREMAimpactFactor = 1
+  *endif
+*endif
 
 *if,ar10,eq,0,then
 
@@ -30,7 +42,10 @@
     *enddo
 *endif
 
+afunbackup
+*afun,rad
 pi=acos(-1)
+afunrestore
 
 ! Initialize arrays
 *del , deltaX        ,  , nopr
@@ -97,11 +112,15 @@ pi=acos(-1)
 
 *endif
 
-! Calculate impact coefficients (according to AREMA Chapter 8)
-*voper, dynImpact , dynImpact , add  , 1.7060
-*voper, dynImpact , dynImpact , max  , 1
-*voper, dynImpact , dynImpact , min  , 1.6
-
+*if,AREMAimpactFactor,eq,1,then
+  ! Calculate impact coefficients (according to AREMA Chapter 8)
+  *voper, dynImpact , dynImpact , add  , 1.7060
+  *voper, dynImpact , dynImpact , max  , 1
+  *voper, dynImpact , dynImpact , min  , 1.6
+*else
+  ! No impact coefficient applied
+  *vfill , dynImpact , ramp , 1 , 0
+*endif
 
 *if,upcase(arg8),eq,'V',then
 
@@ -150,4 +169,3 @@ pi=acos(-1)
 *vfun ,     %arg2% , comp , NLIST_num
 
 *get,%arg3%,parm,%arg2%,dim,x
-
