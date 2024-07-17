@@ -22,30 +22,30 @@
 ! Initialize arrays
 *get,ar20,parm,%ARG1%,type
 *if,ar20,eq,4,then
-  arrayType='CHAR'
+  ar21 = 'CHAR'
 *else
-  arrayType='ARRAY'
+  ar21 = 'ARRAY'
 *endif
 
-*get , originalDim , parm , %ARG1% , dim , x
-newDim = originalDim-1
+*get , ar22 , parm , %ARG1% , dim , x
+ar23 = ar22-1
 
-*dim,ARRCDR_ARR_temp,%arrayType%,originalDim
-*do,nthPos,1,originalDim,1
-  ARRCDR_ARR_temp(nthPos) = %ARG1%(nthPos)
+*dim,ARRCDR_ARR_temp,%ar21%,ar22
+*do,ar24,1,ar22,1
+  ARRCDR_ARR_temp(ar24) = %ARG1%(ar24)
 *enddo
 
 *del,%ARG1%,,nopr
 
 ! Remove first element, update input array
-*if,originalDim,le,1,then
+*if,ar22,le,1,then
   ! Do nothing
-*elseif,originalDim,eq,2,then
+*elseif,ar22,eq,2,then
   %ARG1% = ARRCDR_ARR_temp(2)
 *else
-  *dim,%ARG1%,%arrayType%,newDim
-  *do,nthPos,2,originalDim,1
-    %ARG1%(nthPos-1)=ARRCDR_ARR_temp(nthPos)
+  *dim,%ARG1%,%ar21%,ar23
+  *do,ar24,2,ar22,1
+    %ARG1%(ar24-1)=ARRCDR_ARR_temp(ar24)
   *enddo
 *endif
 
