@@ -16,7 +16,7 @@
 ! ar21: arrayName
 ! ar22: arrayType
 ! ar23: originalDim
-! ar24: finalDim
+! ar24: newDim
 ! ar25: nthPos
 ! ar26: nthAtom
 
