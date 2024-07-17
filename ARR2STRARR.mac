@@ -1,40 +1,55 @@
-! ARR2STRARR, output, input, format, precision
-! ARR2STRARR,   arg1,  arg2,   arg3,      arg4
+! ARR2STRARR , output , input , format , precision
+! ARR2STRARR , ARG1   , ARG2  , ARG3   , ARG4
 
 ! Description:
 ! Converts the numeric values of an array (up to 2D) into strings that follow a chosen format.
 
-! Arguments;
-! arg1: output     -  name of output parameter
-! arg2: input      -  name of input parameter (array of numbers)
-! arg3: format     -  type of number formatting, out of the following options:
+! Arguments:
+! ARG1: output     -  name of output parameter
+! ARG2: input      -  name of input parameter (array of numbers)
+! ARG3: format     -  type of number formatting, out of the following options:
 !                        ['F'] Float
 !                        ['E'] Exponential
 !                        ['I'] Integer
-! arg4: precision  -  number of digits after decimal point (not used for arg3='I')
+! ARG4: precision  -  number of digits after decimal point (not used for ARG3='I')
 
 ! Local parameters:
-! AR21: xDimension
-! AR22: yDimension
-! AR23: nthX
-! AR24: nthY
-! AR25: number
+! ar21: xDimension
+! ar22: yDimension
+! ar23: nthX
+! ar24: nthY
+! ar25: number
 
 ! Global parameters (erased at the end of this subroutine):
 ! ARR2STRARR_VAR_stringNumber
 
-*get,AR21,parm,%arg2%,dim,x
-*get,AR22,parm,%arg2%,dim,y
 
-*del,%arg1%,,nopr
-*dim,%arg1%,string,248,AR21,AR22
+! Prepare environment
+*del , ARR2STRARR_VAR_stringNumber ,  , nopr
+*del , ARR2STRARR_VAR_format       ,  , nopr
+*del , ARR2STRARR_VAR_precision    ,  , nopr
+*del , %ARG1%                      ,  , nopr
 
-*do,AR23,1,AR21,1
-    *do,AR24,1,AR22,1
-        AR25=%arg2%(AR23,AR24)
-        num2str,'ARR2STRARR_VAR_stringNumber',AR25,arg3,arg4
-        %arg1%(1,AR23,AR24)=ARR2STRARR_VAR_stringNumber
-    *enddo
+! Parse inputs
+ARR2STRARR_VAR_format    = ARG3
+ARR2STRARR_VAR_precision = ARG4
+
+! Initialize array
+*get,ar21,parm,%ARG2%,dim,x
+*get,ar22,parm,%ARG2%,dim,y
+
+*dim,%ARG1%,string,248,ar21,ar22
+
+! Convert
+*do,ar23,1,ar21,1
+  *do,ar24,1,ar22,1
+    ar25=%ARG2%(ar23,ar24)
+    num2str,'ARR2STRARR_VAR_stringNumber',ar25,ARR2STRARR_VAR_format,ARR2STRARR_VAR_precision
+    %ARG1%(1,ar23,ar24)=ARR2STRARR_VAR_stringNumber
+  *enddo
 *enddo
 
-*del,ARR2STRARR_VAR_stringNumber,,nopr
+! Clean up
+*del , ARR2STRARR_VAR_stringNumber ,  , nopr
+*del , ARR2STRARR_VAR_format       ,  , nopr
+*del , ARR2STRARR_VAR_precision    ,  , nopr
