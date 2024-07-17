@@ -1,5 +1,5 @@
 ! ARRPUT , arrName , atomCount , atom1 , atom2 , atom3 , atom4 , atom5 , atom6 , atom7 , atom8 , atom9 , atom10
-! ARRPUT , ARG1            , ARG2      , ARG3  , ARG4  , ARG5  , ARG6  , ARG7  , ARG8  , ARG9  , AR10  , AR11  , AR12
+! ARRPUT , ARG1    , ARG2      , ARG3  , ARG4  , ARG5  , ARG6  , ARG7  , ARG8  , ARG9  , AR10  , AR11  , AR12
 
 ! Description:
 ! Appends a defined number of atoms (between 0 and 10) to an existing or new numerical (default) or
@@ -44,34 +44,34 @@ ar21 = 'ARRPUT_ARR_output'
 *get,ar20,parm,%ar21%,type
 *if,ar20,eq,4,then
   ! Char array
-  arrayType='CHAR'
+  ar22='CHAR'
 *else
   ! Default: numerical array
-  arrayType='ARRAY'
+  ar22='ARRAY'
 *endif
 
-*dim,ARRPUT_ARR_atoms,%arrayType%,10
+*dim,ARRPUT_ARR_atoms,%ar22%,10
 ARRPUT_ARR_atoms(1) = ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8 , ARG9 , AR10 , AR11 , AR12
 
-*get,originalDim,parm,%ar21%,dim,x
-finalDim = originalDim+atomCount
+*get,ar23,parm,%ar21%,dim,x
+ar24 = ar23+ARG2
 
-*dim,ARRPUT_ARR_temp,%arrayType%,originalDim
+*dim,ARRPUT_ARR_temp,%ar22%,ar23
 
 ! Recreate array with appended values
-*do,nthPos,1,originalDim,1
-  ARRPUT_ARR_temp(nthPos) = %ar21%(nthPos)
+*do,ar25,1,ar23,1
+  ARRPUT_ARR_temp(ar25) = %ar21%(ar25)
 *enddo
 
 *del,%ar21%,,nopr
-*dim,%ar21%,%arrayType%,finalDim
+*dim,%ar21%,%ar22%,ar24
 
-*do,nthPos,1,originalDim,1
-  %ar21%(nthPos) = ARRPUT_ARR_temp(nthPos)
+*do,ar25,1,ar23,1
+  %ar21%(ar25) = ARRPUT_ARR_temp(ar25)
 *enddo
 
-*do,nthAtom,1,atomCount,1
-  %ar21%(originalDim+nthAtom)=ARRPUT_ARR_atoms(nthAtom)
+*do,ar26,1,ARG2,1
+  %ar21%(ar23+ar26)=ARRPUT_ARR_atoms(ar26)
 *enddo
 
 ! Clean up
