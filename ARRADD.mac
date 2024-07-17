@@ -1,3 +1,5 @@
+!! DEPRECATED: use ARRPUT or ARRJOIN instead                                                      !!
+
 ! ARRADD, key,  value1, value2, value3, value4, value5, value6, value7, value8, value9, value10
 ! ARRADD, arg1,   arg2,   arg3,   arg4,   arg5,   arg6,   arg7,   arg8,   arg9,   ar10,    ar11
 
@@ -105,4 +107,3 @@
 *enddo
 
 *del,ARRADD_ARR_new,,nopr
-
