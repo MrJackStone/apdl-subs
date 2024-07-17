@@ -6,31 +6,32 @@
 ! separator character can be set by arg3, replacing the default ':'.
 
 ! Arguments:
-! arg1: parm  -  parameter name (string)
-! arg2: t0    -  previous time value to calculate elapsed time (if undefined current CPU time
-!                is returned)
+! ARG1: parm       -  parameter name (string)
+! ARG2: t0         -  previous time value to calculate elapsed time (if undefined current CPU time
+!                     is returned)
+! ARG3: separator  -  string character that separates hours, minutes, and seconds (defaults to ":")
 
 ! Local parameters:
-! AR20: parType
-! AR21: tWall
-! AR22: cTime
+! ar20: parType
+! ar21: tWall
+! ar22: cTime
 
 ! Output parameters:
 ! _output
 
 
 ! Get current time on wall clock
-*get,AR21,active,,time,wall
+*get,ar21,active,,time,wall
 
-*if,arg2,gt,0,then
+*if,ARG2,gt,0,then
     ! Calculate elapsed time
-    AR22=AR21-arg2
+    ar22=ar21-ARG2
 *else
     ! Calculate 24h time
-    AR22=mod(AR21,24)
+    ar22=mod(ar21,24)
 *endif
 
 ! Convert time to string
-fhour, arg1, AR22, arg3
+fhour, ARG1, ar22, arg3
 
-_output=%arg1%
+_output = %ARG1%
