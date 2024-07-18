@@ -1,0 +1,115 @@
+! ANNOLEG , window , corner , title , values
+! ANNOLEG , ARG1   , ARG2   , ARG3  , ARG4
+
+! Description:
+! Draws a custom color legend using annotations.
+
+! Arguments:
+! ARG1: window  -  number of window used to set the legend's anchor point (defaults to 1)
+! ARG2: corner  -  position inside window where legend will be drawn:
+!                    [1] top-right
+!                    [2] top-left (default)
+!                    [3] bottom-left
+!                    [4] bottom-right
+! ARG3: title   -  legend title
+! ARG4: values  -  value of each entry
+
+! Local parameters:
+! ar20: parType
+! ar21: winNum
+! ar22: anchorCorner
+! ar23: titleLength
+! ar24: valueCount
+! ar25: windXmin
+! ar26: windXmax
+! ar27: windYmin
+! ar28: windYmax
+! ar29: legWidth
+! ar30: legHeight
+! ar31: xAnchor
+! ar32: yAnchor
+! ar33: xTitle
+! ar34: yTitle
+! ar35: xLLC
+! ar36: yLLC
+! ar37: xURC
+! ar38: yURC
+! ar39: xText
+! ar40: nthValue
+! ar41: legValue
+
+! Global erased parameters:
+! ANNOLEG_VAR_charWidth
+! ANNOLEG_VAR_color
+
+
+! Parse inputs
+ar21 = 1
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,0,then
+  ar21 = ((nint(ARG1)<5)>1)
+*endif
+
+ar22 = 2
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,0,then
+  *if,ARG2,ge,1,and,ARG2,le,4,then
+    ar22 = ((nint(ARG2)<4)>1)
+  *endif
+*endif
+
+! Calculate annotation position
+*get , ar24 , parm , %ARG4% , dim , x
+
+*get , ar25 , graph , ar21 , range , xmin
+*get , ar26 , graph , ar21 , range , xmax
+*get , ar27 , graph , ar21 , range , ymin
+*get , ar28 , graph , ar21 , range , ymax
+
+g_annocharwidth,'ANNOLEG_VAR_charWidth'
+ar23 = strleng(ARG3)
+ar29 = ANNOLEG_VAR_charWidth*ar23
+ar30 = ANNOLEG_VAR_charWidth*((2*ar24)+1)
+
+*if,ar22,eq,1,then
+  ! Top-right
+  ar31 = ar26-ar29
+  ar32 = ar28
+*elseif,ar22,eq,2,then
+  ! Top-left
+  ar31 = ar25
+  ar32 = ar28
+*elseif,ar22,eq,3,then
+  ! Bottom-left
+  ar31 = ar25
+  ar32 = ar27+ar30
+*elseif,ar22,eq,4,then
+  ! Bottom-right
+  ar31 = ar26-ar29
+  ar32 = ar27+ar30
+*endif
+
+ar33 = ar31+(0.5*ANNOLEG_VAR_charWidth)
+ar34 = ar32-(1.5*ANNOLEG_VAR_charWidth)
+ar35 = ar33
+ar37 = ar35+(2.0*ANNOLEG_VAR_charWidth)
+ar38 = ar32-(2.5*ANNOLEG_VAR_charWidth)
+ar39 = ar37+(0.5*ANNOLEG_VAR_charWidth)
+
+! Draw annotations
+*do,ar40,1,ar24,1
+  ar41 = %ARG4%(ar40)
+  ar36 = ar38-ANNOLEG_VAR_charWidth
+  annocolors,'ANNOLEG_VAR_color',ar40
+
+  /lspec,15,0,1
+  /pspec,ANNOLEG_VAR_color,1,1
+  p4gon,ar35,ar36,ar37,ar38
+  anno,ar39,ar36,'%ar41%'
+
+  ar38 = ar36-ANNOLEG_VAR_charWidth
+*enddo
+
+! Clean up
+*del , ANNOLEG_VAR_charWidth ,  , nopr
+*del , ANNOLEG_VAR_color     ,  , nopr

@@ -1,0 +1,40 @@
+! ANNOCOLORS , output , index
+! ANNOCOLORS , ARG1   , ARG2
+
+! Description:
+! Returns the custom annotation legend color corresponding to the given index.
+
+! Arguments:
+! ARG1: output  -  name of output parameter, to which color is assigned
+!                  (defaults to 'ANNOCOLORS_VAR_output')
+! ARG2: index   -  legend index, between 1 and 12 (loops automatically)
+
+! Local parameters:
+! ar20: parType
+! ar21: parmName
+! ar22: validIndex
+
+! Global erased parameters:
+! ANNOCOLORS_ARR_legColors
+
+
+! Parse inputs
+ar21 = 'ANNOCOLORS_VAR_output'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21=ARG1
+*endif
+
+! Hardcoded: legend color sequence
+*del , ANNOCOLORS_ARR_legColors ,  , nopr
+*dim , ANNOCOLORS_ARR_legColors ,  , 12
+ANNOCOLORS_ARR_legColors(1) = 5 , 8 , 10 , 2 , 4 , 7 , 11 , 1 , 6 , 12 , 3 , 9
+
+! Calculate index within valid interval
+ar22 = mod(ARG2-1,12)+1
+
+! Return color number
+%ar21% = ANNOCOLORS_ARR_legColors(ar22)
+
+! Clean up
+*del , ANNOCOLORS_ARR_legColors ,  , nopr
