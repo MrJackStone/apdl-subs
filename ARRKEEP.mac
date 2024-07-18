@@ -1,0 +1,52 @@
+! ARRKEEP , from , kept
+! ARRKEEP , ARG1 , ARG2
+
+! Description:
+! Keeps from the first array only values present the second array (AND operator).
+
+! Arguments:
+! ARG1: from  -  name of array from which values will be kept or deleted
+! ARG2: kept  -  name of array containing values to remove
+
+! Local parameters:
+! ar21: fromLength
+! ar22: keptLength
+! ar23: nthPos
+! ar24: keptValue
+
+! Global cleared parameters:
+! ARRKEEP_ARR_mask
+! ARRKEEP_ARR_temp
+! ARRKEEP_ARR_check
+
+
+! Prepare environment
+*del , ARRKEEP_ARR_mask    ,  , nopr
+*del , ARRKEEP_ARR_temp    ,  , nopr
+
+! Initialize arrays
+*get,ar21,parm,%ARG1%,dim,x
+*get,ar22,parm,%ARG2%,dim,x
+*dim , ARRKEEP_ARR_mask ,  , ar21
+*dim , ARRKEEP_ARR_temp ,  , ar21
+
+! Back up values
+*vfun,ARRKEEP_ARR_temp,copy,%ARG1%
+*del,%ARG1%,,nopr
+
+! Create masking array marking matching values
+*do,ar23,1,ar22,1
+  ar24 = %ARG2%(ar23)
+  *del,ARRKEEP_ARR_check,,nopr
+  *voper , ARRKEEP_ARR_check , %ARG1%           , eq  , ar24
+  *voper , ARRKEEP_ARR_mask  , ARRKEEP_ARR_mask , add , ARRKEEP_ARR_check
+*enddo
+
+! Compress original array
+*vmask,ARRKEEP_ARR_mask
+*vfun,%ARG1%,comp,ARRKEEP_ARR_temp
+
+! Clean up
+*del , ARRKEEP_ARR_temp    ,  , nopr
+*del , ARRKEEP_ARR_check   ,  , nopr
+*del , ARRKEEP_ARR_mask    ,  , nopr

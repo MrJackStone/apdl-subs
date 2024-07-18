@@ -1,11 +1,11 @@
-! ARRDEL , from , excludedValues
+! ARRDEL , from , removed
 ! ARRDEL , ARG1 , ARG2
 
 ! Description:
-! Deletes from the first array values present the second array.
+! Deletes from the first array values present the second array (NOT operator).
 
 ! Arguments:
-! ARG1: from     -  name of array from which values might be deleted
+! ARG1: from     -  name of array from which values will be kept or deleted
 ! ARG2: removed  -  name of array containing values to remove
 
 ! Local parameters:
@@ -13,6 +13,12 @@
 ! ar22: excludedLength
 ! ar23: nthPos
 ! ar24: excludedValue
+
+! Global cleared parameters:
+! ARRDEL_ARR_invMask
+! ARRDEL_ARR_mask
+! ARRDEL_ARR_temp
+! ARRDEL_ARR_check
 
 
 ! Prepare environment
@@ -31,11 +37,11 @@
 *del,%ARG1%,,nopr
 
 ! Create masking array marking matching values
-*do,nthPos,1,ar22,1
-  excludedValue=%ARG2%(nthPos)
+*do,ar23,1,ar22,1
+  ar24 = %ARG2%(ar23)
   *del,ARRDEL_ARR_check,,nopr
-  *voper,ARRDEL_ARR_check,%ARG1%,eq,excludedValue
-  *voper,ARRDEL_ARR_invMask,ARRDEL_ARR_invMask,add,ARRDEL_ARR_check
+  *voper , ARRDEL_ARR_check   , %ARG1%             , eq  , ar24
+  *voper , ARRDEL_ARR_invMask , ARRDEL_ARR_invMask , add , ARRDEL_ARR_check
 *enddo
 *vfun,ARRDEL_ARR_mask,not,ARRDEL_ARR_invMask
 
