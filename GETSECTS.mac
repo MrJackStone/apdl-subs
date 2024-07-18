@@ -1,0 +1,64 @@
+! GETSECTS , idsArrayName , sectType
+! GETSECTS , ARG1         , ARG2
+
+! Description:
+! Returns a list of all IDs of cross-sections of a given type (BEAM or SHELL).
+
+! Arguments:
+! ARG1: idsArrayName  -  name of output parameter to which list of IDs will be assigned
+!                        (defaults to 'GETSECTS_ARR_ids')
+! ARG2: sectType      -  type of cross-section:
+!                          ['BEAM']  beam sections
+!                          ['SHELL'] shell sections
+
+! Local parameters:
+! ar20: parType
+! ar21: outputParmName
+! ar22: secTypeKey
+! ar23: entity
+! ar24: secCount
+! ar25: nthSection
+! ar26: sectionType
+
+! Global erased parameters:
+! GETSECTS_ARR_secIDs
+
+
+! Parse inputs
+ar21 = 'GETSECTS_ARR_ids'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
+*endif
+
+ar22=' '
+ar23=' '
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  *if,upcase(ARG2),eq,'BEAM',then
+    ar22='BEAM'
+    ar23='SECP'
+  *elseif,upcase(ARG2),eq,'SHELL',then
+    ar22='SHEL'
+    ar23='SHEL'
+  *endif
+*endif
+
+! Initialize arrays
+*get,ar24,secp,,num,max
+
+*del , %ar21%                ,  , nopr
+*del , GETSECTS_ARR_secIDs ,  , nopr
+*dim , GETSECTS_ARR_secIDs ,  , ar24
+
+! Collect valid section IDs
+*do,nthSection,1,ar24,1
+  *get,sectionType,%ar23%,nthSection,type
+  *if,strsub(upcase(sectionType),1,4),ne,%ar22%,cycle
+  GETSECTS_ARR_secIDs(nthSection) = nthSection
+*enddo
+
+*vfun,%ar21%,comp,GETSECTS_ARR_secIDs
+
+! Clean up
+*del,GETSECTS_ARR_secIDs,,nopr
