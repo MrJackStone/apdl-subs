@@ -1,0 +1,136 @@
+! ANNOTHKLEG , window , corner , section_nums , unit
+! ANNOTHKLEG , ARG1   , ARG2   , ARG3         , ARG4
+
+! Description:
+! Draws a plate section thickness colored legend using annotations.
+
+! Arguments:
+! ARG1: window        -  number of window used to set the legend's anchor point
+!                        (defaults to 1)
+! ARG2: corner        -  position inside window where legend will be drawn:
+!                          [1] top-right
+!                          [2] top-left (default)
+!                          [3] bottom-left
+!                          [4] bottom-right
+! ARG3: section_nums  -  name of array containing section IDs to include in the legend
+!                        (defaults to all SHELL sections)
+! ARG4: unit          -  units used in the legend, which define multiplier applied to extracted
+!                        shell section thickness (presumed to be set in meters):
+!                          ['m']  meters (default, multiplier: 1)
+!                          ['cm'] centimeters (multiplier: 100)
+!                          ['mm'] millimeters (multiplier: 1000)
+
+! Local parameters:
+! ar20: parType
+! ar21: secidCount
+! ar22: nthSec
+! ar23: secID
+! ar24: shellThk
+! ar25: uniqueThkCount
+! ar26: nthThk
+! ar27: COMPE_all
+! ar28: COMPE_bg
+! ar29: COMPE_active
+! ar30: legTitle
+
+
+! Global cleared parameters:
+! ANNOTHKLEG_ARR_shell_sects
+! ANNOTHKLEG_ARR_thkGroups
+! ANNOTHKLEG_ARR_thkUnique
+! ANNOTHKLEG_VAR_selectSectName
+
+
+! Prepare environment
+ebackup
+cm,ar29,elem
+
+! Parse inputs
+ar33 = 'FULL'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  *get,ar20,parm,%ARG3%,type
+  *if,ar20,eq,1,then
+    ar33 = 'SELECT'
+    *del,ANNOTHKLEG_VAR_selectSectName,,nopr
+    ANNOTHKLEG_VAR_selectSectName=ARG3
+  *endif
+*endif
+
+ar24 = 'm'
+ar34 = 1
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  *if,lwcase(ARG4),eq,'cm',then
+    ar24 = 'cm'
+    ar34 = 100
+  *elseif,lwcase(ARG4),eq,'mm',then
+    ar24 = 'mm'
+    ar34 = 1000
+  *endif
+*endif
+
+! Get eligible shell sections
+getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL'
+
+*if,ar33,eq,'SELECT',then
+  arrkeep,'ANNOTHKLEG_ARR_shell_sects',ANNOTHKLEG_VAR_selectSectName
+*endif
+*get,ar21,parm,ANNOTHKLEG_ARR_shell_sects,dim,x
+
+! Group shell section IDs by thickness
+*del,ANNOTHKLEG_ARR_shell_thks,,nopr
+*dim,ANNOTHKLEG_ARR_shell_thks,,ar21
+
+*do,ar22,1,ar21,1
+  ar23 = ANNOTHKLEG_ARR_shell_sects(ar22)
+  *get,ar24,shel,ar23,prop,tthk
+  ANNOTHKLEG_ARR_shell_thks(ar22) = ar24
+*enddo
+
+arrgroup,'ANNOTHKLEG_ARR_thkGroups','ANNOTHKLEG_ARR_thkUnique','ANNOTHKLEG_ARR_shell_sects','ANNOTHKLEG_ARR_shell_thks'
+*vscfun , ar25 , parm , ANNOTHKLEG_ARR_thkUnique , dim , x
+
+! Convert shell thicknesses to char array
+*del , ANNOTHKLEG_CHR_thks ,      , nopr
+*dim , ANNOTHKLEG_CHR_thks , char , ar25
+*do,ar26,1,ar25,1
+  ANNOTHKLEG_CHR_thks(ar26) = '%ANNOTHKLEG_ARR_thkUnique(ar26)*ar34%'
+*enddo
+
+! Create & color selection components (filtered through current selection)
+esel,none
+cm,ar27,elem
+
+*do,ar26,1,ar25,1
+  esel,none
+  *do,ar22,1,ar21,1
+    ar23 = ANNOTHKLEG_ARR_thkGroups(ar22,ar26)
+    esel,a,sec,,ar23
+  *enddo
+  cmsel,r,ar29
+
+  cm,COMPE_GROUP_%ar26%,elem
+  cmsel,a,ar27
+  cm,ar27,elem
+
+  annocolors,'ANNOTHKLEG_VAR_color',ar26
+  /color,cm,ANNOTHKLEG_VAR_color,COMPE_GROUP_%ar26%
+*enddo
+
+cmsel,s,ar27
+esel,inve
+cmsel,r,ar29
+cm,ar28,elem
+/color,cm,dgra,ar28
+
+! Draw color legend
+ar30 = 'THK [%ar24%]'
+annoleg , ARG1 , ARG2 , ar30 , 'ANNOTHKLEG_CHR_thks'
+
+! Clean up
+elrestore
+*del , ANNOTHKLEG_ARR_shell_sects    ,  , nopr
+*del , ANNOTHKLEG_ARR_thkGroups      ,  , nopr
+*del , ANNOTHKLEG_ARR_thkUnique      ,  , nopr
+*del , ANNOTHKLEG_VAR_selectSectName ,  , nopr

@@ -1,0 +1,219 @@
+! ANNOTHKLEG , window , corner , section_nums , unit
+! ANNOTHKLEG , ARG1   , ARG2   , ARG3         , ARG4
+
+! Description:
+! Draws a plate section thickness colored legend using annotations.
+
+! Arguments:
+! ARG1: window        -  number of window used to set the legend's anchor point
+!                        (defaults to 1)
+! ARG2: corner        -  position inside window where legend will be drawn:
+!                          [1] top-right
+!                          [2] top-left (default)
+!                          [3] bottom-left
+!                          [4] bottom-right
+! ARG3: section_nums  -  name of array containing section IDs to include in the legend
+!                        (defaults to all SHELL sections)
+! ARG4: unit          -  units used in the legend, which define multiplier applied to extracted
+!                        shell section thickness (presumed to be set in meters):
+!                          ['m']  meters (default, multiplier: 1)
+!                          ['cm'] centimeters (multiplier: 100)
+!                          ['mm'] millimeters (multiplier: 1000)
+
+! Local parameters:
+! ar20: parType
+! ar21: winNum
+
+
+! Prepare environment
+ebackup
+nbackup
+
+! Parse inputs
+ar21 = 1
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,0,then
+  ar21 = ((nint(ARG1)<5)>1)
+*endif
+
+ar22 = 2
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,0,then
+  *if,ARG2,ge,1,and,ARG2,le,4,then
+    ar22 = ((nint(ARG2)<4)>1)
+  *endif
+*endif
+
+ar33 = 'FULL'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  *get,ar20,parm,%ARG3%,type
+  *if,ar20,eq,1,then
+    ar33 = 'SELECT'
+    *del,ANNOTHKLEG_VAR_selectSectName,,nopr
+    ANNOTHKLEG_VAR_selectSectName=ARG3
+  *endif
+*endif
+
+ar24 = 'm'
+ar34 = 1
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  *if,lwcase(ARG4),eq,'cm',then
+    ar24 = 'cm'
+    ar34 = 100
+  *elseif,lwcase(ARG4),eq,'mm',then
+    ar24 = 'mm'
+    ar34 = 1000
+  *endif
+*endif
+
+! Hardcoded: legend color sequence
+*del,ANNOTHKLEG_ARR_legColors,,nopr
+*dim,ANNOTHKLEG_ARR_legColors,,12
+ANNOTHKLEG_ARR_legColors(1)=5, 8, 10, 2, 4, 7, 11, 1, 6, 12, 3, 9
+
+! Set applicable sections
+*get,ar43,secp,,num,max
+
+*del , ANNOTHKLEG_ARR_secids      ,  , nopr
+*del , ANNOTHKLEG_ARR_shell_sects ,  , nopr
+*dim , ANNOTHKLEG_ARR_secids      ,  , ar43
+
+*do,nthSection,1,ar43,1
+  *get,sectionType,shel,nthSection,type
+  *if,strsub(upcase(sectionType),1,4),ne,'SHEL',cycle
+  ANNOTHKLEG_ARR_secids(nthSection) = nthSection
+*enddo
+*vfun,ANNOTHKLEG_ARR_shell_sects,comp,ANNOTHKLEG_ARR_secids
+
+*if,ar33,eq,'SELECT',then
+  arrkeep,'ANNOTHKLEG_ARR_shell_sects','ANNOTHKLEG_VAR_selectSectName'
+*endif
+*get,secidCount,parm,ANNOTHKLEG_ARR_shell_sects,dim,x
+
+! Group shell section IDs by thickness
+*del , ANNOTHKLEG_ARR_thkValues ,  , nopr
+*del , ANNOTHKLEG_ARR_thkGroups ,  , nopr
+*dim , ANNOTHKLEG_ARR_thkValues ,  , secidCount
+*dim , ANNOTHKLEG_ARR_thkGroups ,  , secidCount , secidCount
+
+*do,nthSect,1,secidCount,1
+  secID = ANNOTHKLEG_ARR_shell_sects(nthSect)
+  *get,secThk,shel,secID,prop,tthk
+  *del,check,,nopr
+  *voper,check,ANNOTHKLEG_ARR_thkValues,eq,secThk
+  *vscfun,present,check,sum
+  *if,present,ge,1,then
+    *vscfun,thkGroup,lmax,check
+  *else
+    thkGroup                           = nthSect
+    ANNOTHKLEG_ARR_thkValues(thkGroup) = secThk
+  *endif
+  ANNOTHKLEG_ARR_thkGroups(nthSect,thkGroup)=secID
+*enddo
+
+*del  , ANNOTHKLEG_ARR_thkUnique ,      , nopr
+*vfun , ANNOTHKLEG_ARR_thkUnique , comp , ANNOTHKLEG_ARR_thkValues
+*vscfun,uniqueThkCount,parm,ANNOTHKLEG_ARR_thkUnique,dim,x
+
+! Create & color selection components (filtered through current selection)
+cm,COMPE_active,elem
+esel,none
+cm,COMPE_all,elem
+
+*do,nthThk,1,uniqueThkCount,1
+  colorIdx = mod(nthThk-1,12)+1
+  colorNum = ANNOTHKLEG_ARR_legColors(colorIdx)
+
+  esel,none
+  *do,nthSect,1,secidCount,1
+    secID = ANNOTHKLEG_ARR_thkGroups(nthSect,nthThk)
+    esel,a,sec,,secID
+  *enddo
+  cmsel,r,COMPE_active
+
+  cm,COMPE_GROUP_%nthThk%,elem
+  cmsel,a,COMPE_all
+  cm,COMPE_all,elem
+
+  /color,cm,colorNum,COMPE_GROUP_%nthThk%
+*enddo
+
+cmsel,s,COMPE_all
+esel,inve
+cmsel,r,COMPE_active
+cm,COMPE_bg,elem
+/color,cm,dgra,COMPE_bg
+
+! Calculate annotation position
+*get,windXmin,graph,ar21,range,xmin
+*get,windXmax,graph,ar21,range,xmax
+*get,windYmin,graph,ar21,range,ymin
+*get,windYmax,graph,ar21,range,ymax
+
+g_annocharwidth,'ANNOTHKLEG_VAR_charWidth'
+legWidth  = ANNOTHKLEG_VAR_charWidth*10
+legHeight = ANNOTHKLEG_VAR_charWidth*((2*uniqueThkCount)+1)
+
+*if,ar22,eq,1,then
+  ! Top-right
+  xAnchor = windXmax-legWidth
+  yAnchor = windYMax
+*elseif,ar22,eq,2,then
+  ! Top-left
+  xAnchor = windXmin
+  yAnchor = windYMax
+*elseif,ar22,eq,3,then
+  ! Bottom-left
+  xAnchor = windXmin
+  yAnchor = windYMin+legHeight
+*elseif,ar22,eq,4,then
+  ! Bottom-right
+  xAnchor = windXmax-legWidth
+  yAnchor = windYMin+legHeight
+*endif
+
+xTitle = xAnchor+(ANNOTHKLEG_VAR_charWidth/2)
+yTitle = yAnchor-(1.5*ANNOTHKLEG_VAR_charWidth)
+xllc   = xTitle
+xurc   = xllc+(2*ANNOTHKLEG_VAR_charWidth)
+yurc   = yAnchor-(2.5*ANNOTHKLEG_VAR_charWidth)
+xtext  = xurc+(ANNOTHKLEG_VAR_charWidth/2)
+
+! Draw annotation
+*do,nthThk,1,uniqueThkCount,1
+  thk      = ANNOTHKLEG_ARR_thkUnique(nthThk)*ar34
+  yllc     = yurc-ANNOTHKLEG_VAR_charWidth
+  colorIdx = mod(nthThk-1,12)+1
+  colorNum = ANNOTHKLEG_ARR_legColors(colorIdx)
+
+  /lspec,15,0,1
+  /pspec,colorNum,1,1
+  p4gon,xllc,yllc,xurc,yurc
+  anno,xtext,yllc,'%thk%'
+
+  yurc = yllc-ANNOTHKLEG_VAR_charWidth
+*enddo
+
+! Clean up
+elrestore
+nrestore
+
+
+
+
+
+
+
+
+
+
+ANNOTHKLEG_ARR_legColors
+ANNOTHKLEG_ARR_secids
+ANNOTHKLEG_ARR_shell_sects
+ANNOTHKLEG_ARR_thkGroups
+ANNOTHKLEG_ARR_thkUnique
+ANNOTHKLEG_ARR_thkValues
+ANNOTHKLEG_VAR_charWidth
+ANNOTHKLEG_VAR_selectSectName
