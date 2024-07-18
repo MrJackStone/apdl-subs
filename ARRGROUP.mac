@@ -1,0 +1,77 @@
+! ARRGROUP , groupTable , groupHeaders , indicesArray , valuesArray
+! ARRGROUP , ARG1       , ARG2         , ARG3         , ARG4
+
+! Description:
+! Groups indices found in an array based on the values of a corresponding array.
+
+! Arguments:
+! ARG1: groupTable    -  name of output parameter (two dimensional array) to which the grouped
+!                        indices will be assigned (defaults to 'ARRGROUP_ARR_groups')
+! ARG2: groupHeaders  -  name of output parameter (1-D array) to which the value headers of each
+!                        group will be assigned (defaults to 'ARRGROUP_ARR_headers')
+! ARG3: indicesArray  -  name of array containing indices to be grouped in table
+! ARG4: valuesArray   -  name of array containing values to be used as unique headers to generate
+!                        the groups
+
+! Local parameters:
+! ar20: parType
+! ar22: headerIdx
+! ar24: valueCount
+! ar25: nthValue
+! ar26: present
+! ar33: index
+! ar34: value
+
+! Global erased parameters:
+! ARRGROUP_ARR_match
+
+
+! Parse inputs
+ar91 = 'ARRGROUP_ARR_groups'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar91=ARG1
+*endif
+
+ar92='ARRGROUP_ARR_headers'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar92=ARG2
+*endif
+
+ar82 = 'ARRGROUP_ARR_sparseHeaders'
+
+! Initialize arrays
+*get,ar24,parm,%ARG4%,dim,x
+
+*del , %ar82% ,  , nopr
+*del , %ar91% ,  , nopr
+*dim , %ar82% ,  , ar24
+*dim , %ar91% ,  , ar24 , ar24
+
+ar22=0
+
+! Create groups
+*do,ar25,1,ar24,1
+  ar33 = %ARG3%(ar25)
+  ar34 = %ARG4%(ar25)
+
+  *del,ARRGROUP_ARR_match,,nopr
+  *voper,ARRGROUP_ARR_match,%ar82%,eq,ar34
+
+  *vscfun,ar26,ARRGROUP_ARR_match,sum
+  *if,ar26,ge,1,then
+    *vscfun,ar22,lmax,ARRGROUP_ARR_match
+  *else
+    ar22         = ar22+1
+    %ar82%(ar22) = ar34
+  *endif
+  %ar91%(ar25,ar22) = ar33
+*enddo
+
+! Compress headers array
+*del  , %ar92% ,      , nopr
+*vfun , %ar92% , comp , %ar82%
+
+! Clean up
+*del , ARRGROUP_ARR_match ,  , nopr
