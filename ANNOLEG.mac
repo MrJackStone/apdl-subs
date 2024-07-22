@@ -97,6 +97,8 @@ ar38 = ar32-(2.5*ANNOLEG_VAR_charWidth)
 ar39 = ar37+(0.5*ANNOLEG_VAR_charWidth)
 
 ! Draw annotations
+anno,ar33,ar34,ARG3
+
 *do,ar40,1,ar24,1
   ar41 = %ARG4%(ar40)
   ar36 = ar38-ANNOLEG_VAR_charWidth
