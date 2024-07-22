@@ -59,7 +59,7 @@ ar22=0
   *del,ARRGROUP_ARR_match,,nopr
   *voper,ARRGROUP_ARR_match,%ar82%,eq,ar34
 
-  *vscfun,ar26,ARRGROUP_ARR_match,sum
+  *vscfun,ar26,sum,ARRGROUP_ARR_match
   *if,ar26,ge,1,then
     *vscfun,ar22,lmax,ARRGROUP_ARR_match
   *else
@@ -70,8 +70,9 @@ ar22=0
 *enddo
 
 ! Compress headers array
-*del  , %ar92% ,      , nopr
-*vfun , %ar92% , comp , %ar82%
+*del   , %ar92% ,      , nopr
+*vmask , %ar82%
+*vfun  , %ar92% , comp , %ar82%
 
 ! Clean up
 *del , ARRGROUP_ARR_match ,  , nopr
