@@ -1,5 +1,5 @@
-! ANNOTHKLEG , window , corner , section_nums , unit
-! ANNOTHKLEG , ARG1   , ARG2   , ARG3         , ARG4
+! ANNOTHKLEG , window , corner , section_nums , unit , cmRoot
+! ANNOTHKLEG , ARG1   , ARG2   , ARG3         , ARG4 , ARG5
 
 ! Description:
 ! Draws a plate section thickness colored legend using annotations.
@@ -19,6 +19,8 @@
 !                          ['m']  meters (default, multiplier: 1)
 !                          ['cm'] centimeters (multiplier: 100)
 !                          ['mm'] millimeters (multiplier: 1000)
+! ARG5: cmRoot        -  element selection component name infix (COMPE_<root>_<i>) for each
+!                        thickness group (defaults to 'ANNOTHKLEG')
 
 ! Local parameters:
 ! ar20: parType
@@ -32,7 +34,9 @@
 ! ar28: COMPE_bg
 ! ar29: COMPE_active
 ! ar30: legTitle
-
+! ar31: cmInfix
+! ar32: cmRoot
+! ar33: nthCMname
 
 ! Global cleared parameters:
 ! ANNOTHKLEG_ARR_shell_sects
@@ -69,6 +73,13 @@ ar34 = 1
     ar34 = 1000
   *endif
 *endif
+
+ar31 = 'ANNOTHKLEG'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,3,then
+  ar31 = ARG5
+*endif
+ar32 = 'COMPE_%ar31%'
 
 ! Get eligible shell sections
 getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL'
@@ -110,7 +121,8 @@ cm,ar27,elem
   *enddo
   cmsel,r,ar29
 
-  cm,COMPE_GROUP_%ar26%,elem
+  ar33 = '%ar32%_%ar26%'
+  cm,%ar33%,elem
   cmsel,a,ar27
   cm,ar27,elem
 
