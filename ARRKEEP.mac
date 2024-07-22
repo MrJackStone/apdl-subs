@@ -21,18 +21,17 @@
 
 
 ! Prepare environment
-*del , ARRKEEP_ARR_mask    ,  , nopr
-*del , ARRKEEP_ARR_temp    ,  , nopr
+*del , ARRKEEP_ARR_mask ,  , nopr
+*del , ARRKEEP_ARR_temp ,  , nopr
 
 ! Initialize arrays
-*get,ar21,parm,%ARG1%,dim,x
-*get,ar22,parm,%ARG2%,dim,x
+*get , ar21 , parm , %ARG1% , dim , x
+*get , ar22 , parm , %ARG2% , dim , x
 *dim , ARRKEEP_ARR_mask ,  , ar21
 *dim , ARRKEEP_ARR_temp ,  , ar21
 
 ! Back up values
 *vfun,ARRKEEP_ARR_temp,copy,%ARG1%
-*del,%ARG1%,,nopr
 
 ! Create masking array marking matching values
 *do,ar23,1,ar22,1
@@ -43,10 +42,11 @@
 *enddo
 
 ! Compress original array
+*del,%ARG1%,,nopr
 *vmask,ARRKEEP_ARR_mask
 *vfun,%ARG1%,comp,ARRKEEP_ARR_temp
 
 ! Clean up
-*del , ARRKEEP_ARR_temp    ,  , nopr
-*del , ARRKEEP_ARR_check   ,  , nopr
-*del , ARRKEEP_ARR_mask    ,  , nopr
+*del , ARRKEEP_ARR_temp  ,  , nopr
+*del , ARRKEEP_ARR_check ,  , nopr
+*del , ARRKEEP_ARR_mask  ,  , nopr
