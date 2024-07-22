@@ -47,17 +47,20 @@ ar23=' '
 ! Initialize arrays
 *get,ar24,secp,,num,max
 
-*del , %ar21%                ,  , nopr
+*del , %ar21%              ,  , nopr
 *del , GETSECTS_ARR_secIDs ,  , nopr
 *dim , GETSECTS_ARR_secIDs ,  , ar24
 
 ! Collect valid section IDs
-*do,nthSection,1,ar24,1
-  *get,sectionType,%ar23%,nthSection,type
-  *if,strsub(upcase(sectionType),1,4),ne,%ar22%,cycle
-  GETSECTS_ARR_secIDs(nthSection) = nthSection
+*do,ar25,1,ar24,1
+  *get,ar26,%ar23%,ar25,type
+  *get,ar20,parm,ar26,type
+  *if,ar20,ne,3,cycle
+  *if,strsub(upcase(ar26),1,4),ne,ar22,cycle
+  GETSECTS_ARR_secIDs(ar25) = ar25
 *enddo
 
+*vmask,GETSECTS_ARR_secIDs
 *vfun,%ar21%,comp,GETSECTS_ARR_secIDs
 
 ! Clean up
