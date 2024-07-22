@@ -37,6 +37,8 @@
 ! ar31: cmInfix
 ! ar32: cmRoot
 ! ar33: nthCMname
+! ar34: scale
+! ar35: thkUnit
 
 ! Global cleared parameters:
 ! ANNOTHKLEG_ARR_shell_sects
@@ -61,15 +63,15 @@ ar33 = 'FULL'
   *endif
 *endif
 
-ar24 = 'm'
+ar35 = 'm'
 ar34 = 1
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,3,then
   *if,lwcase(ARG4),eq,'cm',then
-    ar24 = 'cm'
+    ar35 = 'cm'
     ar34 = 100
   *elseif,lwcase(ARG4),eq,'mm',then
-    ar24 = 'mm'
+    ar35 = 'mm'
     ar34 = 1000
   *endif
 *endif
@@ -100,7 +102,7 @@ getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL'
 *enddo
 
 arrgroup,'ANNOTHKLEG_ARR_thkGroups','ANNOTHKLEG_ARR_thkUnique','ANNOTHKLEG_ARR_shell_sects','ANNOTHKLEG_ARR_shell_thks'
-*vscfun , ar25 , parm , ANNOTHKLEG_ARR_thkUnique , dim , x
+*get , ar25 , parm , ANNOTHKLEG_ARR_thkUnique , dim , x
 
 ! Convert shell thicknesses to char array
 *del , ANNOTHKLEG_CHR_thks ,      , nopr
@@ -127,7 +129,7 @@ cm,ar27,elem
   cm,ar27,elem
 
   annocolors,'ANNOTHKLEG_VAR_color',ar26
-  /color,cm,ANNOTHKLEG_VAR_color,COMPE_GROUP_%ar26%
+  /color,cm,ANNOTHKLEG_VAR_color,%ar33%
 *enddo
 
 cmsel,s,ar27
@@ -137,7 +139,7 @@ cm,ar28,elem
 /color,cm,dgra,ar28
 
 ! Draw color legend
-ar30 = 'THK [%ar24%]'
+ar30 = 'THK [%ar35%]'
 annoleg , ARG1 , ARG2 , ar30 , 'ANNOTHKLEG_CHR_thks'
 
 ! Clean up
