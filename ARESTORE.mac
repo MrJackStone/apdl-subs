@@ -1,4 +1,4 @@
-! ARESTORE
+! arestore
 ! ARESTORE
 
 ! Description:
@@ -36,4 +36,3 @@ cmdele,ABACKUP_CM_%ABACKUP_%
 
 ! Update backup counter
 ABACKUP_=ABACKUP_-1
-

@@ -1,5 +1,5 @@
-! ARGDEFAULT , outputParmName , argValue , argType , defaultValue
-! ARGDEFAULT , arg1           , arg2     , arg3    , arg4
+! argdefault , outputParmName , argValue , argType , defaultValue
+! ARGDEFAULT , ARG1           , ARG2     , ARG3    , ARG4
 
 ! Descriptions:
 ! Assigns a default value to a parameter if another parameter's value (presumably the value of an
@@ -8,9 +8,9 @@
 ! See also: PARDEFAULT.
 
 ! Arguments:
-! arg1: outputParmName  -  name of parameter to which the default value will be assigned
-! arg2: parName         -  name of parameter whose type will be checked
-! arg3: parType         -  expected parameter type to check against:
+! ARG1: outputParmName  -  name of parameter to which the default value will be assigned
+! ARG2: parName         -  name of parameter whose type will be checked
+! ARG3: parType         -  expected parameter type to check against:
 !                            'UNDEF'    (undefined)
 !                            'SCALAR'   (scalar number)
 !                            'ARRAY'    (number array)
@@ -18,26 +18,26 @@
 !                            'CHAR'     (character scalar)
 !                            'CHR_ARR'  (character array)
 !                            'STR_ARR'  (string array)
-! arg4: defaultValue    -  value assigned to the appropriate parameter
+! ARG4: defaultValue    -  value assigned to the appropriate parameter
 
 ! Local parameters:
 ! -
 
-! Global parameters (erased at the end of this subroutine):
+! Global erased parameters:
 ! ARGDEFAULT_VAR_name
 ! ARGDEFAULT_VAR_check
 
 
 *del,ARGDEFAULT_VAR_name,,nopr
-ARGDEFAULT_VAR_name=arg2
+ARGDEFAULT_VAR_name = ARG2
 
-parverify,'ARGDEFAULT_VAR_check','ARGDEFAULT_VAR_name',arg3
+parverify , 'ARGDEFAULT_VAR_check' , 'ARGDEFAULT_VAR_name' , ARG3
 
-*del,%arg1%,,nopr
+*del,%ARG1%,,nopr
+
+%ARG1% = ARG2
 *if,ARGDEFAULT_VAR_check,eq,0,then
-  %arg1%=arg4
-*else
-  %arg1%=arg2
+  %ARG1%=ARG4
 *endif
 
 *del , ARGDEFAULT_VAR_name  ,, nopr

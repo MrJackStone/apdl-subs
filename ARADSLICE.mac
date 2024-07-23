@@ -1,42 +1,38 @@
-! ARADSLICE, radius
-! ARADSLICE,   arg1
+! aradslice, radius
+! ARADSLICE,   ARG1
 
 ! Description:
 ! Slices all selected areas along a circular line of a given radius.
 
-! Argument list:
-! arg1: radius  -  radius of the circle created to slice the areas
+! Arguments:
+! ARG1: radius  -  radius of the circle created to slice the areas
 
-! Local variables:
-! AR20: COMPA_old
-! AR21: COMPL_old
-! AR22: ANum
-! AR23: COMPL_slice
-! AR24:
-! AR25:
+! Local parameters:
+! ar20: COMPA_old
+! ar21: COMPL_old
+! ar22: ANum
+! ar23: COMPL_slice
+
 
 ! Deactivate automatic display
-/uis,REPLOT,0
-/uis,MSGPOP,3
-IMMED,0
-BOPTN,NWARN,1
+/uis,replot,0
+/uis,msgpop,3
+immed,0
+boptn,nwarn,1
 
 ! Store current selection
-CM,AR20,AREA
-CM,AR21,LINE
-ASEL,U,AREA,,ALL
-LSEL,U,LINE,,ALL
+cm,ar20,area
+cm,ar21,line
+asel,none
+lsel,none
 
 ! Create lines to slice
-CYL4, 0, 0, arg1
-*get,AR22,AREA,,NUM,MIN
-ADELE,AR22,,,0
-CM,AR23,LINE
+cyl4, 0, 0, ARG1
+*get,ar22,area,,num,min
+adele,ar22,,,0
+cm,ar23,line
 
 ! Slice areas
-CMSEL,A,AR20
-CMSEL,A,AR21
-ASBL,AR20,AR23,,DELETE,DELETE
-
-
-
+cmsel,a,ar20
+cmsel,a,ar21
+asbl,ar20,ar23,,delete,delete

@@ -1,4 +1,4 @@
-! ARR2STRARR , output , input , format , precision
+! arr2strarr , output , input , format , precision
 ! ARR2STRARR , ARG1   , ARG2  , ARG3   , ARG4
 
 ! Description:
@@ -20,7 +20,7 @@
 ! ar24: nthY
 ! ar25: number
 
-! Global parameters (erased at the end of this subroutine):
+! Global erased parameters:
 ! ARR2STRARR_VAR_stringNumber
 
 
@@ -43,9 +43,9 @@ ARR2STRARR_VAR_precision = ARG4
 ! Convert
 *do,ar23,1,ar21,1
   *do,ar24,1,ar22,1
-    ar25=%ARG2%(ar23,ar24)
+    ar25 = %ARG2%(ar23,ar24)
     num2str,'ARR2STRARR_VAR_stringNumber',ar25,ARR2STRARR_VAR_format,ARR2STRARR_VAR_precision
-    %ARG1%(1,ar23,ar24)=ARR2STRARR_VAR_stringNumber
+    %ARG1%(1,ar23,ar24) = ARR2STRARR_VAR_stringNumber
   *enddo
 *enddo
 

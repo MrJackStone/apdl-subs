@@ -1,20 +1,22 @@
-! ARRINIT , arrayNames , arrayType , arrayLengths
-! ARRINIT , arg1       , arg2       , arg3
+! arrinit , arrayNames , arrayType , arrayLengths
+! ARRINIT , ARG1       , ARG2       , ARG3
 
 ! Description:
-! Initializes arrays (*del, *dim). If arg3 is scalar, all arrays are given the same length; if it
+! Initializes arrays (*del, *dim). If ARG3 is scalar, all arrays are given the same length; if it
 ! is an array, each array name is given its corresponding size. All arrays must be of the same
-! type, as defined by arg2.
+! type, as defined by ARG2.
 
 ! Arguments:
-! arg1: arrayNames    -  names of arrays to initialize
-! arg2: arrayType     -  type to be assigned to all arrays (defaults to 'ARRAY')
-! arg3: arrayLengths  -  length to be assigned to each array (array or scalar)
+! ARG1: arrayNames    -  names of arrays to initialize
+! ARG2: arrayType     -  type to be assigned to all arrays (defaults to 'ARRAY')
+! ARG3: arrayLengths  -  length to be assigned to each array (array or scalar)
 
 ! Local parameters:
-! AR20: parType
-! AR21: arrayCount
-! AR22: nthArr
+! ar20: parType
+! ar21: arrayCount
+! ar22: nthArr
+! ar23: arrName
+! ar24: arrLength
 
 
 ! Initialize array params
@@ -23,78 +25,78 @@
 *del , ARRINIT_ARR_types   ,  , nopr
 
 ! Check array names input param
-*get,AR20,parm,arg1,type
-*if,AR20,eq,3,then
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
   ! Is a string
-  *get,AR20,parm,%arg1%,type
-  *if,AR20,eq,4,then
+  *get,ar20,parm,%ARG1%,type
+  *if,ar20,eq,4,then
     ! Is a char array -- TODO: can't be char array, must be string; otherwise valid array names get trimmed
-    *get,AR21,parm,%arg1%,type
-    *dim,ARRINIT_ARR_names,char,AR21
-    *do,nthArr,1,AR21,1
-      ARRINIT_ARR_names(nthArr)=%arg1%(nthArr)
+    *get,ar21,parm,%ARG1%,type
+    *dim,ARRINIT_ARR_names,char,ar21
+    *do,ar22,1,ar21,1
+      ARRINIT_ARR_names(ar22) = %ARG1%(ar22)
     *enddo
   *else
-    AR21=1
-    *dim,ARRINIT_ARR_Names,char,AR21
-    ARRINIT_ARR_names(1)=arg1
+    ar21 = 1
+    *dim,ARRINIT_ARR_Names,char,ar21
+    ARRINIT_ARR_names(1) = ARG1
   *endif
 *else
   *msg,warn,
-ARRINIT error: arg1 must be a string representing an array name or the name of a char array.%/&
+ARRINIT error: ARG1 must be a string representing an array name or the name of a char array.%/&
 ARRINIT command ignored.
   *return,-1
 *endif
 
 ! Check array type
-AR32='ARRAY'
-*get,AR20,parm,arg2,type
-*if,AR20,eq,3,then
-  AR32=arg2
+ar32 = 'ARRAY'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar32 = ARG2
 *endif
 
 ! Check array lengths input param
-*get,AR20,parm,arg3,type
-*if,AR20,eq,3,then
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
   ! Is a string
-  *get,AR20,parm,%arg3%,type
-  *if,AR20,eq,1,then
+  *get,ar20,parm,%ARG3%,type
+  *if,ar20,eq,1,then
     ! Is an array
-    *get,AR22,parm,%arg3%,dim,x
-    *if,AR22,ne,AR21,then
+    *get,ar22,parm,%ARG3%,dim,x
+    *if,ar22,ne,ar21,then
       *msg,warn
-ARRINIT error: when arg3 is the name of an array, this array must be the same size of arg1.%/&
+ARRINIT error: when ARG3 is the name of an array, this array must be the same size of ARG1.%/&
 ARRINIT command ignored.
       *return,-1
     *endif
-    *dim,ARRINIT_ARR_lengths,,AR21
-    *do,nthArr,1,AR21,1
-      ARRINIT_ARR_lengths(nthArr)=%arg3%(nthArr)
+    *dim,ARRINIT_ARR_lengths,,ar21
+    *do,ar22,1,ar21,1
+      ARRINIT_ARR_lengths(ar22)=%ARG3%(ar22)
     *enddo
   *endif
-*elseif,AR20,eq,0,then
+*elseif,ar20,eq,0,then
   ! Is a number
-  *if,arg3,eq,0,then
+  *if,ARG3,eq,0,then
     *msg,warn
-ARRINIT error: zero array length is invalid (arg3=0).%/&
+ARRINIT error: zero array length is invalid (ARG3=0).%/&
 ARRINIT command ignored.
     *return,-1
   *endif
-  *dim,ARRINIT_ARR_lengths,,AR21
-  *do,nthArr,1,AR21,1
-    ARRINIT_ARR_lengths(nthArr)=arg3
+  *dim,ARRINIT_ARR_lengths,,ar21
+  *do,ar22,1,ar21,1
+    ARRINIT_ARR_lengths(ar22)=ARG3
   *enddo
 *else
   *msg,warn
-ARRINIT error: arg1 must be either the name of an array (string) or a number.%/&
+ARRINIT error: ARG1 must be either the name of an array (string) or a number.%/&
 ARRINIT command ignored.
   *return,-1
 *endif
 
 ! Initialize arrays
-*do,nthArr,1,AR21,1
-  arrName   = ARRINIT_ARR_names(nthArr)
-  arrLength = ARRINIT_ARR_lengths(nthArr)
-  *del,%arrName%,,nopr
-  *dim,%arrName%,AR32,arrLength
+*do,ar22,1,ar21,1
+  ar23 = ARRINIT_ARR_names(ar22)
+  ar24 = ARRINIT_ARR_lengths(ar22)
+  *del,%ar23%,,nopr
+  *dim,%ar23%,ar32,ar24
 *enddo

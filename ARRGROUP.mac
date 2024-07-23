@@ -1,4 +1,4 @@
-! ARRGROUP , groupTable , groupHeaders , indicesArray , valuesArray
+! arrgroup , groupTable , groupHeaders , indicesArray , valuesArray
 ! ARRGROUP , ARG1       , ARG2         , ARG3         , ARG4
 
 ! Description:
@@ -30,13 +30,13 @@
 ar91 = 'ARRGROUP_ARR_groups'
 *get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
-  ar91=ARG1
+  ar91 = ARG1
 *endif
 
-ar92='ARRGROUP_ARR_headers'
+ar92 = 'ARRGROUP_ARR_headers'
 *get,ar20,parm,ARG2,type
 *if,ar20,eq,3,then
-  ar92=ARG2
+  ar92 = ARG2
 *endif
 
 ar82 = 'ARRGROUP_ARR_sparseHeaders'
@@ -49,7 +49,7 @@ ar82 = 'ARRGROUP_ARR_sparseHeaders'
 *dim , %ar82% ,  , ar24
 *dim , %ar91% ,  , ar24 , ar24
 
-ar22=0
+ar22 = 0
 
 ! Create groups
 *do,ar25,1,ar24,1
