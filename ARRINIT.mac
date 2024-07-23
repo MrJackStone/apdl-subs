@@ -17,6 +17,7 @@
 ! ar22: nthArr
 ! ar23: arrName
 ! ar24: arrLength
+! ar32: arrType
 
 
 ! Initialize array params
@@ -29,21 +30,20 @@
 *if,ar20,eq,3,then
   ! Is a string
   *get,ar20,parm,%ARG1%,type
-  *if,ar20,eq,4,then
-    ! Is a char array -- TODO: can't be char array, must be string; otherwise valid array names get trimmed
-    *get,ar21,parm,%ARG1%,type
-    *dim,ARRINIT_ARR_names,char,ar21
+  *if,ar20,eq,5,then
+    *get,ar21,parm,%ARG1%,dim,y
+    *dim,ARRINIT_ARR_names,string,248,ar21
     *do,ar22,1,ar21,1
-      ARRINIT_ARR_names(ar22) = %ARG1%(ar22)
+      ARRINIT_ARR_names(1,ar22) = %ARG1%(1,ar22)
     *enddo
   *else
     ar21 = 1
-    *dim,ARRINIT_ARR_Names,char,ar21
-    ARRINIT_ARR_names(1) = ARG1
+    *dim,ARRINIT_ARR_names,string,248,ar21
+    ARRINIT_ARR_names(1,1) = ARG1
   *endif
 *else
   *msg,warn,
-ARRINIT error: ARG1 must be a string representing an array name or the name of a char array.%/&
+ARRINIT error: ARG1 must be a string representing an array name or the name of a string array.%/&
 ARRINIT command ignored.
   *return,-1
 *endif
@@ -71,7 +71,7 @@ ARRINIT command ignored.
     *endif
     *dim,ARRINIT_ARR_lengths,,ar21
     *do,ar22,1,ar21,1
-      ARRINIT_ARR_lengths(ar22)=%ARG3%(ar22)
+      ARRINIT_ARR_lengths(ar22) = %ARG3%(ar22)
     *enddo
   *endif
 *elseif,ar20,eq,0,then
@@ -95,7 +95,7 @@ ARRINIT command ignored.
 
 ! Initialize arrays
 *do,ar22,1,ar21,1
-  ar23 = ARRINIT_ARR_names(ar22)
+  ar23 = ARRINIT_ARR_names(1,ar22)
   ar24 = ARRINIT_ARR_lengths(ar22)
   *del,%ar23%,,nopr
   *dim,%ar23%,ar32,ar24
