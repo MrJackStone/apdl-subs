@@ -1,4 +1,4 @@
-! ANNOTXTARRAY, text_strings,   x0,   y0, spacing, direction, cellWidth, alignment
+! annotxtarray, text_strings,   x0,   y0, spacing, direction, cellWidth, alignment
 ! ANNOTXTARRAY,         ARG1, ARG2, ARG3,    ARG4,      ARG5,      ARG6,      ARG7
 
 ! Description:

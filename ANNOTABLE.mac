@@ -1,4 +1,4 @@
-! ANNOTABLE, data_values, row_labels, column_headers, tableTitle, xllc, yllc, cellAlignment
+! annotable, data_values, row_labels, column_headers, tableTitle, xllc, yllc, cellAlignment
 ! ANNOTABLE,        ARG1,       ARG2,           ARG3,       ARG4, ARG5, ARG6,          ARG7
 
 ! Description:

@@ -1,4 +1,4 @@
-! AHELIX , radius , phi  , width , direction , theta0
+! ahelix , radius , phi  , width , direction , theta0
 ! AHELIX , ARG1   , ARG2 , ARG3  , ARG4      , ARG5
 
 ! Description:

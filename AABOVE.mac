@@ -1,5 +1,5 @@
 ! aabove, selType,  kp1,  kp2
-! aabove,    arg1, arg2, arg3
+! AABOVE,    arg1, arg2, arg3
 
 ! Description:
 ! Selects all areas "above" a segment defined by two keypoints. The segment is interpreted as the
