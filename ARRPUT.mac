@@ -1,4 +1,4 @@
-! ARRPUT , arrName , atomCount , atom1 , atom2 , atom3 , atom4 , atom5 , atom6 , atom7 , atom8 , atom9 , atom10
+! arrput , arrName , atomCount , atom1 , atom2 , atom3 , atom4 , atom5 , atom6 , atom7 , atom8 , atom9 , atom10
 ! ARRPUT , ARG1    , ARG2      , ARG3  , ARG4  , ARG5  , ARG6  , ARG7  , ARG8  , ARG9  , AR10  , AR11  , AR12
 
 ! Description:

@@ -1,14 +1,22 @@
-! ARRJOIN, outputParm, arr1, ... arr17
-! ARRJOIN,       arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, ar10, ar11, ar12, ar13, ar14, ar15, ar16, ar17, ar18
+! arrjoin , outputParm , arr1 , arr2 , arr3 , arr4 , arr5 , arr6 , arr7 , arr8 , arr9 , arr10 , arr11 , arr12 , arr13 , arr14 , arr15 , arr16 , arr17
+! ARRJOIN , ARG1       , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8 , ARG9 , AR10 , AR11  , AR12  , AR13  , AR14  , AR15  , AR16  , AR17  , AR18
 
 ! Description:
 ! Joins multiple arrays (parameter names given) into a single one.
 
 ! Arguments:
-! arg1: outputParm  -  name of the output array parameter
-! arg2-ar19: arrXX  -  name of the input array parameters
+! ARG1: outputParm  -  name of the output array parameter
+! ARG2-AR19: arrXX  -  name of the input array parameters
 
-! Global parameters (erased at the end of this subroutine)
+! Local parameters:
+! ar20: parType
+! ar21: nthArg
+! ar22: nthArrDim
+! ar23: arrDim
+! ar24: maskValue
+! ar25: index
+
+! Global erased parameters:
 ! ARRJOIN_ARR_mask
 ! ARRJOIN_VAR_parmName
 
@@ -17,111 +25,111 @@
 *dim,ARRJOIN_ARR_mask,,17
 *vfill,ARRJOIN_ARR_mask,ramp,0,0
 
-! 'arg' arguments
-AR23=0
-*do,AR21,2,9,1
-    *get,AR20,parm,arg%AR21%,type
-    *if,AR20,eq,3,then
+! 'ARG' arguments
+ar23 = 0
+*do,ar21,2,9,1
+  *get,ar20,parm,arg%ar21%,type
+  *if,ar20,eq,3,then
 
-        ARRJOIN_VAR_parmName=arg%AR21%
+    ARRJOIN_VAR_parmName = arg%ar21%
 
-        *cfopen,ARRJOIN_tmp,tmp
-            *vwrite,ARRJOIN_VAR_parmName
-*get,AR20,parm,%c,type
-            *vwrite
-            ('*if,AR20,eq,1,then')
-            *vwrite,ARRJOIN_VAR_parmName
-*get,AR22,parm,%c,dim,x
-            *vwrite
-            ('AR23=AR23+AR22')
-            *vwrite
-            ('ARRJOIN_ARR_mask(AR21)=AR22')
-            *vwrite
-            ('*elseif,AR20,eq,0,then')
-            *vwrite
-            ('AR23=AR23+1')
-            *vwrite
-            ('ARRJOIN_ARR_mask(AR21)=-1')
-            *vwrite
-            ('*endif')
-        *cfclos
-        /nopr
-        /input,ARRJOIN_tmp,tmp
-        /delete,ARRJOIN_tmp,tmp
-        /gopr
+    *cfopen,ARRJOIN_tmp,tmp
+      *vwrite,ARRJOIN_VAR_parmName
+*get,ar20,parm,%c,type
+      *vwrite,
+      ('*if,ar20,eq,1,then')
+      *vwrite,ARRJOIN_VAR_parmName
+*get,ar22,parm,%c,dim,x
+      *vwrite,
+      ('ar23=ar23+ar22')
+      *vwrite,
+      ('ARRJOIN_ARR_mask(ar21)=ar22')
+      *vwrite,
+      ('*elseif,ar20,eq,0,then')
+      *vwrite,
+      ('ar23=ar23+1')
+      *vwrite,
+      ('ARRJOIN_ARR_mask(ar21)=-1')
+      *vwrite,
+      ('*endif')
+    *cfclos
+    /nopr
+    /input,ARRJOIN_tmp,tmp
+    /delete,ARRJOIN_tmp,tmp
+    /gopr
 
-    *endif
+  *endif
 *enddo
 
-! 'ar' arguments
-*do,AR21,10,17,1
-    *get,AR20,parm,ar%AR21%,type
-    *if,AR20,eq,3,then
+! 'AR' arguments
+*do,ar21,10,17,1
+  *get,ar20,parm,ar%ar21%,type
+  *if,ar20,eq,3,then
 
-        ARRJOIN_VAR_parmName=arg%AR21%
+    ARRJOIN_VAR_parmName = arg%ar21%
 
-        *cfopen,ARRJOIN_tmp,tmp
-            *vwrite,ARRJOIN_VAR_parmName
-*get,AR20,parm,%c,type
-            *vwrite
-            ('*if,AR20,eq,1,then')
-            *vwrite,ARRJOIN_VAR_parmName
-*get,AR22,parm,%c,dim,x
-            *vwrite
-            ('AR23=AR23+AR22')
-            *vwrite
-            ('ARRJOIN_ARR_mask(AR21)=AR22')
-            *vwrite
-            ('*elseif,AR20,eq,0,then')
-            *vwrite
-            ('AR23=AR23+1')
-            *vwrite
-            ('ARRJOIN_ARR_mask(AR21)=-1')
-            *vwrite
-            ('*endif')
-        *cfclos
-        /nopr
-        /input,ARRJOIN_tmp,tmp
-        /delete,ARRJOIN_tmp,tmp
-        /gopr
+    *cfopen,ARRJOIN_tmp,tmp
+      *vwrite,ARRJOIN_VAR_parmName
+*get,ar20,parm,%c,type
+      *vwrite,
+      ('*if,ar20,eq,1,then')
+      *vwrite,ARRJOIN_VAR_parmName
+*get,ar22,parm,%c,dim,x
+      *vwrite,
+      ('ar23=ar23+ar22')
+      *vwrite,
+      ('ARRJOIN_ARR_mask(ar21)=ar22')
+      *vwrite,
+      ('*elseif,ar20,eq,0,then')
+      *vwrite,
+      ('ar23=ar23+1')
+      *vwrite,
+      ('ARRJOIN_ARR_mask(ar21)=-1')
+      *vwrite,
+      ('*endif')
+    *cfclos
+    /nopr
+    /input,ARRJOIN_tmp,tmp
+    /delete,ARRJOIN_tmp,tmp
+    /gopr
 
-    *endif
+  *endif
 *enddo
 
-*del,%arg1%,,nopr
-*dim,%arg1%,,AR23
+*del,%ARG1%,,nopr
+*dim,%ARG1%,,ar23
 
-AR25=1
-*do,AR21,2,17,1
-    AR24=ARRJOIN_ARR_mask(AR21)
-    *if,AR24,ge,1,then
-        ! Append array
-        *if,AR21,le,9,then
-            *vfun,%arg1%(AR25),copy,arg%AR21%
-        *else
-            *vfun,%arg1%(AR25),copy,ar%AR21%
-        *endif
-        AR25=AR25+AR24
+ar25 = 1
+*do,ar21,2,17,1
+  ar24 = ARRJOIN_ARR_mask(ar21)
+  *if,ar24,ge,1,then
+    ! Append array
+    *if,ar21,le,9,then
+      *vfun,%ARG1%(ar25),copy,arg%ar21%
+    *else
+      *vfun,%ARG1%(ar25),copy,ar%ar21%
+    *endif
+    ar25 = ar25+ar24
 
-    *elseif,AR24,eq,-1,then
-        ! Append scalar
-        *if,AR21,le,9,then
-            ARRJOIN_VAR_parmName=arg%AR21%
-        *else
-            ARRJOIN_VAR_parmName=ar%AR21%
-        *endif
+  *elseif,ar24,eq,-1,then
+    ! Append scalar
+    *if,ar21,le,9,then
+      ARRJOIN_VAR_parmName = arg%ar21%
+    *else
+      ARRJOIN_VAR_parmName = ar%ar21%
+    *endif
 
-        *cfopen,ARRJOIN_tmp,tmp
-        *vwrite,arg1,AR25,ARRJOIN_VAR_parmName
+    *cfopen,ARRJOIN_tmp,tmp
+      *vwrite,ARG1,ar25,ARRJOIN_VAR_parmName
 %c(%i)=%c
-        *cfclos
-        /nopr
-        /input,ARRJOIN_tmp,tmp
-        /delete,ARRJOIN_tmp,tmp
-        /gopr
-        AR25=AR25+1
+    *cfclos
+    /nopr
+    /input,ARRJOIN_tmp,tmp
+    /delete,ARRJOIN_tmp,tmp
+    /gopr
+    ar25 = ar25+1
 
-    *endif
+  *endif
 *enddo
 
 *del,ARRJOIN_ARR_mask,,nopr

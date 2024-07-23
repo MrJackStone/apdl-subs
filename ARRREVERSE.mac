@@ -1,77 +1,77 @@
 ! arrreverse, outparm, arrparm
-! arrreverse,    arg1,    arg2
+! ARRREVERSE,    ARG1,    ARG2
 
 ! Description:
 ! Reverses the order of the elements in the provided array.
 
 ! Arguments:
-! arg1: outparm  -  name of the parameter to which the reversed array will be written.
-!                   Defaults to arg2 (name of the input parameter itself)
-! arg2: arrparm  -  name of the array parameter to reverse
+! ARG1: outparm  -  name of the parameter to which the reversed array will be written.
+!                   Defaults to ARG2 (name of the input parameter itself)
+! ARG2: arrparm  -  name of the array parameter to reverse
 
 ! Local parameters:
-! AR20: parType
-! AR21: index
-! AR22: reversedIndex
-! AR23: arrayElement
-! AR30: arrayType
-! AR31: arrLength
-! AR91: outputParm
+! ar20: parType
+! ar21: index
+! ar22: reversedIndex
+! ar23: arrayElement
+! ar30: arrayType
+! ar31: arrLength
+! ar91: outputParm
 
 ! Global parameters (erased at the end of this subroutine):
 ! ARRREVERSE_ARR_temp
 
 ! Output parameters:
-! %arg1% (defaults to %arg2%)
+! %ARG1% (defaults to %ARG2%)
 
 
 ! Validate arguments
-*get,AR20,parm,arg2,type
-*if,AR20,ne,3,then
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
   *msg,warn
-ARRREVERSE error: invalid arg2 type (expected character scalar).%/&
+ARRREVERSE error: invalid ARG2 type (expected character scalar).%/&
 ARRREVERSE command ignored.
   *return,-1
 *endif
 
-*get,AR20,parm,%arg2%,type
-*if,AR20,ne,1,or,AR20,ne,4,then
+*get,ar20,parm,%ARG2%,type
+*if,ar20,ne,1,or,ar20,ne,4,then
   *msg,warn
-ARRREVERSE error: invalid arg2 (expected name of array).%/&
+ARRREVERSE error: invalid ARG2 (expected name of array).%/&
 ARRREVERSE command ignored.
   *return,-1
 *endif
 
-AR30='array'
-*if,AR20,eq,4,then
-  AR30='char'
+ar30 = 'array'
+*if,ar20,eq,4,then
+  ar30 = 'char'
 *endif
 
 ! Set argument defaults
-AR91=arg2
-*get,AR20,parm,arg1,type
-*if,AR20,eq,3,then
-  AR91=arg1
+ar91 = ARG2
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar91 = ARG1
 *endif
 
 ! Initialize temporary array to store reversed values
-*get,AR31,parm,%arg2%,dim,x
+*get,ar31,parm,%ARG2%,dim,x
 *del,ARRREVERSE_ARR_temp,,nopr
-*dim,ARRREVERSE_ARR_temp,AR30,AR31
+*dim,ARRREVERSE_ARR_temp,ar30,ar31
 
 ! Initialize reverse index counter
-AR22=AR31
+ar22 = ar31
 
 ! Assign values from provided array to temp array in reversed order
-*do,AR21,1,AR31,1
-  AR23=%arg2%(AR21)
-  ARRREVERSE_ARR_temp(AR22)=AR23
-  AR22=AR22-1
+*do,ar21,1,ar31,1
+  ar23                      = %ARG2%(ar21)
+  ARRREVERSE_ARR_temp(ar22) = ar23
+  ar22                      = ar22-1
 *enddo
 
 ! Assign reversed array to output parameter
-*del,%AR91%,,nopr
-*vfun,%AR91%,copy,ARRREVERSE_ARR_temp
+*del,%ar91%,,nopr
+*vfun,%ar91%,copy,ARRREVERSE_ARR_temp
 
 ! Clean up
 *del,ARRREVERSE_ARR_temp,,nopr

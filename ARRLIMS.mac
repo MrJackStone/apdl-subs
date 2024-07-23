@@ -1,61 +1,60 @@
-! ARRLIMS, outputParm
-! ARRLIMS,       arg1
+! arrlims, outputParm
+! ARRLIMS,       ARG1
 
 ! Description:
 ! Calculates maximum and minimum values for each column of the given 2-D arrays.
 
 ! Arguments:
-! arg1: outputParm  -  name of output parameter to which min/max values will be written
+! ARG1: outputParm  -  name of output parameter to which min/max values will be written
 
 ! Implicit arguments:
 ! ARRLIMS_ARR_names  -  array of characters, each position containing the name of a 2-D array
 !                       parameter (all must have an equal number of columns)
 
 ! Local parameters:
-! AR20: arrcount
-! AR21: totDim
-! AR22: nthArr
-! AR23: arrName
-! AR24: arrDim
-! AR25: colCount
-! AR26: idx1
-! AR27: nthCol
-! AR28: minval
-! AR29: maxval
+! ar20: arrcount
+! ar21: totDim
+! ar22: nthArr
+! ar23: arrName
+! ar24: arrDim
+! ar25: colCount
+! ar26: idx1
+! ar27: nthCol
+! ar28: minval
+! ar29: maxval
 
 ! Output parameters:
 ! ARRLIMS_ARR_allRows  -  2-D array combining all input array rows
 
 
-*get,AR20,parm,ARRLIMS_ARR_names,dim,y
+*get,ar20,parm,ARRLIMS_ARR_names,dim,y
 
-AR21=0
-*do,AR22,1,AR20,1
-    AR23=ARRLIMS_ARR_names(1,AR22)
-    *get,AR24,parm,%AR23%,dim,x
-    AR21=AR21+AR24
-    *get,AR25,parm,%AR23%,dim,y
+ar21 = 0
+*do,ar22,1,ar20,1
+    ar23 = ARRLIMS_ARR_names(1,ar22)
+    *get,ar24,parm,%ar23%,dim,x
+    ar21 = ar21+ar24
+    *get,ar25,parm,%ar23%,dim,y
 *enddo
 
 *del,ARRLIMS_ARR_allRows,,nopr
-*dim,ARRLIMS_ARR_allRows,,AR21,AR25
+*dim,ARRLIMS_ARR_allRows,,ar21,ar25
 
-AR26=1
-*do,AR22,1,AR20,1
-    AR23=ARRLIMS_ARR_names(1,AR22)
-    *get,AR24,parm,%AR23%,dim,x
-    *do,AR27,1,AR25,1
-        *vfun,ARRLIMS_ARR_allRows(AR26,AR27),copy,%AR23%(1,AR27)
+ar26 = 1
+*do,ar22,1,ar20,1
+    ar23 = ARRLIMS_ARR_names(1,ar22)
+    *get,ar24,parm,%ar23%,dim,x
+    *do,ar27,1,ar25,1
+        *vfun,ARRLIMS_ARR_allRows(ar26,ar27),copy,%ar23%(1,ar27)
     *enddo
-    AR26=AR26+AR24
+    ar26 = ar26+ar24
 *enddo
 
-*del,%arg1%,,nopr
-*dim,%arg1%,,2,AR25
-*do,AR27,1,AR25,1
-    *vscfun,AR28,min,ARRLIMS_ARR_allRows(1,AR27)
-    *vscfun,AR29,max,ARRLIMS_ARR_allRows(1,AR27)
-    %arg1%(1,AR27)=AR28
-    %arg1%(2,AR27)=AR29
+*del,%ARG1%,,nopr
+*dim,%ARG1%,,2,ar25
+*do,ar27,1,ar25,1
+    *vscfun,ar28,min,ARRLIMS_ARR_allRows(1,ar27)
+    *vscfun,ar29,max,ARRLIMS_ARR_allRows(1,ar27)
+    %ARG1%(1,ar27) = ar28
+    %ARG1%(2,ar27) = ar29
 *enddo
-

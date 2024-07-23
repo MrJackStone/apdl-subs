@@ -1,30 +1,30 @@
-! ARRUNIQ, inputArray, outputArray, sort
-! ARRUNIQ,       arg1,        arg2, arg3
+! arruniq, inputArray, outputArray, sort
+! ARRUNIQ,       ARG1,        ARG2, ARG3
 
 ! Description:
 ! Removes repeated elements from a sorted array.
 
 ! Arguments:
-! arg1: inputArray   -  name of array parameter to be operated on
-! arg2: outputArray  -  name of array parameter to which resulting list will be written
-! arg3: sort         -  array sorting key:
+! ARG1: inputArray   -  name of array parameter to be operated on
+! ARG2: outputArray  -  name of array parameter to which resulting list will be written
+! ARG3: sort         -  array sorting key:
 !                          [0] do not sort (default)
 !                          [1] sort ascending
 !                          [2] sort descending
 
 ! Implicit arguments
 ! ARRUNIQ_ARR_input  -  name of array parameter to be operated on
-!                       (alternative to passing arg1 as STRING)
+!                       (alternative to passing ARG1 as STRING)
 
 ! Local parameters:
-! AR20: inputLength
-! AR21: outputLength
-! AR22: lastEntry
-! AR23: nthEntry
-! AR24: newEntry
-! AR25: parmType
-! AR26: inputParmName
-! AR27: outputParmName
+! ar20: inputLength
+! ar21: outputLength
+! ar22: lastEntry
+! ar23: nthEntry
+! ar24: newEntry
+! ar25: parmType
+! ar26: inputParmName
+! ar27: outputParmName
 
 ! Global parameters (erased at the end of this subroutine):
 ! ARRUNIQ_ARR_tempArray
@@ -35,79 +35,76 @@
 
 
 ! Set input array parameter name
-*get,AR25,PARM,arg1,TYPE
-*if,AR25,EQ,3,THEN
-    AR26=arg1
-*else
-    AR26='ARRUNIQ_ARR_input'
+ar26 = 'ARRUNIQ_ARR_input'
+*get,ar25,parm,ARG1,type
+*if,ar25,eq,3,then
+  ar26 = ARG1
 *endif
 
 ! Set output array parameter name
-*get,AR25,PARM,arg2,TYPE
-*if,AR25,EQ,3,THEN
-    AR27=arg2
-*else
-    AR27='ARRUNIQ_ARR_OUTPUT'
+ar27 = 'ARRUNIQ_ARR_OUTPUT'
+*get,ar25,parm,ARG2,type
+*if,ar25,eq,3,then
+  ar27 = ARG2
 *endif
 
 ! Set sorted input parameter name
-AR28='ARRUNIQ_ARR_sorted'
-*del,%AR28%,,nopr
+ar28 = 'ARRUNIQ_ARR_sorted'
+*del,%ar28%,,nopr
 
 ! Sort input array
-*get,AR25,parm,arg3,type
-*if,AR25,eq,0,then
-    *if,arg3,eq,1,then
-        *vfun,%AR28%,asort,%AR26%
-    *elseif,arg3,eq,2,then
-        *vfun,%AR28%,dsort,%AR26%
-    *else
-        *vfun,%AR28%,copy,%AR26%
-    *endif
+*get,ar25,parm,ARG3,type
+*if,ar25,eq,0,then
+  *if,ARG3,eq,1,then
+    *vfun,%ar28%,asort,%ar26%
+  *elseif,ARG3,eq,2,then
+    *vfun,%ar28%,dsort,%ar26%
+  *else
+    *vfun,%ar28%,copy,%ar26%
+  *endif
 *else
-    *vfun,%AR28%,copy,%AR26%
+  *vfun,%ar28%,copy,%ar26%
 *endif
 
 ! Get input array size
-*get,AR20,PARM,%AR28%,DIM,X
+*get,ar20,parm,%ar28%,dim,x
 
 ! Initialize output array
-AR21=1
-*del,%AR27%,,nopr
-*dim,%AR27%,ARRAY,AR21
-AR22=%AR28%(1)
-%AR27%(1)=AR22
+ar21 = 1
+*del,%ar27%,,nopr
+*dim,%ar27%,array,ar21
+ar22      = %ar28%(1)
+%ar27%(1) = ar22
 
 ! Loop through input array values, starting from the second one:
-*do,AR23,2,AR20,1
+*do,ar23,2,ar20,1
 
-   ! Get value in next position
-   AR24=%AR28%(AR23)
+  ! Get value in next position
+  ar24 = %ar28%(ar23)
 
-   ! If value is different from previous one:
-   *if,AR24,NE,AR22,THEN
+  ! If value is different from previous one:
+  *if,ar24,ne,ar22,then
 
-      ! Increment output array length
-      AR21=AR21+1
+    ! Increment output array length
+    ar21 = ar21+1
 
-      ! Fill temporary array with output values
-      *del,ARRUNIQ_ARR_tempArray,,nopr
-      *dim,ARRUNIQ_ARR_tempArray,ARRAY,AR21
-      *vfun,ARRUNIQ_ARR_tempArray,COPY,%AR27%
+    ! Fill temporary array with output values
+    *del  , ARRUNIQ_ARR_tempArray ,       , nopr
+    *dim  , ARRUNIQ_ARR_tempArray , array , ar21
+    *vfun , ARRUNIQ_ARR_tempArray , copy  , %ar27%
 
-      ! Append new value to output array
-      *del,%AR27%,,nopr
-      *dim,%AR27%,ARRAY,AR21
-      *vfun,%AR27%,COPY,ARRUNIQ_ARR_tempArray
-      %AR27%(AR21)=AR24
+    ! Append new value to output array
+    *del,%ar27%,,nopr
+    *dim,%ar27%,array,ar21
+    *vfun,%ar27%,copy,ARRUNIQ_ARR_tempArray
+    %ar27%(ar21) = ar24
 
-      ! Update previous element value
-      AR22=AR24
+    ! Update previous element value
+    ar22=ar24
 
-   *endif
+  *endif
 
 *enddo
 
 ! Clear parameters
 *del,ARRUNIQ_ARR_tempArray,,nopr
-
