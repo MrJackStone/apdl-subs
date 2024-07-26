@@ -1,9 +1,0 @@
-! testme, arg1
-
-*cfopen,testme_tmp,txt
-    *vwrite,'banana','apple'
-%c %/%c %\
-    *vwrite,'banana'
-%c
-*cfclos
-
