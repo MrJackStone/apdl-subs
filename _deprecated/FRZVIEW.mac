@@ -1,5 +1,0 @@
-! FRZVIEW, window
-! FRZVIEW,   arg1
-
-/dist  , arg1 , 1.001 , 1
-/focus , arg1 , 0.001 , 0.001 , 0.001,1
