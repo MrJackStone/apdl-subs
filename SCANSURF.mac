@@ -302,12 +302,12 @@ AR72=0
             SCANSURF_ARR_csecAggregates(1)=AR44,AR45,AR46,AR47,AR48,AR49,AR50 !! IX, IY, IXY
         *endif
 
-        ! Average first segment's value with last value from previous segment
-        *if,AR30,gt,1,and,AR70,eq,AR24,then
-            *do,AR39,1,AR38,1
-                SCANSURF_ARR_csecAggregates(AR39)=(SCANSURF_ARR_csecAggregates(AR39)+SCANSURF_ARR_prevAggregates(AR39))/2
-            *enddo
-        *endif
+        ! ! Average first segment's value with last value from previous segment
+        ! *if,AR30,gt,1,and,AR70,eq,AR24,then
+        !     *do,AR39,1,AR38,1
+        !         SCANSURF_ARR_csecAggregates(AR39)=(SCANSURF_ARR_csecAggregates(AR39)+SCANSURF_ARR_prevAggregates(AR39))/2
+        !     *enddo
+        ! *endif
 
         ! Store aggregated value
         *do,AR39,1,AR38,1
