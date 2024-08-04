@@ -93,7 +93,8 @@
 
 ! Store active CS
 csbackup
-AR36=CSBackup_
+mpopbackup
+*get,ar36,active,,csys
 
 ! For the active path:
 ! Get the number of vertices
@@ -110,7 +111,7 @@ SCANSURF command is ignored.
 AR24=1+(AR23-1)/(AR22-1)
 
 ! Aggregation option check & parameters
-*del,SCANSURF_ARR_outputLabels
+*del,SCANSURF_ARR_outputLabels,,nopr
 AR21=upcase(arg1)
 *if,AR21,eq,'SINGLE',then
     ! Single result
@@ -138,7 +139,7 @@ SCANSURF error: path does not have space for all required result sets.%/&
 SCANSURF command is ignored.
     *return,-1
 *endif
-*del,SCANSURF_ARR_dataSetIndices
+*del,SCANSURF_ARR_dataSetIndices,,nopr
 *dim,SCANSURF_ARR_dataSetIndices,,AR38
 *vfill,SCANSURF_ARR_dataSetIndices,ramp,SCANSURF_VAR_firstIdx,1
 
@@ -170,8 +171,8 @@ SCANSURF command is ignored.
 ! Initialize loop parameters: local CS number, path division point offset, virtual cross-section count
 AR26=0
 AR72=0
-*del,SCANSURF_ARR_aggCsecValues
-*del,SCANSURF_ARR_allSurfNames
+*del,SCANSURF_ARR_aggCsecValues,,nopr
+*del,SCANSURF_ARR_allSurfNames,,nopr
 *dim,SCANSURF_ARR_aggCsecValues,,AR23,AR38
 *dim,SCANSURF_ARR_allSurfNames,char,AR23
 
@@ -193,12 +194,13 @@ AR72=0
     AR67=AR60/(AR24-1)
 
     ! Create local coordinate system aligned with the path's segment
+    csys,0
     csnext,'SCANSURF_VAR_nthCS'
     csby2p,SCANSURF_VAR_nthCS,AR31,AR32,AR33,AR41,AR42,AR43
-    csys,AR36
+    csys,ar36
 
     ! Calculate X coordinate in local CS for each division point along the path's segment
-    *del,SCANSURF_ARR_xAtDivs
+    *del,SCANSURF_ARR_xAtDivs,,nopr
     *dim,SCANSURF_ARR_xAtDivs,,AR24
     *vfill,SCANSURF_ARR_xAtDivs(1),ramp,0,AR67
 
@@ -261,7 +263,7 @@ AR72=0
         !!susel,s,%AR71%
 
         ! Initialize array to store aggregated result(s) for this cross-section
-        *del,SCANSURF_ARR_csecAggregates
+        *del,SCANSURF_ARR_csecAggregates,,nopr
         *dim,SCANSURF_ARR_csecAggregates,,AR38
 
         ! Extract aggregated virtual cross-section value
@@ -273,7 +275,7 @@ AR72=0
                 SCANSURF_ARR_csecAggregates(1)=AR81
             *else
                 ! VSCFUN option
-                *del,SCANSURF_ARR_csecVals
+                *del,SCANSURF_ARR_csecVals,,nopr
                 suget,%AR71%,%AR28%,SCANSURF_ARR_csecVals,off
                 *vscfun,AR81,%AR25%,SCANSURF_ARR_csecVals
                 SCANSURF_ARR_csecAggregates(1)=AR81
@@ -317,7 +319,7 @@ AR72=0
     *enddo
 
     ! Store this segment's last set of values
-    *del,SCANSURF_ARR_prevAggregates
+    *del,SCANSURF_ARR_prevAggregates,,nopr
     *vfun,SCANSURF_ARR_prevAggregates,copy,SCANSURF_ARR_csecAggregates
 
     ! Increment overall path division point offset
@@ -326,26 +328,17 @@ AR72=0
 
 ! Transfer aggregated virtual cross-section data to path
 *do,AR39,1,AR38,1
-    *del,SCANSURF_ARR_aggColumn
+    *del,SCANSURF_ARR_aggColumn,,nopr
     *vfun,SCANSURF_ARR_aggColumn,copy,SCANSURF_ARR_aggCsecValues(1,AR39)
     AR91=SCANSURF_ARR_outputLabels(AR39)
     AR92=SCANSURF_ARR_dataSetIndices(AR39)
     arr2pth,'SCANSURF_ARR_aggColumn',AR91,AR92
 *enddo
 
-! Restore previously active CS
+! Clean up
+*del , SCANSURF_ARR_xAtDivs  ,  , nopr
+*del , SCANSURF_ARR_csecVals ,  , nopr
+*del , SCANSURF_VAR_nthCS    ,  , nopr
+*del , SCANSURF_VAR_mthCS    ,  , nopr
 csrestore
-
-! Clear parameters
-*del,SCANSURF_ARR_xAtDivs
-*del,SCANSURF_ARR_csecVals
-*del,SCANSURF_VAR_nthCS
-*del,SCANSURF_VAR_mthCS
-
-! Restore warnings
-/uis,msgpop,2
-
-
-
-
-
+mpoprestore
