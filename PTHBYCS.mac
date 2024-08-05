@@ -1,32 +1,58 @@
-! PTHBYCS, pthName, nDiv, csStart, csEnd
-! PTHBYCS,    arg1, arg2,    arg3,  arg4
+! PTHBYCS , pthName , nDiv , csStart , csEnd1 , csEnd2 , csEnd3 , csEnd4 , csEnd5 , csEnd6
+! PTHBYCS , ARG1    , ARG2 , ARG3    , ARG4   , ARG5   , ARG6   , ARG7   , ARG8   , ARG9
 
 ! Description:
-! Creates a path that starts at the origin of a CS and ends at the origin of another CS.
+! Creates a path that starts at the origin of a CS and passses through the origins of up to 6
+! other coordinate systems.
 
 ! Arguments:
-! arg1: pthName  -  name of the path to be created
-! arg2: nDiv     -  number of divisions in the path to be created
-! arg3: csStart  -  coordinate system that marks the start point of the path
-! arg4: csEnd    -  coordinate system that marks the end point of the path
+! ARG1: pthName  -  name of the path to be created
+! ARG2: nDiv     -  number of divisions in the path to be created
+! ARG3: csStart  -  coordinate system that marks the start point of the path
+! ARG4: csEnd1   -  coordinate system that marks the next path point
+! ARG5: csEnd2   -  coordinate system that marks the next path point (optional)
+! ARG6: csEnd3   -  coordinate system that marks the next path point (optional)
+! ARG7: csEnd4   -  coordinate system that marks the next path point (optional)
+! ARG8: csEnd5   -  coordinate system that marks the next path point (optional)
+! ARG9: csEnd6   -  coordinate system that marks the next path point (optional)
 
 ! Local parameters:
-! AR21: x0
-! AR22: y0
-! AR23: z0
-! AR24: x1
-! AR25: y1
-! AR26: z1
+! ar21: xi
+! ar22: yi
+! ar23: zi
+! ar31: csNum
+! ar32: ptCount
+! ar33: nthPos
 
-*get,AR21,cdsy,arg3,loc,x
-*get,AR22,cdsy,arg3,loc,y
-*get,AR23,cdsy,arg3,loc,z
+! Global erased parameters:
+! PTHBYCS_ARR_csNums
 
-*get,AR24,cdsy,arg4,loc,x
-*get,AR25,cdsy,arg4,loc,y
-*get,AR26,cdsy,arg4,loc,z
 
-path,%arg1%,2,,arg2
+! Parse inputs
+*del,PTHBYCS_ARR_csNums,,nopr
+*dim,PTHBYCS_ARR_csNums,,7
+PTHBYCS_ARR_csNums(1) = ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8 , ARG9
 
-ppath,1,,AR21,AR22,AR23
-ppath,2,,AR24,AR25,AR26
+! Calculate number of path points
+*do,ar33,1,7,1
+  ar31 = PTHBYCS_ARR_csNums(ar33)
+  *if,ar31,le,0,exit
+  ar32 = ar33
+*enddo
+
+! Create path
+path,%ARG1%,ar32,,ARG2
+
+! Set path points
+*do,ar33,1,ar32,1
+  ar31 = PTHBYCS_ARR_csNums(ar33)
+
+  *get,ar21,cdsy,ar31,loc,x
+  *get,ar22,cdsy,ar31,loc,y
+  *get,ar23,cdsy,ar31,loc,z
+
+  ppath,ar33,,ar21,ar22,ar23
+*enddo
+
+! Clean up
+*del,PTHBYCS_ARR_csNums,,nopr
