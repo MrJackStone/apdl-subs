@@ -1,77 +1,73 @@
 ! arxori, xDir
 ! ARXORI, ARG1
 
-! Descrição:
-! Esta subrotina serve para orientar o vetor normal de todas as áreas selecionadas com base
-! no sentido imposto para a componente X do vetor normal.
+! Description:
+! Orients the normal of selected areas along the positive or negative direction (depending on
+! the sign of ARG1) of the global X axis.
 
-! Lista de argumentos:
-! arg1: xDir  -  sentido da componente X da normal (valor positivo ou negativo)
+! Arguments:
+! ARG1: xDir  -  orientation along X (positive or negative value)
 
-! Lista de variáveis locais:
-! AR20: ACount
-! AR21: nthArea
-! AR22: L1
-! AR23: L2
-! AR24: L3
-! AR25: K11
-! AR26: K21
-! AR27: K31
-! AR28: K12
-! AR29: K22
-! AR30: K32
-! AR31: K1
-! AR32: K2
-! AR33: K3
-! AR34: XNorm
-! AR35: revCheck
-! AR36: ANum
+! Local parameters:
+! ar20: aCount
+! ar21: nthArea
+! ar22: L1
+! ar23: L2
+! ar24: L3
+! ar25: K11
+! ar26: K21
+! ar27: K31
+! ar28: K12
+! ar29: K22
+! ar30: K32
+! ar31: K1
+! ar32: K2
+! ar33: K3
+! ar34: XNorm
+! ar35: revCheck
+! ar36: ANum
 
-! Obter número de áreas selecionadas
-*get,AR20,AREA,,COUNT
-AR36=0
+*get,ar20,area,,count
+ar36 = 0
 
-! Orientar cada área selecionada
-*do,AR21,1,AR20,1
+! Re-orient each selected area
+*do,ar21,1,ar20,1
 
-   ! Obter número da área
-   AR36=ARNEXT(AR36)
+  ar36 = arnext(ar36)
 
-   ! Obter número de três das linhas do perímetro
-   *get,AR22,AREA,AR36,LOOP,1,LINE,1
-   *get,AR23,AREA,AR36,LOOP,1,LINE,2
-   *get,AR24,AREA,AR36,LOOP,1,LINE,3
+  *get , ar22 , area , ar36 , loop , 1 , line , 1
+  *get , ar23 , area , ar36 , loop , 1 , line , 2
+  *get , ar24 , area , ar36 , loop , 1 , line , 3
 
-   ! Obter números dos keypoints das linhas
-   *get,AR25,LINE,AR22,KP,1
-   *get,AR26,LINE,AR23,KP,1
-   *get,AR27,LINE,AR24,KP,1
-   *get,AR28,LINE,AR22,KP,2
-   *get,AR29,LINE,AR23,KP,2
-   *get,AR30,LINE,AR24,KP,2
+  *get , ar25 , line , ar22 , kp , 1
+  *get , ar26 , line , ar23 , kp , 1
+  *get , ar27 , line , ar24 , kp , 1
+  *get , ar28 , line , ar22 , kp , 2
+  *get , ar29 , line , ar23 , kp , 2
+  *get , ar30 , line , ar24 , kp , 2
 
-   ! Escolher três keypoints distintos
-   AR31=AR25
-   *if,AR31,EQ,AR26,THEN
-      AR32=AR29
-   *else
-      AR32=AR26
-   *endif
-   *if,AR31,EQ,AR27,OR,AR32,EQ,AR27,THEN
-      AR33=AR30
-   *else
-      AR33=AR27
-   *endif
+  ! Pick three different keypoints
+  ar31 = ar25
 
-   ! Calcular vetor normal (componente na direção X)
-   AR34=NORMKX(AR31,AR32,AR33)
-   AR35=AR34*arg1
+  *if,ar31,eq,ar26,then
+    ar32 = ar29
+  *else
+    ar32 = ar26
+  *endif
 
-   ! Inverter a área (se necessário)
-   *if,AR35,LT,0,THEN
-      AREVERSE,AR36
-   *endif
+  *if,ar31,eq,ar27,or,ar32,eq,ar27,then
+    ar33 = ar30
+  *else
+    ar33 = ar27
+  *endif
+
+  ! Calcular vetor normal (componente na direção X)
+  AR34=NORMKX(AR31,AR32,AR33)
+  AR35=AR34*arg1
+
+  ! Inverter a área (se necessário)
+  *if,AR35,LT,0,THEN
+    AREVERSE,AR36
+  *endif
 
 *enddo
-
-
