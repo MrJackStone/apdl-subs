@@ -1,51 +1,55 @@
-! CSBY2P,  num,   x0,   y0,   z0,   x1,   y1,   z1, yzRotation
-! CSBY2P, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8
+! CSBY2P , num  , x0   , y0   , z0   , x1   , y1   , z1   , yzRotation
+! CSBY2P , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8
 
 ! Description:
 ! Creates a coordinate system based on two 3-D point coordinates in the active CSYS that define the
 ! origin and orientation of the X axis. Optionally, a rotation in the Y-Z plane can also be given.
 
 ! Arguments:
-! arg1: num    -  number of the coordinate system to be created
-! arg2: x0     -  X coordinate (in active CSYS) of the origin of the new coordinate system
-! arg3: y0     -  Y coordinate (in active CSYS) of the origin of the new coordinate system
-! arg4: z0     -  Z coordinate (in active CSYS) of the origin of the new coordinate system
-! arg5: x1     -  X coordinate (in active CSYS) of the point that defines the X-axis direction
-! arg6: y1     -  Y coordinate (in active CSYS) of the point that defines the X-axis direction
-! arg7: z1     -  Z coordinate (in active CSYS) of the point that defines the X-axis direction
-! arg8: yzRot  -  rotation in Y-Z plane (last rotation applied)
+! ARG1: num    -  number of the coordinate system to be created
+! ARG2: x0     -  X coordinate (in active CSYS) of the origin of the new coordinate system
+! ARG3: y0     -  Y coordinate (in active CSYS) of the origin of the new coordinate system
+! ARG4: z0     -  Z coordinate (in active CSYS) of the origin of the new coordinate system
+! ARG5: x1     -  X coordinate (in active CSYS) of the point that defines the X-axis direction
+! ARG6: y1     -  Y coordinate (in active CSYS) of the point that defines the X-axis direction
+! ARG7: z1     -  Z coordinate (in active CSYS) of the point that defines the X-axis direction
+! ARG8: yzRot  -  rotation in Y-Z plane (last rotation applied)
 
 ! Local parameters:
-! AR22: deltaX
-! AR23: deltaY
-! AR24: deltaZ
-! AR25: lengthXY
+! ar22: deltaX
+! ar23: deltaY
+! ar24: deltaZ
+! ar25: lengthXY
 
 ! Global parameters (erased at the end of this subroutine):
 ! CSBY2P_VAR_rotXY
 ! CSBY2P_VAR_rotXZ
 
 
+! Prepare environment
+*del,CSBY2P_VAR_rotXY,,nopr
+*del,CSBY2P_VAR_rotXZ,,nopr
+
 ! Calculate deltas for each coordinate
-AR22=arg5-arg2
-AR23=arg6-arg3
-AR24=arg7-arg4
+ar22 = ARG5-ARG2
+ar23 = ARG6-ARG3
+ar24 = ARG7-ARG4
 
 ! Calculate oblique length in X-Y plane
-AR25=sqrt(AR22**2+AR23**2)
+ar25 = sqrt(ar22**2+ar23**2)
 
 ! Calculate first rotation angle: about Z
-posang,'rotXY',AR22,AR23
+posang,'CSBY2P_VAR_rotXY',ar22,ar23
 
 ! Calculate second rotation angle: about Y
-posang,'rotZX',AR25,AR24
+posang,'CSBY2P_VAR_rotXZ',ar25,ar24
 
 ! Create local coordinate system with Z and Y rotations
-clocal,arg1,cart,arg2,arg3,arg4,rotXY,,-rotZX
+clocal,ARG1,cart,ARG2,ARG3,ARG4,CSBY2P_VAR_rotXY,,-CSBY2P_VAR_rotXZ
 
 ! Apply optional third rotation about X axis
-clocal,arg1,cart,,,,,arg8
+clocal,ARG1,cart,,,,,ARG8
 
-! Clear local parameters
+! Clean up
 *del,CSBY2P_VAR_rotXY,,nopr
 *del,CSBY2P_VAR_rotXZ,,nopr
