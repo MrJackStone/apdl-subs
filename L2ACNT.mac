@@ -1,0 +1,56 @@
+! l2acnt , cmArea , cmLine , pinball
+! L2ACNT , ARG1   , ARG2   , ARG3
+
+! Description:
+! Creates linear bonded (always) contact between lines (contact) and areas (target).
+
+! Arguments:
+! ARG1: cmArea   -  name of area selection component
+! ARG2: cmLine   -  name of line selection component
+! ARG3: pinball  -  size of pinball region
+
+! Local parameters:
+! -
+
+! Global erased parameters:
+! COMPE_L2ACNT_target
+! COMPN_L2ACNT_target
+! COMPE_L2ACNT_contact
+! COMPN_L2ACNT_contact
+! L2ACNT_ARR_keyopts
+! L2ACNT_ARR_reals
+
+
+! Create target element base
+cmsel,s,%ARG1%
+esla,s
+nsle,s
+cm,COMPE_L2ACNT_target,elem
+cm,COMPN_L2ACNT_target,node
+
+! Create contact element base
+cmsel,s,%ARG2%
+nsll,s,1
+esln,s
+cm,COMPE_L2ACNT_contact,elem
+cm,COMPN_L2ACNT_contact,node
+
+! Set keyopts & real constants
+*del , L2ACNT_ARR_keyopts ,  , nopr
+*dim , L2ACNT_ARR_keyopts ,  , 2
+L2ACNT_ARR_keyopts(2) = 2
+
+*del , L2ACNT_ARR_reals ,  , nopr
+*dim , L2ACNT_ARR_reals ,  , 2
+L2ACNT_ARR_reals(2) = -ARG3
+
+! Create contact pairs
+cntdef , 'L2ACNT_TARGET' , 'L2ACNT_CONTACT' , 170 , 175 , 5 ,  , 'L2ACNT_ARR_keyopts' , 'L2ACNT_ARR_reals'
+
+! Clean up
+cmdele , COMPE_L2ACNT_target
+cmdele , COMPN_L2ACNT_target
+cmdele , COMPE_L2ACNT_contact
+cmdele , COMPN_L2ACNT_contact
+*del , L2ACNT_ARR_keyopts ,  , nopr
+*del , L2ACNT_ARR_reals   ,  , nopr
