@@ -41,7 +41,7 @@ ar26 = 'GLO2LOC_VAR_y'
   ar26 = ARG6
 *endif
 
-ar26 = 'GLO2LOC_VAR_z'
+ar27 = 'GLO2LOC_VAR_z'
 *get,ar20,parm,ARG7,type
 *if,ar20,eq,3,then
   ar27 = ARG7
