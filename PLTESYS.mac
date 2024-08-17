@@ -1,0 +1,65 @@
+! PLTESYS
+
+/eof
+
+*get,ec,elem,,count
+
+*vget,elem_sel,elem,,esel
+*vget,elem_esys,elem,,attr,'esys'
+
+*vmask,elem_sel
+*vfun,sel_esys,comp,elem_esys
+
+arruniq,'sel_esys','uniq_esys',1
+
+wpcsys
+dsys
+
+!!                                                                                                !!
+init
+/prep7
+blc5,0,0,4,3
+
+/triad,on
+/vup,all,z
+/udoc,1,view,left
+
+dsys,0
+/view,1,1,1,1
+/angle,1,0
+/auto,1
+aplot
+*get,gdist,graph,1,dist
+
+wpcsys,-1,0
+wpoffs,1,-0.4
+wprota,45,,-15
+cswpla,999,cart
+wpstyl,,,,,,,,0
+
+*get , xl    , cdsy , 999 , loc , x
+*get , yl    , cdsy , 999 , loc , y
+*get , xl    , cdsy , 999 , loc , x
+*get , angXY , cdsy , 999 , ang , xy
+*get , angYZ , cdsy , 999 , ang , yz
+*get , angZX , cdsy , 999 , ang , zx
+
+dsys,999
+/view,1,1,1,1
+/angle,1,0
+/auto,1
+aplot
+
+/angle,1,0
+aplot
+/angle,1,angXY,zm,1
+aplot
+/angle,1,angYZ,xm,1
+aplot
+/angle,1,angZX,ym,1
+aplot
+/dist,1,gdist
+
+/auto,1
+aplot
+/plopts
