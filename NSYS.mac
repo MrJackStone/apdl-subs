@@ -9,14 +9,30 @@
 
 ! Local parameters:
 ! ar20: parType
-! ar21: angXY
-! ar22: angYZ
-! ar23: angZX
+! ar21: dsysXY
+! ar22: dsysYZ
+! ar23: dsysZX
 ! ar24: nthWindow
 ! ar25: wDist
 ! ar26: xFocus
 ! ar27: yFocus
 ! ar28: zFocus
+! ar30: currDSYS
+! ar31: locXY
+! ar32: locYZ
+! ar33: locZX
+
+! Global erased parameters:
+! NSYS_VAR_xg
+! NSYS_VAR_yg
+! NSYS_VAR_zg
+! NSYS_VAR_xl
+! NSYS_VAR_yl
+! NSYS_VAR_zl
+! NSYS_ARR_dists
+! NSYS_ARR_xFoci
+! NSYS_ARR_yFoci
+! NSYS_ARR_zFoci
 
 
 ! Prepare environment
@@ -37,9 +53,15 @@
 *dim , NSYS_ARR_zFoci ,  , 5
 
 ! Get current display data
-*get , ar21 , cdsy  , ARG1 , ang  , xy
-*get , ar22 , cdsy  , ARG1 , ang  , yz
-*get , ar23 , cdsy  , ARG1 , ang  , zx
+*get , ar30 , active ,  , dsys
+
+*get , ar21 , cdsy , ar30 , ang , xy
+*get , ar22 , cdsy , ar30 , ang , yz
+*get , ar23 , cdsy , ar30 , ang , zx
+
+*get , ar31 , cdsy , ARG1 , ang , xy
+*get , ar32 , cdsy , ARG1 , ang , yz
+*get , ar33 , cdsy , ARG1 , ang , zx
 
 *do,ar24,1,5,1
   *get , ar25 , graph , ar24 , dist
@@ -57,33 +79,34 @@ dsys,ARG1
 
 ! Restore previous view perspective for all windows
 *do,ar24,1,5,1
-  NSYS_VAR_xg = NSYS_ARR_xFoci(ar24)
-  NSYS_VAR_yg = NSYS_ARR_yFoci(ar24)
-  NSYS_VAR_zg = NSYS_ARR_zFoci(ar24)
+  NSYS_VAR_xl = NSYS_ARR_xFoci(ar24)
+  NSYS_VAR_yl = NSYS_ARR_yFoci(ar24)
+  NSYS_VAR_zl = NSYS_ARR_zFoci(ar24)
   ar25        = NSYS_ARR_dists(ar24)
+  loc2glo , NSYS_VAR_xl , NSYS_VAR_yl , NSYS_VAR_zl , ar30 , 'NSYS_VAR_xg' , 'NSYS_VAR_yg' , 'NSYS_VAR_zg'
   glo2loc , NSYS_VAR_xg , NSYS_VAR_yg , NSYS_VAR_zg , ARG1 , 'NSYS_VAR_xl' , 'NSYS_VAR_yl' , 'NSYS_VAR_zl'
 
-  /angle , ar24 , ar21 , zm , 1
-  /angle , ar24 , ar22 , xm , 1
-  /angle , ar24 , ar23 , ym , 1
+  /angle , ar24 , -ar23 , ym , 1
+  /angle , ar24 , -ar22 , xm , 1
+  /angle , ar24 , -ar21 , zm , 1
+  /focus , ar24 , NSYS_VAR_xg , NSYS_VAR_yg , NSYS_VAR_zg
+
+  /angle , ar24 , ar31 , zm , 1
+  /angle , ar24 , ar32 , xm , 1
+  /angle , ar24 , ar33 , ym , 1
   /focus , ar24 , NSYS_VAR_xl , NSYS_VAR_yl , NSYS_VAR_zl
+
   /dist  , ar24 , ar25
 *enddo
 
-/replot
-
-/eof
-
-*if,ARG1,eq,0,then
-  dsys,0
-  /angle,1,0
-  /view,1,1,1,1
-  ! /auto,1
-  /replot
-  *return,-1
-*endif
-
-! *get , xl    , cdsy  , ARG1 , loc  , x
-! *get , yl    , cdsy  , ARG1 , loc  , y
-! *get , zl    , cdsy  , ARG1 , loc  , z
-
+! Clean up
+*del , NSYS_VAR_xg    ,  , nopr
+*del , NSYS_VAR_yg    ,  , nopr
+*del , NSYS_VAR_zg    ,  , nopr
+*del , NSYS_VAR_xl    ,  , nopr
+*del , NSYS_VAR_yl    ,  , nopr
+*del , NSYS_VAR_zl    ,  , nopr
+*del , NSYS_ARR_dists ,  , nopr
+*del , NSYS_ARR_xFoci ,  , nopr
+*del , NSYS_ARR_yFoci ,  , nopr
+*del , NSYS_ARR_zFoci ,  , nopr
