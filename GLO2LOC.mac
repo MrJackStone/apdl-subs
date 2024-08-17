@@ -1,0 +1,66 @@
+! glo2loc , globalX , globalY , globalZ , CS   , localX , localY , localZ
+! GLO2LOC , ARG1    , ARG2    , ARG3    , ARG4 , ARG5   , ARG6   , ARG7
+
+! Description:
+! Transforms coordinates given in global coordinate system to equivalent ones in a local coordinate
+! system.
+
+! Arguments:
+! ARG1: globalX  -  value of X coordinate in global CS
+! ARG2: globalY  -  value of Y coordinate in global CS
+! ARG3: globalZ  -  value of Z coordinate in global CS
+! ARG4: localCS  -  number identifying local CS
+! ARG5: localX   -  parameter (STR) to which local X coordinate will be assigned
+! ARG6: localY   -  parameter (STR) to which local Y coordinate will be assigned
+! ARG7: localZ   -  parameter (STR) to which local Z coordinate will be assigned
+
+! Local parameters:
+! ar20: parType
+! ar25: xOutputParm
+! ar26: yOutputParm
+! ar27: zOutputParm
+
+! Output parameters:
+! GLO2LOC_ARR_local
+! GLO2LOC_ARR_global
+! %ARG5% (defaults to GLO2LOC_VAR_x)
+! %ARG6% (defaults to GLO2LOC_VAR_y)
+! %ARG7% (defaults to GLO2LOC_VAR_z)
+
+
+! Parse inputs
+ar25 = 'GLO2LOC_VAR_x'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,3,then
+  ar25 = ARG5
+*endif
+
+ar26 = 'GLO2LOC_VAR_y'
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,3,then
+  ar26 = ARG6
+*endif
+
+ar26 = 'GLO2LOC_VAR_z'
+*get,ar20,parm,ARG7,type
+*if,ar20,eq,3,then
+  ar27 = ARG7
+*endif
+
+! Initialize array with global coordinates
+*del , GLO2LOC_ARR_local  ,  , nopr
+*del , GLO2LOC_ARR_global ,  , nopr
+*dim , GLO2LOC_ARR_local  ,  , 1    , 3
+*dim , GLO2LOC_ARR_global ,  , 1    , 3
+
+GLO2LOC_ARR_global(1,1) = ARG1
+GLO2LOC_ARR_global(1,2) = ARG2
+GLO2LOC_ARR_global(1,3) = ARG3
+
+! Translate to local CS
+*vfun,GLO2LOC_ARR_local(1,1),local,GLO2LOC_ARR_global(1,1),ARG4
+
+! Assign output params
+%ar25% = GLO2LOC_ARR_global(1,1)
+%ar26% = GLO2LOC_ARR_global(1,2)
+%ar27% = GLO2LOC_ARR_global(1,3)
