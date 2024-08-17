@@ -1,0 +1,89 @@
+! NSYS , csNum
+! NSYS , ARG1
+
+! Description:
+! Changes DSYS to the given coordinate system without changing the view perspective.
+
+! Arguments:
+! ARG1: csNum   -  number of coordinate system to activate
+
+! Local parameters:
+! ar20: parType
+! ar21: angXY
+! ar22: angYZ
+! ar23: angZX
+! ar24: nthWindow
+! ar25: wDist
+! ar26: xFocus
+! ar27: yFocus
+! ar28: zFocus
+
+
+! Prepare environment
+*del , NSYS_VAR_xg    ,  , nopr
+*del , NSYS_VAR_yg    ,  , nopr
+*del , NSYS_VAR_zg    ,  , nopr
+*del , NSYS_VAR_xl    ,  , nopr
+*del , NSYS_VAR_yl    ,  , nopr
+*del , NSYS_VAR_zl    ,  , nopr
+*del , NSYS_ARR_dists ,  , nopr
+*del , NSYS_ARR_xFoci ,  , nopr
+*del , NSYS_ARR_yFoci ,  , nopr
+*del , NSYS_ARR_zFoci ,  , nopr
+
+*dim , NSYS_ARR_dists ,  , 5
+*dim , NSYS_ARR_xFoci ,  , 5
+*dim , NSYS_ARR_yFoci ,  , 5
+*dim , NSYS_ARR_zFoci ,  , 5
+
+! Get current display data
+*get , ar21 , cdsy  , ARG1 , ang  , xy
+*get , ar22 , cdsy  , ARG1 , ang  , yz
+*get , ar23 , cdsy  , ARG1 , ang  , zx
+
+*do,ar24,1,5,1
+  *get , ar25 , graph , ar24 , dist
+  *get , ar26 , graph , ar24 , focus , x
+  *get , ar27 , graph , ar24 , focus , y
+  *get , ar28 , graph , ar24 , focus , z
+  NSYS_ARR_dists(ar24) = ar25
+  NSYS_ARR_xFoci(ar24) = ar26
+  NSYS_ARR_yFoci(ar24) = ar27
+  NSYS_ARR_zFoci(ar24) = ar28
+*enddo
+
+! Change display CSYS
+dsys,ARG1
+
+! Restore previous view perspective for all windows
+*do,ar24,1,5,1
+  NSYS_VAR_xg = NSYS_ARR_xFoci(ar24)
+  NSYS_VAR_yg = NSYS_ARR_yFoci(ar24)
+  NSYS_VAR_zg = NSYS_ARR_zFoci(ar24)
+  ar25        = NSYS_ARR_dists(ar24)
+  glo2loc , NSYS_VAR_xg , NSYS_VAR_yg , NSYS_VAR_zg , ARG1 , 'NSYS_VAR_xl' , 'NSYS_VAR_yl' , 'NSYS_VAR_zl'
+
+  /angle , ar24 , ar21 , zm , 1
+  /angle , ar24 , ar22 , xm , 1
+  /angle , ar24 , ar23 , ym , 1
+  /focus , ar24 , NSYS_VAR_xl , NSYS_VAR_yl , NSYS_VAR_zl
+  /dist  , ar24 , ar25
+*enddo
+
+/replot
+
+/eof
+
+*if,ARG1,eq,0,then
+  dsys,0
+  /angle,1,0
+  /view,1,1,1,1
+  ! /auto,1
+  /replot
+  *return,-1
+*endif
+
+! *get , xl    , cdsy  , ARG1 , loc  , x
+! *get , yl    , cdsy  , ARG1 , loc  , y
+! *get , zl    , cdsy  , ARG1 , loc  , z
+
