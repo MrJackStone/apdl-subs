@@ -1,0 +1,50 @@
+! DSRESTORE
+! DSRESTORE
+
+! Description:
+! Restores the value of the active coordinate system previously stored by DSBACKUP.
+
+! Arguments:
+! -
+
+! Local parameters:
+! ar20: parType
+! ar21: length
+! ar22: restoredValue
+
+! Global parameters:
+! DSBACKUP_
+
+! Global parameters (erased at the end of this subroutine):
+! DSBACKUP_ARR_temp
+
+
+*get,ar20,parm,DSBACKUP_,type
+
+! Abort if no record is found
+*if,ar20,ne,1,then
+  *msg,warn
+DSRESTORE error: no stored DSYS number to restore.%/&
+DSRESTORE command is ignored.
+  *return,-1
+*endif
+
+! Get value to restore
+*get,ar21,parm,DSBACKUP_,dim,x
+ar22 = DSBACKUP_(ar21)
+
+! Update array that stores values
+*if,ar21,eq,1,then
+  *del,DSBACKUP_,,nopr
+*else
+  *del  , DSBACKUP_ARR_temp ,      , nopr
+  *dim  , DSBACKUP_ARR_temp ,      , ar21-1
+  *vfun , DSBACKUP_ARR_temp , copy , DSBACKUP_
+  *del  , DSBACKUP_         ,      , nopr
+  *dim  , DSBACKUP_         ,      , ar21-1
+  *vfun , DSBACKUP_         , copy , DSBACKUP_ARR_temp
+  *del  , DSBACKUP_ARR_temp ,      , nopr
+*endif
+
+! Restore value
+nsys,ar22

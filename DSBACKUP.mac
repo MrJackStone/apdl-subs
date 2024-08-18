@@ -1,0 +1,52 @@
+! DSBACKUP
+! DSBACKUP
+
+! Description:
+! Stores the number of the active DSYS. If the active DSYS is then changed, it can be restored
+! with DSRESTORE.
+
+! Arguments:
+! -
+
+! Local parameters:
+! ar20: parType
+! ar21: index
+! ar22: length
+! ar23: activeDS
+
+! Global parameters:
+! DSBACKUP_
+
+! Global erased parameters:
+! DSBACKUP_ARR_temp
+
+
+! Update size of array that stores values
+*get,ar20,parm,DSBACKUP_,type
+
+*if,ar20,ne,1,then
+  *del , DSBACKUP_ ,  , nopr
+  *dim , DSBACKUP_ ,  , 1
+
+  ar21 = 1
+
+*else
+  *get , ar22 , parm , DSBACKUP_ , dim , x
+
+  *del  , DSBACKUP_ARR_temp ,      , nopr
+  *dim  , DSBACKUP_ARR_temp ,      , ar22
+  *vfun , DSBACKUP_ARR_temp , copy , DSBACKUP_
+  *del  , DSBACKUP_         ,      , nopr
+  *dim  , DSBACKUP_         ,      , ar22+1
+  *vfun , DSBACKUP_         , copy , DSBACKUP_ARR_temp
+  *del  , DSBACKUP_ARR_temp ,      , nopr
+
+  ar21 = ar22+1
+
+*endif
+
+! Get current value
+*get,ar23,active,,dsys
+
+! Store current value
+DSBACKUP_(ar21) = ar23
