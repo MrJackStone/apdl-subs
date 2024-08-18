@@ -1,65 +1,40 @@
-! PLTESYS
+! PLTESYS , moveOrigin
+! PLTESYS , ARG1
 
-/eof
 
-*get,ec,elem,,count
+*del , elem_sel  ,  , nopr
+*del , elem_esys ,  , nopr
+*del , sel_esys  ,  , nopr
+*del , uniq_esys ,  , nopr
 
-*vget,elem_sel,elem,,esel
-*vget,elem_esys,elem,,attr,'esys'
+cm,COMPE_backup,elem
 
-*vmask,elem_sel
-*vfun,sel_esys,comp,elem_esys
+*vget  , elem_sel  , elem ,           , esel
+*vget  , elem_esys , elem ,           , attr , 'esys'
+*vmask , elem_sel
+*vfun  , sel_esys  , comp , elem_esys
 
 arruniq,'sel_esys','uniq_esys',1
+*get,esysCount,parm,uniq_esys,dim,x
 
-wpcsys
-dsys
+*do,nthEsys,1,esysCount,1
+  nthCS = uniq_esys(nthEsys)
+  csys , nthCS
 
-!!                                                                                                !!
-init
-/prep7
-blc5,0,0,4,3
+  cmsel,s,COMPE_backup
+  esel,r,esys,,nthCS
+  nsle,s,1
+  ndbbox , 'PLTESYS_VAR_xmin' , 'PLTESYS_VAR_xmax' , 'PLTESYS_VAR_ymin' , 'PLTESYS_VAR_ymax' , 'PLTESYS_VAR_zmin' , 'PLTESYS_VAR_zmax' ,
+  xCenter = (PLTESYS_VAR_xmin+PLTESYS_VAR_xmax)/2
+  yCenter = (PLTESYS_VAR_ymin+PLTESYS_VAR_ymax)/2
+  zCenter = (PLTESYS_VAR_zmin+PLTESYS_VAR_zmax)/2
+  cmsel,s,COMPE_backup
 
-/triad,on
-/vup,all,z
-/udoc,1,view,left
+  csnext , 'PLTESYS_VAR_cs'
+  clocal , PLTESYS_VAR_cs , cart , xCenter , yCenter , zCenter
+  ! csys,0
 
-dsys,0
-/view,1,1,1,1
-/angle,1,0
-/auto,1
-aplot
-*get,gdist,graph,1,dist
-
-wpcsys,-1,0
-wpoffs,1,-0.4
-wprota,45,,-15
-cswpla,999,cart
-wpstyl,,,,,,,,0
-
-*get , xl    , cdsy , 999 , loc , x
-*get , yl    , cdsy , 999 , loc , y
-*get , xl    , cdsy , 999 , loc , x
-*get , angXY , cdsy , 999 , ang , xy
-*get , angYZ , cdsy , 999 , ang , yz
-*get , angZX , cdsy , 999 , ang , zx
-
-dsys,999
-/view,1,1,1,1
-/angle,1,0
-/auto,1
-aplot
-
-/angle,1,0
-aplot
-/angle,1,angXY,zm,1
-aplot
-/angle,1,angYZ,xm,1
-aplot
-/angle,1,angZX,ym,1
-aplot
-/dist,1,gdist
-
-/auto,1
-aplot
-/plopts
+  nsys , PLTESYS_VAR_cs
+  eplot
+*enddo
+nsys,0
