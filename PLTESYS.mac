@@ -5,10 +5,17 @@
 ! Performs a plotting operation (defaults to EPLOT) after changing the display coordinate system
 ! (DSYS) to one provided directly (through ARG1) or to the first ESYS extracted from the current
 ! element selection. Despte the DSYS change, the effective view perspective remains unchanged.
+!
 ! This macro is recommended to plot (using ANSYS's native /TRIAD symbol) the orientation of the
 ! local coordinate system (ESYS) of a selection of elements. For this to work it is necessary that
 ! /TRIAG,ORIG be set before calling this macro. This macro can also be combined with /NOERASE and
 ! GO2PNG/ENDPNG to create composite plots.
+!
+! Note: for some reason, when ARG3=1 (move origin) the setting /PSYMB,CS,1 seems to be
+!       automatically activated at some point in this macro. Issuing /PSYMB,CS,0 anywhere in this
+!       file does not work to disable CS display for subsequent plots. It is recommended, therefore,
+!       that /PSYMB,CS,0 be issued immediately upon returning from this macro if display of all
+!       defined coordinate systems is to be prevented.
 
 ! Arguments:
 ! ARG1: csNum        -  number of coordinate system to set as display CS. If set to 0, a
