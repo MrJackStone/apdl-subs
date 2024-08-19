@@ -1,5 +1,5 @@
-! PLTESYS , moveOrigin
-! PLTESYS , ARG1
+! PLTESYS , csys , moveOrigin
+! PLTESYS , ARG1 , ARG2
 
 
 *del , elem_sel  ,  , nopr
@@ -7,34 +7,41 @@
 *del , sel_esys  ,  , nopr
 *del , uniq_esys ,  , nopr
 
-cm,COMPE_backup,elem
+*if,ARG1,le,0,then
+  *vget  , elem_sel  , elem ,           , esel
+  *vget  , elem_esys , elem ,           , attr , 'esys'
+  *vmask , elem_sel
+  *vfun  , sel_esys  , comp , elem_esys
 
-*vget  , elem_sel  , elem ,           , esel
-*vget  , elem_esys , elem ,           , attr , 'esys'
-*vmask , elem_sel
-*vfun  , sel_esys  , comp , elem_esys
+  arruniq,'sel_esys','uniq_esys',1
+  *get,esysCount,parm,uniq_esys,dim,x
+  firstESYS = uniq_esys(1)
 
-arruniq,'sel_esys','uniq_esys',1
-*get,esysCount,parm,uniq_esys,dim,x
+  *if,esysCount,gt,1,then
+    *msg,warn,esysCount,firstESYS
+PLTESYS WARNING: selected element set contains %I different ESYS.%/&
+Only the first ESYS (number %I) will be plotted.
+  *endif
 
-*do,nthEsys,1,esysCount,1
-  nthCS = uniq_esys(nthEsys)
-  csys , nthCS
+*else
+  firstESYS = ARG1
 
-  cmsel,s,COMPE_backup
-  esel,r,esys,,nthCS
+*endif
+
+*if,ARG2,eq,1,then
+  csys , firstESYS
+
   nsle,s,1
   ndbbox , 'PLTESYS_VAR_xmin' , 'PLTESYS_VAR_xmax' , 'PLTESYS_VAR_ymin' , 'PLTESYS_VAR_ymax' , 'PLTESYS_VAR_zmin' , 'PLTESYS_VAR_zmax' ,
   xCenter = (PLTESYS_VAR_xmin+PLTESYS_VAR_xmax)/2
   yCenter = (PLTESYS_VAR_ymin+PLTESYS_VAR_ymax)/2
   zCenter = (PLTESYS_VAR_zmin+PLTESYS_VAR_zmax)/2
-  cmsel,s,COMPE_backup
 
   csnext , 'PLTESYS_VAR_cs'
   clocal , PLTESYS_VAR_cs , cart , xCenter , yCenter , zCenter
-  ! csys,0
+*endif
 
-  nsys , PLTESYS_VAR_cs
-  eplot
-*enddo
+nsys , PLTESYS_VAR_cs
+eplot
+
 nsys,0
