@@ -1,5 +1,5 @@
-! PLTESYS , csNum , plotCommand , moveOrigin , csOutput
-! PLTESYS , ARG1  , ARG2        , ARG3       , ARG4
+! PLTESYS , csNum , plotCommand , moveOrigin , eselColor , csOutput
+! PLTESYS , ARG1  , ARG2        , ARG3       , ARG4      , ARG5
 
 ! Description:
 ! Performs a plotting operation (defaults to EPLOT) after changing the display coordinate system
@@ -18,7 +18,13 @@
 ! ARG3: moveOrigin   -  option to move the origin of the chosen display CS:
 !                         [0] Off (CS origin is kept at its original location)
 !                         [1] On (CS origin is moved to the center of the selection bounding box)
-! ARG4: csOutput     -  name of parameter to which the number of the activated CS will be assigned
+! ARG4: eselColor    -  color (index 1 through 16) to assign to selected element set. Numbers 1
+!                       through 15 are the same as described in the /COLOR command and number 16
+!                       loops over and is converted to 0 (BLAC, by default). Element coloring is
+!                       achieved by creating and coloring a temporary element selection component,
+!                       therefore this functionality works only if the plot command is EPLOT.
+!                       (Defaults to no color assignment)
+! ARG5: csOutput     -  name of parameter to which the number of the activated CS will be assigned
 !                       (defaults to 'PLTESYS_VAR_csOutput')
 
 ! Local parameters:
@@ -31,6 +37,9 @@
 ! ar26: zCenter
 ! ar27: csOutputParmName
 ! ar28: actualCS
+! ar29: applyCMcolor
+! ar30: colorIndex
+! ar31: COMPE_temp
 
 ! Global erased parameters:
 ! PLTESYS_ARR_esel_status
@@ -46,7 +55,7 @@
 ! PLTESYS_VAR_cs
 
 ! Global output parameters:
-! %ARG4% (defaults to PLTESYS_VAR_csOutput)
+! %ARG5% (defaults to PLTESYS_VAR_csOutput)
 
 
 ! Parse inputs
@@ -57,9 +66,18 @@ ar22 = 'EPLOT'
 *endif
 
 ar27 = 'PLTESYS_VAR_csOutput'
-*get,ar20,parm,ARG4,type
+*get,ar20,parm,ARG5,type
 *if,ar20,eq,3,then
-  ar27 = ARG4
+  ar27 = ARG5
+*endif
+
+ar29 = 0
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,0,then
+  *if,ARG4,gt,0,then
+    ar29 = 1
+    ar30 = mod(ARG4,16)
+  *endif
 *endif
 
 ! Prepare environment
@@ -118,6 +136,12 @@ ar28 = %ar27%
   ar28 = PLTESYS_VAR_cs
 *endif
 
+! Apply element color
+*if,ar29,eq,1,then
+  cm,ar31,elem
+  /color,cm,ar30,ar31
+*endif
+
 ! Plot using changed display coordinate system
 nsys , ar28
 %ar22%
@@ -129,6 +153,10 @@ nrestore
 
 *if,PLTESYS_VAR_cs,ne,0,then
   csdele , PLTESYS_VAR_cs
+*endif
+
+*if,ar29,eq,1,then
+  cmdele,ar31
 *endif
 
 *del , PLTESYS_ARR_esel_status ,  , nopr
