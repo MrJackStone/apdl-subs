@@ -34,8 +34,8 @@
 !                          [1] - Mirror loads
 
 ! Local parameters:
-! ar20: upcaseLTName
-! ar21: parType
+! ar20: parType
+! ar21: upcaseLTName
 ! ar22: LTrep
 ! ar23: refCount
 ! ar24: ltDist
@@ -68,7 +68,7 @@
 ! LOADTRAIN_ARR_positions
 ! LOADTRAIN_ARR_loads
 
-! Global parameters (erased at the end of this subroutine):
+! Global erased parameters:
 ! LOADTRAIN_ARR_refPositions
 ! LOADTRAIN_ARR_refLoads
 ! LOADTRAIN_ARR_locomotive_pos
@@ -78,45 +78,44 @@
 ! LOADTRAIN_ARR_indices
 
 
-! Load train name (case-insensitive)
-ar20=UPCASE(ARG1)
-
-! Impact multiplier
-*get,ar21,PARM,ARG4,TYPE
-*if,ar21,NE,0,OR,ARG4,EQ,0,THEN
-  ar31=1
-*else
-  ar31=ARG4
+! Parse inputs
+ar21 = 'NONE'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = upcase(ARG1)
 *endif
 
-! Load train/Locomotive repetitions
-*get,ar21,PARM,ARG2,TYPE
-*if,ar21,NE,0,OR,ARG2,LE,1,THEN
-  ar22=1
-*else
-  ar22=ARG2
+ar22 = 1
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,0,and,ARG2,ge,1,then
+  ar22 = ARG2
 *endif
 
-! Option: mirror loads
-ar39=1
+ar31 = 1
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,0,and,ARG4,ne,0,then
+  ar31 = ARG4
+*endif
+
+ar39 = 1
 *if,ARG6,eq,1,then
-  ar39=-1
+  ar39 = -1
 *endif
 
-! Number of uniformly distributed point loads or following railcars
-ar32=0
-*get,ar21,parm,ARG5,type
-*if,ar21,eq,0,then
-  ar32=nint(abs(ARG5))
+ar32 = 0
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,0,then
+  ar32 = nint(abs(ARG5))
 *endif
 
+! Prepare environment
 *del , LOADTRAIN_ARR_positions    ,  , nopr
 *del , LOADTRAIN_ARR_loads        ,  , nopr
 *del , LOADTRAIN_ARR_refPositions ,  , nopr
 *del , LOADTRAIN_ARR_refLoads     ,  , nopr
 
 
-*if,ar20,EQ,'COOPER E-80',THEN
+*if,ar21,EQ,'COOPER E-80',THEN
   ! Reference COOPER E-80 single configuration
   ar23=18
   *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
@@ -157,7 +156,7 @@ ar32=0
     *enddo
   *endif
 
-*elseif,ar20,EQ,'CE-80+20',THEN
+*elseif,ar21,EQ,'CE-80+20',THEN
   ! Reference COOPER E-80 +20% single configuration
   ar23=18
   *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
@@ -198,7 +197,7 @@ ar32=0
     *enddo
   *endif
 
-*elseif,ar20,eq,'DASH9',then
+*elseif,ar21,eq,'DASH9',then
   ! Reference DASH9 + GDE railcar configuration:
 
   ! Locomotive
@@ -260,7 +259,7 @@ ar32=0
     ar25=ar25+ar30+ar41
   *enddo
 
-*elseif,ar20,EQ,'TB-32',THEN
+*elseif,ar21,EQ,'TB-32',THEN
   ! Reference TB-32 single configuration
   ar23=18
   *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
@@ -277,8 +276,8 @@ ar32=0
   ar24=1.5
 
   ! Number of point loads representing following railway cars
-  *get,ar21,parm,ARG5,type
-  *if,ar21,ne,0,then
+  *get,ar20,parm,ARG5,type
+  *if,ar20,ne,0,then
     ar32=0
   *elseif,ARG5,gt,0,then
     ar32=nint(ARG5)
@@ -312,7 +311,7 @@ ar32=0
   *endif
 
 
-*elseif,ar20,EQ,'CE-80_FRONT',THEN
+*elseif,ar21,EQ,'CE-80_FRONT',THEN
   ! Reference COOPER E-80 single configuration
   ar23=2
   *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
@@ -338,7 +337,7 @@ ar32=0
   *enddo
 
 
-*elseif,ar20,EQ,'TB-360',THEN
+*elseif,ar21,EQ,'TB-360',THEN
   ! Number of point loads on either side of the locomotive
   ar32=NINT(ARG5)
 
@@ -363,7 +362,7 @@ ar32=0
   *enddo
 
 
-*elseif,ar20,EQ,'TB-450',THEN
+*elseif,ar21,EQ,'TB-450',THEN
   ! Highway truck TB-450, single configuration
   ar23=3
   *dim,LOADTRAIN_ARR_positions,ARRAY,ar23
@@ -373,7 +372,7 @@ ar32=0
   LOADTRAIN_VAR_count=ar23
 
 
-*elseif,ar20,EQ,'ER-8000',THEN
+*elseif,ar21,EQ,'ER-8000',THEN
   ! ER-8000 (empilhadora/recuperadora 8000 ton) single configuration
   ar23=13
   *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
@@ -402,7 +401,7 @@ ar32=0
   *enddo
 
 
-*elseif,ar20,EQ,'NONE',THEN
+*elseif,ar21,EQ,'NONE',THEN
   ! No load
   *del,LOADTRAIN_ARR_positions,,nopr
   *del,LOADTRAIN_ARR_loads,,nopr
@@ -433,7 +432,7 @@ ar51='~LOADTRAIN_LOG_%LOADTRAIN_VAR_suffix%_%ar50%'
   *vwrite,
   (' ')
 
-  *vwrite,ar20
+  *vwrite,ar21
 Load train name: %S
   *vwrite,ar22
 Repetitions:     %I
