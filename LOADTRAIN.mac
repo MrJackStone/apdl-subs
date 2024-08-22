@@ -62,6 +62,11 @@
 ! ar42: nthRailcar
 ! ar43: axlesPerRailcar
 ! ar44: nthAxle
+! ar46: UDLpitch
+! ar47: startIndex
+! ar48: lastLTforcePosition
+! ar49: firstUDLPosition
+! ar50: locationOffset
 ! ar50: randomNumFnameSuffix
 ! ar51: recordFileName
 ! ar91: positionsParam
@@ -128,8 +133,8 @@ ar94 = 'LOADTRAIN_VAR_length'
 *endif
 
 ! Prepare environment
-*del , %ar91% ,  , nopr
-*del , %ar92% ,  , nopr
+*del , %ar91%                     ,  , nopr
+*del , %ar92%                     ,  , nopr
 *del , LOADTRAIN_ARR_refPositions ,  , nopr
 *del , LOADTRAIN_ARR_refLoads     ,  , nopr
 
@@ -137,6 +142,7 @@ ar94 = 'LOADTRAIN_VAR_length'
 *if,ar21,eq,'COOPER E-80',then
   ! Reference COOPER E-80 single configuration
   ar23 = 18
+
   *dim , LOADTRAIN_ARR_refPositions , , ar23
   *dim , LOADTRAIN_ARR_refLoads     , , ar23
   LOADTRAIN_ARR_refPositions(1)  = 0     , 2.4   , 3.9   , 5.4   , 6.9   , 9.6   , 11.1  , 12.9  , 14.4  , 16.8
@@ -144,45 +150,38 @@ ar94 = 'LOADTRAIN_VAR_length'
   LOADTRAIN_ARR_refPositions(11) = 19.2  , 20.7  , 22.2  , 23.7  , 26.4  , 27.9  , 29.7  , 31.2
   LOADTRAIN_ARR_refLoads(11)     = 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3
 
-  ! Railway car uniformly distributed linear load value
-  ar37 = 120e3
+  ! Railway car:
+  ar37 = 120e3 ! Uniformly distributed linear load value
+  ar46 = 1.0   ! Distance between point loads used to simulate UDL
 
-  ! Distance between load trains
-  ar24 = 2.4
+  ! Distance between vehicles:
+  ar24 = 2.4                                    ! Last force ahead, first force behind
+  ar45 = LOADTRAIN_ARR_refPositions(ar23)+ar24  ! First force ahead, first force behind
 
-  ! COOPER E-80 repeated N times
+  ! Initialize positions/forces arrays for total number of point loads
   %ar93% = ar23*ar22+ar32
-
   *dim , %ar91% ,  , %ar93%
   *dim , %ar92% ,  , %ar93%
 
-  ar25 = ARG3
-
-  ! ! idea: offsets array?
-  ! *do,ar26,1,ar22,1
-  !   startPosition = 1+(ar26-1)*ar23
-  !   *vfun,%ar92%(startPosition),copy,LOADTRAIN_ARR_refLoads(1)
-  ! *enddo
-
+  ! Fill positions/forces with load train repetitions
   *do,ar26,1,ar22,1
-    ar27 = 1+ar23*(ar26-1)
-    *do,ar28,1,ar23,1
-      ar29                = LOADTRAIN_ARR_refLoads(ar28)
-      ar30                = LOADTRAIN_ARR_refPositions(ar28)
-      %ar92%(ar27+ar28-1) = ar29
-      %ar91%(ar27+ar28-1) = ar25+ar30
-    *enddo
-    ar25 = ar25+ar30+ar24
+    ar47 = (ar26-1)*ar23+1
+    ar50 = (ar26-1)*ar45
+    *voper , %ar91%(ar47) , LOADTRAIN_ARR_refPositions(1) , add                       , ar50
+    *vfun  , %ar92%(ar47) , copy                          , LOADTRAIN_ARR_refLoads(1)
   *enddo
 
-  ar38 = 0
+  ! Fill positions/forces with UDL point loads
   *if,ar32,gt,0,then
-    *do,ar28,ar23*ar22+1,%ar93%,1
-      %ar91%(ar28) = ar25-ar38
-      %ar92%(ar28) = ar37
-      ar38         = ar38-1
-    *enddo
+    ar47 = ar23*ar22+1
+    ar48 = %ar91%(ar47)
+    ar49 = ar48+ar24
+    *vfill , %ar91%(ar47) , ramp , ar49 , ar46
+    *vfill , %ar92%(ar47) , ramp , ar37 , 0
   *endif
+
+  ! Apply global offset
+  *voper,%ar91%,%ar91%,add,ARG3
 
   ! Apply impact coefficient
   *voper,%ar92%,%ar92%,add,,ar31
