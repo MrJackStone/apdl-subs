@@ -187,45 +187,11 @@ ar94 = 'LOADTRAIN_VAR_length'
   *voper,%ar92%,%ar92%,add,,ar31
 
 *elseif,ar21,eq,'CE-80+20',then
-  ! Reference COOPER E-80 +20% single configuration
-  ar23 = 18
-  *dim , LOADTRAIN_ARR_refPositions ,  , ar23
-  *dim , LOADTRAIN_ARR_refLoads     ,  , ar23
-  LOADTRAIN_ARR_refPositions(1)  = 0     , 2.4   , 3.9   , 5.4   , 6.9   , 9.6   , 11.1  , 12.9  , 14.4  , 16.8
-  LOADTRAIN_ARR_refLoads(1)      = 181e3 , 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3 , 181e3
-  LOADTRAIN_ARR_refPositions(11) = 19.2  , 20.7  , 22.2  , 23.7  , 26.4  , 27.9  , 29.7  , 31.2
-  LOADTRAIN_ARR_refLoads(11)     = 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3
 
-  ! Railway car uniformly distributed linear load value
-  ar37 = 120e3
-
-  ! Distance between load trains
-  ar24 = 2.4
-
-  ! COOPER E-80 repeated N times
-  %ar93% = ar23*ar22+ar32
-  *dim , %ar91% ,  , %ar93%
-  *dim , %ar92% ,  , %ar93%
-  ar25 = ARG3
-  *do,ar26,1,ar22,1
-    ar27 = 1+ar23*(ar26-1)
-    *do,ar28,1,ar23,1
-      ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31*1.2
-      ar30                = LOADTRAIN_ARR_refPositions(ar28)
-      %ar92%(ar27+ar28-1) = ar29
-      %ar91%(ar27+ar28-1) = ar25+ar30
-    *enddo
-    ar25=ar25+ar30+ar24
-  *enddo
-
-  ar38 = 0
-  *if,ar32,gt,0,then
-    *do,ar28,ar23*ar22+1,%ar93%,1
-      %ar91%(ar28) = ar25-ar38
-      %ar92%(ar28) = ar37*ar31
-      ar38         = ar38-1
-    *enddo
-  *endif
+  *msg,fatal
+LOADTRAIN error: type 'CE-80+20' (COOPER-E80 + 20%) deprecated.%/&
+Run terminated.
+  *return,-1
 
 *elseif,ar21,eq,'DASH9',then
   ! Reference DASH9 + GDE railcar configuration:
