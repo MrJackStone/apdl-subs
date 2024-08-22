@@ -134,183 +134,29 @@ ar94 = 'LOADTRAIN_VAR_length'
 *del , LOADTRAIN_ARR_refLoads     ,  , nopr
 
 
-*if,ar21,EQ,'COOPER E-80',THEN
+*if,ar21,eq,'COOPER E-80',then
   ! Reference COOPER E-80 single configuration
-  ar23=18
-  *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
-  *dim,LOADTRAIN_ARR_refLoads,ARRAY,ar23
-  LOADTRAIN_ARR_refPositions(1)  =    0,  2.4,  3.9,  5.4,  6.9,  9.6, 11.1, 12.9, 14.4, 16.8
-  LOADTRAIN_ARR_refPositions(11) = 19.2, 20.7, 22.2, 23.7, 26.4, 27.9, 29.7, 31.2
-  LOADTRAIN_ARR_refLoads(1)  = 181e3, 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3, 181e3
-  LOADTRAIN_ARR_refLoads(11) = 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3
+  ar23 = 18
+  *dim , LOADTRAIN_ARR_refPositions , , ar23
+  *dim , LOADTRAIN_ARR_refLoads     , , ar23
+  LOADTRAIN_ARR_refPositions(1)  = 0     , 2.4   , 3.9   , 5.4   , 6.9   , 9.6   , 11.1  , 12.9  , 14.4  , 16.8
+  LOADTRAIN_ARR_refLoads(1)      = 181e3 , 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3 , 181e3
+  LOADTRAIN_ARR_refPositions(11) = 19.2  , 20.7  , 22.2  , 23.7  , 26.4  , 27.9  , 29.7  , 31.2
+  LOADTRAIN_ARR_refLoads(11)     = 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3
 
   ! Railway car uniformly distributed linear load value
-  ar37=120e3
+  ar37 = 120e3
 
   ! Distance between load trains
-  ar24=2.4
+  ar24 = 2.4
 
   ! COOPER E-80 repeated N times
-  %ar93%=ar23*ar22+ar32
-  *dim,%ar91%,ARRAY,%ar93%
-  *dim,%ar92%,ARRAY,%ar93%
-  ar25=ARG3
+  %ar93% = ar23*ar22+ar32
+  *dim , %ar91% ,  , %ar93%
+  *dim , %ar92% ,  , %ar93%
+  ar25 = ARG3
   *do,ar26,1,ar22,1
-    ar27=1+ar23*(ar26-1)
-    *do,ar28,1,ar23,1
-      ar29=LOADTRAIN_ARR_refLoads(ar28)*ar31
-      ar30=LOADTRAIN_ARR_refPositions(ar28)
-      %ar92%(ar27+ar28-1)=ar29
-      %ar91%(ar27+ar28-1)=ar25+ar30
-    *enddo
-    ar25=ar25+ar30+ar24
-  *enddo
-
-  ar38=0
-  *if,ar32,gt,0,then
-    *do,ar28,ar23*ar22+1,%ar93%,1
-      %ar91%(ar28)=ar25-ar38
-      %ar92%(ar28)=ar37*ar31
-      ar38=ar38-1
-    *enddo
-  *endif
-
-*elseif,ar21,EQ,'CE-80+20',THEN
-  ! Reference COOPER E-80 +20% single configuration
-  ar23=18
-  *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
-  *dim,LOADTRAIN_ARR_refLoads,ARRAY,ar23
-  LOADTRAIN_ARR_refPositions(1)  =    0,  2.4,  3.9,  5.4,  6.9,  9.6, 11.1, 12.9, 14.4, 16.8
-  LOADTRAIN_ARR_refPositions(11) = 19.2, 20.7, 22.2, 23.7, 26.4, 27.9, 29.7, 31.2
-  LOADTRAIN_ARR_refLoads(1)  = 181e3, 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3, 181e3
-  LOADTRAIN_ARR_refLoads(11) = 362e3, 362e3, 362e3, 362e3, 235e3, 235e3, 235e3, 235e3
-
-  ! Railway car uniformly distributed linear load value
-  ar37=120e3
-
-  ! Distance between load trains
-  ar24=2.4
-
-  ! COOPER E-80 repeated N times
-  %ar93%=ar23*ar22+ar32
-  *dim,%ar91%,ARRAY,%ar93%
-  *dim,%ar92%,ARRAY,%ar93%
-  ar25=ARG3
-  *do,ar26,1,ar22,1
-    ar27=1+ar23*(ar26-1)
-    *do,ar28,1,ar23,1
-      ar29=LOADTRAIN_ARR_refLoads(ar28)*ar31*1.2
-      ar30=LOADTRAIN_ARR_refPositions(ar28)
-      %ar92%(ar27+ar28-1)=ar29
-      %ar91%(ar27+ar28-1)=ar25+ar30
-    *enddo
-    ar25=ar25+ar30+ar24
-  *enddo
-
-  ar38=0
-  *if,ar32,gt,0,then
-    *do,ar28,ar23*ar22+1,%ar93%,1
-      %ar91%(ar28)=ar25-ar38
-      %ar92%(ar28)=ar37*ar31
-      ar38=ar38-1
-    *enddo
-  *endif
-
-*elseif,ar21,eq,'DASH9',then
-  ! Reference DASH9 + GDE railcar configuration:
-
-  ! Locomotive
-  ar23=8
-  *del , LOADTRAIN_ARR_locomotive_pos ,       , nopr
-  *del , LOADTRAIN_ARR_locomotive_for ,       , nopr
-  *dim , LOADTRAIN_ARR_locomotive_pos , array , ar23
-  *dim , LOADTRAIN_ARR_locomotive_for , array , ar23
-  LOADTRAIN_ARR_locomotive_pos(1) =     0 , 2.08  , 3.47  , 5.55  , 12.61 , 14.69 , 16.08 , 18.16
-  LOADTRAIN_ARR_locomotive_for(1) = 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3
-
-  ! Railway car
-  ar43=4
-  *del , LOADTRAIN_ARR_railcar_pos ,       , nopr
-  *del , LOADTRAIN_ARR_railcar_for ,       , nopr
-  *dim , LOADTRAIN_ARR_railcar_pos , array , ar43
-  *dim , LOADTRAIN_ARR_railcar_for , array , ar43
-  LOADTRAIN_ARR_railcar_pos(1) =     0 , 1.73  , 5.50  , 7.23
-  LOADTRAIN_ARR_railcar_for(1) = 300e3 , 300e3 , 300e3 , 300e3
-
-  ! Distance between locomotives
-  ar24=4.91
-
-  ! Distance between locomotive and railcar
-  ar40=3.72
-
-  ! Distance between railcars
-  ar41=2.52
-
-  ! Calculate total number of loads
-  %ar93%=(ar23*ar22)+(ar43*ar32)
-  *dim , %ar91% , , %ar93%
-  *dim , %ar92% , , %ar93%
-
-  ! Locomotive loads & positions
-  ar27=0
-  ar25=ARG3
-  *do,ar26,1,ar22,1
-    *do,ar28,1,ar23,1
-      ar27         = ar27+1
-      ar29         = LOADTRAIN_ARR_locomotive_for(ar28)
-      ar30         = LOADTRAIN_ARR_locomotive_pos(ar28)
-      %ar92%(ar27) = ar29*ar31
-      %ar91%(ar27) = ar25+ar30
-    *enddo
-    ar25=ar25+ar30+ar24
-  *enddo
-
-  ! Railway car loads & positions
-  ar25=ar25-ar24+ar40
-  *do,ar42,1,ar32,1
-    *do,ar44,1,ar43,1
-      ar27         = ar27+1
-      ar29         = LOADTRAIN_ARR_railcar_for(ar44)
-      ar30         = LOADTRAIN_ARR_railcar_pos(ar44)
-      %ar92%(ar27) = ar29*ar31
-      %ar91%(ar27) = ar25+ar30
-    *enddo
-    ar25=ar25+ar30+ar41
-  *enddo
-
-*elseif,ar21,EQ,'TB-32',THEN
-  ! Reference TB-32 single configuration
-  ar23=18
-  *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
-  *dim,LOADTRAIN_ARR_refLoads,ARRAY,ar23
-  LOADTRAIN_ARR_refPositions(1)  =    0,  2.4,  3.9,  5.4,  6.9,  9.6, 11.1, 12.9, 14.4, 16.8
-  LOADTRAIN_ARR_refPositions(11) = 19.2, 20.7, 22.2, 23.7, 26.4, 27.9, 29.7, 31.2
-  LOADTRAIN_ARR_refLoads(1)  = 160e3, 320e3, 320e3, 320e3, 320e3, 210e3, 210e3, 210e3, 210e3, 160e3
-  LOADTRAIN_ARR_refLoads(11) = 320e3, 320e3, 320e3, 320e3, 210e3, 210e3, 210e3, 210e3
-
-  ! Railway car uniformly distributed linear load value
-  ar37=100e3
-
-  ! Distance between load trains
-  ar24=1.5
-
-  ! Number of point loads representing following railway cars
-  *get,ar20,parm,ARG5,type
-  *if,ar20,ne,0,then
-    ar32=0
-  *elseif,ARG5,gt,0,then
-    ar32=nint(ARG5)
-  *else
-    ar32=0
-  *endif
-
-  ! TB-32 repeated N times
-  %ar93%=ar23*ar22+ar32
-  *dim,%ar91%,ARRAY,%ar93%
-  *dim,%ar92%,ARRAY,%ar93%
-  ar25=ARG3
-  *do,ar26,1,ar22,1
-    ar27=1+ar23*(ar26-1)
+    ar27 = 1+ar23*(ar26-1)
     *do,ar28,1,ar23,1
       ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31
       ar30                = LOADTRAIN_ARR_refPositions(ar28)
@@ -320,7 +166,161 @@ ar94 = 'LOADTRAIN_VAR_length'
     ar25=ar25+ar30+ar24
   *enddo
 
-  ar38=0
+  ar38 = 0
+  *if,ar32,gt,0,then
+    *do,ar28,ar23*ar22+1,%ar93%,1
+      %ar91%(ar28) = ar25-ar38
+      %ar92%(ar28) = ar37*ar31
+      ar38         = ar38-1
+    *enddo
+  *endif
+
+*elseif,ar21,eq,'CE-80+20',then
+  ! Reference COOPER E-80 +20% single configuration
+  ar23 = 18
+  *dim , LOADTRAIN_ARR_refPositions ,  , ar23
+  *dim , LOADTRAIN_ARR_refLoads     ,  , ar23
+  LOADTRAIN_ARR_refPositions(1)  = 0     , 2.4   , 3.9   , 5.4   , 6.9   , 9.6   , 11.1  , 12.9  , 14.4  , 16.8
+  LOADTRAIN_ARR_refLoads(1)      = 181e3 , 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3 , 181e3
+  LOADTRAIN_ARR_refPositions(11) = 19.2  , 20.7  , 22.2  , 23.7  , 26.4  , 27.9  , 29.7  , 31.2
+  LOADTRAIN_ARR_refLoads(11)     = 362e3 , 362e3 , 362e3 , 362e3 , 235e3 , 235e3 , 235e3 , 235e3
+
+  ! Railway car uniformly distributed linear load value
+  ar37 = 120e3
+
+  ! Distance between load trains
+  ar24 = 2.4
+
+  ! COOPER E-80 repeated N times
+  %ar93% = ar23*ar22+ar32
+  *dim , %ar91% ,  , %ar93%
+  *dim , %ar92% ,  , %ar93%
+  ar25 = ARG3
+  *do,ar26,1,ar22,1
+    ar27 = 1+ar23*(ar26-1)
+    *do,ar28,1,ar23,1
+      ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31*1.2
+      ar30                = LOADTRAIN_ARR_refPositions(ar28)
+      %ar92%(ar27+ar28-1) = ar29
+      %ar91%(ar27+ar28-1) = ar25+ar30
+    *enddo
+    ar25=ar25+ar30+ar24
+  *enddo
+
+  ar38 = 0
+  *if,ar32,gt,0,then
+    *do,ar28,ar23*ar22+1,%ar93%,1
+      %ar91%(ar28) = ar25-ar38
+      %ar92%(ar28) = ar37*ar31
+      ar38         = ar38-1
+    *enddo
+  *endif
+
+*elseif,ar21,eq,'DASH9',then
+  ! Reference DASH9 + GDE railcar configuration:
+
+  ! Locomotive
+  ar23 = 8
+  *del , LOADTRAIN_ARR_locomotive_pos ,       , nopr
+  *del , LOADTRAIN_ARR_locomotive_for ,       , nopr
+  *dim , LOADTRAIN_ARR_locomotive_pos , array , ar23
+  *dim , LOADTRAIN_ARR_locomotive_for , array , ar23
+  LOADTRAIN_ARR_locomotive_pos(1) =     0 , 2.08  , 3.47  , 5.55  , 12.61 , 14.69 , 16.08 , 18.16
+  LOADTRAIN_ARR_locomotive_for(1) = 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3 , 229e3
+
+  ! Railway car
+  ar43 = 4
+  *del , LOADTRAIN_ARR_railcar_pos ,       , nopr
+  *del , LOADTRAIN_ARR_railcar_for ,       , nopr
+  *dim , LOADTRAIN_ARR_railcar_pos , array , ar43
+  *dim , LOADTRAIN_ARR_railcar_for , array , ar43
+  LOADTRAIN_ARR_railcar_pos(1) =     0 , 1.73  , 5.50  , 7.23
+  LOADTRAIN_ARR_railcar_for(1) = 300e3 , 300e3 , 300e3 , 300e3
+
+  ! Distance between locomotives
+  ar24 = 4.91
+
+  ! Distance between locomotive and railcar
+  ar40 = 3.72
+
+  ! Distance between railcars
+  ar41 = 2.52
+
+  ! Calculate total number of loads
+  %ar93% = (ar23*ar22)+(ar43*ar32)
+  *dim , %ar91% , , %ar93%
+  *dim , %ar92% , , %ar93%
+
+  ! Locomotive loads & positions
+  ar27 = 0
+  ar25 = ARG3
+  *do,ar26,1,ar22,1
+    *do,ar28,1,ar23,1
+      ar27         = ar27+1
+      ar29         = LOADTRAIN_ARR_locomotive_for(ar28)
+      ar30         = LOADTRAIN_ARR_locomotive_pos(ar28)
+      %ar92%(ar27) = ar29*ar31
+      %ar91%(ar27) = ar25+ar30
+    *enddo
+    ar25 = ar25+ar30+ar24
+  *enddo
+
+  ! Railway car loads & positions
+  ar25 = ar25-ar24+ar40
+  *do,ar42,1,ar32,1
+    *do,ar44,1,ar43,1
+      ar27         = ar27+1
+      ar29         = LOADTRAIN_ARR_railcar_for(ar44)
+      ar30         = LOADTRAIN_ARR_railcar_pos(ar44)
+      %ar92%(ar27) = ar29*ar31
+      %ar91%(ar27) = ar25+ar30
+    *enddo
+    ar25 = ar25+ar30+ar41
+  *enddo
+
+*elseif,ar21,eq,'TB-32',then
+  ! Reference TB-32 single configuration
+  ar23 = 18
+  *dim , LOADTRAIN_ARR_refPositions , , ar23
+  *dim , LOADTRAIN_ARR_refLoads     , , ar23
+  LOADTRAIN_ARR_refPositions(1)  = 0     , 2.4   , 3.9   , 5.4   , 6.9   , 9.6   , 11.1  , 12.9  , 14.4  , 16.8
+  LOADTRAIN_ARR_refLoads(1)      = 160e3 , 320e3 , 320e3 , 320e3 , 320e3 , 210e3 , 210e3 , 210e3 , 210e3 , 160e3
+  LOADTRAIN_ARR_refPositions(11) = 19.2  , 20.7  , 22.2  , 23.7  , 26.4  , 27.9  , 29.7  , 31.2
+  LOADTRAIN_ARR_refLoads(11)     = 320e3 , 320e3 , 320e3 , 320e3 , 210e3 , 210e3 , 210e3 , 210e3
+
+  ! Railway car uniformly distributed linear load value
+  ar37 = 100e3
+
+  ! Distance between load trains
+  ar24 = 1.5
+
+  ! Number of point loads representing following railway cars
+  *get,ar20,parm,ARG5,type
+  *if,ar20,ne,0,then
+    ar32 = 0
+  *elseif,ARG5,gt,0,then
+    ar32 = nint(ARG5)
+  *else
+    ar32 = 0
+  *endif
+
+  ! TB-32 repeated N times
+  %ar93% = ar23*ar22+ar32
+  *dim , %ar91% ,  , %ar93%
+  *dim , %ar92% ,  , %ar93%
+  ar25 = ARG3
+  *do,ar26,1,ar22,1
+    ar27 = 1+ar23*(ar26-1)
+    *do,ar28,1,ar23,1
+      ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31
+      ar30                = LOADTRAIN_ARR_refPositions(ar28)
+      %ar92%(ar27+ar28-1) = ar29
+      %ar91%(ar27+ar28-1) = ar25+ar30
+    *enddo
+    ar25 = ar25+ar30+ar24
+  *enddo
+
+  ar38 = 0
   *if,ar32,gt,0,then
     *do,ar28,ar23*ar22+1,%ar93%,1
       %ar91%(ar28) = ar25-ar38
@@ -330,45 +330,48 @@ ar94 = 'LOADTRAIN_VAR_length'
   *endif
 
 
-*elseif,ar21,EQ,'CE-80_FRONT',THEN
+*elseif,ar21,eq,'CE-80_FRONT',then
   ! Reference COOPER E-80 single configuration
-  ar23=2
-  *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
-  *dim,LOADTRAIN_ARR_refLoads,ARRAY,ar23
-  LOADTRAIN_ARR_refPositions(1)  =    0,  1
-  LOADTRAIN_ARR_refLoads(1)  = 181e3, 181e3
+  ar23 = 2
+  *dim , LOADTRAIN_ARR_refPositions , , ar23
+  *dim , LOADTRAIN_ARR_refLoads     , , ar23
+  LOADTRAIN_ARR_refPositions(1) = 0     , 1
+  LOADTRAIN_ARR_refLoads(1)     = 181e3 , 181e3
+
   ! Distance between load trains
-  ar24=4
+  ar24 = 4
+
   ! COOPER E-80 repeated N times
-  %ar93%=ar23*ar22
+  %ar93% = ar23*ar22
   *dim,%ar91%,,%ar93%
   *dim,%ar92%,,%ar93%
-  ar25=ARG3
+  ar25 = ARG3
   *do,ar26,1,ar22,1
-    ar27=1+ar23*(ar26-1)
+    ar27 = 1+ar23*(ar26-1)
     *do,ar28,1,ar23,1
       ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31
       ar30                = LOADTRAIN_ARR_refPositions(ar28)
       %ar92%(ar27+ar28-1) = ar29
       %ar91%(ar27+ar28-1) = ar25+ar30
     *enddo
-    ar25=ar25+ar30+ar24
+    ar25 = ar25+ar30+ar24
   *enddo
 
 
-*elseif,ar21,EQ,'TB-360',THEN
+*elseif,ar21,eq,'TB-360',then
   ! Number of point loads on either side of the locomotive
-  ar32=NINT(ARG5)
+  ar32 = nint(ARG5)
 
   ! TB-360 locomotive loads
-  %ar93%=4+2*ar32
+  %ar93% = 4+2*ar32
   *dim,%ar91%,,%ar93%
   *dim,%ar92%,,%ar93%
   %ar91%(1) = -3+ARG3    , -1+ARG3    , 1+ARG3     , 3+ARG3
   %ar92%(1) = 360e3*ar31 , 360e3*ar31 , 360e3*ar31 , 360e3*ar31
+
   ! Railway car loads
-  ar33=3
-  ar34=-3
+  ar33 = 3
+  ar34 = -3
   *do,ar27,1,ar32,1
     ar33         = ar33+1
     ar34         = ar34-1
@@ -381,9 +384,9 @@ ar94 = 'LOADTRAIN_VAR_length'
   *enddo
 
 
-*elseif,ar21,EQ,'TB-450',THEN
+*elseif,ar21,eq,'TB-450',then
   ! Highway truck TB-450, single configuration
-  ar23=3
+  ar23 = 3
   *dim,%ar91%,,ar23
   *dim,%ar92%,,ar23
   %ar91%(1) = -1.5+ARG3  , 0+ARG3     , 1.5+ARG3
@@ -391,36 +394,36 @@ ar94 = 'LOADTRAIN_VAR_length'
   %ar93%    = ar23
 
 
-*elseif,ar21,EQ,'ER-8000',THEN
+*elseif,ar21,eq,'ER-8000',then
   ! ER-8000 (empilhadora/recuperadora 8000 ton) single configuration
-  ar23=13
-  *dim,LOADTRAIN_ARR_refPositions,ARRAY,ar23
-  *dim,LOADTRAIN_ARR_refLoads,ARRAY,ar23
-  LOADTRAIN_ARR_refPositions(1)  =  0.00,  1.00,  2.10,  3.10,  4.80,  5.80,  6.90,  7.90, 16.64, 17.69
-  LOADTRAIN_ARR_refPositions(11) = 18.69, 20.25, 21.25
-  LOADTRAIN_ARR_refLoads(1)  =     800e3, 800e3, 800e3, 800e3, 800e3, 800e3, 800e3, 800e3, 720e3, 720e3
-  LOADTRAIN_ARR_refLoads(11) =     720e3, 720e3, 720e3
+  ar23 = 13
+  *dim , LOADTRAIN_ARR_refPositions , , ar23
+  *dim , LOADTRAIN_ARR_refLoads     , , ar23
+  LOADTRAIN_ARR_refPositions(1)  = 0.00  , 1.00  , 2.10  , 3.10  , 4.80  , 5.80  , 6.90  , 7.90  , 16.64 , 17.69
+  LOADTRAIN_ARR_refLoads(1)      = 800e3 , 800e3 , 800e3 , 800e3 , 800e3 , 800e3 , 800e3 , 800e3 , 720e3 , 720e3
+  LOADTRAIN_ARR_refPositions(11) = 18.69 , 20.25 , 21.25
+  LOADTRAIN_ARR_refLoads(11)     = 720e3 , 720e3 , 720e3
 
-  ar22=1 ! Always a single configuration
+  ar22 = 1 ! Always a single configuration
 
   ! ER-8000 without repetitions
-  %ar93%=ar23*ar22
+  %ar93% = ar23*ar22
   *dim,%ar91%,,%ar93%
   *dim,%ar92%,,%ar93%
-  ar25=ARG3
+  ar25 = ARG3
   *do,ar26,1,ar22,1
-    ar27=1+ar23*(ar26-1)
+    ar27 = 1+ar23*(ar26-1)
     *do,ar28,1,ar23,1
       ar29                = LOADTRAIN_ARR_refLoads(ar28)*ar31
       ar30                = LOADTRAIN_ARR_refPositions(ar28)
       %ar92%(ar27+ar28-1) = ar29
       %ar91%(ar27+ar28-1) = ar25+ar30
     *enddo
-    ar25=ar25+ar30+ar24
+    ar25 = ar25+ar30+ar24
   *enddo
 
 
-*elseif,ar21,EQ,'NONE',THEN
+*elseif,ar21,eq,'NONE',then
   ! No load
   *del , %ar91% ,  , nopr
   *del , %ar92% ,  , nopr
@@ -438,8 +441,8 @@ ar94 = 'LOADTRAIN_VAR_length'
 
 ! Write load train configuration to file
 ctime,'LOADTRAIN_VAR_suffix',,'_'
-ar50=nint(rand(100,999))
-ar51='~LOADTRAIN_LOG_%LOADTRAIN_VAR_suffix%_%ar50%'
+ar50 = nint(rand(100,999))
+ar51 = '~LOADTRAIN_LOG_%LOADTRAIN_VAR_suffix%_%ar50%'
 *del , LOADTRAIN_ARR_indices ,  , nopr
 *dim , LOADTRAIN_ARR_indices ,  , %ar93%
 *vfill,LOADTRAIN_ARR_indices,ramp,1,1
