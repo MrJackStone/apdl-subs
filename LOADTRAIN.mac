@@ -75,10 +75,10 @@
 ! ar94: lengthParam
 
 ! Output parameters:
-! LOADTRAIN_VAR_count
-! LOADTRAIN_VAR_length
-! LOADTRAIN_ARR_positions
-! LOADTRAIN_ARR_loads
+! %ARG7%_count     (defaults to 'LOADTRAIN_VAR_count')
+! %ARG7%_length    (defaults to 'LOADTRAIN_VAR_length')
+! %ARG7%_positions (defaults to 'LOADTRAIN_ARR_positions')
+! %ARG7%_loads     (defaults to 'LOADTRAIN_ARR_loads')
 
 ! Global erased parameters:
 ! LOADTRAIN_ARR_refPositions

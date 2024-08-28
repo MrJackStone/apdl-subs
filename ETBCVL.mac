@@ -1,0 +1,145 @@
+! etbcvl , convolutionRadius , etable_names , selectionDirections
+! ETBCVL , ARG1              , ARG2         , ARG3
+
+! Description:
+! Applies convolution (averaging) to element table results for the selected elements.
+
+! Arguments:
+! ARG1: convolutionRadius  -  determines the size of the region around each element that will be
+!                             be searched to find neighboring elements to perform the convolution
+! ARG2: etable_names       -  name of char array parameter containing the name of each element
+!                             table to be convoluted
+! ARG3: selectionDirs      -  directions along which the neighbor filtering selection operations
+!                             will be performed (defaults to 'XYZ'):
+!                               ['X']    X-direction only
+!                               ['Y']    Y-direction only
+!                               ['Z']    Z-direction only
+!                               ['XY']   X and Y directions
+!                               ['YZ']   Y and Z directions
+!                               ['XZ']   Z and Z directions
+!                               ['XYZ']  all directions
+
+! Local parameters:
+! ar20: parType
+! ar21: COMPE_eligible
+! ar22: COMPN_eligible
+! ar23: ec
+! ar24: enum
+! ar25: nthElem
+! ar26: xCenter
+! ar27: yCenter
+! ar28: zCenter
+! ar29: neighborCount
+! ar30: convolutionTableCount
+! ar31: neighborNum
+! ar32: nthNeighbor
+! ar33: nthEtable
+! ar34: etLab
+! ar35: xSelection
+! ar36: ySelection
+! ar37: zSelection
+! ar38: nthValue
+
+
+! Global erased parameters:
+! ETBCVL_ARR_neighbor_sums
+
+
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,0,then
+  *msg,warn
+ETBCVL error: invalid convolution radius (ARG1).%/&
+ETBCVL command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,4,then
+  *msg,warn
+ETBCVL error: invalid ETABLE names (ARG2).%/&
+The name of a char array is expected as argument.%/&
+ETBCVL command is ignored.
+  *return,-1
+*endif
+
+ar35 = 1
+ar36 = 1
+ar37 = 1
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar35 = strpos(upcase(ARG3),'X')
+  ar36 = strpos(upcase(ARG3),'Y')
+  ar37 = strpos(upcase(ARG3),'Z')
+*endif
+
+! Prepare environment
+ebackup
+nbackup
+
+*get , ar30 , parm , %ARG2% , dim , x
+
+*del , ETBCVL_ARR_neighbor_sums ,  , nopr
+*dim , ETBCVL_ARR_neighbor_sums ,  , ar30
+
+! Work with current element/node selection
+cm,ar21,elem
+cm,ar22,node
+*get,ar23,elem,,count
+
+! Loop over each selected element:
+ar24 = 0
+
+*do,ar25,1,ar23,1
+  cmsel,s,ar21
+  ar24 = elnext(ar24)
+  esel,s,elem,,ar24
+  nsle,s
+
+  ! Select neighboring elements
+  nsel,all
+
+  *if,ar35,gt,0,then
+    *get,ar26,elem,ar24,cent,x
+    nsel,r,loc,x,ar26-ARG1,ar26+ARG1
+  *endif
+
+  *if,ar36,gt,0,then
+    *get,ar27,elem,ar24,cent,y
+    nsel,r,loc,y,ar27-ARG1,ar27+ARG1
+  *endif
+
+  *if,ar37,gt,0,then
+    *get,ar28,elem,ar24,cent,z
+    nsel,r,loc,z,ar28-ARG1,ar28+ARG1
+  *endif
+
+  esln,s,1
+  cmsel,r,ar21
+  *get,ar29,elem,,count
+
+  ! Sum ETABLE values for each neighbor
+  *vfill,ETBCVL_ARR_neighbor_sums,ramp,0,0
+
+  ar31 = 0
+  *do,ar32,1,ar29,1
+    ar31 = elnext(ar31)
+    *do,ar33,1,ar30,1
+      ar34 = %ARG2%(ar33)
+      *get,ar38,elem,ar31,etab,'%ar34%'
+      ETBCVL_ARR_neighbor_sums(ar33) = ETBCVL_ARR_neighbor_sums(ar33)+ar38
+    *enddo
+  *enddo
+
+  ! Assign neighbor-averaged value to current iteration's element
+  esel,s,elem,,ar24
+  *do,ar33,1,ar30,1
+    ar34 = %ARG2%(ar33)
+    detab,ar24,'A%ar34%',ETBCVL_ARR_neighbor_sums(ar33)/ar29
+  *enddo
+*enddo
+
+! Clean up
+nrestore
+elrestore
+*del,ETBCVL_ARR_neighbor_sums,,nopr
