@@ -1,0 +1,18 @@
+! CMPDELE
+! CMPDELE
+
+! Description:
+! Deletes all existing selection components.
+
+! Local parameters:
+! ar23: cmCount
+! ar24: nthComp
+! ar25: cmName
+
+
+*get,ar23,comp,,ncomp
+
+*do,ar24,ar23,1,-1
+  *get,ar25,comp,ar24,name
+  cmdele,ar25
+*enddo

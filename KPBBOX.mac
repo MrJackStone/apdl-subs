@@ -1,0 +1,69 @@
+! kpbbox , xmin , xmax , ymin , ymax , zmin , zmax
+! KPBBOX , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6
+
+! Description:
+! Obtains the bounding box coordinates of the current keypoint selection in the active coordinate
+! system.
+
+! Arguments:
+! ARG1: xmin  -  name of the parameter to which the minimum value of X will be assigned
+! ARG2: xmax  -  name of the parameter to which the maximum value of X will be assigned
+! ARG3: ymin  -  name of the parameter to which the minimum value of Y will be assigned
+! ARG4: ymax  -  name of the parameter to which the maximum value of Y will be assigned
+! ARG5: zmin  -  name of the parameter to which the minimum value of Z will be assigned
+! ARG6: zmax  -  name of the parameter to which the maximum value of Z will be assigned
+
+! Output parameters:
+! %ARG1% through %ARG6% (default to: KPBBOX_VAR_xmin through KPBBOX_VAR_zmax)
+
+! Local parameters:
+! ar20: parType
+! ar21: xminParm
+! ar22: xmaxParm
+! ar23: yminParm
+! ar24: ymaxParm
+! ar25: zminParm
+! ar26: zmaxParm
+
+
+! Set defaults
+AR21 = 'KPBBOX_VAR_xmin'
+AR22 = 'KPBBOX_VAR_xmax'
+AR23 = 'KPBBOX_VAR_ymin'
+AR24 = 'KPBBOX_VAR_ymax'
+AR25 = 'KPBBOX_VAR_zmin'
+AR26 = 'KPBBOX_VAR_zmax'
+
+! Override with user-defined parameter names
+*get,AR20,parm,arg1,type
+*if,AR20,eq,3,then
+  AR21 = arg1
+*endif
+*get,AR20,parm,arg2,type
+*if,AR20,eq,3,then
+  AR22 = arg2
+*endif
+*get,AR20,parm,arg3,type
+*if,AR20,eq,3,then
+  AR23 = arg3
+*endif
+*get,AR20,parm,arg4,type
+*if,AR20,eq,3,then
+  AR24 = arg4
+*endif
+*get,AR20,parm,arg5,type
+*if,AR20,eq,3,then
+  AR25 = arg5
+*endif
+*get,AR20,parm,arg6,type
+*if,AR20,eq,3,then
+  AR26 = arg6
+*endif
+
+! Get & assign values
+*get , %ar21% , kp ,  , mnloc , x
+*get , %ar22% , kp ,  , mxloc , x
+*get , %ar23% , kp ,  , mnloc , y
+*get , %ar24% , kp ,  , mxloc , y
+*get , %ar25% , kp ,  , mnloc , z
+*get , %ar26% , kp ,  , mxloc , z

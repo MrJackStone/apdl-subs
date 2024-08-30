@@ -1,0 +1,157 @@
+! cmpwrite , fileName , fileExt
+! CMPWRITE , ARG1     , ARG2
+
+! Description:
+! Writes all existing selection components to a file.
+
+! Arguments
+! ARG1: fileName  -  name of the created file
+! ARG2: fileExt   -  extension of the created file (defaults to .cm)
+
+! Local parameters:
+! ar20: parType
+! ar22: extension
+! ar23: cmCount
+! ar24: nthComp
+! ar25: cmName
+! ar26: cmType
+! ar27: entType
+! ar28: selOp
+! ar29: nextOp
+! ar30: entCount
+! ar31: entNum
+! ar32: nthEnt
+! ar40: charCount
+! ar41: firstTwo
+! ar43: third
+! ar44: fourth
+
+
+! Parse inputs
+ar22 = 'cm'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar22 = ARG2
+*endif
+
+! Initialize output file
+*cfopen,%ARG1%,%ar22%
+  *vwrite,
+  ('nbackup')
+  *vwrite,
+  ('ebackup')
+  *vwrite,
+  ('kbackup')
+  *vwrite,
+  ('lbackup')
+  *vwrite,
+  ('abackup')
+  *vwrite,
+  ('vbackup')
+  *vwrite,
+  (' ')
+*cfclos
+
+! Write each component to file
+*get,ar23,comp,,ncomp
+
+*do,ar24,1,ar23,1
+
+  *get , ar25 , comp , ar24 , name
+
+  ! Skip components whose name is a local param (ARG[1-9] or AR[10-99])
+  ar40 = strleng(ar25)
+
+  *if,ar40,eq,4,then
+    ar41 = upcase(strsub(ar25,1,2))
+    ar43 = upcase(strsub(ar25,3,1))
+    ar44 = upcase(strsub(ar25,4,1))
+
+    *if,ar41,eq,'AR',then
+
+      ! 'ARG' param
+      *if,ar43,eq,'G',then
+        *if,valchr(ar44),gt,0,cycle
+
+      ! 'AR' param
+      *else
+        *if,valchr(ar43),gt,0,then
+          *if,valchr(ar44),gt,0,or,ar44,eq,'0',cycle
+        *endif
+
+      *endif
+    *endif
+  *endif
+
+  ! Define selection operations to use based on component type
+  *get , ar26 , comp , ar25 , type
+  *if,ar26,eq,1,then
+    ar27 = 'node'
+    ar28 = 'nsel'
+    ar29 = 'ndnext'
+  *elseif,ar26,eq,2,then
+    ar27 = 'elem'
+    ar28 = 'esel'
+    ar29 = 'elnext'
+  *elseif,ar26,eq,6,then
+    ar27 = 'kp'
+    ar28 = 'ksel'
+    ar29 = 'kpnext'
+  *elseif,ar26,eq,7,then
+    ar27 = 'line'
+    ar28 = 'lsel'
+    ar29 = 'lsnext'
+  *elseif,ar26,eq,8,then
+    ar27 = 'area'
+    ar28 = 'asel'
+    ar29 = 'arnext'
+  *elseif,ar26,eq,9,then
+    ar27 = 'volu'
+    ar28 = 'vsel'
+    ar29 = 'vlnext'
+  *endif
+
+  ! Select entities to backup
+  cmsel,s,%ar25%
+  *get,ar30,%ar27%,,count
+
+  ! Write selection commands for each entity
+  *cfopen,%ARG1%,%ar22%,,append
+
+    *vwrite,ar24,ar27,ar25
+! CM #%I (%s): %s
+    *vwrite,ar28
+%S,none
+
+    ar31 = 0
+    *do,ar32,1,ar30,1
+      ar31 = %ar29%(ar31)
+      *vwrite,ar28,ar31
+%S,a,,,%I
+    *enddo
+
+    *vwrite,ar25,ar27
+cm,%S,%S
+
+    *vwrite,
+    (' ')
+
+  *cfclos
+
+*enddo
+
+! Clean up output file
+*cfopen,%ARG1%,%ar22%,,append
+  *vwrite,
+  ('nrestore')
+  *vwrite,
+  ('elrestore')
+  *vwrite,
+  ('krestore')
+  *vwrite,
+  ('lrestore')
+  *vwrite,
+  ('arestore')
+  *vwrite,
+  ('vrestore')
+*cfclos

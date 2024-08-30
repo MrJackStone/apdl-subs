@@ -52,5 +52,9 @@ cmdele , COMPE_L2ACNT_target
 cmdele , COMPN_L2ACNT_target
 cmdele , COMPE_L2ACNT_contact
 cmdele , COMPN_L2ACNT_contact
+cmdele , COMPE_L2ACNT_TARGET_targe
+cmdele , COMPN_L2ACNT_TARGET_targe
+cmdele , COMPE_L2ACNT_CONTACT_conta
+cmdele , COMPN_L2ACNT_CONTACT_conta
 *del , L2ACNT_ARR_keyopts ,  , nopr
 *del , L2ACNT_ARR_reals   ,  , nopr
