@@ -1,0 +1,189 @@
+! ETBFOR2PRES , scaleFactor , etRoot , apportioned_areas
+! ETBFOR2PRES , ARG1        , ARG2   , ARG3
+
+! Description:
+! Creates an element table containing element surface pressures (in the X, Y, and Z directions)
+! equivalent to the average of the applied nodal forces divided by each element's apportioned area.
+
+! Arguments:
+! ARG1: scaleFactor   -  scale factor applied to the calculated pressures (defaults to 1.0)
+!                        Usually set to 1e-3 to convert forces in N to pressures in kPa.
+! ARG2: etRoot        -  prefix of the element tables created to store pressures
+!                        (defaults to 'F2P_')
+! ARG3: apport_areas  -  name of array parameter containing apportioned areas of ALL nodes in the
+!                        model. If blank, the apportioned areas are calculated inside this macro
+!                        for all notes but considering only the active element selection. This
+!                        argument is usually provided for reasons of efficiency, to avoid repeated
+!                        calculation of all apportioned areas.
+
+! Local parameters:
+! ar20: parType
+! ar21: COMPE_active
+! ar22: totalNodeCount
+! ar23: nthNode
+! ar24: pxLabel
+! ar25: pyLabel
+! ar26: pzLabel
+! ar27: selElemCount
+! ar28: enum
+! ar29: nthElem
+! ar30: pxAvg
+! ar31: pyAvg
+! ar32: pzAvg
+! ar33: pressureScaleFactor
+! ar43: apportArrayName
+! ar44: skipArnodeCalcs
+! ar45: arrLength
+! ar46: etPrefix
+
+! Global erased parameters:
+! ETBFOR2PRES_ARR_nodes
+! ETBFOR2PRES_ARR_nsel
+! ETBFOR2PRES_ARR_fx
+! ETBFOR2PRES_ARR_fy
+! ETBFOR2PRES_ARR_fz
+! ETBFOR2PRES_ARR_selPx
+! ETBFOR2PRES_ARR_selPy
+! ETBFOR2PRES_ARR_selPz
+
+! Global output parameters:
+! %ARG3% (defaults to 'ETBFOR2PRES_ARR_apportioned')
+! ETBFOR2PRES_ARR_px
+! ETBFOR2PRES_ARR_py
+! ETBFOR2PRES_ARR_pz
+
+
+! Prepare environment
+nbackup
+ebackup
+cm,ar21,elem
+esel,all
+nsel,all
+
+*get,ar22,node,,count
+
+*del , ETBFOR2PRES_ARR_nodes ,  , nopr
+*del , ETBFOR2PRES_ARR_fx    ,  , nopr
+*del , ETBFOR2PRES_ARR_fy    ,  , nopr
+*del , ETBFOR2PRES_ARR_fz    ,  , nopr
+*del , ETBFOR2PRES_ARR_px    ,  , nopr
+*del , ETBFOR2PRES_ARR_py    ,  , nopr
+*del , ETBFOR2PRES_ARR_pz    ,  , nopr
+
+*dim , ETBFOR2PRES_ARR_fx  ,  , ar22
+*dim , ETBFOR2PRES_ARR_fy  ,  , ar22
+*dim , ETBFOR2PRES_ARR_fz  ,  , ar22
+
+*vget , ETBFOR2PRES_ARR_nodes , node ,  , nlist
+
+! Parse inputs
+ar33 = 1
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,0,then
+  *if,ARG1,ne,0,then
+    ar33 = ARG1
+  *endif
+*endif
+
+ar43 = 'ETBFOR2PRES_ARR_apportioned'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar43 = ARG3
+*endif
+
+ar44 = 0
+*get,ar20,parm,%ar43%,type
+*if,ar20,eq,1,then
+  *get,ar45,parm,%ar43%,dim,x
+  *if,ar45,eq,ar22,then
+    ar44 = 1
+  *endif
+*endif
+
+ar46 = 'F2P_'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar46 = ARG2
+*endif
+ar24 = '%ar46%X'
+ar25 = '%ar46%Y'
+ar26 = '%ar46%Z'
+
+! Calculate apportioned areas
+*if,ar44,eq,0,then
+  cmsel,s,ar21
+  *del,%ar43%,,nopr
+  *dim,%ar43%,,ar22
+  *do,ar23,1,ar22,1
+    %ar43%(ar23) = arnode(ETBFOR2PRES_ARR_nodes(ar23))
+  *enddo
+  esel,all
+  nsel,all
+*endif
+
+! Get all nodal forces
+*get , ETBFOR2PRES_ARR_fx(1:ar22) , node , ETBFOR2PRES_ARR_nodes(1:ar22) , f , fx
+*get , ETBFOR2PRES_ARR_fy(1:ar22) , node , ETBFOR2PRES_ARR_nodes(1:ar22) , f , fy
+*get , ETBFOR2PRES_ARR_fz(1:ar22) , node , ETBFOR2PRES_ARR_nodes(1:ar22) , f , fz
+
+! Convert nodal forces to element pressures
+*vfact,ar33
+*voper , ETBFOR2PRES_ARR_px , ETBFOR2PRES_ARR_fx , div , %ar43%
+*vfact,ar33
+*voper , ETBFOR2PRES_ARR_py , ETBFOR2PRES_ARR_fy , div , %ar43%
+*vfact,ar33
+*voper , ETBFOR2PRES_ARR_pz , ETBFOR2PRES_ARR_fz , div , %ar43%
+
+! Initialize element tables to store pressures
+etable , %ar24% , volu
+detab  , all    , %ar24% , 0
+sadd   , %ar25% , %ar24% ,   , 1
+sadd   , %ar26% , %ar24% ,   , 1
+
+! Calculate & store equivalent pressures for original element selection
+cmsel,s,ar21
+*get,ar27,elem,,count
+ar28 = 0
+
+*do,ar29,1,ar27,1
+  cmsel,s,ar21
+  ar28 = elnext(ar28)
+  esel,s,elem,,ar28
+  nsle,s
+
+  *vget , ETBFOR2PRES_ARR_nsel , node ,  , nsel
+
+  *del , ETBFOR2PRES_ARR_selPx ,  , nopr
+  *del , ETBFOR2PRES_ARR_selPy ,  , nopr
+  *del , ETBFOR2PRES_ARR_selPz ,  , nopr
+
+  *vmask , ETBFOR2PRES_ARR_nsel
+  *vfun  , ETBFOR2PRES_ARR_selPx   , comp , ETBFOR2PRES_ARR_px
+  *vmask , ETBFOR2PRES_ARR_nsel
+  *vfun  , ETBFOR2PRES_ARR_selPy   , comp , ETBFOR2PRES_ARR_py
+  *vmask , ETBFOR2PRES_ARR_nsel
+  *vfun  , ETBFOR2PRES_ARR_selPz   , comp , ETBFOR2PRES_ARR_pz
+
+  *vscfun , ar30 , mean , ETBFOR2PRES_ARR_selPx
+  *vscfun , ar31 , mean , ETBFOR2PRES_ARR_selPy
+  *vscfun , ar32 , mean , ETBFOR2PRES_ARR_selPz
+
+  detab , ar28 , %ar24% , ar30
+  detab , ar28 , %ar25% , ar31
+  detab , ar28 , %ar26% , ar32
+*enddo
+
+! Clean up
+cmdele,ar21
+
+*del , ETBFOR2PRES_ARR_nodes ,  , nopr
+*del , ETBFOR2PRES_ARR_nsel  ,  , nopr
+*del , ETBFOR2PRES_ARR_fx    ,  , nopr
+*del , ETBFOR2PRES_ARR_fy    ,  , nopr
+*del , ETBFOR2PRES_ARR_fz    ,  , nopr
+*del , ETBFOR2PRES_ARR_selPx ,  , nopr
+*del , ETBFOR2PRES_ARR_selPy ,  , nopr
+*del , ETBFOR2PRES_ARR_selPz ,  , nopr
+
+elrestore
+nrestore
