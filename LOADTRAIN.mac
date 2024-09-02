@@ -155,8 +155,8 @@ ar94 = 'LOADTRAIN_VAR_length'
   ar46 = 1.0   ! Distance between point loads used to simulate UDL
 
   ! Distance between vehicles:
-  ar24 = 2.4                                    ! Last force ahead, first force behind
-  ar45 = LOADTRAIN_ARR_refPositions(ar23)+ar24  ! First force ahead, first force behind
+  ar24 = 2.4                                    ! Gap between vehicles
+  ar45 = LOADTRAIN_ARR_refPositions(ar23)+ar24  ! Pitch between vehicles
 
   ! Initialize positions/forces arrays for total number of point loads
   %ar93% = ar23*ar22+ar32
@@ -174,7 +174,7 @@ ar94 = 'LOADTRAIN_VAR_length'
   ! Fill positions/forces with UDL point loads
   *if,ar32,gt,0,then
     ar47 = ar23*ar22+1
-    ar48 = %ar91%(ar47)
+    ar48 = %ar91%(ar47-1)
     ar49 = ar48+ar24
     *vfill , %ar91%(ar47) , ramp , ar49 , ar46
     *vfill , %ar92%(ar47) , ramp , ar37 , 0
