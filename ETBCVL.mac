@@ -55,6 +55,15 @@ ETBCVL command is ignored.
 *endif
 
 *get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,warn
+ETBCVL error: invalid char array name (ARG2).%/&
+A string is expected as argument.%/&
+ETBCVL command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG2%,type
 *if,ar20,ne,4,then
   *msg,warn
 ETBCVL error: invalid ETABLE names (ARG2).%/&
