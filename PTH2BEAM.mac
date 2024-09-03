@@ -166,7 +166,7 @@ csrestore
 path,arg5,2,50,arg7
 ppath,1,,AR36,AR38,AR40
 ppath,2,,AR37,AR39,AR41
-pdef,'DUMMY',s,eqv,0
+pdef,'DUMMY',s,eqv,avg
 
 
 !! IN-PLANE: BENDING MOMENT & AXIAL FORCE
@@ -228,7 +228,7 @@ pth2dfl,arg1,arg2,,,AR43,'Y',arg7,,0,1,arg6
 !! OFF-PLANE BENDING
 *if,ar12,ne,1,then
   path,arg5
-  pdef,'M2',etab,'M11',1
+  pdef,'M2',etab,'M11',avg
   pth2arr,'M2','PTH2BEAM_ARR_m2'
   *voper, %ar11%(1, 3) , %ar11%(1, 3) , min , PTH2BEAM_ARR_m2(1)
   *voper, %ar11%(1, 4) , %ar11%(1, 4) , max , PTH2BEAM_ARR_m2(1)
