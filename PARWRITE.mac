@@ -1,0 +1,141 @@
+! PRMWRITE, parmName
+! PRMWRITE, ARG1
+
+! Description:
+! Writes the value of a parameter to an external file, that can be read with PRMREAD.
+
+! Arguments:
+! ARG1: parmName  -  name of parameter to write to file (string).
+
+! Local parameters:
+! ar20: parType
+! ar21: dim1
+! ar22: dim2
+! ar23: dim3
+! ar24: dim4
+! ar25: dim5
+! ar26: fileName
+! ar27: fileExtension
+! ar28: value
+! ar31: index1
+! ar32: index2
+! ar33: index3
+! ar34: index4
+! ar35: index5
+
+
+! Check inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,warning
+PARWRITE error: invalid argument type (string expected).%/&
+PARWRITE command is ignored.
+  *return,-1
+*endif
+
+! Generate created file name
+ar26 = 'PRM_%ARG1%'
+ar27 = 'prm'
+
+! Write param to file
+*get,ar20,parm,%ARG1%,type
+
+*if,ar20,eq,0,then
+  ! Scalar
+  *cfopen,%ar26%,%ar27%
+    *vwrite,ARG1
+*del,%s,,nopr
+    *vwrite,ARG1,%ARG1%
+%s = %g
+  *cfclos
+
+*elseif,ar20,eq,1,then
+  ! Array
+  *get , ar21 , parm , %ARG1% , dim , 1
+  *get , ar22 , parm , %ARG1% , dim , 2
+  *get , ar23 , parm , %ARG1% , dim , 3
+
+  ! Abort if 4-D or 5-D array
+  *get , ar24 , parm , %ARG1% , dim , 4
+  *if,ar24,gt,0,then
+    *msg,fatal
+PARWRITE fatal error: support for 4-D and 5-D arrays not implemented.%/&
+Run terminated.
+    *return,-1
+  *endif
+
+  *cfopen,%ar26%,%ar27%
+
+    *vwrite,ARG1
+*del,%s,,nopr
+    *vwrite,ARG1,ar21,ar22,ar23
+*dim,%s,,%i,%i,%i
+
+    *do,ar31,1,ar21,1
+      *do,ar32,1,ar22,1
+        *do,ar33,1,ar23,1
+          ar28 = %ARG1%(ar31,ar32,ar33)
+          *vwrite,ARG1,ar31,ar32,ar33,ar28
+%s(%i,%i,%i) = %g
+        *enddo
+      *enddo
+    *enddo
+
+  *cfclos
+
+*elseif,ar20,eq,2,then
+  ! Table
+  *msg,fatal
+PARWRITE fatal error: macro lacks implementation to handle TABLES.%/&
+Run terminated.
+  *return,-1
+
+*elseif,ar20,eq,3,then
+  ! Character scalar
+  *cfopen,%ar26%,%ar27%
+    *vwrite,ARG1
+*del,%s,,nopr
+    *vwrite,ARG1,%ARG1%
+%s = '%s'
+  *cfclos
+
+*elseif,ar20,eq,4,then
+  ! Character array
+  *get , ar21 , parm , %ARG1% , dim , 1
+  *get , ar22 , parm , %ARG1% , dim , 2
+  *get , ar23 , parm , %ARG1% , dim , 3
+
+  *cfopen,%ar26%,%ar27%
+
+    *vwrite,ARG1
+*del,%s,,nopr
+    *vwrite,ARG1,ar21,ar22,ar23
+*dim,%s,char,%i,%i,%i
+
+    *do,ar31,1,ar21,1
+      *do,ar32,1,ar22,1
+        *do,ar33,1,ar23,1
+          ar28 = %ARG1%(ar31,ar32,ar33)
+          *vwrite,ARG1,ar31,ar32,ar33,ar28
+%s(%i,%i,%i,%i,%i) = %s
+        *enddo
+      *enddo
+    *enddo
+
+  *cfclos
+
+*elseif,ar20,eq,5,then
+  ! String array
+  *msg,fatal
+PARWRITE fatal error: macro lacks implementation to handle STRING ARRAYS.%/&
+Run terminated.
+  *return,-1
+
+*else
+  ! Unrecognized
+  *msg,warn
+PARWRITE error: input argument type unrecognized.%/&
+PARWRITE command is ignored.
+  *return,-1
+
+*endif

@@ -1,0 +1,30 @@
+! PRMREAD, parmName
+! PRMREAD, ARG1
+
+! Description:
+! Reads the value of a parameter from an external file created by PRMWRITE.
+
+! Arguments:
+! ARG1: parmName  -  name of parameter to be read.
+
+! Local parameters:
+! ar20: parType
+! ar26: fileName
+! ar27: fileExtension
+
+
+! Check inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,warning
+PARREAD error: invalid argument type (string expected).%/&
+PARREAD command is ignored.
+  *return,-1
+*endif
+
+! Generate read file name
+ar26 = 'PRM_%ARG1%'
+ar27 = 'prm'
+
+! Read param from file
+/input,%ar26%,%ar27%
