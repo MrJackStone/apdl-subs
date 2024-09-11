@@ -28,8 +28,8 @@
 *get,ar20,parm,ARG1,type
 *if,ar20,ne,3,then
   *msg,warning
-PARWRITE error: invalid argument type (string expected).%/&
-PARWRITE command is ignored.
+PRMWRITE error: invalid argument type (string expected).%/&
+PRMWRITE command is ignored.
   *return,-1
 *endif
 
@@ -59,7 +59,7 @@ ar27 = 'prm'
   *get , ar24 , parm , %ARG1% , dim , 4
   *if,ar24,gt,0,then
     *msg,fatal
-PARWRITE fatal error: support for 4-D and 5-D arrays not implemented.%/&
+PRMWRITE fatal error: support for 4-D and 5-D arrays not implemented.%/&
 Run terminated.
     *return,-1
   *endif
@@ -86,7 +86,7 @@ Run terminated.
 *elseif,ar20,eq,2,then
   ! Table
   *msg,fatal
-PARWRITE fatal error: macro lacks implementation to handle TABLES.%/&
+PRMWRITE fatal error: macro lacks implementation to handle TABLES.%/&
 Run terminated.
   *return,-1
 
@@ -127,15 +127,15 @@ Run terminated.
 *elseif,ar20,eq,5,then
   ! String array
   *msg,fatal
-PARWRITE fatal error: macro lacks implementation to handle STRING ARRAYS.%/&
+PRMWRITE fatal error: macro lacks implementation to handle STRING ARRAYS.%/&
 Run terminated.
   *return,-1
 
 *else
   ! Unrecognized
   *msg,warn
-PARWRITE error: input argument type unrecognized.%/&
-PARWRITE command is ignored.
+PRMWRITE error: input argument type unrecognized.%/&
+PRMWRITE command is ignored.
   *return,-1
 
 *endif
