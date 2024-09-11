@@ -117,7 +117,7 @@ Run terminated.
         *do,ar33,1,ar23,1
           ar28 = %ARG1%(ar31,ar32,ar33)
           *vwrite,ARG1,ar31,ar32,ar33,ar28
-%s(%i,%i,%i,%i,%i) = %s
+%s(%i,%i,%i) = '%s'
         *enddo
       *enddo
     *enddo
