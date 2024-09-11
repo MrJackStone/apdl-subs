@@ -22,7 +22,17 @@
 ! ar33: index3
 ! ar34: index4
 ! ar35: index5
+! ar36: prmName
+! ar37: prmValue
 
+! Global erased parameters:
+! PRMWRITE_VAR_prmName
+! PRMWRITE_VAR_prmValue
+
+
+! Prepare environment
+*del , PRMWRITE_VAR_prmName
+*del , PRMWRITE_VAR_prmValue
 
 ! Check inputs
 *get,ar20,parm,ARG1,type
@@ -42,10 +52,12 @@ ar27 = 'prm'
 
 *if,ar20,eq,0,then
   ! Scalar
+  PRMWRITE_VAR_prmName  = ARG1
+  PRMWRITE_VAR_prmValue = %ARG1%
   *cfopen,%ar26%,%ar27%
-    *vwrite,ARG1
+    *vwrite,PRMWRITE_VAR_prmName
 *del,%s,,nopr
-    *vwrite,ARG1,%ARG1%
+    *vwrite,PRMWRITE_VAR_prmName,PRMWRITE_VAR_prmValue
 %s = %g
   *cfclos
 
@@ -92,10 +104,12 @@ Run terminated.
 
 *elseif,ar20,eq,3,then
   ! Character scalar
+  PRMWRITE_VAR_prmName  = ARG1
+  PRMWRITE_VAR_prmValue = %ARG1%
   *cfopen,%ar26%,%ar27%
-    *vwrite,ARG1
+    *vwrite,PRMWRITE_VAR_prmName
 *del,%s,,nopr
-    *vwrite,ARG1,%ARG1%
+    *vwrite,PRMWRITE_VAR_prmName,PRMWRITE_VAR_prmValue
 %s = '%s'
   *cfclos
 
@@ -139,3 +153,7 @@ PRMWRITE command is ignored.
   *return,-1
 
 *endif
+
+! Clean up
+*del , PRMWRITE_VAR_prmName  ,  , nopr
+*del , PRMWRITE_VAR_prmValue ,  , nopr
