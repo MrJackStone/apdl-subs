@@ -1,25 +1,55 @@
-! l2acnt , cmArea , cmLine , pinball
-! L2ACNT , ARG1   , ARG2   , ARG3
+! l2acnt , cmArea , cmLine , pinball , jointType
+! L2ACNT , ARG1   , ARG2   , ARG3    , ARG4
 
 ! Description:
-! Creates linear bonded (always) contact between lines (contact) and areas (target).
+! Creates linear bonded (always) contact between lines (contact) and areas (target). The connection
+! can be fixed (U & ROT) or pinned (U-only) depending on the value of ARG4.
 
 ! Arguments:
-! ARG1: cmArea   -  name of area selection component
-! ARG2: cmLine   -  name of line selection component
-! ARG3: pinball  -  size of pinball region
+! ARG1: cmArea     -  name of area selection component
+! ARG2: cmLine     -  name of line selection component
+! ARG3: pinball    -  size of pinball region
+! ARG4: jointType  -  type of connection to create between line and area:
+!                       [0] Fixed (all six DOF)
+!                       [1] Pinned (UX, UY, and UZ only)
 
 ! Local parameters:
-! -
+! ar20: parType
+! ar24: activeDOFoption
 
 ! Global erased parameters:
 ! COMPE_L2ACNT_target
 ! COMPN_L2ACNT_target
 ! COMPE_L2ACNT_contact
 ! COMPN_L2ACNT_contact
-! L2ACNT_ARR_keyopts
+! L2ACNT_ARR_keyoptsConta
+! L2ACNT_ARR_keyoptsTarge
 ! L2ACNT_ARR_reals
 
+
+! Parse inputs
+  ar24 = 0
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,0,then
+  ar24 = ((ARG4<1)>0)
+*endif
+
+! Define contact settings
+*del , L2ACNT_ARR_keyoptsConta ,  , nopr
+*del , L2ACNT_ARR_reals        ,  , nopr
+*del , L2ACNT_ARR_keyoptsTarge ,  , nopr
+*dim , L2ACNT_ARR_keyoptsConta ,  , 2
+*dim , L2ACNT_ARR_reals        ,  , 2
+*dim , L2ACNT_ARR_keyoptsTarge ,  , 4
+
+L2ACNT_ARR_keyoptsConta(2) = 2
+
+L2ACNT_ARR_reals(2) = -ARG3
+
+*if,ar24,eq,1,then
+  L2ACNT_ARR_keyoptsTarge(2) = 1
+  L2ACNT_ARR_keyoptsTarge(4) = 000111
+*endif
 
 ! Create target element base
 cmsel,s,%ARG1%
@@ -35,17 +65,8 @@ esln,s
 cm,COMPE_L2ACNT_contact,elem
 cm,COMPN_L2ACNT_contact,node
 
-! Set keyopts & real constants
-*del , L2ACNT_ARR_keyopts ,  , nopr
-*dim , L2ACNT_ARR_keyopts ,  , 2
-L2ACNT_ARR_keyopts(2) = 2
-
-*del , L2ACNT_ARR_reals ,  , nopr
-*dim , L2ACNT_ARR_reals ,  , 2
-L2ACNT_ARR_reals(2) = -ARG3
-
 ! Create contact pairs
-cntdef , 'L2ACNT_TARGET' , 'L2ACNT_CONTACT' , 170 , 175 , 5 ,  , 'L2ACNT_ARR_keyopts' , 'L2ACNT_ARR_reals'
+cntdef , 'L2ACNT_TARGET' , 'L2ACNT_CONTACT' , 170 , 175 , 5 ,  , 'L2ACNT_ARR_keyoptsConta' , 'L2ACNT_ARR_reals', 'L2ACNT_ARR_keyoptsTarge'
 
 ! Clean up
 cmdele , COMPE_L2ACNT_target
@@ -56,5 +77,6 @@ cmdele , COMPE_L2ACNT_TARGET_targe
 cmdele , COMPN_L2ACNT_TARGET_targe
 cmdele , COMPE_L2ACNT_CONTACT_conta
 cmdele , COMPN_L2ACNT_CONTACT_conta
-*del , L2ACNT_ARR_keyopts ,  , nopr
-*del , L2ACNT_ARR_reals   ,  , nopr
+*del , L2ACNT_ARR_keyoptsConta ,  , nopr
+*del , L2ACNT_ARR_keyoptsTarge ,  , nopr
+*del , L2ACNT_ARR_reals        ,  , nopr
