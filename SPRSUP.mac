@@ -1,5 +1,5 @@
-! sprsup,   lx,   ly,   lz,  mat, real, type, cmnName, cmeName, calcApportioned, coupledDOFs
-! sprsup, arg1, arg2, arg3, arg4, arg5, arg6,    arg7,    arg8,            arg9,        ar10
+! sprsup , lx   , ly   , lz   , mat  , real , type , cmnName , cmeName , calcApportioned , coupledDOFs , apport_array
+! sprsup , arg1 , arg2 , arg3 , arg4 , arg5 , arg6 , arg7    , arg8    , arg9            , ar10        , AR11
 
 ! Description:
 ! Creates spring supports connected to currently selected nodes.
@@ -13,10 +13,11 @@
 ! arg6: type             -  element type index
 ! arg7: cmnName          -  name of selection component containing created nodes
 ! arg8: cmeName          -  name of selection component containing created elements
-! arg9: calcApportioned  -  determines whether or not to scale spring length based on nodal
-!                           apportioned areas:
+! arg9: calcApportioned  -  determines whether or not to scale spring length to keep stiffness
+!                           constant based on nodal apportioned areas:
 !                              [0] do not scale (all springs will have the same length)
-!                              [1] scale (length adjusted to keep stiffness constant)
+!                              [1] scale (apportioned areas will be calculated in this macro)
+!                              [2] scale (use apportioned areas provided through AR11)
 ! ar10: coupledDOFs      -  determines which degrees of freedom to couple between each spring's
 !                           nodes:
 !                              [0] no coupling
@@ -27,9 +28,15 @@
 !                              [5] UX & UZ
 !                              [6] UY & UZ
 !                              [7] UX, UY & UZ
+! AR11: apport_array     -  name of Nx2 array containing node numbers (?,1) and their corresponding
+!                           apportioned areas (?,2).
+!                           This argument is required if ARG9=2 and disregarded otherwise.
+!                           This argument should be provided when computational efficiency is a
+!                           concern, since it prevents this macro from recalculating previously
+!                           obtained apportioned areas every time it is called.
 
 ! Local parameters:
-! AR20: COMPN_selected
+! ar20: parType
 ! AR21: nc
 ! AR22: nnum
 ! AR23: nthNode
@@ -42,93 +49,163 @@
 ! AR30: COMPN_temp
 ! AR31: COMPE_temp
 ! AR32: apportionedArea
-! AR33: COMPE_selected
+! ar41: arrayRowCount
+! ar42: arrayColCount
+! ar43: validApportArray
 
+! Parse inputs
+ar47 = 'SPRSUP_COMPN_supports'
+*get,ar20,parm,ARG7,type
+*if,ar20,eq,3,then
+  ar47 = ARG7
+*endif
 
+ar48 = 'SPRSUP_COMPE_springs'
+*get,ar20,parm,ARG8,type
+*if,ar20,eq,3,then
+  ar48 = ARG8
+*endif
+
+*if,ARG9,eq,2,then
+  ar43 = 0
+  *get,ar20,parm,AR11,type
+  *if,ar20,eq,3,then
+    *get,ar20,parm,%AR11%,type
+    *if,ar20,eq,1,then
+      *get,ar41,parm,%AR11%,dim,x
+      *get,ar42,parm,%AR11%,dim,y
+      *if,ar41,ge,1,and,ar42,ge,2,then
+        ar43 = 1
+      *endif
+    *endif
+  *endif
+
+  *if,ar43,eq,0,then
+    *msg,error
+SPRSUP error: invalid nodal apportioned area array passed through AR11.%/&
+When ARG9=2 a predefined Nx2 array with node numbers & corresponding apportioned areas is required.%/&
+SPRSUP command is ignored.
+    *return,-1
+  *endif
+*endif
+
+! Prepare environment
 nbackup
 ebackup
-cm,AR20,node
-cm,AR33,elem
+
+*del , SPRSUP_ARR_nnum_apport ,  , nopr
+*del , SPRSUP_ARR_apportioned ,  , nopr
+*del , SPRSUP_ARR_base_nodes  ,  , nopr
+*del , SPRSUP_ARR_new_nodes   ,  , nopr
+*del , SPRSUP_ARR_nsel_mask   ,  , nopr
+*del , SPRSUP_ARR_base_x      ,  , nopr
+*del , SPRSUP_ARR_base_y      ,  , nopr
+*del , SPRSUP_ARR_base_z      ,  , nopr
+*del , SPRSUP_ARR_new_x       ,  , nopr
+*del , SPRSUP_ARR_new_y       ,  , nopr
+*del , SPRSUP_ARR_new_z       ,  , nopr
+*del , SPRSUP_ARR_scaled_LX   ,  , nopr
+*del , SPRSUP_ARR_scaled_LY   ,  , nopr
+*del , SPRSUP_ARR_scaled_LZ   ,  , nopr
+
+*get,ar21,node,,count
+
+! Obtain node numbers and corresponding apportioned areas
+*if,ARG9,eq,0,then
+  ! Ignore apportioned areas
+  *dim,SPRSUP_ARR_apportioned,,ar21
+  *vfill,SPRSUP_ARR_apportioned,ramp,1,0
+  *vget,SPRSUP_ARR_base_nodes,node,,nlist
+
+*elseif,ARG9,eq,1,then
+  ! Calculate apportioned areas
+  apportionedstats,,'SPRSUP_ARR_nnum_apport'
+  *vfun , SPRSUP_ARR_base_nodes  , copy , SPRSUP_ARR_nnum_apport(1 , 1)
+  *vfun , SPRSUP_ARR_apportioned , copy , SPRSUP_ARR_nnum_apport(1 , 2)
+
+*elseif,ARG9,eq,2,then
+  ! Apportioned areas previously calculated
+  *dim,SPRSUP_ARR_nsel_mask,,ar41
+  *get,SPRSUP_ARR_nsel_mask(1:ar41),node,%AR11%(1:ar41,1),nsel
+
+  *vmask , SPRSUP_ARR_nsel_mask
+  *vfun  , SPRSUP_ARR_base_nodes  , copy , %AR11%(1,1)
+  *vmask , SPRSUP_ARR_nsel_mask
+  *vfun  , SPRSUP_ARR_apportioned , copy , %AR11%(1,2)
+
+*endif
+
+! Calculate positions
+*vget , SPRSUP_ARR_base_x , node ,  , loc , x
+*vget , SPRSUP_ARR_base_y , node ,  , loc , y
+*vget , SPRSUP_ARR_base_z , node ,  , loc , z
+
+*voper , SPRSUP_ARR_scaled_LX , ARG1 , div , SPRSUP_ARR_apport_areas(1 , 2)
+*voper , SPRSUP_ARR_scaled_LY , ARG2 , div , SPRSUP_ARR_apport_areas(1 , 2)
+*voper , SPRSUP_ARR_scaled_LZ , ARG3 , div , SPRSUP_ARR_apport_areas(1 , 2)
+
+*voper , SPRSUP_ARR_new_x , SPRSUP_ARR_base_x , add , SPRSUP_ARR_scaled_LX
+*voper , SPRSUP_ARR_new_y , SPRSUP_ARR_base_y , add , SPRSUP_ARR_scaled_LY
+*voper , SPRSUP_ARR_new_z , SPRSUP_ARR_base_z , add , SPRSUP_ARR_scaled_LZ
+
+! Create springs
+mat  , arg4
+real , arg5
+type , arg6
+
+nextnd,'SPRSUP_ARR_new_nodes',ar21
+
+n , SPRSUP_ARR_new_nodes(1:ar21)  , SPRSUP_ARR_new_x(1:ar21)     , SPRSUP_ARR_new_y(1:ar21) , SPRSUP_ARR_new_z(1:ar21)
+e , SPRSUP_ARR_base_nodes(1:ar21) , SPRSUP_ARR_new_nodes(1:ar21)
+
+! Couple DOFs
+*if,ar10,eq,1,then
+  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,2,then
+  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,3,then
+  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,4,then
+  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,5,then
+  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,6,then
+  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*elseif,ar10,eq,7,then
+  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*endif
+
+! Create exported components
 nsel,none
+nsel,a,node,,SPRSUP_ARR_new_nodes(1:ar21)
+cm,%ar47%,node
+
 esel,none
-cm,AR30,node
-cm,AR31,elem
-cmsel,s,AR20
+esln,s,0
+cm,%ar48%,node
 
-mat,arg4
-real,arg5
-type,arg6
-
-! Create support springs
-*get,AR21,node,,count
-AR22=0
-*do,AR23,1,AR21,1
-  cmsel,s,AR20
-  AR22=ndnext(AR22)
-
-  ! Calculate apportioned area
-  *if,arg9,eq,1,then
-    esel,s,elem,,all
-    nsle,a
-    AR32=arnode(AR22)
-    cmsel,s,AR31
-  *else
-    AR32=1
-  *endif
-
-  ! Create new node and element
-  AR24=nx(AR22)
-  AR25=ny(AR22)
-  AR26=nz(AR22)
-  *get,AR28,node,,num,maxd
-  AR27=AR28+1
-  n,AR27,AR24+(arg1/AR32),AR25+(arg2/AR32),AR26+(arg3/AR32)
-  e,AR22,AR27
-
-  ! Couple DOFs
-  *if,ar10,eq,1,then
-    safe_cp,'UX',AR27,AR22
-  *elseif,ar10,eq,2,then
-    safe_cp,'UY',AR27,AR22
-  *elseif,ar10,eq,3,then
-    safe_cp,'UX',AR27,AR22
-    safe_cp,'UY',AR27,AR22
-  *elseif,ar10,eq,4,then
-    safe_cp,'UZ',AR27,AR22
-  *elseif,ar10,eq,5,then
-    safe_cp,'UX',AR27,AR22
-    safe_cp,'UZ',AR27,AR22
-  *elseif,ar10,eq,6,then
-    safe_cp,'UY',AR27,AR22
-    safe_cp,'UZ',AR27,AR22
-  *elseif,ar10,eq,7,then
-    safe_cp,'UX',AR27,AR22
-    safe_cp,'UY',AR27,AR22
-    safe_cp,'UZ',AR27,AR22
-  *endif
-
-  nsel,s,node,,AR27
-  cmsel,a,AR30
-  cm,AR30,node
-  cm,AR31,elem
-*enddo
-cm,AR31,elem
-
-! Create nodal component (supported nodes)
-*get,AR29,parm,arg7,type
-*if,AR29,eq,3,then
-  cmsel,s,AR30
-  cm,%arg7%,node
-*endif
-
-! Create element component (springs)
-*get,AR29,parm,arg8,type
-*if,AR29,eq,3,then
-  cm,%arg8%,elem
-*endif
-
-! Restore previous selection and add created entities
+! Clean up
 nrestore
-cmsel,a,AR30
 elrestore
-cmsel,a,AR31
+cmsel,a,%ar47%
+cmsel,a,%ar48%
+
+*del , SPRSUP_ARR_nnum_apport ,  , nopr
+*del , SPRSUP_ARR_apportioned ,  , nopr
+*del , SPRSUP_ARR_base_nodes  ,  , nopr
+*del , SPRSUP_ARR_new_nodes   ,  , nopr
+*del , SPRSUP_ARR_nsel_mask   ,  , nopr
+*del , SPRSUP_ARR_base_x      ,  , nopr
+*del , SPRSUP_ARR_base_y      ,  , nopr
+*del , SPRSUP_ARR_base_z      ,  , nopr
+*del , SPRSUP_ARR_new_x       ,  , nopr
+*del , SPRSUP_ARR_new_y       ,  , nopr
+*del , SPRSUP_ARR_new_z       ,  , nopr
+*del , SPRSUP_ARR_scaled_LX   ,  , nopr
+*del , SPRSUP_ARR_scaled_LY   ,  , nopr
+*del , SPRSUP_ARR_scaled_LZ   ,  , nopr
