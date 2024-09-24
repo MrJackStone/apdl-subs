@@ -199,3 +199,44 @@ mp , prxy , ar33    , 0.3
 ! Create discrete springs connected to current node selection
 ar88 = ARG8
 sprsup , ar41 , ar42 , ar43 , ar33 , ar32 , ar31 , ar29 , ar30 , 2 , ar88 , ar51
+
+
+!! D.  Apply supports                                                                             !!
+cmsel,s,%ar29%
+
+*if,ARG8,eq,1,then
+  ! Couple UX
+  d,%ar29%,uy,0
+  d,%ar29%,uz,0
+
+*elseif,ARG8,eq,2,then
+  ! Couple UY
+  d,%ar29%,ux,0
+  d,%ar29%,uz,0
+
+*elseif,ARG8,eq,3,then
+  ! Couple UX, UY
+  d,%ar29%,uz,0
+
+*elseif,ARG8,eq,4,then
+  ! Couple UZ
+  d,%ar29%,ux,0
+  d,%ar29%,uy,0
+
+*elseif,ARG8,eq,5,then
+  ! Couple UX, UZ
+  d,%ar29%,uy,0
+
+*elseif,ARG8,eq,6,then
+  ! Couple UY, UZ
+  d,%ar29%,ux,0
+
+*elseif,ARG8,eq,7,then
+  ! No constraints
+
+*else
+  ! No coupling
+  d,%ar29%,ux,0
+  d,%ar29%,uy,0
+  d,%ar29%,uz,0
+*endif
