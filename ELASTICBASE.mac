@@ -83,126 +83,51 @@
 ! Global output parameters:
 ! %AR11% (defaults to 'ELASTICBASE_ARR_apport_areas')
 
-! Define name of node selection component
-*get,AR20,parm,arg9,type
-*if,AR20,eq,3,then
-    AR29=arg9
-*else
-    AR29='ELASTICBASE_COMPN_new'
+
+! Parse inputs
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,error
+ELASTICBASE error: ARG2 must be a string.%/&
+ELASTICBASE command is ignored.
+  *return,-1
 *endif
 
-! Define name of element selection component
-*get,AR20,parm,ar10,type
-*if,AR20,eq,3,then
-    AR30=ar10
-*else
-    AR30='ELASTICBASE_COMPE_new'
-*endif
-
-! New element type, real constant set, and material numbers
-*get,AR21,etyp,,num,max
-AR31=AR21+1
-*get,AR22,rcon,,num,max
-AR32=AR22+1
-*get,AR23,mat,,num,max
-AR33=AR23+1
-
-! Calculate mean apportioned area
-apportionedstats,'ELASTICBASE_ARR_appoStats'
-AR24=ELASTICBASE_ARR_appoStats(4)
-
-! Calculate adopted length for spring elements
-*if,arg5,eq,0,then
-    AR25=1
-*else
-    AR25=arg5
-*endif
-AR25=AR25*AR24
-
-! Calculate axial stiffness per unit area for calculated length
-AR34=abs(AR25)*arg3
-
-! Calculate adopted elastic modulus and cross-sectional area
-*if,arg6,ne,0,then
-    ! When elastic modulus is given
-    AR26=abs(arg6)
-    AR27=AR34/AR26
-*else
-    *if,arg7,ne,0,then
-        ! When cross-sectional area is given
-        AR27=abs(arg7)
-        AR26=AR34/AR27
-    *else
-        ! When neither elastic modulus nor cross-sectional area are given
-        AR27=AR24/10
-        AR26=AR34/AR27
-    *endif
-*endif
-
-! Determine spring direction
-AR41=0
-AR42=0
-AR43=0
-*if,upcase(arg2),eq,'X',then
-    AR41=AR25
-*elseif,upcase(arg2),eq,'Y',then
-    AR42=AR25
-*elseif,upcase(arg2),eq,'Z',then
-    AR43=AR25
-*else
-    *msg,warn
+*if,upcase(ARG2),ne,'X',and,upcase(ARG2),ne,'Y',then
+  *if,upcase(ARG2),ne,'Z',then
+    *msg,error
 ELASTICBASE error: invalid direction. arg2 must be X, Y, or Z.%/&
 ELASTICBASE command is ignored.
     *return,-1
+  *endif
 *endif
 
-! Create new attribute set: element type, real constant set, material
-et,AR31,link180
-r,AR32,AR27,,arg4
-mp,ex,AR33,AR26
-mp,prxy,AR33,0.3
-
-! Create discrete springs connected to current node selection
-sprsup,AR41,AR42,AR43,AR33,AR32,AR31,AR29,AR30,1,arg8
-
-! Apply displacement restriction in uncoupled directions
-cmsel,s,%AR29%
-*if,arg8,eq,1,then
-    ! Couple UX
-    d,%AR29%,uy,0
-    d,%AR29%,uz,0
-*elseif,arg8,eq,2,then
-    ! Couple UY
-    d,%AR29%,ux,0
-    d,%AR29%,uz,0
-*elseif,arg8,eq,3,then
-    ! Couple UX, UY
-    d,%AR29%,uz,0
-*elseif,arg8,eq,4,then
-    ! Couple UZ
-    d,%AR29%,ux,0
-    d,%AR29%,uy,0
-*elseif,arg8,eq,5,then
-    ! Couple UX, UZ
-    d,%AR29%,uy,0
-*elseif,arg8,eq,6,then
-    ! Couple UY, UZ
-    d,%AR29%,ux,0
-*elseif,arg8,eq,7,then
-    ! No constraints
-*else
-    ! No coupling
-    d,%AR29%,ux,0
-    d,%AR29%,uy,0
-    d,%AR29%,uz,0
-*endif
-
-! Assign attribute numbers to output object
-*get,AR20,parm,arg1,type
+AR29 = 'ELASTICBASE_COMPN_new'
+*get,AR20,parm,arg9,type
 *if,AR20,eq,3,then
-    *del,%arg1%,,nopr
-    *dim,%arg1%,,7
-    %arg1%(1)=AR33,AR32,AR31,AR25,AR26,AR27,AR24
+  AR29 = arg9
 *endif
 
-*del,ELASTICBASE_ARR_appoStats,,nopr
+AR30 = 'ELASTICBASE_COMPE_new'
+*get,AR20,parm,ar10,type
+*if,AR20,eq,3,then
+  AR30 = ar10
+*endif
+
+ar50 = 'ELASTICBASE_ARR_apport_stats'
+
+ar51 = 'ELASTICBASE_ARR_apport_areas'
+*get,ar20,parm,AR11,type
+*if,ar20,eq,3,then
+  ar51 = AR11
+*endif
+
+ar54 = 1
+*get,ar20,parm,%ar51%,type
+*if,ar20,eq,1,then
+  *get,ar52,parm,%ar51%,dim,x
+  *get,ar53,parm,%ar51%,dim,y
+  *if,ar52,ge,1,and,ar53,ge,2,then
+    ar54 = 0
+  *endif
+*endif
