@@ -1,50 +1,57 @@
-! ELASTICBASE, outputObject, direction, stiffness, tenskey, refLength, refElasticModulus, refArea, coupledDOFs, cmnName, cmeName
-! ELASTICBASE,         arg1,      arg2,      arg3,    arg4,      arg5,              arg6,    arg7,        arg8,    arg9,    ar10
+! elasticbase , output , direction , stiffness , tenskey , refL , refE , refA , coupledDOFs , cmnName , cmeName , apport_array
+! ELASTICBASE , ARG1   , ARG2      , ARG3      , ARG4    , ARG5 , ARG6 , ARG7 , ARG8        , ARG9    , AR10    , AR11
 
 ! Description:
 ! Creates an elastic base of a given stiffness composed of discrete spring elements aligned with
 ! global X, Y, or Z axis.
 
 ! Arguments:
-! arg1: outputObject       -  name of array parameter to which the following data will be written:
-!                                POS CONTENTS
-!                                (1) material ID assigned to spring elements
-!                                (2) real constant set ID assigned to spring elements
-!                                (3) element type ID assigned to spring elements
-!                                (4) adopted length
-!                                (5) adopted elastic modulus
-!                                (6) adopted cross-sectional area
-!                                (7) average apportioned area
-! arg2: direction          -  direction of the spring elements (must be 'X', 'Y', or 'Z')
-! arg3: stiffness          -  elastic base's stiffness per unit area (N/m²)
-! arg4: tenskey            -  LINK180's TENSKEY option:
-!                                [ 0] Tension & compression (default)
-!                                [ 1] Tension only (tendon)
-!                                [-1] Compression only (strut)
-! arg5: refLength          -  spring element length for average apportioned area (defaults to 1
-!                             length unit). The sign of this number determines whether the spring
-!                             is created "ahead" of the reference nodes (i.e., towards an increasing
-!                             value of the chosen XYZ coordinate) or "behind" them (towards a
-!                             decreasing value of the coordinate)
-! arg6: refElasticModulus  -  elastic modulus of the material assigned to the springs. This value
-!                             can be zero, in which case it is automaticall calculated based on the
-!                             cross-sectional area
-! arg7: refArea            -  cross-sectional area of the spring elements created. This value is
-!                             only used if arg6 (refElasticModulus) is zero
-! arg8: coupledDOFs        -  determines which degrees of freedom to couple between each spring's
-!                             nodes:
-!                                [0] no coupling
-!                                [1] UX
-!                                [2] UY
-!                                [3] UX & UY
-!                                [4] UZ
-!                                [5] UX & UZ
-!                                [6] UY & UZ
-!                                [7] UX, UY & UZ
-! arg9: cmnName            -  name of nodal selection component containing created nodes
-!                             (defaults to ELASTICBASE_COMPN_new)
-! ar10: cmeName            -  name of element selection component containing created elements
-!                             (defaults to ELASTICBASE_COMPE_new)
+! arg1: output       -  name of array parameter to which the following data will be written:
+!                         POS CONTENTS
+!                         (1) material ID assigned to spring elements
+!                         (2) real constant set ID assigned to spring elements
+!                         (3) element type ID assigned to spring elements
+!                         (4) adopted length
+!                         (5) adopted elastic modulus
+!                         (6) adopted cross-sectional area
+!                         (7) average apportioned area
+! arg2: direction    -  direction of the spring elements (must be 'X', 'Y', or 'Z')
+! arg3: stiffness    -  elastic base's stiffness per unit area (N/m²)
+! arg4: tenskey      -  LINK180's TENSKEY option:
+!                         [ 0] Tension & compression (default)
+!                         [ 1] Tension only (tendon)
+!                         [-1] Compression only (strut)
+! arg5: refL         -  spring element length for average apportioned area (defaults to 1
+!                       length unit). The sign of this number determines whether the spring
+!                       is created "ahead" of the reference nodes (i.e., towards an increasing
+!                       value of the chosen XYZ coordinate) or "behind" them (towards a
+!                       decreasing value of the coordinate)
+! arg6: refE         -  elastic modulus of the material assigned to the springs. This value
+!                       can be zero, in which case it is automaticall calculated based on the
+!                       cross-sectional area
+! arg7: refA         -  cross-sectional area of the spring elements created. This value is
+!                       only used if arg6 (refElasticModulus) is zero
+! arg8: coupledDOFs  -  determines which degrees of freedom to couple between each spring's
+!                       nodes:
+!                         [0] no coupling
+!                         [1] UX
+!                         [2] UY
+!                         [3] UX & UY
+!                         [4] UZ
+!                         [5] UX & UZ
+!                         [6] UY & UZ
+!                         [7] UX, UY & UZ
+! arg9: cmnName      -  name of nodal selection component containing created nodes
+!                       (defaults to ELASTICBASE_COMPN_new)
+! ar10: cmeName      -  name of element selection component containing created elements
+!                       (defaults to ELASTICBASE_COMPE_new)
+! AR11: apport_array -  name of Nx2 array containing node numbers (?,1) and their corresponding
+!                       apportioned areas (?,2).
+!                       If blank, defaults to 'ELASTICBASE_ARR_apport_areas' and apportioned areas are
+!                       then calculated inside this macro. This argument should be provided when
+!                       computational efficiency is a concern, since it avoids recalculating nodal
+!                       apportioned areas every subsequent time ELASTICBASE is executed.
+
 
 ! Local parameters:
 ! AR20: parType
@@ -64,10 +71,17 @@
 ! AR41: xLength
 ! AR42: yLength
 ! AR43: zLength
+! ar50: apportStatsName
+! ar51: apportArrayName
+! ar52: apportArrayNodeCount
+! ar53: apportArrayColCount
+! ar54: calculateApportAreas
 
-! Global parameters (erased at the end of this subroutine):
-! ELASTICBASE_ARR_appoStats
+! Global erased parameters:
+! ELASTICBASE_ARR_apport_stats
 
+! Global output parameters:
+! %AR11% (defaults to 'ELASTICBASE_ARR_apport_areas')
 
 ! Define name of node selection component
 *get,AR20,parm,arg9,type
