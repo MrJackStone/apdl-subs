@@ -49,8 +49,8 @@ nbackup
 ebackup
 cm,AR20,node
 cm,AR33,elem
-nsel,u,node,,all
-esel,u,elem,,all
+nsel,none
+esel,none
 cm,AR30,node
 cm,AR31,elem
 cmsel,s,AR20
@@ -63,76 +63,72 @@ type,arg6
 *get,AR21,node,,count
 AR22=0
 *do,AR23,1,AR21,1
-    cmsel,s,AR20
-    AR22=ndnext(AR22)
+  cmsel,s,AR20
+  AR22=ndnext(AR22)
 
-    ! Calculate apportioned area
-    *if,arg9,eq,1,then
-        esel,s,elem,,all
-        nsle,a
-        AR32=arnode(AR22)
-        cmsel,s,AR31
-    *else
-        AR32=1
-    *endif
+  ! Calculate apportioned area
+  *if,arg9,eq,1,then
+    esel,s,elem,,all
+    nsle,a
+    AR32=arnode(AR22)
+    cmsel,s,AR31
+  *else
+    AR32=1
+  *endif
 
-    ! Create new node and element
-    AR24=nx(AR22)
-    AR25=ny(AR22)
-    AR26=nz(AR22)
-    *get,AR28,node,,num,maxd
-    AR27=AR28+1
-    n,AR27,AR24+(arg1/AR32),AR25+(arg2/AR32),AR26+(arg3/AR32)
-    e,AR22,AR27
+  ! Create new node and element
+  AR24=nx(AR22)
+  AR25=ny(AR22)
+  AR26=nz(AR22)
+  *get,AR28,node,,num,maxd
+  AR27=AR28+1
+  n,AR27,AR24+(arg1/AR32),AR25+(arg2/AR32),AR26+(arg3/AR32)
+  e,AR22,AR27
 
-    ! Couple DOFs
-    *if,ar10,eq,1,then
-        safe_cp,'UX',AR27,AR22
-    *elseif,ar10,eq,2,then
-        safe_cp,'UY',AR27,AR22
-    *elseif,ar10,eq,3,then
-        safe_cp,'UX',AR27,AR22
-        safe_cp,'UY',AR27,AR22
-    *elseif,ar10,eq,4,then
-        safe_cp,'UZ',AR27,AR22
-    *elseif,ar10,eq,5,then
-        safe_cp,'UX',AR27,AR22
-        safe_cp,'UZ',AR27,AR22
-    *elseif,ar10,eq,6,then
-        safe_cp,'UY',AR27,AR22
-        safe_cp,'UZ',AR27,AR22
-    *elseif,ar10,eq,7,then
-        safe_cp,'UX',AR27,AR22
-        safe_cp,'UY',AR27,AR22
-        safe_cp,'UZ',AR27,AR22
-    *endif
+  ! Couple DOFs
+  *if,ar10,eq,1,then
+    safe_cp,'UX',AR27,AR22
+  *elseif,ar10,eq,2,then
+    safe_cp,'UY',AR27,AR22
+  *elseif,ar10,eq,3,then
+    safe_cp,'UX',AR27,AR22
+    safe_cp,'UY',AR27,AR22
+  *elseif,ar10,eq,4,then
+    safe_cp,'UZ',AR27,AR22
+  *elseif,ar10,eq,5,then
+    safe_cp,'UX',AR27,AR22
+    safe_cp,'UZ',AR27,AR22
+  *elseif,ar10,eq,6,then
+    safe_cp,'UY',AR27,AR22
+    safe_cp,'UZ',AR27,AR22
+  *elseif,ar10,eq,7,then
+    safe_cp,'UX',AR27,AR22
+    safe_cp,'UY',AR27,AR22
+    safe_cp,'UZ',AR27,AR22
+  *endif
 
-    nsel,s,node,,AR27
-    cmsel,a,AR30
-    cm,AR30,node
-    cm,AR31,elem
+  nsel,s,node,,AR27
+  cmsel,a,AR30
+  cm,AR30,node
+  cm,AR31,elem
 *enddo
 cm,AR31,elem
 
 ! Create nodal component (supported nodes)
 *get,AR29,parm,arg7,type
 *if,AR29,eq,3,then
-    cmsel,s,AR30
-    cm,%arg7%,node
+  cmsel,s,AR30
+  cm,%arg7%,node
 *endif
 
 ! Create element component (springs)
 *get,AR29,parm,arg8,type
 *if,AR29,eq,3,then
-    cm,%arg8%,elem
+  cm,%arg8%,elem
 *endif
 
 ! Restore previous selection and add created entities
 nrestore
-cmsel,a,AR30  !! this was commented until 01/12/22, don't know why
+cmsel,a,AR30
 elrestore
-cmsel,a,AR31  !! this was commented until 01/12/22, don't know why
-
-
-
-
+cmsel,a,AR31
