@@ -1,24 +1,24 @@
 ! sprsup , lx   , ly   , lz   , mat  , real , type , cmnName , cmeName , calcApportioned , coupledDOFs , apport_array
-! sprsup , arg1 , arg2 , arg3 , arg4 , arg5 , arg6 , arg7    , arg8    , arg9            , ar10        , AR11
+! SPRSUP , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7    , ARG8    , ARG9            , AR10        , AR11
 
 ! Description:
 ! Creates spring supports connected to currently selected nodes.
 
 ! Arguments:
-! arg1: lx               -  spring length along X direction
-! arg2: ly               -  spring length along Y direction
-! arg3: lz               -  spring length along Z direction
-! arg4: mat              -  material index
-! arg5: real             -  real constant index
-! arg6: type             -  element type index
-! arg7: cmnName          -  name of selection component containing created nodes
-! arg8: cmeName          -  name of selection component containing created elements
-! arg9: calcApportioned  -  determines whether or not to scale spring length to keep stiffness
+! ARG1: lx               -  spring length along X direction
+! ARG2: ly               -  spring length along Y direction
+! ARG3: lz               -  spring length along Z direction
+! ARG4: mat              -  material index
+! ARG5: real             -  real constant index
+! ARG6: type             -  element type index
+! ARG7: cmnName          -  name of selection component containing created nodes
+! ARG8: cmeName          -  name of selection component containing created elements
+! ARG9: calcApportioned  -  determines whether or not to scale spring length to keep stiffness
 !                           constant based on nodal apportioned areas:
 !                              [0] do not scale (all springs will have the same length)
 !                              [1] scale (apportioned areas will be calculated in this macro)
 !                              [2] scale (use apportioned areas provided through AR11)
-! ar10: coupledDOFs      -  determines which degrees of freedom to couple between each spring's
+! AR10: coupledDOFs      -  determines which degrees of freedom to couple between each spring's
 !                           nodes:
 !                              [0] no coupling
 !                              [1] UX
@@ -37,21 +37,11 @@
 
 ! Local parameters:
 ! ar20: parType
-! AR21: nc
-! AR22: nnum
-! AR23: nthNode
-! AR24: nx
-! AR25: ny
-! AR26: nz
-! AR27: newNode
-! AR28: NDMX
-! AR29: parType
-! AR30: COMPN_temp
-! AR31: COMPE_temp
-! AR32: apportionedArea
+! ar21: nc
 ! ar41: arrayRowCount
 ! ar42: arrayColCount
 ! ar43: validApportArray
+
 
 ! Parse inputs
 ar47 = 'SPRSUP_COMPN_supports'
@@ -149,9 +139,9 @@ ebackup
 *voper , SPRSUP_ARR_new_z , SPRSUP_ARR_base_z , add , SPRSUP_ARR_scaled_LZ
 
 ! Create springs
-mat  , arg4
-real , arg5
-type , arg6
+mat  , ARG4
+real , ARG5
+type , ARG6
 
 nextnd,'SPRSUP_ARR_new_nodes',ar21
 
@@ -159,24 +149,17 @@ n , SPRSUP_ARR_new_nodes(1:ar21)  , SPRSUP_ARR_new_x(1:ar21)     , SPRSUP_ARR_ne
 e , SPRSUP_ARR_base_nodes(1:ar21) , SPRSUP_ARR_new_nodes(1:ar21)
 
 ! Couple DOFs
-*if,ar10,eq,1,then
+*if,mod(AR10,2),eq,1,then
   cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,2,then
-  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,3,then
-  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,4,then
-  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,5,then
-  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,6,then
-  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-  cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-*elseif,ar10,eq,7,then
-  cp,next,'UX',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
-  cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+*endif
+
+*if,AR10,ge,2,then
+  *if,AR10,ne,4,and,AR10,ne,5,then
+    cp,next,'UY',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
+  *endif
+*endif
+
+*if,AR10,ge,4,then
   cp,next,'UZ',SPRSUP_ARR_new_nodes(1:ar21),SPRSUP_ARR_base_nodes(1:ar21)
 *endif
 
