@@ -182,3 +182,20 @@ ar43 = 0
   apportionedstats,,ar51
 *endif
 *vscfun,ar24,mean,%ar51%(1,2)
+
+
+!! C.  Create springs                                                                             !!
+! New mesh attributes
+ar31 = etyiqr(0,16)
+ar32 = rlinqr(0,16)
+ar33 = mpinqr(0,0,16)
+
+! Create new attribute set: element type, real constant set, material
+et , ar31 , link180
+r  , ar32 , ar27    ,      , ARG4
+mp , ex   , ar33    , ar26
+mp , prxy , ar33    , 0.3
+
+! Create discrete springs connected to current node selection
+ar88 = ARG8
+sprsup , ar41 , ar42 , ar43 , ar33 , ar32 , ar31 , ar29 , ar30 , 2 , ar88 , ar51
