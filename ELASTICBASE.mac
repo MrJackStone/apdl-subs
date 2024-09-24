@@ -240,3 +240,13 @@ cmsel,s,%ar29%
   d,%ar29%,uy,0
   d,%ar29%,uz,0
 *endif
+
+
+!! E.  Clean up                                                                                   !!
+! Assign attribute numbers to output object
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  *del , %ARG1% ,  , nopr
+  *dim , %ARG1% ,  , 7
+  %ARG1%(1) = ar33 , ar32 , ar31 , ar25 , ar26 , ar27 , ar24
+*endif
