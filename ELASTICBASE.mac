@@ -6,7 +6,7 @@
 ! global X, Y, or Z axis.
 
 ! Arguments:
-! arg1: output       -  name of array parameter to which the following data will be written:
+! ARG1: output       -  name of array parameter to which the following data will be written:
 !                         POS CONTENTS
 !                         (1) material ID assigned to spring elements
 !                         (2) real constant set ID assigned to spring elements
@@ -15,23 +15,23 @@
 !                         (5) adopted elastic modulus
 !                         (6) adopted cross-sectional area
 !                         (7) average apportioned area
-! arg2: direction    -  direction of the spring elements (must be 'X', 'Y', or 'Z')
-! arg3: stiffness    -  elastic base's stiffness per unit area (N/m²)
-! arg4: tenskey      -  LINK180's TENSKEY option:
+! ARG2: direction    -  direction of the spring elements (must be 'X', 'Y', or 'Z')
+! ARG3: stiffness    -  elastic base's stiffness per unit area (N/m²)
+! ARG4: tenskey      -  LINK180's TENSKEY option:
 !                         [ 0] Tension & compression (default)
 !                         [ 1] Tension only (tendon)
 !                         [-1] Compression only (strut)
-! arg5: refL         -  spring element length for average apportioned area (defaults to 1
+! ARG5: refL         -  spring element length for average apportioned area (defaults to 1
 !                       length unit). The sign of this number determines whether the spring
 !                       is created "ahead" of the reference nodes (i.e., towards an increasing
 !                       value of the chosen XYZ coordinate) or "behind" them (towards a
 !                       decreasing value of the coordinate)
-! arg6: refE         -  elastic modulus of the material assigned to the springs. This value
+! ARG6: refE         -  elastic modulus of the material assigned to the springs. This value
 !                       can be zero, in which case it is automaticall calculated based on the
 !                       cross-sectional area
-! arg7: refA         -  cross-sectional area of the spring elements created. This value is
-!                       only used if arg6 (refElasticModulus) is zero
-! arg8: coupledDOFs  -  determines which degrees of freedom to couple between each spring's
+! ARG7: refA         -  cross-sectional area of the spring elements created. This value is
+!                       only used if ARG6 (refE) is zero
+! ARG8: coupledDOFs  -  determines which degrees of freedom to couple between each spring's
 !                       nodes:
 !                         [0] no coupling
 !                         [1] UX
@@ -41,9 +41,9 @@
 !                         [5] UX & UZ
 !                         [6] UY & UZ
 !                         [7] UX, UY & UZ
-! arg9: cmnName      -  name of nodal selection component containing created nodes
+! ARG9: cmnName      -  name of nodal selection component containing created nodes
 !                       (defaults to ELASTICBASE_COMPN_new)
-! ar10: cmeName      -  name of element selection component containing created elements
+! AR10: cmeName      -  name of element selection component containing created elements
 !                       (defaults to ELASTICBASE_COMPE_new)
 ! AR11: apport_array -  name of Nx2 array containing node numbers (?,1) and their corresponding
 !                       apportioned areas (?,2).
@@ -54,24 +54,20 @@
 
 
 ! Local parameters:
-! AR20: parType
-! AR21: maxType
-! AR22: maxReal
-! AR23: maxMat
-! AR24: meanApportionedArea
-! AR25: adoptedLength
-! AR26: adoptedElasticModulus
-! AR27: adoptedArea
-! AR29: nodeComponent
-! AR30: elementComponent
-! AR31: newType
-! AR32: newReal
-! AR33: newMat
-! AR34: meanUnitAxialStiffness
-! AR41: xLength
-! AR42: yLength
-! AR43: zLength
-! ar50: apportStatsName
+! ar20: parType
+! ar25: adoptedLength
+! ar26: adoptedElasticModulus
+! ar27: adoptedArea
+! ar28: DOFcouplingKey
+! ar29: nodeComponent
+! ar30: elementComponent
+! ar31: newType
+! ar32: newReal
+! ar33: newMat
+! ar34: meanUnitAxialStiffness
+! ar41: xLength
+! ar42: yLength
+! ar43: zLength
 ! ar51: apportArrayName
 ! ar52: apportArrayNodeCount
 ! ar53: apportArrayColCount
@@ -84,7 +80,7 @@
 ! %AR11% (defaults to 'ELASTICBASE_ARR_apport_areas')
 
 
-! Parse inputs
+!! A.  Parse inputs                                                                               !!
 *get,ar20,parm,ARG2,type
 *if,ar20,ne,3,then
   *msg,error
@@ -96,25 +92,23 @@ ELASTICBASE command is ignored.
 *if,upcase(ARG2),ne,'X',and,upcase(ARG2),ne,'Y',then
   *if,upcase(ARG2),ne,'Z',then
     *msg,error
-ELASTICBASE error: invalid direction. arg2 must be X, Y, or Z.%/&
+ELASTICBASE error: invalid direction. ARG2 must be X, Y, or Z.%/&
 ELASTICBASE command is ignored.
     *return,-1
   *endif
 *endif
 
-AR29 = 'ELASTICBASE_COMPN_new'
-*get,AR20,parm,arg9,type
-*if,AR20,eq,3,then
-  AR29 = arg9
+ar29 = 'ELASTICBASE_COMPN_new'
+*get,ar20,parm,ARG9,type
+*if,ar20,eq,3,then
+  ar29 = ARG9
 *endif
 
-AR30 = 'ELASTICBASE_COMPE_new'
-*get,AR20,parm,ar10,type
-*if,AR20,eq,3,then
-  AR30 = ar10
+ar30 = 'ELASTICBASE_COMPE_new'
+*get,ar20,parm,AR10,type
+*if,ar20,eq,3,then
+  ar30 = AR10
 *endif
-
-ar50 = 'ELASTICBASE_ARR_apport_stats'
 
 ar51 = 'ELASTICBASE_ARR_apport_areas'
 *get,ar20,parm,AR11,type
@@ -197,8 +191,8 @@ mp , ex   , ar33    , ar26
 mp , prxy , ar33    , 0.3
 
 ! Create discrete springs connected to current node selection
-ar88 = ARG8
-sprsup , ar41 , ar42 , ar43 , ar33 , ar32 , ar31 , ar29 , ar30 , 2 , ar88 , ar51
+ar28 = ARG8
+sprsup , ar41 , ar42 , ar43 , ar33 , ar32 , ar31 , ar29 , ar30 , 2 , ar28 , ar51
 
 
 !! D.  Apply supports                                                                             !!
