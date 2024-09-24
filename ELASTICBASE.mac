@@ -131,3 +131,54 @@ ar54 = 1
     ar54 = 0
   *endif
 *endif
+
+
+!! B.  Calculate spring attributes                                                                !!
+! Spring reference length
+ar25 = 1
+*if,ARG5,ne,0,then
+  ar25 = ARG5
+*endif
+
+! Calculate axial stiffness per unit area for calculated length
+ar34 = abs(ar25)*ARG3
+
+! Calculate elastic modulus and cross-sectional area
+*if,ARG6,ne,0,then
+
+  ! When elastic modulus is given
+  ar26 = abs(ARG6)
+  ar27 = ar34/ar26
+
+*else
+
+  ! When elastic modulus is not given
+  *if,ARG7,ne,0,then
+    ! When cross-sectional area is given
+    ar27 = abs(ARG7)
+    ar26 = ar34/ar27
+  *else
+    ! When neither elastic modulus nor cross-sectional area are given
+    ar27 = (ar25**2)/100
+    ar26 = ar34/ar27
+  *endif
+
+*endif
+
+! Determine spring length in each direction
+ar41 = 0
+ar42 = 0
+ar43 = 0
+*if,upcase(ARG2),eq,'X',then
+  ar41 = ar25
+*elseif,upcase(ARG2),eq,'Y',then
+  ar42 = ar25
+*elseif,upcase(ARG2),eq,'Z',then
+  ar43 = ar25
+*endif
+
+! Calculate apportioned areas
+*if,ar54,eq,1,then
+  apportionedstats,,ar51
+*endif
+*vscfun,ar24,mean,%ar51%(1,2)
