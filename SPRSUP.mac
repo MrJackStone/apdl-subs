@@ -130,9 +130,9 @@ ebackup
 *vget , SPRSUP_ARR_base_y , node ,  , loc , y
 *vget , SPRSUP_ARR_base_z , node ,  , loc , z
 
-*voper , SPRSUP_ARR_scaled_LX , ARG1 , div , SPRSUP_ARR_apport_areas(1 , 2)
-*voper , SPRSUP_ARR_scaled_LY , ARG2 , div , SPRSUP_ARR_apport_areas(1 , 2)
-*voper , SPRSUP_ARR_scaled_LZ , ARG3 , div , SPRSUP_ARR_apport_areas(1 , 2)
+*voper , SPRSUP_ARR_scaled_LX , ARG1 , div , SPRSUP_ARR_apportioned
+*voper , SPRSUP_ARR_scaled_LY , ARG2 , div , SPRSUP_ARR_apportioned
+*voper , SPRSUP_ARR_scaled_LZ , ARG3 , div , SPRSUP_ARR_apportioned
 
 *voper , SPRSUP_ARR_new_x , SPRSUP_ARR_base_x , add , SPRSUP_ARR_scaled_LX
 *voper , SPRSUP_ARR_new_y , SPRSUP_ARR_base_y , add , SPRSUP_ARR_scaled_LY
