@@ -100,6 +100,10 @@ ebackup
 
 *get,ar21,node,,count
 
+*dim , SPRSUP_ARR_base_x ,  , ar21
+*dim , SPRSUP_ARR_base_y ,  , ar21
+*dim , SPRSUP_ARR_base_z ,  , ar21
+
 ! Obtain node numbers and corresponding apportioned areas
 *if,ARG9,eq,0,then
   ! Ignore apportioned areas
@@ -126,9 +130,9 @@ ebackup
 *endif
 
 ! Calculate positions
-*vget , SPRSUP_ARR_base_x , node ,  , loc , x
-*vget , SPRSUP_ARR_base_y , node ,  , loc , y
-*vget , SPRSUP_ARR_base_z , node ,  , loc , z
+*get , SPRSUP_ARR_base_x(1:ar21) , node , SPRSUP_ARR_base_nodes(1:ar21) , loc , x
+*get , SPRSUP_ARR_base_y(1:ar21) , node , SPRSUP_ARR_base_nodes(1:ar21) , loc , y
+*get , SPRSUP_ARR_base_z(1:ar21) , node , SPRSUP_ARR_base_nodes(1:ar21) , loc , z
 
 *voper , SPRSUP_ARR_scaled_LX , ARG1 , div , SPRSUP_ARR_apportioned
 *voper , SPRSUP_ARR_scaled_LY , ARG2 , div , SPRSUP_ARR_apportioned
