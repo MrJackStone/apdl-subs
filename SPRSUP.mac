@@ -110,8 +110,8 @@ ebackup
 *elseif,ARG9,eq,1,then
   ! Calculate apportioned areas
   apportionedstats,,'SPRSUP_ARR_nnum_apport'
-  *vfun , SPRSUP_ARR_base_nodes  , copy , SPRSUP_ARR_nnum_apport(1 , 1)
-  *vfun , SPRSUP_ARR_apportioned , copy , SPRSUP_ARR_nnum_apport(1 , 2)
+  *vfun , SPRSUP_ARR_base_nodes  , copy , SPRSUP_ARR_nnum_apport(1,1)
+  *vfun , SPRSUP_ARR_apportioned , copy , SPRSUP_ARR_nnum_apport(1,2)
 
 *elseif,ARG9,eq,2,then
   ! Apportioned areas previously calculated
@@ -119,9 +119,9 @@ ebackup
   *get,SPRSUP_ARR_nsel_mask(1:ar41),node,%AR11%(1:ar41,1),nsel
 
   *vmask , SPRSUP_ARR_nsel_mask
-  *vfun  , SPRSUP_ARR_base_nodes  , copy , %AR11%(1,1)
+  *vfun  , SPRSUP_ARR_base_nodes  , comp , %AR11%(1,1)
   *vmask , SPRSUP_ARR_nsel_mask
-  *vfun  , SPRSUP_ARR_apportioned , copy , %AR11%(1,2)
+  *vfun  , SPRSUP_ARR_apportioned , comp , %AR11%(1,2)
 
 *endif
 
