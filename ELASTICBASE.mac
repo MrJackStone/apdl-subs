@@ -128,10 +128,16 @@ ar54 = 1
 
 
 !! B.  Calculate spring attributes                                                                !!
+! Calculate apportioned areas
+*if,ar54,eq,1,then
+  apportionedstats,,ar51
+*endif
+*vscfun,ar24,mean,%ar51%(1,2)
+
 ! Spring reference length
-ar25 = 1
+ar25 = ar24
 *if,ARG5,ne,0,then
-  ar25 = ARG5
+  ar25 = ar25*ARG5
 *endif
 
 ! Calculate axial stiffness per unit area for calculated length
@@ -170,12 +176,6 @@ ar43 = 0
 *elseif,upcase(ARG2),eq,'Z',then
   ar43 = ar25
 *endif
-
-! Calculate apportioned areas
-*if,ar54,eq,1,then
-  apportionedstats,,ar51
-*endif
-*vscfun,ar24,mean,%ar51%(1,2)
 
 
 !! C.  Create springs                                                                             !!
