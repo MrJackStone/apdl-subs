@@ -15,8 +15,8 @@
   /device,font,2,Arial,1000,0,-21,0,0,,, ! Entity font
   /device,font,1,Arial,1000,0,-21,0,0,,, ! Legend font
   /device,text,1,100                     ! Legend size (default = 100)
-  /device,text,2,100                     ! Legend size (default = 100)
-  /device,text,3,100                     ! Legend size (default = 100)
+  /device,text,2,100                     ! Entity size (default = 100)
+  /device,text,3,100                     ! Annotation size (default = 100)
   g_annobold,1
 
 *else
