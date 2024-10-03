@@ -189,6 +189,7 @@ arestore
 lrestore
 krestore
 csrestore
+csdele,RNDPOLY_VAR_cs
 cmsel,a,%ar25%
 cmsel,a,%ar26%
 cmsel,a,%ar27%
