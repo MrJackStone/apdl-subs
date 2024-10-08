@@ -1,10 +1,11 @@
-! PLTESYS , csNum , plotCommand , moveOrigin , eselColor , csOutput
-! PLTESYS , ARG1  , ARG2        , ARG3       , ARG4      , ARG5
+! PLTESYS , csNum , plotCommand , moveOrigin , eselColor , csOutput , plotMultiple
+! PLTESYS , ARG1  , ARG2        , ARG3       , ARG4      , ARG5     , ARG6
 
 ! Description:
 ! Performs a plotting operation (defaults to EPLOT) after changing the display coordinate system
-! (DSYS) to one provided directly (through ARG1) or to the first ESYS extracted from the current
-! element selection. Despte the DSYS change, the effective view perspective remains unchanged.
+! (DSYS) to one provided directly (through ARG1), to the first ESYS extracted from the current
+! element selection, or to all ESYS from the current element selection.
+! Despte the DSYS change, the effective view perspective remains unchanged.
 !
 ! This macro is recommended to plot (using ANSYS's native /TRIAD symbol) the orientation of the
 ! local coordinate system (ESYS) of a selection of elements. For this to work it is necessary that
@@ -18,21 +19,26 @@
 !       defined coordinate systems is to be prevented.
 
 ! Arguments:
-! ARG1: csNum        -  number of coordinate system to set as display CS. If set to 0, a
-!                       coordinate system will be obtained from the current element selecion.
-! ARG2: plotCommand  -  plot command to be executed after changing the display coordinate system
-!                       (defaults to 'EPLOT')
-! ARG3: moveOrigin   -  option to move the origin of the chosen display CS:
-!                         [0] Off (CS origin is kept at its original location)
-!                         [1] On (CS origin is moved to the center of the selection bounding box)
-! ARG4: eselColor    -  color (index 1 through 16) to assign to selected element set. Numbers 1
-!                       through 15 are the same as described in the /COLOR command and number 16
-!                       loops over and is converted to 0 (BLAC, by default). Element coloring is
-!                       achieved by creating and coloring a temporary element selection component,
-!                       therefore this functionality works only if the plot command is EPLOT.
-!                       (Defaults to no color assignment)
-! ARG5: csOutput     -  name of parameter to which the number of the activated CS will be assigned
-!                       (defaults to 'PLTESYS_VAR_csOutput')
+! ARG1: csNum         -  number of coordinate system to set as display CS. If set to 0, a
+!                        coordinate system will be obtained from the current element selecion.
+! ARG2: plotCommand   -  plot command to be executed after changing the display coordinate system
+!                        (defaults to 'EPLOT')
+! ARG3: moveOrigin    -  option to move the origin of the chosen display CS:
+!                          [0] Off (CS origin is kept at its original location)
+!                          [1] On (CS origin is moved to the center of the selection bounding box)
+! ARG4: eselColor     -  color (index 1 through 16) to assign to selected element set. Numbers 1
+!                        through 15 are the same as described in the /COLOR command and number 16
+!                        loops over and is converted to 0 (BLAC, by default). Element coloring is
+!                        achieved by creating and coloring a temporary element selection component,
+!                        therefore this functionality works only if the plot command is EPLOT.
+!                        (Defaults to no color assignment)
+! ARG5: csOutput      -  name of parameter to which the number of the activated CS will be assigned
+!                        (defaults to 'PLTESYS_ARR_csOutput')
+! ARG6: plotMultiple  -  when the element selection contains multiple different ESYS, this option
+!                        determines whether to plot only a single ESYS or to plot all ESYS.
+!                        Applies only when ARG1=0. The available options are:
+!                          [0] Plot a single ESYS (associated to element with lowest number)
+!                          [1] Plot all ESYS associated to any selected element
 
 ! Local parameters:
 ! ar20: parType
@@ -46,7 +52,12 @@
 ! ar28: actualCS
 ! ar29: applyCMcolor
 ! ar30: colorIndex
-! ar31: COMPE_temp
+! ar31: COMPE_selection
+! ar32: plotEsysCount
+! ar33: chosenCsys
+! ar34: nthEsys
+! ar35: csysNum
+! ar36: esysNum
 
 ! Global erased parameters:
 ! PLTESYS_ARR_esel_status
@@ -62,7 +73,7 @@
 ! PLTESYS_VAR_cs
 
 ! Global output parameters:
-! %ARG5% (defaults to PLTESYS_VAR_csOutput)
+! %ARG5% (defaults to PLTESYS_ARR_csOutput)
 
 
 ! Parse inputs
@@ -72,7 +83,7 @@ ar22 = 'EPLOT'
   ar22 = ARG2
 *endif
 
-ar27 = 'PLTESYS_VAR_csOutput'
+ar27 = 'PLTESYS_ARR_csOutput'
 *get,ar20,parm,ARG5,type
 *if,ar20,eq,3,then
   ar27 = ARG5
@@ -91,6 +102,7 @@ ar29 = 0
 dsbackup
 csbackup
 nbackup
+ebackup
 
 *del , PLTESYS_ARR_esel_status ,  , nopr
 *del , PLTESYS_ARR_all_esys    ,  , nopr
@@ -102,64 +114,85 @@ nbackup
 *del , PLTESYS_VAR_ymax        ,  , nopr
 *del , PLTESYS_VAR_zmin        ,  , nopr
 *del , PLTESYS_VAR_zmax        ,  , nopr
-*del , PLTESYS_VAR_cs          ,  , nopr
-PLTESYS_VAR_cs = 0
 
-! Get number of coordinate system to plot
-%ar27% = ARG1
+ar32 = 1
+*del , %ar27% ,  , nopr
+*dim , %ar27% ,  , ar32
+%ar27%(1) = ARG1
 
+cm,ar31,elem
+*if,ar29,eq,1,then
+  /color,cm,ar30,ar31
+*endif
+
+! Get numbers of element coordinate systems
 *if,ARG1,le,0,then
-  *vget , PLTESYS_ARR_esel_status , elem ,  , esel
-  *vget , PLTESYS_ARR_all_esys    , elem ,  , attr , 'ESYS'
+
+  *vget  , PLTESYS_ARR_esel_status , elem ,                      , esel
+  *vget  , PLTESYS_ARR_all_esys    , elem ,                      , attr , 'ESYS'
   *vmask , PLTESYS_ARR_esel_status
   *vfun  , PLTESYS_ARR_sel_esys    , comp , PLTESYS_ARR_all_esys
 
   arruniq,'PLTESYS_ARR_sel_esys','PLTESYS_ARR_uniq_esys',1
   *get,ar23,parm,PLTESYS_ARR_uniq_esys,dim,x
-  %ar27% = PLTESYS_ARR_uniq_esys(1)
 
-  *if,ar23,gt,1,then
-    *msg,warn,ar23,%ar27%
+  *if,ARG6,eq,1,then
+    ar32 = ar23
+  *else
+    *if,ar23,gt,1,then
+      ar33 = PLTESYS_ARR_uniq_esys(1)
+      *msg,warn,ar23,ar33
 PLTESYS WARNING: selected element set contains %I different ESYS.%/&
-Only the first ESYS (number %I) will be plotted.
+Only one ESYS (number %I) will be plotted.
+    *endif
   *endif
-*endif
 
-ar28 = %ar27%
+  *del  , %ar27% ,      , nopr
+  *dim  , %ar27% ,      , ar32
+  *vfun , %ar27% , copy , PLTESYS_ARR_uniq_esys
+
+*endif
 
 ! Move CSYS to bounding box virtual center
 *if,ARG3,eq,1,then
-  csys , %ar27%
+  *do,ar34,1,ar32,1
+    ar35 = %ar27%(ar34)
+    csys,ar35
 
-  nsle,s,1
-  ndbbox , 'PLTESYS_VAR_xmin' , 'PLTESYS_VAR_xmax' , 'PLTESYS_VAR_ymin' , 'PLTESYS_VAR_ymax' , 'PLTESYS_VAR_zmin' , 'PLTESYS_VAR_zmax' ,
-  ar24 = (PLTESYS_VAR_xmin+PLTESYS_VAR_xmax)/2
-  ar25 = (PLTESYS_VAR_ymin+PLTESYS_VAR_ymax)/2
-  ar26 = (PLTESYS_VAR_zmin+PLTESYS_VAR_zmax)/2
+    cmsel,s,ar31
+    esel,r,esys,,ar35
+    nsle,s,1
 
-  csnext , 'PLTESYS_VAR_cs'
-  clocal , PLTESYS_VAR_cs , cart , ar24 , ar25 , ar26
+    ndbbox , 'PLTESYS_VAR_xmin' , 'PLTESYS_VAR_xmax' , 'PLTESYS_VAR_ymin' , 'PLTESYS_VAR_ymax' , 'PLTESYS_VAR_zmin' , 'PLTESYS_VAR_zmax' ,
+    ar24 = (PLTESYS_VAR_xmin+PLTESYS_VAR_xmax)/2
+    ar25 = (PLTESYS_VAR_ymin+PLTESYS_VAR_ymax)/2
+    ar26 = (PLTESYS_VAR_zmin+PLTESYS_VAR_zmax)/2
 
-  ar28 = PLTESYS_VAR_cs
-*endif
+    csnext , 'PLTESYS_VAR_cs'
+    clocal , PLTESYS_VAR_cs , cart , ar24 , ar25 , ar26
 
-! Apply element color
-*if,ar29,eq,1,then
-  cm,ar31,elem
-  /color,cm,ar30,ar31
+    %ar27%(ar34) = PLTESYS_VAR_cs
+  *enddo
 *endif
 
 ! Plot using changed display coordinate system
-nsys , ar28
-%ar22%
+*do,ar34,1,ar32,1
+  ar36 = %ar27%(ar34)
+  nsys , ar36
+  %ar22%
+*enddo
 
 ! Clean up
 dsrestore
 csrestore
 nrestore
+elrestore
 
-*if,PLTESYS_VAR_cs,ne,0,then
-  csdele , PLTESYS_VAR_cs
+*if,ARG3,eq,1,then
+  *do,ar34,1,ar32,1
+    ar36 = %ar27%(ar34)
+    csdele , ar36
+  *enddo
 *endif
 
 *if,ar29,eq,1,then
