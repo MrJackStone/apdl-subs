@@ -1,38 +1,66 @@
-! aradslice, radius
-! ARADSLICE,   ARG1
+! aradslice , radius , length
+! ARADSLICE , ARG1   , ARG2
 
 ! Description:
-! Slices all selected areas along a circular line of a given radius.
+! Slices all selected areas along a circular line of a given radius or slices all selected
+! volumes along a cylindrical pipe of a given radius and a given length.
 
 ! Arguments:
 ! ARG1: radius  -  radius of the circle created to slice the areas
+! ARG2: length  -  length of the pipe used to slice the volumes
+!                  (set to 0 for slicing area along circular line)
 
 ! Local parameters:
 ! ar20: COMPA_old
 ! ar21: COMPL_old
 ! ar22: ANum
 ! ar23: COMPL_slice
+! ar24: COMPV_old
+! ar25: COMPA_slice
+! ar26: nextCS
 
-
-! Deactivate automatic display
-/uis,replot,0
-/uis,msgpop,3
-immed,0
-boptn,nwarn,1
 
 ! Store current selection
 cm,ar20,area
 cm,ar21,line
+cm,ar24,volu
+vsel,none
 asel,none
 lsel,none
 
-! Create lines to slice
-cyl4, 0, 0, ARG1
-*get,ar22,area,,num,min
-adele,ar22,,,0
-cm,ar23,line
+*if,ARG2,eq,0,then
+  ! Slice areas:
+  ! Create lines to slice
+  cyl4, 0, 0, ARG1
+  *get,ar22,area,,num,min
+  adele,ar22,,,0
+  cm,ar23,line
 
-! Slice areas
-cmsel,a,ar20
-cmsel,a,ar21
-asbl,ar20,ar23,,delete,delete
+  ! Slice areas
+  cmsel,a,ar20
+  cmsel,a,ar21
+  asbl,ar20,ar23,,delete,delete
+
+*else
+  ! Slice volumes:
+  ! Create lines to slice
+  cyl4, 0, 0, ARG1,,,,ARG2
+  *get,ar22,volu,,num,min
+  vdele,ar22,,,0
+  cm,ar25,area
+
+  csbackup
+  ar26 = (csyiqr(0,14)+1>10)
+  cswpla,ar26,cart
+  asel,s,loc,z,0
+  asel,a,loc,z,ARG2
+  cmsel,r,ar25
+  adele,ar25,,,0
+  csrestore
+  csdele,ar26
+
+  ! Slice volumes
+  cmsel,s,ar24
+  cmsel,s,ar25
+  vsba,ar24,ar25,,delete,delete
+*endif
