@@ -33,13 +33,10 @@
 ! ar20: parType
 ! ar21: statsArrayName
 ! ar22: areasArrayName
-! ar23: COMPN_target
-! ar24: COMPE_target
 ! ar25: targetNodeCount
 ! ar33: COMPN_pool
 ! ar34: COMPE_pool
 ! ar35: targetNodeIndex
-! ar45: targetNodeNumber
 ! ar91: minApportioned
 ! ar92: maxApportioned
 ! ar93: sumApportioned
@@ -50,7 +47,7 @@
 ! ar98: rmsApportioned
 
 
-! Set name of output parameters
+! Parse inputs
 ar21 = 'APPORTIONEDSTATS_ARR_stats'
 *get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
@@ -63,17 +60,22 @@ ar22 = 'APPORTIONEDSTATS_ARR_areas'
   ar22 = ARG2
 *endif
 
-! Store current selection
-cm,ar23,node
-cm,ar24,elem
+! Prepare environment
+nbackup
+ebackup
+
+! Initialize output arrays
 *get,ar25,node,,count
 
-! Initialize apportioned area array
-*del,%ar22%,,nopr
-*dim,%ar22%,,ar25,2
+*del , %ar21% ,  , nopr
+*del , %ar22% ,  , nopr
+*dim , %ar21% ,  , 8
+*dim , %ar22% ,  , ar25 , 2
+
+*vget,%ar22%(1,1),node,,nlist
 
 ! Set node pool selection component
-nsel,s,node,,all
+nsel,all
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
   cmsel,s,%ARG3%
@@ -81,7 +83,7 @@ nsel,s,node,,all
 cm,ar33,node
 
 ! Set element pool selection component
-esel,s,elem,,all
+esel,all
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
   cmsel,s,%ARG3%
@@ -89,20 +91,11 @@ esel,s,elem,,all
 cm,ar34,elem
 
 ! Calculate apportioned areas for target nodes
-ar45 = 0
-
+cmsel,s,ar33
+cmsel,s,ar34
 *do,ar35,1,ar25,1
-  cmsel,s,ar23
-  ar45 = ndnext(ar45)
-  cmsel,s,ar33
-  cmsel,s,ar34
-  %ar22%(ar35,1) = ar45
-  %ar22%(ar35,2) = arnode(ar45)
+  %ar22%(ar35,2) = arnode(%ar22%(ar35,1))
 *enddo
-
-! Restore original selection
-cmsel , s , ar23
-cmsel , s , ar24
 
 ! Calculate statistical summary data
 *vscfun , ar91 , min  , %ar22%(1,2)
@@ -114,7 +107,8 @@ cmsel , s , ar24
 *vscfun , ar97 , stdv , %ar22%(1,2)
 *vscfun , ar98 , rms  , %ar22%(1,2)
 
-! Assign stats to output array
-*del,%ar21%,,nopr
-*dim,%ar21%,,8
 %ar21%(1) = ar91 , ar92 , ar93 , ar94 , ar95 , ar96 , ar97 , ar98
+
+! Clean up
+nrestore
+elrestore

@@ -1,0 +1,155 @@
+! KPSORT , dir  , order , kpNumbersParm , xCoordParm , yCoordParm , zCoordParm
+! KPSORT , ARG1 , ARG2  , ARG3          , ARG4       , ARG5       , ARG6
+
+! Description:
+! Sorts selected keypoints (in ascending or descending order) in an array based on the value of one
+! keypoint coordinate.
+
+! Arguments:
+! ARG1: dir            -  chosen coordinate: 'X', 'Y' or 'Z' (defaults to 'X')
+! ARG2: order          -  sorting order: 'A' (ascending, default) or 'D' (descending)
+! ARG3: kpNumbersParm  -  name of array parameter in which keypoint numbers will be stored
+!                         Default: KPSORT_ARR_kps
+! ARG4: xCoordParm     -  name of array parameter in which x coordinates will be stored
+!                         Default: KPSORT_ARR_xcoord
+! ARG5: yCoordParm     -  name of array parameter in which y coordinates will be stored
+!                         Default: KPSORT_ARR_ycoord
+! ARG6: zCoordParm     -  name of array parameter in which z coordinates will be stored
+!                         Default: KPSORT_ARR_zcoord
+
+! Local parameters:
+! ar20: parType
+! ar21: sortCartesianDirection
+! ar22: kpCount
+! ar23: sortOrder
+! ar24: dirIndex
+! ar25: KPSORT_COMPK_backup
+
+! Global erased parameters:
+! KPSORT_ARR_data
+! KPSORT_ARR_mask
+! KPSORT_ARR_temp
+! KPSORT_ARR_tempKPs
+! KPSORT_ARR_tempXs
+! KPSORT_ARR_tempYs
+! KPSORT_ARR_tempZs
+
+! Output parameters:
+! %ARG3% (defaults to 'KPSORT_ARR_kps')
+! %ARG4% (defaults to 'KPSORT_ARR_xcoord')
+! %ARG5% (defaults to 'KPSORT_ARR_ycoord')
+! %ARG6% (defaults to 'KPSORT_ARR_zcoord')
+
+
+! Back up current environment
+mpopbackup
+/uis,msgpop,3
+cm,ar25,kp
+
+! Set argument defaults
+ar23 = 'A'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar23 = upcase(ARG2)
+*endif
+
+ar21 = 'X'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = upcase(ARG1)
+*endif
+
+! Get names for output parameters
+ar93 = 'KPSORT_ARR_kps'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar93 = ARG3
+*endif
+
+ar94 = 'KPSORT_ARR_xcoord'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar94 = ARG4
+*endif
+
+ar95='KPSORT_ARR_ycoord'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,3,then
+  ar95 = ARG5
+*endif
+
+ar96 = 'KPSORT_ARR_zcoord'
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,3,then
+  ar96 = ARG6
+*endif
+
+! Get axis direction index
+*if,ar21,eq,'X',then
+  ar24 = 2
+*elseif,ar21,eq,'Y',then
+  ar24 = 3
+*elseif,ar21,eq,'Z',then
+  ar24 = 4
+*endif
+
+! Prepare arrays to be used
+*del , KPSORT_ARR_tempKPs ,  , nopr
+*del , KPSORT_ARR_tempXs  ,  , nopr
+*del , KPSORT_ARR_tempYs  ,  , nopr
+*del , KPSORT_ARR_tempZs  ,  , nopr
+*del , KPSORT_ARR_temp    ,  , nopr
+*del , KPSORT_ARR_data    ,  , nopr
+
+! Count keypoints, initialize related arrays
+ksel,all
+*get,ar22,kp,,count
+*dim,KPSORT_ARR_data,,ar22,5
+
+! Extract keypoint coordinates
+*vget , KPSORT_ARR_data(1 , 1) , kp ,  , klist
+*vget , KPSORT_ARR_data(1 , 2) , kp ,  , loc   , x
+*vget , KPSORT_ARR_data(1 , 3) , kp ,  , loc   , y
+*vget , KPSORT_ARR_data(1 , 4) , kp ,  , loc   , z
+
+! Extract keypoint selection state
+cmsel,s,ar25
+*vget , KPSORT_ARR_data(1 , 5) , kp ,, ksel
+
+! Sort Nx4 matrix in ascending order of the chosen coordinate
+*moper,KPSORT_ARR_temp,KPSORT_ARR_data,sort,,ar24
+
+! Transfer listing data from table to arrays
+*vfun , KPSORT_ARR_tempKPs , copy , KPSORT_ARR_data(1 , 1)
+*vfun , KPSORT_ARR_tempXs  , copy , KPSORT_ARR_data(1 , 2)
+*vfun , KPSORT_ARR_tempYs  , copy , KPSORT_ARR_data(1 , 3)
+*vfun , KPSORT_ARR_tempZs  , copy , KPSORT_ARR_data(1 , 4)
+*vfun , KPSORT_ARR_mask    , copy , KPSORT_ARR_data(1 , 5)
+
+! Compress arrays to keep only data for selected keypoints
+*vmask, KPSORT_ARR_mask
+*vfun , %ar93% , comp , KPSORT_ARR_tempKPs
+*vmask, KPSORT_ARR_mask
+*vfun , %ar94% , comp , KPSORT_ARR_tempXs
+*vmask, KPSORT_ARR_mask
+*vfun , %ar95% , comp , KPSORT_ARR_tempYs
+*vmask, KPSORT_ARR_mask
+*vfun , %ar96% , comp , KPSORT_ARR_tempZs
+
+! Reverse order if descending sort was requested
+*if,ar23,eq,'D',then
+  arrreverse,,ar93
+  arrreverse,,ar94
+  arrreverse,,ar95
+  arrreverse,,ar96
+*endif
+
+! Clean up
+*del , KPSORT_ARR_data    ,  , nopr
+*del , KPSORT_ARR_mask    ,  , nopr
+*del , KPSORT_ARR_temp    ,  , nopr
+*del , KPSORT_ARR_tempKPs ,  , nopr
+*del , KPSORT_ARR_tempXs  ,  , nopr
+*del , KPSORT_ARR_tempYs  ,  , nopr
+*del , KPSORT_ARR_tempZs  ,  , nopr
+mpoprestore

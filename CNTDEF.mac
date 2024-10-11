@@ -1,24 +1,26 @@
-! CNTDEF , targeCMsuf , contaCMsuf , targeEType , contaEType , surfBehavior , friction , keyoptArray , rcArray
-! CNTDEF , ARG1       , ARG2       , ARG3       , ARG4       , ARG5         , ARG6     , ARG7        , ARG8
+! CNTDEF , targeCMsuf , contaCMsuf , targeEType , contaEType , surfBehavior , friction , conta_keyopts , pair_rc , targe_keyopts
+! CNTDEF , ARG1       , ARG2       , ARG3       , ARG4       , ARG5         , ARG6     , ARG7          , ARG8    , ARG9
 
 ! Description:
 ! Creates contact pair between two nodal/element selection components (one for target, one for
 ! contact).
 
 ! Arguments:
-! ARG1: targeCMsuf    -  sufix (string) of node & element components (presumes component names
-!                        begin with 'COMPN_' and 'COMPE_') of target region
-! ARG2: contaCMsuf    -  sufix (string) of node & element components (presumes component names
-!                        begin with 'COMPN_' and 'COMPE_') of contact region
-! ARG3: targeEType    -  target element type number (169, 170)
-! ARG4: contaEType    -  contact element type number (171, 172, etc.)
-! ARG5: surfBehavior  -  surface behavior, keyopt(12) (ranges from 0 t0 6)
-!                        DEFAULT: Standard (0)
-! ARG6: friction      -  friction coefficient
-! ARG7: keyoptArray   -  name (string) of an array containing values for contact element keyoption
-!                        values (optional, overrides defaults)
-! ARG8: rcArray       -  name (string) of an array containing values for contact pair real constant
-!                        values (optional, overrides defaults)
+! ARG1: targeCMsuf     -  sufix (string) of node & element components (presumes component names
+!                         begin with 'COMPN_' and 'COMPE_') of target region
+! ARG2: contaCMsuf     -  sufix (string) of node & element components (presumes component names
+!                         begin with 'COMPN_' and 'COMPE_') of contact region
+! ARG3: targeEType     -  target element type number (169, 170)
+! ARG4: contaEType     -  contact element type number (171, 172, etc.)
+! ARG5: surfBehavior   -  surface behavior, keyopt(12) (ranges from 0 t0 6)
+!                         DEFAULT: Standard (0)
+! ARG6: friction       -  friction coefficient
+! ARG7: conta_keyopts  -  name (string) of an array containing values for contact element keyoption
+!                         values (optional, overrides defaults)
+! ARG8: pair_rc        -  name (string) of an array containing values for contact pair real constant
+!                         values (optional, overrides defaults)
+! ARG9: targe_keyopts  -  name (string) of an array containing values for target element keyoption
+!                         values (optional, overrides defaults)
 
 ! Local parameters:
 ! ar20: rcCount
@@ -89,6 +91,19 @@ keyopt , ar32 , 18 , 0     ! Sliding behavior:        [0] Finite sliding
     ar29=%arg7%(ar28)
     *if,ar29,ne,0,then
       keyopt, ar32, ar28, ar29
+    *endif
+  *enddo
+*endif
+
+! Replace default TARGE keyopt values with provided ones
+*get,ar23,parm,%ARG9%,type
+*if,ar23,eq,1,then
+  *get,ar27,parm,%ARG9%,dim,x
+  ar27=(ar27<9)
+  *do,ar28,1,ar27,1
+    ar29 = %ARG9%(ar28)
+    *if,ar29,ne,0,then
+      keyopt, ar31, ar28, ar29
     *endif
   *enddo
 *endif

@@ -101,6 +101,7 @@ ar27='COMPK_%ar24%'
 
 
 !! B.  Prepare environment                                                                        !!
+csbackup
 abackup
 lbackup
 kbackup
@@ -108,18 +109,32 @@ asel,none
 lsel,none
 ksel,none
 
+csnext,'RNDPOLY_VAR_cs'
+cswpla,RNDPOLY_VAR_cs,cart
+
 
 !! C.  Draw straight-edged contour shape                                                          !!
+! NOTE: Previously this shape was generated using PTXY + POLY, followed by ADELE.
+!       This approach, however, does not work in all cases, since it can't be guaranteed to
+!       respect the order in which the X-Y coordinates are given as the order in which the
+!       keypoints will be created.
+!       POLY seems to always create an area with positive normal (pointing towards the working
+!       plane's +Z direction), though this is not declared in the ANSYS help. When the X-Y pairs
+!       would result in a negative normal, the order of the keypoints is flipped so as to reverse
+!       the created area's normal. This reversal causes the array index correspondence between
+!       the X-Y coordinate arrays and the radii array to be lost, resulting in the rounded fillets
+!       being applied to the wrong vertices unpredictably.
+!       The new approach uses K & L, resulting in predictable behavior.
+
 ! Draw keypoints & lines
-ptxy,%arg1%(1:ar23),%arg2%(1:ar23)
-poly
-adele,all
+nextkp,'RNDPOLY_ARR_kps',ar23
+k,RNDPOLY_ARR_kps(1:ar23),%ARG1%(1:ar23),%ARG2%(1:ar23)
+l,RNDPOLY_ARR_kps(1:ar23-1),RNDPOLY_ARR_kps(2:ar23)
+l,RNDPOLY_ARR_kps(ar23),RNDPOLY_ARR_kps(1)
 
 ! Store entities
 cm,%ar26%,line
 cm,%ar27%,kp
-*del,RNDPOLY_ARR_kps,,nopr
-*vget,RNDPOLY_ARR_kps,kp,,klist
 
 
 !! D.  Round corners                                                                              !!
@@ -173,8 +188,11 @@ cm,%ar25%,area
 arestore
 lrestore
 krestore
+csrestore
+csdele,RNDPOLY_VAR_cs
 cmsel,a,%ar25%
 cmsel,a,%ar26%
 cmsel,a,%ar27%
-*del,RNDPOLY_ARR_radii,,nopr
-*del,RNDPOLY_ARR_kps,,nopr
+*del , RNDPOLY_ARR_radii ,  , nopr
+*del , RNDPOLY_ARR_kps   ,  , nopr
+*del , RNDPOLY_VAR_cs    ,  , nopr
