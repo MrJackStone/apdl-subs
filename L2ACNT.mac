@@ -12,6 +12,9 @@
 ! ARG4: jointType  -  type of connection to create between line and area:
 !                       [0] Fixed (all six DOF)
 !                       [1] Pinned (UX, UY, and UZ only)
+!                       [2] Pinned ROTX
+!                       [3] Pinned ROTY
+!                       [4] Pinned ROTZ
 
 ! Local parameters:
 ! ar20: parType
@@ -31,7 +34,7 @@
   ar24 = 0
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,0,then
-  ar24 = ((ARG4<1)>0)
+  ar24 = ((ARG4<4)>0)
 *endif
 
 ! Define contact settings
@@ -49,6 +52,15 @@ L2ACNT_ARR_reals(2) = -ARG3
 *if,ar24,eq,1,then
   L2ACNT_ARR_keyoptsTarge(2) = 1
   L2ACNT_ARR_keyoptsTarge(4) = 000111
+*elseif,ar24,eq,2,then
+  L2ACNT_ARR_keyoptsTarge(2) = 1
+  L2ACNT_ARR_keyoptsTarge(4) = 110111
+*elseif,ar24,eq,3,then
+  L2ACNT_ARR_keyoptsTarge(2) = 1
+  L2ACNT_ARR_keyoptsTarge(4) = 101111
+*elseif,ar24,eq,4,then
+  L2ACNT_ARR_keyoptsTarge(2) = 1
+  L2ACNT_ARR_keyoptsTarge(4) = 011111
 *endif
 
 ! Create target element base
