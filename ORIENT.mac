@@ -1,5 +1,5 @@
-! ORIENT,ETYPE,MAT,SECN,dx,dy,dz,ESize,EDiv
-! ORIENT,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8
+! ORIENT , ETYPE , MAT  , SECN , dx   , dy   , dz   , ESize , EDiv
+! ORIENT , arg1  , arg2 , arg3 , arg4 , arg5 , arg6 , arg7  , arg8
 
 ! Argument list:
 ! arg1: EleNumber  -  element type number
