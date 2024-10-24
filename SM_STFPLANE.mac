@@ -1,0 +1,131 @@
+! sm_stfplane , stfCS , botCS , planeLength , planeHeight , topHeight , botHeight , cornerRadius , moduleCount , left_edges , right_edges
+! SM_STFPLANE , ARG1  , ARG2  , ARG3        , ARG4        , ARG5      , ARG6      , ARG7         , ARG8        , ARG9       , AR10
+
+
+! Exported solid model components:
+! COMPA_LSTFBOT_web
+! COMPA_LSTFTOP_web
+! COMPA_STF_cornerWebs
+! COMPA_VSTF_web
+! COMPL_LSTFBOT_flange
+! COMPL_LSTFTOP_flange
+! COMPL_VSTF_flange
+
+
+csys,ARG1
+
+! Create solid plate
+wpcsys,-1
+asel,none
+blc4,0,0,ARG4,ARG3
+cm,COMPA_solid,area
+
+! Slice against bottom plate
+csys,ARG2
+wpcsys,-1
+cmsel,s,COMPA_solid
+asbw,all,,delete
+cm,COMPA_solid,area
+asel,r,loc,z,-1e6,0
+adele,all,,,1
+csys,ARG1
+
+! Slice at top/bottom opening edges
+cmsel,s,COMPA_solid
+lsla
+ksll
+kpbbox,'xTopPlate','xBotPlate'
+xTopEdge = xTopPlate+ARG5
+xBotEdge = xBotPlate-ARG6
+
+cmsel,s,COMPA_solid
+wpcsys,-1
+wprota,,,90
+wpoffs,,,xTopEdge
+asbw,all,,delete
+wpoffs,,,xBotEdge-xTopEdge
+asbw,all,,delete
+wpcsys,-1
+cm,COMPA_solid,area
+
+! Slice at left/right opening edges
+*do,nthModule,1,ARG8,1
+  yLeft  = ARG9(nthModule)
+  yRight = AR10(nthModule)
+
+  cmsel,s,COMPA_solid
+  wpcsys,-1
+  wprota,,-90
+  wpoffs,,,yLeft
+  asbw,all,,delete
+  wpoffs,,,yRight-yLeft
+  asbw,all,,delete
+  wpcsys,-1
+  cm,COMPA_solid,area
+*enddo
+
+! Remove openings from solid plate
+*del , x_coords ,  , nopr
+*del , y_coords ,  , nopr
+*del , corner_r ,  , nopr
+*dim , x_coords ,  , 4
+*dim , y_coords ,  , 4
+*dim , corner_r ,  , 4
+
+x_coords(1) = xTopEdge , xBotEdge , xBotEdge , xTopEdge
+corner_r(1) = ARG7     , ARG7     , ARG7     , ARG7
+
+*do,nthModule,1,ARG8,1
+  yLeft       = ARG9(nthModule)
+  yRight      = AR10(nthModule)
+  y_coords(1) = yLeft , yLeft , yRight , yRight
+
+  rndpoly,'x_coords','y_coords','corner_r','SUBTRACT'
+
+  cmsel,s,COMPA_solid
+  cmsel,a,COMPA_subtract
+  asba,COMPA_solid,COMPA_subtract,,delete,delete
+  cm,COMPA_solid,area
+*enddo
+
+! Create selection components
+cmsel,s,COMPA_solid
+lsla,s
+cm,COMPL_solid,line
+
+cmsel,s,COMPA_solid
+asel,r,loc,x,0,xTopEdge
+cm,COMPA_LSTFTOP_web,area
+
+cmsel,s,COMPA_solid
+asel,r,loc,x,xBotEdge,xBotPlate
+cm,COMPA_LSTFBOT_web,area
+
+asel,none
+asel,a,loc,y,ARG9(1:ARG8),AR10(1:ARG8)
+asel,r,loc,x,xTopEdge,xBotEdge
+cmsel,r,COMPA_solid
+cm,COMPA_STF_cornerWebs,area
+
+cmsel,s,COMPA_solid
+cmsel,u,COMPA_STF_cornerWebs
+cmsel,u,COMPA_LSTFTOP_web
+cmsel,u,COMPA_LSTFBOT_web
+cm,COMPA_VSTF_web,area
+
+cmsel,s,COMPA_LSTFTOP_web
+lsla,s
+lsel,r,loc,x,xTopEdge
+cm,COMPL_LSTFTOP_flange,line
+
+cmsel,s,COMPA_LSTFBOT_web
+lsla,s
+lsel,r,loc,x,xBotEdge
+cm,COMPL_LSTFBOT_flange,line
+
+lsel,none
+lsel , a , loc , y , ARG9(1)
+lsel , a , loc , y , AR10(1:ARG8)
+cmsel,s,COMPA_VSTF_web
+lsla,r
+cm,COMPL_VSTF_flange,line
