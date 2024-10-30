@@ -97,8 +97,8 @@ cm,ar29,area
 
 ! Slice at left/right opening edges
 *do,ar33,1,ARG7,1
-  ar34 = ARG8(ar33)
-  ar35 = ARG9(ar33)
+  ar34 = %ARG8%(ar33)
+  ar35 = %ARG9%(ar33)
 
   cmsel,s,ar29
   wpcsys,-1
@@ -123,8 +123,8 @@ SMSTFPLANE_ARR_x_coords(1) = ar31 , ar32 , ar32 , ar31
 SMSTFPLANE_ARR_corner_r(1) = ARG6 , ARG6 , ARG6 , ARG6
 
 *do,ar33,1,ARG7,1
-  ar34                       = ARG8(ar33)
-  ar35                       = ARG9(ar33)
+  ar34                       = %ARG8%(ar33)
+  ar35                       = %ARG9%(ar33)
   SMSTFPLANE_ARR_y_coords(1) = ar34 , ar34 , ar35 , ar35
 
   rndpoly , 'SMSTFPLANE_ARR_x_coords' , 'SMSTFPLANE_ARR_y_coords' , 'SMSTFPLANE_ARR_corner_r' , 'SUBTRACT'
@@ -149,7 +149,7 @@ asel,r,loc,x,ar32,SMSTFPLANE_VAR_xBotPlate
 cm,%ar22%,area
 
 asel,none
-asel,a,loc,y,ARG8(1:ARG7),ARG9(1:ARG7)
+asel,a,loc,y,%ARG8%(1:ARG7),%ARG9%(1:ARG7)
 asel,r,loc,x,ar31,ar32
 cmsel,r,ar29
 cm,%ar23%,area
@@ -171,8 +171,8 @@ lsel,r,loc,x,ar32
 cm,%ar26%,line
 
 lsel,none
-lsel , a , loc , y , ARG8(1)
-lsel , a , loc , y , ARG9(1:ARG7)
+lsel , a , loc , y , %ARG8%(1)
+lsel , a , loc , y , %ARG9%(1:ARG7)
 cmsel,s,%ar24%
 lsla,r
 cm,%ar27%,line
