@@ -1,0 +1,190 @@
+! sm_stfplane , stfCS , botCS , planeLength , planeHeight , plateHeight , cornerRadius , moduleCount , left_edges , right_edges , cmRoot
+! SM_STFPLANE , ARG1  , ARG2  , ARG3        , ARG4        , ARG5        , ARG6         , ARG7        , ARG8       , ARG9        , AR10
+
+
+! Exported solid model components:
+! COMPA_<infix>_topWeb
+! COMPA_<infix>_botWeb
+! COMPA_<infix>_cornerWeb
+! COMPA_<infix>_vertWeb
+! COMPL_<infix>_topFlange
+! COMPL_<infix>_botFlange
+! COMPL_<infix>_vertFlange
+! COMPA_<infix>
+
+! Local parameters:
+! ar20: parType
+! ar21: cmaTopWeb
+! ar22: cmaBotWeb
+! ar23: cmaCornerWeb
+! ar24: cmaVertWeb
+! ar25: cmlTopFlange
+! ar26: cmlBotFlange
+! ar27: cmlVertFlange
+! ar28: cmaAll
+! ar29: COMPA_solid
+! ar30: infix
+! ar31: xTopEdge
+! ar32: xBotEdge
+! ar33: nthModule
+! ar34: yLeft
+! ar35: yRight
+! ar36: COMPL_solid
+
+! Global erased parameters
+! SMSTFPLANE_VAR_xTopPlate
+! SMSTFPLANE_VAR_xBotPlate
+! SMSTFPLANE_ARR_x_coords
+! SMSTFPLANE_ARR_y_coords
+! SMSTFPLANE_ARR_corner_r
+
+
+! Parse inputs
+ar30 = 'STFPLANE'
+*get,ar20,parm,AR10,type
+*if,ar20,eq,3,then
+  ar30 = AR10
+*endif
+
+ar21 = 'COMPA_%ar30%_topWeb'
+ar22 = 'COMPA_%ar30%_botWeb'
+ar23 = 'COMPA_%ar30%_cornerWeb'
+ar24 = 'COMPA_%ar30%_vertWeb'
+ar25 = 'COMPL_%ar30%_topFlange'
+ar26 = 'COMPL_%ar30%_botFlange'
+ar27 = 'COMPL_%ar30%_vertFlange'
+ar28 = 'COMPA_%ar30%'
+
+! Prepare environment
+csbackup
+smdbackup
+
+csys,ARG1
+
+! Create solid plate
+wpcsys,-1
+asel,none
+blc4,0,0,ARG4,ARG3
+cm,ar29,area
+
+! Slice against bottom plate
+csys,ARG2
+wpcsys,-1
+cmsel,s,ar29
+asbw,all,,delete
+cm,ar29,area
+asel,r,loc,z,-1e6,0
+adele,all,,,1
+csys,ARG1
+
+! Slice at top/bottom opening edges
+cmsel,s,ar29
+lsla
+ksll
+kpbbox,'SMSTFPLANE_VAR_xTopPlate','SMSTFPLANE_VAR_xBotPlate'
+ar31 = SMSTFPLANE_VAR_xTopPlate+ARG5
+ar32 = SMSTFPLANE_VAR_xBotPlate-ARG5
+
+cmsel,s,ar29
+wpcsys,-1
+wprota,,,90
+wpoffs,,,ar31
+asbw,all,,delete
+wpoffs,,,ar32-ar31
+asbw,all,,delete
+wpcsys,-1
+cm,ar29,area
+
+! Slice at left/right opening edges
+*do,ar33,1,ARG7,1
+  ar34 = %ARG8%(ar33)
+  ar35 = %ARG9%(ar33)
+
+  cmsel,s,ar29
+  wpcsys,-1
+  wprota,,-90
+  wpoffs,,,ar34
+  asbw,all,,delete
+  wpoffs,,,ar35-ar34
+  asbw,all,,delete
+  wpcsys,-1
+  cm,ar29,area
+*enddo
+
+! Remove openings from solid plate
+*del , SMSTFPLANE_ARR_x_coords ,  , nopr
+*del , SMSTFPLANE_ARR_y_coords ,  , nopr
+*del , SMSTFPLANE_ARR_corner_r ,  , nopr
+*dim , SMSTFPLANE_ARR_x_coords ,  , 4
+*dim , SMSTFPLANE_ARR_y_coords ,  , 4
+*dim , SMSTFPLANE_ARR_corner_r ,  , 4
+
+SMSTFPLANE_ARR_x_coords(1) = ar31 , ar32 , ar32 , ar31
+SMSTFPLANE_ARR_corner_r(1) = ARG6 , ARG6 , ARG6 , ARG6
+
+*do,ar33,1,ARG7,1
+  ar34                       = %ARG8%(ar33)
+  ar35                       = %ARG9%(ar33)
+  SMSTFPLANE_ARR_y_coords(1) = ar34 , ar34 , ar35 , ar35
+
+  rndpoly , 'SMSTFPLANE_ARR_x_coords' , 'SMSTFPLANE_ARR_y_coords' , 'SMSTFPLANE_ARR_corner_r' , 'SUBTRACT'
+
+  cmsel,s,ar29
+  cmsel,a,COMPA_subtract
+  asba,ar29,COMPA_subtract,,delete,delete
+  cm,ar29,area
+*enddo
+
+! Create selection components
+cmsel,s,ar29
+lsla,s
+cm,ar36,line
+
+cmsel,s,ar29
+asel,r,loc,x,0,ar31
+cm,%ar21%,area
+
+cmsel,s,ar29
+asel,r,loc,x,ar32,SMSTFPLANE_VAR_xBotPlate
+cm,%ar22%,area
+
+asel,none
+asel,a,loc,y,%ARG8%(1:ARG7),%ARG9%(1:ARG7)
+asel,r,loc,x,ar31,ar32
+cmsel,r,ar29
+cm,%ar23%,area
+
+cmsel,s,ar29
+cmsel,u,%ar23%
+cmsel,u,%ar21%
+cmsel,u,%ar22%
+cm,%ar24%,area
+
+cmsel,s,%ar21%
+lsla,s
+lsel,r,loc,x,ar31
+cm,%ar25%,line
+
+cmsel,s,%ar22%
+lsla,s
+lsel,r,loc,x,ar32
+cm,%ar26%,line
+
+lsel,none
+lsel , a , loc , y , %ARG8%(1)
+lsel , a , loc , y , %ARG9%(1:ARG7)
+cmsel,s,%ar24%
+lsla,r
+cm,%ar27%,line
+
+cmsel,s,%ar21%
+cmsel,a,%ar22%
+cmsel,a,%ar23%
+cmsel,a,%ar24%
+cm,%ar28%,area
+
+! Clean up
+csrestore
+smdrestore
+*del,SMSTFPLANE_VAR_xTopPlate,,nopr
+*del,SMSTFPLANE_VAR_xBotPlate,,nopr
