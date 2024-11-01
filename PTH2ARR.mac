@@ -36,7 +36,11 @@ PAGET,PTH2ARR_ARR_POINTS,POINTS
 PAGET,PTH2ARR_ARR_TABLE,TABLE
 PAGET,PTH2ARR_ARR_LABEL,LABEL
 
-*get,AR20,PARM,PTH2ARR_ARR_LABEL,DIM,X
+*get,ar20,parm,PTH2ARR_ARR_label,dim,x
+*get,ar24,parm,PTH2ARR_ARR_table,dim,x
+*del,%AR27%,,nopr
+*dim,%ar27%,array,ar24
+
 AR21=0
 *do,AR22,1,AR20,1
     AR23=PTH2ARR_ARR_LABEL(AR22)
@@ -45,10 +49,7 @@ AR21=0
     *endif
 *enddo
 
-*del,%AR27%,,nopr
 *if,AR21,GT,0,THEN
-    *get,AR24,PARM,PTH2ARR_ARR_TABLE,DIM,X
-    *dim,%AR27%,ARRAY,AR24
     *do,AR25,1,AR24,1
         %AR27%(AR25)=PTH2ARR_ARR_TABLE(AR25,AR21)
     *enddo
