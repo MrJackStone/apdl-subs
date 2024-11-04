@@ -1,15 +1,19 @@
-! cmpwrite , fileName , fileExt
-! CMPWRITE , ARG1     , ARG2
+! cmpwrite , fileName , fileExt , emptyOpt
+! CMPWRITE , ARG1     , ARG2    , ARG3
 
 ! Description:
 ! Writes all existing selection components to a file.
 
-! Arguments
+! Arguments:
 ! ARG1: fileName  -  name of the created file
 ! ARG2: fileExt   -  extension of the created file (defaults to .cm)
+! ARG3: emptyOpt  -  determines what to do when coming upon an empty selection component:
+!                      [0] Write to file (default)
+!                      [1] Ignore (not written to file)
 
 ! Local parameters:
 ! ar20: parType
+! ar21: skipEmptyComponent
 ! ar22: extension
 ! ar23: cmCount
 ! ar24: nthComp
@@ -32,6 +36,12 @@ ar22 = 'cm'
 *get,ar20,parm,ARG2,type
 *if,ar20,eq,3,then
   ar22 = ARG2
+*endif
+
+ar21 = 0
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,0,then
+  ar21 = ARG3
 *endif
 
 ! Initialize output file
@@ -114,6 +124,8 @@ ar22 = 'cm'
   ! Select entities to backup
   cmsel,s,%ar25%
   *get,ar30,%ar27%,,count
+
+  *if,ar21,eq,1,and,ar30,eq,0,cycle
 
   ! Write selection commands for each entity
   *cfopen,%ARG1%,%ar22%,,append
