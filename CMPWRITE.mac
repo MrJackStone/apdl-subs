@@ -1,15 +1,18 @@
-! cmpwrite , fileName , fileExt , emptyOpt
-! CMPWRITE , ARG1     , ARG2    , ARG3
+! cmpwrite , fileName , fileExt , emptyOpt , appendOpt
+! CMPWRITE , ARG1     , ARG2    , ARG3     , ARG4
 
 ! Description:
 ! Writes all existing selection components to a file.
 
 ! Arguments:
-! ARG1: fileName  -  name of the created file
-! ARG2: fileExt   -  extension of the created file (defaults to .cm)
-! ARG3: emptyOpt  -  determines what to do when coming upon an empty selection component:
-!                      [0] Write to file (default)
-!                      [1] Ignore (not written to file)
+! ARG1: fileName   -  name of the created file
+! ARG2: fileExt    -  extension of the created file (defaults to .cm)
+! ARG3: emptyOpt   -  determines what to do when coming upon an empty selection component:
+!                       [0] Write to file (default)
+!                       [1] Ignore (not written to file)
+! ARG4: appendOpt  -  determines whether selection components should be appended or redefined:
+!                       [0] Redefine (default)
+!                       [1] Append
 
 ! Local parameters:
 ! ar20: parType
@@ -25,6 +28,7 @@
 ! ar30: entCount
 ! ar31: entNum
 ! ar32: nthEnt
+! ar34: appendOption
 ! ar40: charCount
 ! ar41: firstTwo
 ! ar43: third
@@ -42,6 +46,12 @@ ar21 = 0
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,0,then
   ar21 = ARG3
+*endif
+
+ar34 = 0
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,0,then
+  ar34 = ARG3
 *endif
 
 ! Initialize output file
@@ -134,6 +144,11 @@ ar21 = 0
 ! CM #%I (%s): %s
     *vwrite,ar28
 %S,none
+
+    *if,ar34,eq,1,then
+      *vwrite,ar25
+safe_cmsel,a,%S
+    *endif
 
     ar31 = 0
     *do,ar32,1,ar30,1
