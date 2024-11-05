@@ -49,9 +49,9 @@ ar21 = 0
 *endif
 
 ar34 = 0
-*get,ar20,parm,ARG3,type
+*get,ar20,parm,ARG4,type
 *if,ar20,eq,0,then
-  ar34 = ARG3
+  ar34 = ARG4
 *endif
 
 ! Initialize output file
@@ -147,7 +147,7 @@ ar34 = 0
 
     *if,ar34,eq,1,then
       *vwrite,ar25
-safe_cmsel,a,%S
+safe_cmsel,'a','%S'
     *endif
 
     ar31 = 0
