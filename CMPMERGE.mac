@@ -1,0 +1,51 @@
+! CMPMERGE , fileName , fileExt
+! CMPMERGE , ARG1     , ARG2
+
+! Description:
+! Merges the current selection component definition with the one found in the named file, then! Merges the current selection component definition with the one found in the named file, then
+! overwrites the file in which the selection components were stored.
+
+! Arguments:
+! ARG1: fileName  -  name of the created file
+! ARG2: fileExt   -  extension of the created file (defaults to .cm)
+
+! Local parameters:
+! ar20: parType
+
+! Global erased parameters:
+! CMPMERGE_VAR_fileName
+! CMPMERGE_VAR_fileExt
+
+
+! Parse inputs
+*del , CMPMERGE_VAR_fileName ,  , nopr
+*del , CMPMERGE_VAR_fileExt  ,  , nopr
+
+CMPMERGE_VAR_fileName = ARG1
+
+CMPMERGE_VAR_fileExt = 'cm'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  CMPMERGE_VAR_fileExt = ARG2
+*endif
+
+! Back up current components
+cmpwrite , 'CMPMERGE_temp' , 'tmp'
+
+! Rewrite components from file using "append" option
+cmpdele
+/input   , %CMPMERGE_VAR_fileName% , %CMPMERGE_VAR_fileExt%
+cmpwrite , CMPMERGE_VAR_fileName   , CMPMERGE_VAR_fileExt   ,  , 1
+
+! Bring back backed up components
+cmpdele
+/input , 'CMPMERGE_temp' , 'tmp'
+
+! Merge by reading components from file
+/input   , %CMPMERGE_VAR_fileName% , %CMPMERGE_VAR_fileExt%
+cmpwrite , CMPMERGE_VAR_fileName   , CMPMERGE_VAR_fileExt
+
+! Clean up
+/delete , 'CMPMERGE_temp' , 'tmp'
+*del , CMPMERGE_VAR_fileName ,  , nopr
+*del , CMPMERGE_VAR_fileExt  ,  , nopr
