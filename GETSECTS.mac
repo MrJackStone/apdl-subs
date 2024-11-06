@@ -1,5 +1,5 @@
-! GETSECTS , idsArrayName , sectType
-! GETSECTS , ARG1         , ARG2
+! GETSECTS , idsArrayName , sectType , usedOnly
+! GETSECTS , ARG1         , ARG2     , ARG3
 
 ! Description:
 ! Returns a list of all IDs of cross-sections of a given type (BEAM or SHELL).
@@ -10,6 +10,9 @@
 ! ARG2: sectType      -  type of cross-section:
 !                          ['BEAM']  beam sections
 !                          ['SHELL'] shell sections
+! ARG3: usedOnly      -  option to list only used sections (assigned to at least one element):
+!                          [0] Off (list all sections)
+!                          [1] On (list only used sections)
 
 ! Local parameters:
 ! ar20: parType
@@ -19,10 +22,15 @@
 ! ar24: secCount
 ! ar25: nthSection
 ! ar26: sectionType
+! ar27: usedOnlyOption
+! ar28: ec
 
 ! Global erased parameters:
 ! GETSECTS_ARR_secIDs
 
+
+! Prepare environment
+ebackup
 
 ! Parse inputs
 ar21 = 'GETSECTS_ARR_ids'
@@ -44,6 +52,12 @@ ar23=' '
   *endif
 *endif
 
+ar27 = 0
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,0,then
+  ar27 = ARG3
+*endif
+
 ! Initialize arrays
 *get,ar24,secp,,num,max
 
@@ -57,6 +71,9 @@ ar23=' '
   *get,ar20,parm,ar26,type
   *if,ar20,ne,3,cycle
   *if,strsub(upcase(ar26),1,4),ne,ar22,cycle
+  esel,s,sec,,ar25
+  *get,ar28,elem,,count
+  *if,ar27,eq,1,and,ar28,eq,0,cycle
   GETSECTS_ARR_secIDs(ar25) = ar25
 *enddo
 
@@ -65,3 +82,4 @@ ar23=' '
 
 ! Clean up
 *del,GETSECTS_ARR_secIDs,,nopr
+elrestore

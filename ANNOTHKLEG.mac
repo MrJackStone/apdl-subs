@@ -84,7 +84,7 @@ ar31 = 'ANNOTHKLEG'
 ar32 = 'COMPE_%ar31%'
 
 ! Get eligible shell sections
-getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL'
+getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL',1
 
 *if,ar33,eq,'SELECT',then
   arrkeep,'ANNOTHKLEG_ARR_shell_sects',ANNOTHKLEG_VAR_selectSectName
