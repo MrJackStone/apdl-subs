@@ -148,29 +148,30 @@ ar28 = 0
 *do,ar29,1,ar27,1
   cmsel,s,ar21
   ar28 = elnext(ar28)
-  esel,s,elem,,ar28
+  esel,s,elem,,%ar28%
   nsle,s
 
-  *vget , ETBFOR2PRES_ARR_nsel , node ,  , nsel
-
+  *del , ETBFOR2PRES_ARR_nsel  ,  , nopr
   *del , ETBFOR2PRES_ARR_selPx ,  , nopr
   *del , ETBFOR2PRES_ARR_selPy ,  , nopr
   *del , ETBFOR2PRES_ARR_selPz ,  , nopr
 
+  *vget , ETBFOR2PRES_ARR_nsel , node ,  , nsel
+
   *vmask , ETBFOR2PRES_ARR_nsel
-  *vfun  , ETBFOR2PRES_ARR_selPx   , comp , ETBFOR2PRES_ARR_px
+  *vfun  , ETBFOR2PRES_ARR_selPx , comp , ETBFOR2PRES_ARR_px
   *vmask , ETBFOR2PRES_ARR_nsel
-  *vfun  , ETBFOR2PRES_ARR_selPy   , comp , ETBFOR2PRES_ARR_py
+  *vfun  , ETBFOR2PRES_ARR_selPy , comp , ETBFOR2PRES_ARR_py
   *vmask , ETBFOR2PRES_ARR_nsel
-  *vfun  , ETBFOR2PRES_ARR_selPz   , comp , ETBFOR2PRES_ARR_pz
+  *vfun  , ETBFOR2PRES_ARR_selPz , comp , ETBFOR2PRES_ARR_pz
 
   *vscfun , ar30 , mean , ETBFOR2PRES_ARR_selPx
   *vscfun , ar31 , mean , ETBFOR2PRES_ARR_selPy
   *vscfun , ar32 , mean , ETBFOR2PRES_ARR_selPz
 
-  detab , ar28 , %ar24% , ar30
-  detab , ar28 , %ar25% , ar31
-  detab , ar28 , %ar26% , ar32
+  detab , %ar28% , %ar24% , ar30
+  detab , %ar28% , %ar25% , ar31
+  detab , %ar28% , %ar26% , ar32
 *enddo
 
 ! Clean up
