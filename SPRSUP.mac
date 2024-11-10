@@ -174,7 +174,7 @@ cm,%ar47%,node
 
 esel,none
 esln,s,0
-cm,%ar48%,node
+cm,%ar48%,elem
 
 ! Clean up
 nrestore
