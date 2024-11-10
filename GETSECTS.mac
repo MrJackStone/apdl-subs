@@ -24,6 +24,7 @@
 ! ar26: sectionType
 ! ar27: usedOnlyOption
 ! ar28: ec
+! ar29: sectionDefined
 
 ! Global erased parameters:
 ! GETSECTS_ARR_secIDs
@@ -67,13 +68,19 @@ ar27 = 0
 
 ! Collect valid section IDs
 *do,ar25,1,ar24,1
+  ! Check undefined
+  ar29 = sectinqr(ar25,1)
+  *if,ar29,eq,0,cycle
+  ! Check correct type
   *get,ar26,%ar23%,ar25,type
   *get,ar20,parm,ar26,type
   *if,ar20,ne,3,cycle
   *if,strsub(upcase(ar26),1,4),ne,ar22,cycle
-  esel,s,sec,,ar25
+  ! Check contains elements
+  esel,s,sec,,%ar25%
   *get,ar28,elem,,count
   *if,ar27,eq,1,and,ar28,eq,0,cycle
+  ! Append valid section
   GETSECTS_ARR_secIDs(ar25) = ar25
 *enddo
 
