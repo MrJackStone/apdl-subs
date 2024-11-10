@@ -16,6 +16,7 @@
 ! Local parameters:
 ! ar20: parType
 ! ar22: headerIdx
+! ar23: minFreeIdx
 ! ar24: valueCount
 ! ar25: nthValue
 ! ar26: present
@@ -49,7 +50,7 @@ ar82 = 'ARRGROUP_ARR_sparseHeaders'
 *dim , %ar82% ,  , ar24
 *dim , %ar91% ,  , ar24 , ar24
 
-ar22 = 0
+ar23 = 0
 
 ! Create groups
 *do,ar25,1,ar24,1
@@ -63,7 +64,8 @@ ar22 = 0
   *if,ar26,ge,1,then
     *vscfun,ar22,lmax,ARRGROUP_ARR_match
   *else
-    ar22         = ar22+1
+    ar23         = ar23+1
+    ar22         = ar23
     %ar82%(ar22) = ar34
   *endif
   %ar91%(ar25,ar22) = ar33
