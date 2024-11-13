@@ -1,0 +1,127 @@
+! CPSMERGE
+
+
+cpWidth = 2
+
+*del,dof_names,,nopr
+*dim,dof_names,char,6
+dof_names(1) = 'UX' , 'UY' , 'UZ' , 'ROTX' , 'ROTY' , 'ROTZ'
+
+allsel
+*get,totalNodeCount,node,,count
+
+*del,node_numbers,,nopr
+*dim,node_numbers,,totalNodeCount
+*vfill,node_numbers,ramp,1,1
+
+flag = 1
+iter = 0
+
+*dowhile,flag
+
+  iter = iter + 1
+  *msg,ui,iter
+CPSMERGE: running iteration #%I.
+
+  allsel
+  *get,cpCount,cp,,num
+
+  *do,nthDOF,1,6,1
+    *del,nodal_cps_%nthDOF%,,nopr
+    *dim,nodal_cps_%nthDOF%,,cpWidth,totalNodeCount
+    *del,nodal_cps_count_%nthDOF%,,nopr
+    *dim,nodal_cps_count_%nthDOF%,,totalNodeCount
+    *del,cps_count_mask_%nthDOF%,,nopr
+  *enddo
+
+  *do,nthCP,1,cpCount,1
+    cpStatus = cpinqr(nthCP,1)
+    *if,cpStatus,ne,1,cycle
+
+    *get,cpDOF,cp,nthCP,dof
+    *get,ndCount,cp,nthCP,nterm
+    *del,cp_nodes,,nopr
+    *dim,cp_nodes,,ndCount
+    *do,nthNode,1,ndCount,1
+      *get,ndNum,cp,nthCP,term,nthNode,node
+      cp_nodes(nthNode) = ndNum
+      *vscfun,freeIndex,lmin,nodal_cps_%cpDOF%(1,ndNum)
+      nodal_cps_%cpDOF%(freeIndex,ndNum) = nthCP
+      nodal_cps_count_%cpDOF%(ndNum)=nodal_cps_count_%cpDOF%(ndNum)+1
+    *enddo
+  *enddo
+
+  *del,empty_dof_check,,nopr
+  *dim,empty_dof_check,,6
+
+  ! Compress table to keep only nodes with more than one CP
+  *do,nthDOF,1,6,1
+    *voper,cps_count_mask_%nthDOF%,nodal_cps_count_%nthDOF%,gt,1
+
+    *vscfun,hasOverlappingCPs,max,cps_count_mask_%nthDOF%
+    empty_dof_check(nthDOF) = hasOverlappingCPs
+    *if,hasOverlappingCPs,eq,0,cycle
+
+    *del,nodes_with_multiple_cps_%nthDOF%,,nopr
+    *vmask,cps_count_mask_%nthDOF%
+    *vfun,nodes_with_multiple_cps_%nthDOF%,comp,node_numbers
+    *get,updatedNodeCount,parm,nodes_with_multiple_cps_%nthDOF%,dim,x
+
+    *del,nodal_cps_temp,,nopr
+    *dim,nodal_cps_temp,,cpWidth,updatedNodeCount
+    *do,nthNode,1,updatedNodeCount,1
+      nodeNum = nodes_with_multiple_cps_%nthDOF%(nthNode)
+      *do,nthCP,1,cpWidth,1
+        nodal_cps_temp(nthCP,nthNode) = nodal_cps_%nthDOF%(nthCP,nodeNum)
+      *enddo
+    *enddo
+
+    *del,nodal_cps_%nthDOF%,,nopr
+    *dim,nodal_cps_%nthDOF%,,cpWidth,updatedNodeCount
+    *do,nthNode,1,updatedNodeCount,1
+      nodeNum = nodes_with_multiple_cps_%nthDOF%(nthNode)
+      *do,nthCP,1,cpWidth,1
+        nodal_cps_%nthDOF%(nthCP,nthNode) = nodal_cps_temp(nthCP,nthNode)
+      *enddo
+    *enddo
+    *del,nodal_cps_temp,,nopr
+  *enddo
+
+  ! Combine CPs
+  *del,deleted_cps,,nopr
+  *dim,deleted_cps,,1
+
+  *do,nthDOF,1,6,1
+    hasOverlappingCPs = empty_dof_check(nthDOF)
+    *if,hasOverlappingCPs,eq,0,cycle
+
+    strDOF = dof_names(nthDOF)
+
+    *get,nodeCount,parm,nodal_cps_%nthDOF%,dim,y
+    *do,nthNode,1,nodeCount,1
+      *del,cps_to_combine,,nopr
+      *vfun,cps_to_combine,copy,nodal_cps_%nthDOF%(1,nthNode)
+      arrdel,'cps_to_combine','deleted_cps'
+      *get,cpCount,parm,cps_to_combine,dim,x
+      *if,cpCount,gt,1,then
+        nsel,none
+        nsel,a,cp,,cps_to_combine(1:cpCount)
+        cp,next,%strDOF%,all
+        *del,cps_temp,,nopr
+        *vfun,cps_temp,copy,deleted_cps
+        arrjoin,'deleted_cps','cps_temp','cps_to_combine'
+        cpdele,cps_to_combine(1:cpCount)
+      *endif
+    *enddo
+
+  *enddo
+
+  allsel
+  numcmp,cp
+
+  *get,updatedCPcount,cp,,num
+  *if,updatedCPcount,eq,cpCount,then
+    flag = 0
+  *endif
+
+*enddo
