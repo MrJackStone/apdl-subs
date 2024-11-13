@@ -34,7 +34,6 @@
 
 ! Back up values
 *vfun,ARRDEL_ARR_temp,copy,%ARG1%
-*del,%ARG1%,,nopr
 
 ! Create masking array marking matching values
 *do,ar23,1,ar22,1
@@ -46,6 +45,7 @@
 *vfun,ARRDEL_ARR_mask,not,ARRDEL_ARR_invMask
 
 ! Compress original array
+*del,%ARG1%,,nopr
 *vmask,ARRDEL_ARR_mask
 *vfun,%ARG1%,comp,ARRDEL_ARR_temp
 
