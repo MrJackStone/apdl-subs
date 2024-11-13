@@ -65,13 +65,21 @@ NUM2STR command is ignored.
 ! Set number format parameters
 *if,upcase(arg3),eq,'I',then
     ! Integer
-    NUM2STR_VAR_fieldWidth=nint(log10(abs(arg2))>0)+2
+    *if,arg2,le,0,then
+      NUM2STR_VAR_fieldWidth = 2
+    *else
+      NUM2STR_VAR_fieldWidth=nint(log10(abs(arg2))>0)+2
+    *endif
     NUM2STR_VAR_formatKey='I'
     NUM2STR_VAR_outputPrecision=0
 
 *elseif,upcase(arg3),eq,'F',then
     ! Float
-    NUM2STR_VAR_fieldWidth=nint(log10(abs(arg2))>0)+arg4+3
+    *if,arg2,le,0,then
+      NUM2STR_VAR_fieldWidth = arg4+3
+    *else
+      NUM2STR_VAR_fieldWidth = nint(log10(abs(arg2))>0)+arg4+3
+    *endif
     NUM2STR_VAR_formatKey='F'
     NUM2STR_VAR_outputPrecision=arg4
 
@@ -129,4 +137,3 @@ NUM2STR_VAR_inputVarName='NUM2STR_VAR_input'
 *del , NUM2STR_VAR_output            ,  , nopr
 *del , NUM2STR_VAR_outputPrecision   ,  , nopr
 *del , NUM2STR_VAR_outputVarName     ,  , nopr
-
