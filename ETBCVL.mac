@@ -125,6 +125,7 @@ ar24 = 0
 
   esln,s,1
   cmsel,r,ar21
+  esel,a,elem,,ar24
   *get,ar29,elem,,count
 
   ! Sum ETABLE values for each neighbor
