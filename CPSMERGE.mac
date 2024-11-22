@@ -106,6 +106,11 @@ CPSMERGE: running iteration #%I.
     *dim , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , ar54
   *enddo
 
+  !!                                                                                              !!
+  *msg,warn
+CPSMERGE: building table...
+  !!                                                                                              !!
+
   ! Fill CPs-by-node table
   *do,ar41,1,ar45,1
     ar43 = cpinqr(ar41,1)
@@ -139,6 +144,11 @@ CPSMERGE: running iteration #%I.
 !     *enddo
 !   *cfclos
 
+  !!                                                                                              !!
+  *msg,warn
+CPSMERGE: compressing table...
+  !!                                                                                              !!
+
   ! Compress table to keep only nodes with more than one CP
   *do,ar32,1,ar31,1
     *voper,CPSMERGE_ARR_cps_count_mask_%ar32%,CPSMERGE_ARR_nodal_cps_count_%ar32%,gt,1
@@ -155,6 +165,11 @@ CPSMERGE: running iteration #%I.
     arrfilter ,                                    , 'CPSMERGE_ARR_nodal_cps_%ar32%' , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 2
     arrfilter , 'CPSMERGE_ARR_node_numbers_%ar32%' , 'CPSMERGE_ARR_node_numbers'     , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 1
   *enddo
+
+  !!                                                                                              !!
+  *msg,warn
+CPSMERGE: updating eligible nodes...
+  !!                                                                                              !!
 
   ! Update eligible nodes
   nsel,none
@@ -210,6 +225,11 @@ CPSMERGE: running iteration #%I.
 ! %6I   %6I   %6I
 !     *enddo
 !   *cfclos
+
+  !!                                                                                              !!
+  *msg,warn
+CPSMERGE: combining CPs...
+  !!                                                                                              !!
 
   ! Combine CPs
   *del , CPSMERGE_ARR_deleted_cps ,  , nopr
