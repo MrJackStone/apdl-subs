@@ -1,0 +1,147 @@
+! ARRFILTER , output , input , mask , dimension
+! ARRFILTER , ARG1   , ARG2  , ARG3 , ARG4
+
+! Description:
+! Filters & compresses an array based on a masking array applied to a given dimension.
+
+! Arguments:
+! ARG1: output     -  name of parameter to which the resulting array will be assigned
+!                     (defaults to ARG2, redefining the intput param)
+! ARG2: input      -  name of array parameter to be filtered
+! ARG3: mask       -  name of array parameter containing the mask (usually 0's and 1's) to apply
+! ARG4: dimension  -  dimension of the input array to which the mask will be applied for the
+!                     filtering operation (defaults to 1)
+
+! Local parameters:
+! ar20: parType
+! ar21: outputParm
+! ar22: trueCount
+! ar24: filteredDimension
+! ar31: xDim
+! ar32: yDim
+! ar33: zDim
+! ar34: remappedDimArrayName
+! ar41: nthX
+! ar42: nthY
+! ar43: nthZ
+! ar51: originalX
+! ar52: originalY
+! ar53: originalZ
+
+
+! Parse inputs
+ar24 = 1
+*if,ARG4,gt,0,and,ARG4,le,3,then
+  ar24 = ARG4
+*endif
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,error
+ARRFILTER error: expected string for ARG2.%/&
+ARRFILTER command is ignored.
+  *return,-1
+*endif
+*get,ar20,parm,%ARG2%,type
+*if,ar20,ne,1,then
+  *msg,error
+ARRFILTER error: expected ARG2 to be the name of an array parameter.%/&
+ARRFILTER command is ignored.
+  *return,-1
+*endif
+
+ar21 = ARG2
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
+*endif
+
+*get,ar20,parm,ARG3,type
+*if,ar20,ne,3,then
+  *msg,error
+ARRFILTER error: expected ARG3 to be a string.%/&
+ARRFILTER command is ignored.
+  *return,-1
+*endif
+*get,ar20,parm,%ARG3%,type
+*if,ar20,ne,1,then
+  *msg,error
+ARRFILTER error: expected ARG3 to be the name of an array parameter.%/&
+ARRFILTER command is ignored.
+  *return,-1
+*endif
+
+! Prepare environment
+*del , ARRFILTER_ARR_tempInput  ,  , nopr
+*del , ARRFILTER_ARR_binaryMask ,  , nopr
+*del , ARRFILTER_ARR_xMap       ,  , nopr
+*del , ARRFILTER_ARR_yMap       ,  , nopr
+*del , ARRFILTER_ARR_zMap       ,  , nopr
+
+! Measure input array
+*get , ar31 , parm , %ARG2% , dim , x
+*get , ar32 , parm , %ARG2% , dim , y
+*get , ar33 , parm , %ARG2% , dim , z
+
+! Map indices between input and output arrays
+*dim   , ARRFILTER_ARR_xMap ,      , ar31
+*dim   , ARRFILTER_ARR_yMap ,      , ar32
+*dim   , ARRFILTER_ARR_zMap ,      , ar33
+*vfill , ARRFILTER_ARR_xMap , ramp , 1    , 1
+*vfill , ARRFILTER_ARR_yMap , ramp , 1    , 1
+*vfill , ARRFILTER_ARR_zMap , ramp , 1    , 1
+
+*if,ar24,eq,1,then
+  ar34 = 'ARRFILTER_ARR_xMap'
+*elseif,ar24,eq,2,then
+  ar34 = 'ARRFILTER_ARR_yMap'
+*elseif,ar24,eq,3,then
+  ar34 = 'ARRFILTER_ARR_zMap'
+*endif
+
+*vmask,%ARG3%
+*vfun,%ar34%,comp,%ar34%
+
+! Clone input to temporary array
+*dim,ARRFILTER_ARR_tempInput,,ar31,ar32,ar33
+*do,ar41,1,ar31,1
+  *do,ar42,1,ar32,1
+    *do,ar43,1,ar33,1
+      ARRFILTER_ARR_tempInput(ar41,ar42,ar43) = %ARG2%(ar41,ar42,ar43)
+    *enddo
+  *enddo
+*enddo
+
+! Initialize output array
+*voper,ARRFILTER_ARR_binaryMask,%ARG3%,gt,0
+*vscfun,ar22,sum,ARRFILTER_ARR_binaryMask
+
+*if,ar24,eq,1,then
+  ar31 = ar22
+*elseif,ar24,eq,2,then
+  ar32 = ar22
+*elseif,ar24,eq,3,then
+  ar33 = ar22
+*endif
+
+*del,%ar21%,,nopr
+*dim,%ar21%,,ar31,ar32,ar33
+
+! Transfer data to output array
+*do,ar41,1,ar31,1
+  *do,ar42,1,ar32,1
+    *do,ar43,1,ar33,1
+      ar51 = ARRFILTER_ARR_xMap(ar41)
+      ar52 = ARRFILTER_ARR_yMap(ar42)
+      ar53 = ARRFILTER_ARR_zMap(ar43)
+      %ar21%(ar41,ar42,ar43) = ARRFILTER_ARR_tempInput(ar51,ar52,ar53)
+    *enddo
+  *enddo
+*enddo
+
+! Clean up
+*del , ARRFILTER_ARR_tempInput  ,  , nopr
+*del , ARRFILTER_ARR_binaryMask ,  , nopr
+*del , ARRFILTER_ARR_xMap       ,  , nopr
+*del , ARRFILTER_ARR_yMap       ,  , nopr
+*del , ARRFILTER_ARR_zMap       ,  , nopr
