@@ -106,11 +106,6 @@ CPSMERGE: running iteration #%I.
     *dim , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , ar54
   *enddo
 
-  !!                                                                                              !!
-  *msg,warn
-CPSMERGE: building table...
-  !!                                                                                              !!
-
   ! Fill CPs-by-node table
   *do,ar41,1,ar45,1
     ar43 = cpinqr(ar41,1)
@@ -135,20 +130,6 @@ CPSMERGE: building table...
     *enddo
   *enddo
 
-!   *cfopen,'cpsmerge_iter%ar23%',txt
-!     *vwrite,
-!     ('  NODE     UX,1     UX,2     UY,1     UY,2     UZ,1     UZ,2   ROTX,1   ROTX,2   ROTY,1   ROTY,2   ROTZ,1   ROTZ,2')
-!     *do,i,1,ar54,1
-!       *vwrite,CPSMERGE_ARR_node_numbers(i),CPSMERGE_ARR_nodal_cps_1(1,i),CPSMERGE_ARR_nodal_cps_1(2,i) ,CPSMERGE_ARR_nodal_cps_2(1,i),CPSMERGE_ARR_nodal_cps_2(2,i),CPSMERGE_ARR_nodal_cps_3(1,i),CPSMERGE_ARR_nodal_cps_3(2,i),CPSMERGE_ARR_nodal_cps_4(1,i),CPSMERGE_ARR_nodal_cps_4(2,i),CPSMERGE_ARR_nodal_cps_5(1,i),CPSMERGE_ARR_nodal_cps_5(2,i),CPSMERGE_ARR_nodal_cps_6(1,i),CPSMERGE_ARR_nodal_cps_6(2,i)
-! %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I
-!     *enddo
-!   *cfclos
-
-  !!                                                                                              !!
-  *msg,warn
-CPSMERGE: compressing table...
-  !!                                                                                              !!
-
   ! Compress table to keep only nodes with more than one CP
   *do,ar32,1,ar31,1
     *voper,CPSMERGE_ARR_cps_count_mask_%ar32%,CPSMERGE_ARR_nodal_cps_count_%ar32%,gt,1
@@ -166,11 +147,6 @@ CPSMERGE: compressing table...
     arrfilter , 'CPSMERGE_ARR_node_numbers_%ar32%' , 'CPSMERGE_ARR_node_numbers'     , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 1
   *enddo
 
-  !!                                                                                              !!
-  *msg,warn
-CPSMERGE: updating eligible nodes...
-  !!                                                                                              !!
-
   ! Update eligible nodes
   nsel,none
   *do,ar32,1,ar31,1
@@ -181,64 +157,9 @@ CPSMERGE: updating eligible nodes...
   *enddo
   cm,ar50,node
 
-!   *cfopen,'cpsmerge_comp%ar23%',txt
-!     *vwrite,
-!     ('----- DOF: UX -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_1,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_1(i),CPSMERGE_ARR_nodal_cps_1(1,i),CPSMERGE_ARR_nodal_cps_1(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!     *vwrite,
-!     ('----- DOF: UY -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_2,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_2(i),CPSMERGE_ARR_nodal_cps_2(1,i),CPSMERGE_ARR_nodal_cps_2(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!     *vwrite,
-!     ('----- DOF: UZ -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_3,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_3(i),CPSMERGE_ARR_nodal_cps_3(1,i),CPSMERGE_ARR_nodal_cps_3(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!     *vwrite,
-!     ('----- DOF: ROTX -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_4,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_4(i),CPSMERGE_ARR_nodal_cps_4(1,i),CPSMERGE_ARR_nodal_cps_4(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!     *vwrite,
-!     ('----- DOF: ROTY -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_5,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_5(i),CPSMERGE_ARR_nodal_cps_5(1,i),CPSMERGE_ARR_nodal_cps_5(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!     *vwrite,
-!     ('----- DOF: ROTZ -----')
-!     *get,rc,parm,CPSMERGE_ARR_node_numbers_6,dim,x
-!     *do,i,1,rc,1
-!       *vwrite,CPSMERGE_ARR_node_numbers_6(i),CPSMERGE_ARR_nodal_cps_6(1,i),CPSMERGE_ARR_nodal_cps_6(2,i)
-! %6I   %6I   %6I
-!     *enddo
-!   *cfclos
-
-  !!                                                                                              !!
-  *msg,warn
-CPSMERGE: combining CPs...
-  !!                                                                                              !!
-
   ! Combine CPs
   *del , CPSMERGE_ARR_deleted_cps ,  , nopr
   *dim , CPSMERGE_ARR_deleted_cps ,  , 1
-
-!   *cfopen,'cpsmerge_combin%ar23%',txt
-!     *vwrite,ar23
-! ----- ITER #%I -----
-!   *cfclos
 
   *do,ar32,1,ar31,1
     ar47 = CPSMERGE_ARR_empty_dof_check(ar32)
@@ -260,19 +181,6 @@ CPSMERGE: combining CPs...
         cp,next,%ar33%,all
         cpdele,CPSMERGE_ARR_cps_to_combine(1:ar44)
         arrjoin,'CPSMERGE_ARR_deleted_cps','CPSMERGE_ARR_deleted_cps','CPSMERGE_ARR_cps_to_combine'
-
-        !!                                                                                        !!
-!         *del,current_nodes,,nopr
-!         *vget,current_nodes,node,,nlist
-!         *cfopen,'cpsmerge_combin%ar23%',txt,,append
-!           *vwrite,current_nodes(1)
-! NODE  %6I
-!           *vwrite,CPSMERGE_ARR_cps_to_combine(1)
-! CP    %6I
-!           *vwrite,
-!           (' ')
-!         *cfclos
-        !!                                                                                        !!
       *endif
     *enddo
   *enddo
@@ -285,6 +193,7 @@ CPSMERGE: combining CPs...
   *if,ar46,eq,ar45,then
     ar22 = 0
   *endif
+
   ! Break recursive process if CPs-by-node table had enough column width
   *if,ar26,eq,0,then
     ar22 = 0
