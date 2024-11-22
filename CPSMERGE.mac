@@ -16,6 +16,8 @@
 ! ar22: flag
 ! ar23: iter
 ! ar24: freeIndex
+! ar25: minRowValue
+! ar26: unoccupiedColumn
 ! ar31: DOFcount
 ! ar32: nthDOF
 ! ar33: strDOF
@@ -61,6 +63,7 @@ ar21 = 2
 ar22 = 1
 ar23 = 0
 ar31 = 6
+ar26 = 0
 
 *dim,CPSMERGE_ARR_empty_dof_check,,ar31
 *dim,CPSMERGE_ARR_dof_names,char,ar31
