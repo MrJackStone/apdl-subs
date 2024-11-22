@@ -118,7 +118,9 @@ CPSMERGE: running iteration #%I.
 
       *if,CPSMERGE_VAR_ndIndex,eq,0,cycle
 
-      *vscfun,ar24,lmin,CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
+      *vscfun , ar24 , lmin , CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
+      *vscfun , ar25 , min  , CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
+      ar26 = (ar26>ar25)
 
       CPSMERGE_ARR_nodal_cps_%ar34%(ar24,CPSMERGE_VAR_ndIndex)  = ar41
       CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex) = CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex)+1
@@ -252,6 +254,11 @@ CPSMERGE: running iteration #%I.
   *get,ar46,cp,,num
   *if,ar46,eq,ar45,then
     ar22 = 0
+  *endif
+  ! Break recursive process if CPs-by-node table had enough column width
+  *if,ar26,eq,0,then
+    ar22 = 0
+    brokeForThisReason=1
   *endif
 
 *enddo
