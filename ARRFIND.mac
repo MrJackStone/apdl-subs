@@ -1,0 +1,42 @@
+! ARRFIND , output , arrayParm , searched
+! ARRFIND , ARG1   , ARG2      , ARG3
+
+! Description:
+! Searches for a value in an array and returns the first position in which it was found.
+! Returns zero if the value is not found.
+
+! Arguments:
+! ARG1: output     -  name of param to which the result will be assigned
+!                     (defaults to ARRFIND_VAR_output)
+! ARG2: arrayParm  -  name of array param to be searched
+! ARG3: searched   -  value to be searched
+
+! Local parameters:
+! ar20: parType
+! ar21: outputParm
+! ar22: maxMatchBit
+
+
+! Parse inputs
+ar21 = 'ARRFIND_VAR_output'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
+*endif
+
+! Prepare environment
+*del,ARRFIND_ARR_matches,,nopr
+
+! Search value
+*voper,ARRFIND_ARR_matches,%ARG2%,eq,ARG3
+
+! Return matches
+*vscfun,ar22,max,ARRFIND_ARR_matches
+
+%ar21% = 0
+*if,ar22,ge,1,then
+  *vscfun,%ar21%,lmax,ARRFIND_ARR_matches
+*endif
+
+! Clean up
+*del,ARRFIND_ARR_matches,,nopr
