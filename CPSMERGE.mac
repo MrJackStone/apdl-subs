@@ -142,7 +142,12 @@ CPSMERGE: running iteration #%I.
 
     *vscfun,ar47,max,CPSMERGE_ARR_cps_count_mask_%ar32%
     CPSMERGE_ARR_empty_dof_check(ar32) = ar47
-    *if,ar47,eq,0,cycle
+
+    *if,ar47,eq,0,then
+      *del,CPSMERGE_ARR_nodal_cps_%ar32%,,nopr
+      *del,CPSMERGE_ARR_node_numbers_%ar32%,,nopr
+      *cycle
+    *endif
 
     arrfilter ,                                    , 'CPSMERGE_ARR_nodal_cps_%ar32%' , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 2
     arrfilter , 'CPSMERGE_ARR_node_numbers_%ar32%' , 'CPSMERGE_ARR_node_numbers'     , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 1
@@ -151,6 +156,8 @@ CPSMERGE: running iteration #%I.
   ! Update eligible nodes
   nsel,none
   *do,ar32,1,ar31,1
+    ar47 = CPSMERGE_ARR_empty_dof_check(ar32)
+    *if,ar47,eq,0,cycle
     *get,ar53,parm,CPSMERGE_ARR_node_numbers_%ar32%,dim,x
     nsel,a,node,,CPSMERGE_ARR_node_numbers_%ar32%(1:ar53)
   *enddo
