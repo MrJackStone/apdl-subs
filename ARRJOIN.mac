@@ -96,8 +96,8 @@ ar23 = 0
   *endif
 *enddo
 
-*del,%ARG1%,,nopr
-*dim,%ARG1%,,ar23
+*del,ARRJOIN_ARR_temp,,nopr
+*dim,ARRJOIN_ARR_temp,,ar23
 
 ar25 = 1
 *do,ar21,2,17,1
@@ -105,9 +105,9 @@ ar25 = 1
   *if,ar24,ge,1,then
     ! Append array
     *if,ar21,le,9,then
-      *vfun,%ARG1%(ar25),copy,arg%ar21%
+      *vfun,ARRJOIN_ARR_temp(ar25),copy,arg%ar21%
     *else
-      *vfun,%ARG1%(ar25),copy,ar%ar21%
+      *vfun,ARRJOIN_ARR_temp(ar25),copy,ar%ar21%
     *endif
     ar25 = ar25+ar24
 
@@ -120,7 +120,7 @@ ar25 = 1
     *endif
 
     *cfopen,ARRJOIN_tmp,tmp
-      *vwrite,ARG1,ar25,ARRJOIN_VAR_parmName
+      *vwrite,'ARRJOIN_ARR_temp',ar25,ARRJOIN_VAR_parmName
 %c(%i)=%c
     *cfclos
     /nopr
@@ -132,4 +132,11 @@ ar25 = 1
   *endif
 *enddo
 
+! Transfer data to output array
+*del,%ARG1%,,nopr
+*dim,%ARG1%,,ar23
+*vfun,%ARG1%,copy,ARRJOIN_ARR_temp
+
+! Clean up
 *del,ARRJOIN_ARR_mask,,nopr
+*del,ARRJOIN_ARR_temp,,nopr
