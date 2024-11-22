@@ -1,0 +1,32 @@
+! FEMBACKUP , select
+! FEMBACKUP , ARG1
+
+! Description:
+! Backs up current selection for all finite element model entities. Issue FEMRESTORE to restore
+! selection.
+
+! Arguments:
+! ARG1: select  -  selection command to be applied after backing up current selection:
+!                     ['NONE'] unselect all finite element model entities
+!                     ['ALL']  select all finite element model entities
+
+
+! Back up entities
+nbackup
+ebackup
+
+! Perform selection (optional)
+*get,ar20,parm,ARG1,type
+
+*if,ar20,eq,3,then
+
+  *if,upcase(ARG1),eq,'ALL',then
+    nsel,all
+    esel,all
+
+  *elseif,upcase(ARG1),eq,'NONE',then
+    nsel,none
+    esel,none
+
+  *endif
+*endif

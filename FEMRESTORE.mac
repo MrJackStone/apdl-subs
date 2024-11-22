@@ -1,0 +1,11 @@
+! FEMRESTORE
+
+! Description:
+! Restores all finite element model selection to previous back up state created by FEMBACKUP.
+
+! Arguments:
+! -
+
+
+nrestore
+elrestore
