@@ -1,5 +1,302 @@
 ! CPSMERGE
+! CPSMERGE
 
+! Descrption:
+! Recursively merges different couple sets with duplicate strucutural DOFs into one couple set.
+! ANSYS has a native command that performs this action (although not in recursive fashion) called
+! CPMERGE. This native command, however, has been observed to behave erratically in the past (up to
+! version 2023 R2) and therefore cannot be trusted, which is why this custom macro has been written
+! to replace it.
+
+! Arguments:
+! -
+
+! Local parameters:
+! ar21: cpWidth
+! ar22: flag
+! ar23: iter
+! ar24: freeIndex
+! ar31: DOFcount
+! ar32: nthDOF
+! ar33: strDOF
+! ar34: cpDOF
+! ar41: nthCP
+! ar43: cpStatus
+! ar44: cpCount
+! ar45: initialCpCount
+! ar46: updatedCPcount
+! ar47: hasOverlappingCPs
+! ar50: COMPN_eligible
+! ar51: nthNode
+! ar52: ndNum
+! ar53: ndCount
+! ar54: coupledNodeCount
+! ar55: CPSMERGE_VAR_ndIndex
+
+! Global erased parameters:
+! CPSMERGE_VAR_ndIndex
+! CPSMERGE_ARR_empty_dof_check
+! CPSMERGE_ARR_cp_nums
+! CPSMERGE_ARR_node_numbers
+! CPSMERGE_ARR_node_numbers_[i]
+! CPSMERGE_ARR_nodal_cps_[i]
+! CPSMERGE_ARR_nodal_cps_count_[i]
+! CPSMERGE_ARR_cps_count_mask_[i]
+! CPSMERGE_ARR_deleted_cps
+! CPSMERGE_ARR_dof_names
+! CPSMERGE_ARR_cps_to_combine
+
+
+! Prepare environment
+*del , CPSMERGE_VAR_t0              ,  , nopr
+*del , CPSMERGE_ARR_dof_names       ,  , nopr
+*del , CPSMERGE_ARR_empty_dof_check ,  , nopr
+
+*get,CPSMERGE_VAR_t0,active,,time,wall
+
+fembackup
+smdbackup
+
+ar21 = 2
+ar22 = 1
+ar23 = 0
+ar31 = 6
+
+*dim,CPSMERGE_ARR_empty_dof_check,,ar31
+*dim,CPSMERGE_ARR_dof_names,char,ar31
+CPSMERGE_ARR_dof_names(1) = 'UX' , 'UY' , 'UZ' , 'ROTX' , 'ROTY' , 'ROTZ'
+
+allsel
+numcmp,cp
+
+! Define initial eligible node set
+*get,ar45,cp,,num
+*del,CPSMERGE_ARR_cp_nums,,nopr
+*dim,CPSMERGE_ARR_cp_nums,,ar45
+*vfill,CPSMERGE_ARR_cp_nums,ramp,1,1
+nsel,none
+nsel,a,cp,,CPSMERGE_ARR_cp_nums(1:ar45)
+cm,ar50,node
+
+! Merge nodal couplings
+*dowhile,ar22
+
+  ! Display iteration counter
+  ar23 = ar23 + 1
+  *msg,note,ar23
+CPSMERGE: running iteration #%I.
+
+  ! Initialize data arrays
+  cmsel,s,ar50
+  *get,ar54,node,,count
+  *get,ar45,cp,,num
+
+  *del  , CPSMERGE_ARR_node_numbers ,      , nopr
+  *vget , CPSMERGE_ARR_node_numbers , node ,      , nlist
+
+  *do,ar32,1,ar31,1
+    *del , CPSMERGE_ARR_nodal_cps_%ar32%       ,  , nopr
+    *del , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , nopr
+    *del , CPSMERGE_ARR_cps_count_mask_%ar32%  ,  , nopr
+    *del , CPSMERGE_ARR_node_numbers_%ar32%    ,  , nopr
+    *dim , CPSMERGE_ARR_nodal_cps_%ar32%       ,  , ar21 , ar54
+    *dim , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , ar54
+  *enddo
+
+  ! Fill CPs-by-node table
+  *do,ar41,1,ar45,1
+    ar43 = cpinqr(ar41,1)
+
+    *if,ar43,ne,1,cycle
+
+    *get , ar34 , cp , ar41 , dof
+    *get , ar53 , cp , ar41 , nterm
+
+    *do,ar51,1,ar53,1
+      *get,ar52,cp,ar41,term,ar51,node
+      arrfind,'CPSMERGE_VAR_ndIndex','CPSMERGE_ARR_node_numbers',ar52
+
+      *if,CPSMERGE_VAR_ndIndex,eq,0,cycle
+
+      *vscfun,ar24,lmin,CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
+
+      CPSMERGE_ARR_nodal_cps_%ar34%(ar24,CPSMERGE_VAR_ndIndex)  = ar41
+      CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex) = CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex)+1
+    *enddo
+  *enddo
+
+!   *cfopen,'cpsmerge_iter%ar23%',txt
+!     *vwrite,
+!     ('  NODE     UX,1     UX,2     UY,1     UY,2     UZ,1     UZ,2   ROTX,1   ROTX,2   ROTY,1   ROTY,2   ROTZ,1   ROTZ,2')
+!     *do,i,1,ar54,1
+!       *vwrite,CPSMERGE_ARR_node_numbers(i),CPSMERGE_ARR_nodal_cps_1(1,i),CPSMERGE_ARR_nodal_cps_1(2,i) ,CPSMERGE_ARR_nodal_cps_2(1,i),CPSMERGE_ARR_nodal_cps_2(2,i),CPSMERGE_ARR_nodal_cps_3(1,i),CPSMERGE_ARR_nodal_cps_3(2,i),CPSMERGE_ARR_nodal_cps_4(1,i),CPSMERGE_ARR_nodal_cps_4(2,i),CPSMERGE_ARR_nodal_cps_5(1,i),CPSMERGE_ARR_nodal_cps_5(2,i),CPSMERGE_ARR_nodal_cps_6(1,i),CPSMERGE_ARR_nodal_cps_6(2,i)
+! %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I   %6I
+!     *enddo
+!   *cfclos
+
+  ! Compress table to keep only nodes with more than one CP
+  *do,ar32,1,ar31,1
+    *voper,CPSMERGE_ARR_cps_count_mask_%ar32%,CPSMERGE_ARR_nodal_cps_count_%ar32%,gt,1
+
+    *vscfun,ar47,max,CPSMERGE_ARR_cps_count_mask_%ar32%
+    CPSMERGE_ARR_empty_dof_check(ar32) = ar47
+    *if,ar47,eq,0,cycle
+
+    arrfilter ,                                    , 'CPSMERGE_ARR_nodal_cps_%ar32%' , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 2
+    arrfilter , 'CPSMERGE_ARR_node_numbers_%ar32%' , 'CPSMERGE_ARR_node_numbers'     , 'CPSMERGE_ARR_cps_count_mask_%ar32%' , 1
+  *enddo
+
+  ! Update eligible nodes
+  nsel,none
+  *do,ar32,1,ar31,1
+    *get,ar53,parm,CPSMERGE_ARR_node_numbers_%ar32%,dim,x
+    nsel,a,node,,CPSMERGE_ARR_node_numbers_%ar32%(1:ar53)
+  *enddo
+  cm,ar50,node
+
+!   *cfopen,'cpsmerge_comp%ar23%',txt
+!     *vwrite,
+!     ('----- DOF: UX -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_1,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_1(i),CPSMERGE_ARR_nodal_cps_1(1,i),CPSMERGE_ARR_nodal_cps_1(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!     *vwrite,
+!     ('----- DOF: UY -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_2,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_2(i),CPSMERGE_ARR_nodal_cps_2(1,i),CPSMERGE_ARR_nodal_cps_2(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!     *vwrite,
+!     ('----- DOF: UZ -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_3,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_3(i),CPSMERGE_ARR_nodal_cps_3(1,i),CPSMERGE_ARR_nodal_cps_3(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!     *vwrite,
+!     ('----- DOF: ROTX -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_4,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_4(i),CPSMERGE_ARR_nodal_cps_4(1,i),CPSMERGE_ARR_nodal_cps_4(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!     *vwrite,
+!     ('----- DOF: ROTY -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_5,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_5(i),CPSMERGE_ARR_nodal_cps_5(1,i),CPSMERGE_ARR_nodal_cps_5(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!     *vwrite,
+!     ('----- DOF: ROTZ -----')
+!     *get,rc,parm,CPSMERGE_ARR_node_numbers_6,dim,x
+!     *do,i,1,rc,1
+!       *vwrite,CPSMERGE_ARR_node_numbers_6(i),CPSMERGE_ARR_nodal_cps_6(1,i),CPSMERGE_ARR_nodal_cps_6(2,i)
+! %6I   %6I   %6I
+!     *enddo
+!   *cfclos
+
+  ! Combine CPs
+  *del , CPSMERGE_ARR_deleted_cps ,  , nopr
+  *dim , CPSMERGE_ARR_deleted_cps ,  , 1
+
+!   *cfopen,'cpsmerge_combin%ar23%',txt
+!     *vwrite,ar23
+! ----- ITER #%I -----
+!   *cfclos
+
+  *do,ar32,1,ar31,1
+    ar47 = CPSMERGE_ARR_empty_dof_check(ar32)
+    *if,ar47,eq,0,cycle
+
+    ar33 = CPSMERGE_ARR_dof_names(ar32)
+
+    *get,ar53,parm,CPSMERGE_ARR_nodal_cps_%ar32%,dim,y
+
+    *do,ar51,1,ar53,1
+      *del,CPSMERGE_ARR_cps_to_combine,,nopr
+      *vfun,CPSMERGE_ARR_cps_to_combine,copy,CPSMERGE_ARR_nodal_cps_%ar32%(1,ar51)
+      arrdel,'CPSMERGE_ARR_cps_to_combine','CPSMERGE_ARR_deleted_cps'
+      *get,ar44,parm,CPSMERGE_ARR_cps_to_combine,dim,x
+
+      *if,ar44,gt,1,then
+        nsel,none
+        nsel,a,cp,,CPSMERGE_ARR_cps_to_combine(1:ar44)
+        cp,next,%ar33%,all
+        cpdele,CPSMERGE_ARR_cps_to_combine(1:ar44)
+        arrjoin,'CPSMERGE_ARR_deleted_cps','CPSMERGE_ARR_deleted_cps','CPSMERGE_ARR_cps_to_combine'
+
+        !!                                                                                        !!
+!         *del,current_nodes,,nopr
+!         *vget,current_nodes,node,,nlist
+!         *cfopen,'cpsmerge_combin%ar23%',txt,,append
+!           *vwrite,current_nodes(1)
+! NODE  %6I
+!           *vwrite,CPSMERGE_ARR_cps_to_combine(1)
+! CP    %6I
+!           *vwrite,
+!           (' ')
+!         *cfclos
+        !!                                                                                        !!
+      *endif
+    *enddo
+  *enddo
+
+  allsel
+  numcmp,cp
+
+  ! Break recursive process when CP count remains unchanged
+  *get,ar46,cp,,num
+  *if,ar46,eq,ar45,then
+    ar22 = 0
+  *endif
+
+*enddo
+
+! Register elapsed time
+ctime,'CPSMERGE_VAR_deltaT',CPSMERGE_VAR_t0
+*msg,note,CPSMERGE_VAR_deltaT
+CPSMERGE: elapsed time = %s
+
+! Clean up
+*del , CPSMERGE_VAR_t0              ,  , nopr
+*del , CPSMERGE_VAR_deltaT          ,  , nopr
+*del , CPSMERGE_VAR_ndIndex         ,  , nopr
+*del , CPSMERGE_ARR_empty_dof_check ,  , nopr
+*del , CPSMERGE_ARR_cp_nums         ,  , nopr
+*del , CPSMERGE_ARR_node_numbers    ,  , nopr
+*del , CPSMERGE_ARR_deleted_cps     ,  , nopr
+*del , CPSMERGE_ARR_dof_names       ,  , nopr
+*del , CPSMERGE_ARR_cps_to_combine  ,  , nopr
+
+*do,ar32,1,ar31,1
+  *del , CPSMERGE_ARR_nodal_cps_%ar32%       ,  , nopr
+  *del , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , nopr
+  *del , CPSMERGE_ARR_cps_count_mask_%ar32%  ,  , nopr
+  *del , CPSMERGE_ARR_node_numbers_%ar32%    ,  , nopr
+*enddo
+
+smdrestore
+femrestore
+
+
+
+
+/eof
+
+
+
+
+
+
+! CPSMERGE
+
+
+*del , CPSMERGE_VAR_t0 ,  , nopr
+*get , CPSMERGE_VAR_t0 , active ,  , time , wall
 
 cpWidth = 2
 
@@ -26,12 +323,12 @@ CPSMERGE: running iteration #%I.
   allsel
   *get,cpCount,cp,,num
 
-  *do,nthDOF,1,6,1
-    *del,nodal_cps_%nthDOF%,,nopr
-    *dim,nodal_cps_%nthDOF%,,cpWidth,totalNodeCount
-    *del,nodal_cps_count_%nthDOF%,,nopr
-    *dim,nodal_cps_count_%nthDOF%,,totalNodeCount
-    *del,cps_count_mask_%nthDOF%,,nopr
+  *do,ar32,1,6,1
+    *del,nodal_cps_%ar32%,,nopr
+    *dim,nodal_cps_%ar32%,,cpWidth,totalNodeCount
+    *del,nodal_cps_count_%ar32%,,nopr
+    *dim,nodal_cps_count_%ar32%,,totalNodeCount
+    *del,cps_count_mask_%ar32%,,nopr
   *enddo
 
   *do,nthCP,1,cpCount,1
@@ -39,10 +336,10 @@ CPSMERGE: running iteration #%I.
     *if,cpStatus,ne,1,cycle
 
     *get,cpDOF,cp,nthCP,dof
-    *get,ndCount,cp,nthCP,nterm
+    *get,ar53,cp,nthCP,nterm
     *del,cp_nodes,,nopr
-    *dim,cp_nodes,,ndCount
-    *do,nthNode,1,ndCount,1
+    *dim,cp_nodes,,ar53
+    *do,nthNode,1,ar53,1
       *get,ndNum,cp,nthCP,term,nthNode,node
       cp_nodes(nthNode) = ndNum
       *vscfun,freeIndex,lmin,nodal_cps_%cpDOF%(1,ndNum)
@@ -55,33 +352,33 @@ CPSMERGE: running iteration #%I.
   *dim,empty_dof_check,,6
 
   ! Compress table to keep only nodes with more than one CP
-  *do,nthDOF,1,6,1
-    *voper,cps_count_mask_%nthDOF%,nodal_cps_count_%nthDOF%,gt,1
+  *do,ar32,1,6,1
+    *voper,cps_count_mask_%ar32%,nodal_cps_count_%ar32%,gt,1
 
-    *vscfun,hasOverlappingCPs,max,cps_count_mask_%nthDOF%
-    empty_dof_check(nthDOF) = hasOverlappingCPs
+    *vscfun,hasOverlappingCPs,max,cps_count_mask_%ar32%
+    empty_dof_check(ar32) = hasOverlappingCPs
     *if,hasOverlappingCPs,eq,0,cycle
 
-    *del,nodes_with_multiple_cps_%nthDOF%,,nopr
-    *vmask,cps_count_mask_%nthDOF%
-    *vfun,nodes_with_multiple_cps_%nthDOF%,comp,node_numbers
-    *get,updatedNodeCount,parm,nodes_with_multiple_cps_%nthDOF%,dim,x
+    *del,nodes_with_multiple_cps_%ar32%,,nopr
+    *vmask,cps_count_mask_%ar32%
+    *vfun,nodes_with_multiple_cps_%ar32%,comp,node_numbers
+    *get,updatedNodeCount,parm,nodes_with_multiple_cps_%ar32%,dim,x
 
     *del,nodal_cps_temp,,nopr
     *dim,nodal_cps_temp,,cpWidth,updatedNodeCount
     *do,nthNode,1,updatedNodeCount,1
-      nodeNum = nodes_with_multiple_cps_%nthDOF%(nthNode)
+      nodeNum = nodes_with_multiple_cps_%ar32%(nthNode)
       *do,nthCP,1,cpWidth,1
-        nodal_cps_temp(nthCP,nthNode) = nodal_cps_%nthDOF%(nthCP,nodeNum)
+        nodal_cps_temp(nthCP,nthNode) = nodal_cps_%ar32%(nthCP,nodeNum)
       *enddo
     *enddo
 
-    *del,nodal_cps_%nthDOF%,,nopr
-    *dim,nodal_cps_%nthDOF%,,cpWidth,updatedNodeCount
+    *del,nodal_cps_%ar32%,,nopr
+    *dim,nodal_cps_%ar32%,,cpWidth,updatedNodeCount
     *do,nthNode,1,updatedNodeCount,1
-      nodeNum = nodes_with_multiple_cps_%nthDOF%(nthNode)
+      nodeNum = nodes_with_multiple_cps_%ar32%(nthNode)
       *do,nthCP,1,cpWidth,1
-        nodal_cps_%nthDOF%(nthCP,nthNode) = nodal_cps_temp(nthCP,nthNode)
+        nodal_cps_%ar32%(nthCP,nthNode) = nodal_cps_temp(nthCP,nthNode)
       *enddo
     *enddo
     *del,nodal_cps_temp,,nopr
@@ -91,16 +388,16 @@ CPSMERGE: running iteration #%I.
   *del,deleted_cps,,nopr
   *dim,deleted_cps,,1
 
-  *do,nthDOF,1,6,1
-    hasOverlappingCPs = empty_dof_check(nthDOF)
+  *do,ar32,1,6,1
+    hasOverlappingCPs = empty_dof_check(ar32)
     *if,hasOverlappingCPs,eq,0,cycle
 
-    strDOF = dof_names(nthDOF)
+    strDOF = dof_names(ar32)
 
-    *get,nodeCount,parm,nodal_cps_%nthDOF%,dim,y
+    *get,nodeCount,parm,nodal_cps_%ar32%,dim,y
     *do,nthNode,1,nodeCount,1
       *del,cps_to_combine,,nopr
-      *vfun,cps_to_combine,copy,nodal_cps_%nthDOF%(1,nthNode)
+      *vfun,cps_to_combine,copy,nodal_cps_%ar32%(1,nthNode)
       arrdel,'cps_to_combine','deleted_cps'
       *get,cpCount,parm,cps_to_combine,dim,x
       *if,cpCount,gt,1,then
@@ -125,3 +422,7 @@ CPSMERGE: running iteration #%I.
   *endif
 
 *enddo
+
+ctime,'CPSMERGE_VAR_deltaT',CPSMERGE_VAR_t0
+*msg,note,CPSMERGE_VAR_deltaT
+CPSMERGE: elapsed time = %s
