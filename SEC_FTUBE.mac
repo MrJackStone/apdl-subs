@@ -58,6 +58,7 @@ LBACKUP
 KBACKUP
 EBACKUP
 NBACKUP
+mpopbackup
 
 ! Desativar exibição automática
 /nopr
@@ -649,9 +650,9 @@ CMDELE,AR50
 /gopr
 IMMED,1
 /uis,REPLOT,1
-/uis,MSGPOP,2
 
 ! Restaurar seleção prévia
+mpoprestore
 VRESTORE
 ARESTORE
 LRESTORE

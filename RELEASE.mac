@@ -13,6 +13,8 @@ KBACKUP
 LBACKUP
 NBACKUP
 EBACKUP
+mpopbackup
+/uis,msgpop,3
 
 ! Selecionar linha desejada
 LSEL,S,LINE,,LNum
@@ -78,8 +80,6 @@ ESLN,R,0
    *get,Bckp_REAL,ELEM,ENum,ATTR,REAL
    *get,Bckp_ESYS,ELEM,ENum,ATTR,ESYS
    *get,Bckp_SECN,ELEM,ENum,ATTR,SECN
-   ! Desabilita exibição de mensagens de aviso
-   /uis,MSGPOP,3
    ! Desativa a verificação de associação entre Solid Model e FEM
    MODMSH,NOCHECK
    ! Modificar o elemento:
@@ -93,8 +93,6 @@ ESLN,R,0
    EMODIF,ENum,SECNUM,Bckp_SECN
    ! Reativa a verificação de associação entre Solid Model e FEM
    MODMSH,CHECK
-   ! Reabilita exibição de mensagens de aviso
-   /uis,MSGPOP,2
    ! Aplicar acoplamento dos graus de liberdade referentes aos deslocamentos
    CP,NEXT,UX,NNum,NewNode
    CP,NEXT,UY,NNum,NewNode
@@ -128,4 +126,4 @@ KRESTORE
 LRESTORE
 NRESTORE
 elrestore
-
+mpoprestore

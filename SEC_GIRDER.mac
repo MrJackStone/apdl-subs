@@ -48,6 +48,7 @@ LBACKUP
 KBACKUP
 EBACKUP
 NBACKUP
+mpopbackup
 
 ! Desativar exibição automática
 /nopr
@@ -324,7 +325,6 @@ SEC_GIRDER_VAR_hw=arg9
 /gopr
 IMMED,1
 /uis,REPLOT,1
-/uis,MSGPOP,2
 
 ! Restaurar seleção prévia
 ARESTORE
@@ -332,4 +332,4 @@ LRESTORE
 KRESTORE
 elrestore
 NRESTORE
-
+mpoprestore
