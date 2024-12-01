@@ -1,0 +1,91 @@
+! CPSBCMERGE
+
+! Descrption:
+! Moves DOF constraints applied to nodal couplings's slave nodes to the master node.
+
+! Arguments:
+! -
+
+! Local parameters:
+! ar21: largeNumber
+! ar31: DOFcount
+! ar33: strDOF
+! ar34: cpDOF
+! ar41: nthCP
+! ar43: cpStatus
+! ar45: cpCount
+! ar51: nthNode
+! ar52: ndNum
+! ar53: ndCount
+! ar54: masterNode
+! ar61: masterRestrained
+! ar62: slaveRestrained
+! ar63: masterBCStatus
+! ar64: slaveBCStatus
+
+! Global erased parameters:
+! CPSBCMERGE_ARR_dof_names
+
+
+! Prepare environment
+ar21 = 1e10
+ar31 = 6
+
+*del , CPSBCMERGE_ARR_dof_names ,      , nopr
+*dim , CPSBCMERGE_ARR_dof_names , char , ar31
+CPSBCMERGE_ARR_dof_names(1) = 'UX' , 'UY' , 'UZ' , 'ROTX' , 'ROTY' , 'ROTZ'
+
+nbackup
+nsel,all
+
+! Loop over every nodal coupling:
+*get,ar45,cp,,max
+*do,ar41,1,ar45,1
+
+  ! Skip if coupling set does not exist
+  ar43 = cpinqr(ar41,1)
+  *if,ar43,ne,1,cycle
+
+  ! Skip if coupling has a single node
+  *get , ar53 , cp , ar41 , nterm
+  *if,ar53,eq,1,cycle
+
+  ! Extract coupling attributes
+  *get , ar34 , cp , ar41 , dof
+  *get , ar54 , cp , ar41 , term , 1 , node
+  ar33 = CPSBCMERGE_ARR_dof_names(ar34)
+
+  ! Initialize flags that control BCs transfer to master node
+  ar61 = 0
+  ar62 = 0
+  *get,ar63,node,ar54,d,%ar33%
+  *if,abs(ar63),lt,ar21,then
+    ar61 = 1
+  *endif
+
+  ! Delete DOF BCs from slave nodes
+  *do,ar51,2,ar53,1
+
+    *get , ar52 , cp   , ar41 , term , ar51   , node
+    *get , ar64 , node , ar52 , d    , %ar33%
+
+    *if,ar64,eq,0,then
+      ar62 = 1
+      ddele,ar52,%ar33%
+
+      *msg,note,ar33,ar52
+CPSBCMERGE: %s DOF restriction deleted from node %I.
+    *endif
+
+  *enddo
+
+  ! Move DOF restraint to master node without overwriting
+  *if,ar62,eq,1,and,ar61,eq,0,then
+    d,ar54,%ar33%,0
+  *endif
+
+*enddo
+
+! Clean up
+nrestore
+*del,CPSBCMERGE_ARR_dof_names,,nopr
