@@ -44,6 +44,14 @@
 
 
 ! Parse inputs
+*get,ar21,node,,count
+*if,ar21,eq,0,then
+  *msg,warn
+SPRSUP warning: no selected nodes.%/&
+SPRSUP command is ignored.
+  *return,-1
+*endif
+
 ar47 = 'SPRSUP_COMPN_supports'
 *get,ar20,parm,ARG7,type
 *if,ar20,eq,3,then
@@ -97,8 +105,6 @@ ebackup
 *del , SPRSUP_ARR_scaled_LX   ,  , nopr
 *del , SPRSUP_ARR_scaled_LY   ,  , nopr
 *del , SPRSUP_ARR_scaled_LZ   ,  , nopr
-
-*get,ar21,node,,count
 
 *dim , SPRSUP_ARR_base_x ,  , ar21
 *dim , SPRSUP_ARR_base_y ,  , ar21
