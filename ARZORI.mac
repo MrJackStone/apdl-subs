@@ -1,97 +1,111 @@
-! ARZORI, zDir
-! ARZORI, arg1
+! arzori , orientation
+! ARZORI , ARG1
 
-! Descrição:
-! Esta subrotina serve para orientar o vetor normal de todas as áreas selecionadas com base
-! no sentido imposto para a componente Z do vetor normal.
+! Description:
+! Makes selected areas point towards or against the orientation of Z axis in the active coordinate
+! system.
 
-! Lista de argumentos:
-! arg1: zDir  -  sentido da componente Z da normal (valor positivo ou negativo)
+! Arguments:
+! ARG1: orientation  -  determines where areas should point:
+!                         [>0] point towards Z (default)
+!                         [<0] point against Z
 
-! Lista de variáveis locais:
-! AR20: ACount
-! AR21: nthArea
-! AR22: nthLine
-! AR34: ZNorm
-! AR35: revCheck
-! AR36: ANum
-! AR37: COMPA_prev
-! AR38: COMPL_prev
-! AR39: COMPK_prev
-! AR40: kc
-! AR41: kn
-! AR42: nthKP
-! AR43: kAnchor_1
-! AR44: kAnchor_2
-! AR45: max_angle
-! AR46: k_i
-! AR47: nthAngle
-! AR48: kAnchor_3
+! Local parameters:
+! ar21: sign
+! ar22: COMPA_eligible
+! ar23: areaCount
+! ar24: nthArea
+! ar25: anum
+! ar30: lineCount
+! ar31: l1
+! ar32: l2
+! ar33: nthLine
+! ar40: COMPK_l1
+! ar41: k1
+! ar42: k2
+! ar43: k3
+! ar51: k1Idx
+! ar52: k2Idx
+! ar53: k3Idx
+! ar61: maxAngle
+! ar62: nthAngle
+! ar71: nthNormal
+! ar72: areaNormal
 
-! Global parameters (erased at the end of this subroutine)
+! Global erased parameters:
 ! ARZORI_ARR_klist
 
-! Obter número de áreas selecionadas
-*get,AR20,AREA,,COUNT
-AR36=0
 
-! Orientar cada área selecionada
-*do,AR21,1,AR20,1
+! Parse inputs
+ar21 = 1
+*if,ARG1,ne,0,then
+  ar21 = ARG1
+*endif
 
-    ! Obter número da área
-    AR36=ARNEXT(AR36)
+! Prepare environment
+smdbackup
 
-    ! Backup selection
-    cm,AR37,area
-    cm,AR38,line
-    cm,AR39,kp
+! Check each selected area:
+cm,ar22,area
+*get,ar23,area,,count
+ar25 = 0
 
-    ! Count keypoints
-    asel,s,area,,AR36
-    lsla,s
-    ksll,s
-    *get,AR40,kp,,count
+*do,ar24,1,ar23,1
 
-    ! List keypoints
-    *del,ARZORI_ARR_klist,,nopr
-    *dim,ARZORI_ARR_klist,,AR40
-    *do,AR42,1,AR40,1
-        *get,AR22,area,AR36,loop,1,line,AR42
-        *get,AR41,line,AR22,kp,1
-        ARZORI_ARR_klist(AR42)=AR41
-    *enddo
+  cmsel,s,ar22
+  ar25 = arnext(ar25)
+  asel,s,area,,ar25
+  lsla
+  *get,ar30,line,,count
 
-    ! First two keypoints
-    AR43=ARZORI_ARR_klist(1)
-    AR44=ARZORI_ARR_klist(2)
+  *del,ARZORI_ARR_klist,,nopr
+  *dim,ARZORI_ARR_klist,,ar30
 
-    ! Third keypoint chosen to maximize internal angle
-    AR45=0
-    *do,AR42,3,AR40,1
-        AR46=ARZORI_ARR_klist(AR42)
-        AR47=abs(anglek(AR43,AR44,AR46))
-        *if,AR47,gt,AR45,then
-            AR45=AR47
-            AR48=AR46
-        *endif
-    *enddo
+  ! List area's keypoints in the correct order, following area's loop
+  *do,ar33,1,ar30-1,1
+    *get , ar31 , area , ar25 , loop , 1 , line , ar33
+    *get , ar32 , area , ar25 , loop , 1 , line , ar33+1
 
-    ! Restore previous selection
-    cmsel,s,AR37
-    cmsel,s,AR38
-    cmsel,s,AR39
+    lsel,s,line,,ar31
+    ksll
+    cm,ar40,kp
 
-    ! Calcular vetor normal (componente na direção Z)
-    AR34=NORMKZ(AR43,AR44,AR48)
-    AR35=AR34*arg1
+    lsel,s,line,,ar32
+    ksll,r
+    ar42 = kpnext(0)
 
-    ! Inverter a área (se necessário)
-    *if,AR35,LT,0,THEN
-        AREVERSE,AR36
+    cmsel,s,ar40
+    ksel,u,kp,,ar42
+    ar41 = kpnext(0)
+
+    ARZORI_ARR_klist(ar33)   = ar41
+    ARZORI_ARR_klist(ar33+1) = ar42
+  *enddo
+
+  ! Calculate area normal based on adjaced keypoints that yield max internal angle
+  ar61 = 0
+  *do,ar33,1,ar30-1,1
+    ar51 = mod(ar33-1,ar30)+1
+    ar52 = mod(ar33+0,ar30)+1
+    ar53 = mod(ar33+1,ar30)+1
+    ar41 = ARZORI_ARR_klist(ar51)
+    ar42 = ARZORI_ARR_klist(ar52)
+    ar43 = ARZORI_ARR_klist(ar53)
+    ar62 = anglek(ar41,ar42,ar43)
+    ar71 = normkz(ar41,ar42,ar43)
+    *if,abs(ar62),gt,abs(ar61),then
+      ar61 = ar62
+      ar72 = ar71
     *endif
+  *enddo
+
+  ! Reverse area, if necessary
+  *if,ar72*ar21,lt,0,then
+    areverse,ar25
+  *endif
 
 *enddo
 
+! Clean up
 *del,ARZORI_ARR_klist,,nopr
-
-
+smdrestore
