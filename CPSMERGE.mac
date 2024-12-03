@@ -194,10 +194,11 @@ CPSMERGE: running iteration #%I.
     ar22 = 0
   *endif
 
-  ! Break recursive process if CPs-by-node table had enough column width
-  *if,ar26,eq,0,then
-    ar22 = 0
-  *endif
+  ! TODO  this break criterion does not work -- investigate or eliminate
+  ! ! Break recursive process if CPs-by-node table had enough column width
+  ! *if,ar26,eq,0,then
+  !   ar22 = 0
+  ! *endif
 
 *enddo
 
