@@ -42,28 +42,28 @@ mpopbackup
 /prep7
 *afun,rad
 
-newET = etyiqr(0,16)
-et,newET,82
+ar31 = etyiqr(0,16)
+et,ar31,82
 
-newCS = (csyiqr(0,14)>11)
-cswpla,newCS,cylin
+ar32 = (csyiqr(0,14)>11)
+cswpla,ar32,cylin
 
 ! Parse inputs
-pi             = acos(-1)
-outerDiameter  = ARG1+(2*ARG2)
-outerPerimeter = pi*outerDiameter
+ar21 = acos(-1)
+ar22 = ARG1+(2*ARG2)
+ar23 = ar21*ar22
 
-edgeLength = outerPerimeter/16
+ar24 = ar23/16
 *if,ARG5,gt,0,then
-  edgeLength = ARG5
+  ar24 = ARG5
 *endif
 
-edgeDivs = nint(outerPerimeter/edgeLength)
-angSize  = 360/edgeDivs
+ar25 = nint(ar23/ar24)
+ar26 = 360/ar25
 
 ! Draw cross-section shape
-cyl4,0,0,ARG1/2
-cyl4,0,0,ARG1/2,outerDiameter/2
+cyl4 , 0 , 0 , ARG1/2
+cyl4 , 0 , 0 , ARG1/2 , ar22/2
 
 wprota,,,90
 asbw,all,,delete
@@ -76,63 +76,65 @@ wprota,,-90
 nummrg,kp
 
 ! Create selection components
-cm,COMPA_section,area
+cm,ar33,area
 
 asel,r,loc,x,0,ARG1/2
-cm,COMPA_core,area
+cm,ar34,area
 
-cmsel,s,COMPA_section
-asel,r,loc,x,ARG1/2,outerDiameter/2
-cm,COMPA_ring,area
+cmsel,s,ar33
+asel,r,loc,x,ARG1/2,ar22/2
+cm,ar35,area
 
-cmsel,s,COMPA_section
+cmsel,s,ar33
 lsel,s,loc,x,ARG1/2
-lsel,a,loc,x,outerDiameter/2
+lsel,a,loc,x,ar22/2
 lsla,r
-cm,COMPL_arcs,line
+cm,ar36,line
 
-cmsel,s,COMPA_section
+cmsel,s,ar33
 lsla
-cmsel,u,COMPL_arcs
-cm,COMPL_straight,line
+cmsel,u,ar36
+cm,ar37,line
 
 ! Mesh cross-section
-csys,newCS
+csys,ar32
 
-cmsel,s,COMPA_core
-aatt,ARG3,,newET
+cmsel,s,ar34
+aatt,ARG3,,ar31
 
-cmsel,s,COMPA_ring
-aatt,ARG4,,newET
+cmsel,s,ar35
+aatt,ARG4,,ar31
 
-cmsel,s,COMPL_arcs
-lesize,all,,angSize
+cmsel,s,ar36
+lesize,all,,ar26
 
-cmsel,s,COMPL_straight
-lesize,all,edgeLength
+cmsel,s,ar37
+lesize,all,ar24
 
-cmsel,s,COMPA_section
+cmsel,s,ar33
 amesh,all
 
 ! Write cross-section file
-secwrite,ARG6,sect,,newET
+secwrite,ARG6,sect,,ar31
 
 ! Clean up
 csrestore
 
-cmsel,s,COMPA_section
+cmsel,s,ar33
 lsla
 ksll
 
-cmdele,COMPA_section
-cmdele,COMPA_core
-cmdele,COMPA_ring
+cmdele,ar33
+cmdele,ar34
+cmdele,ar35
+cmdele,ar36
+cmdele,ar37
 
 aclear,all
 adele,all,,,1
 
-etdele,newET
-csdele,newCS
+etdele,ar31
+csdele,ar32
 
 smdrestore
 femrestore
