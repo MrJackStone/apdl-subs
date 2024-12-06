@@ -85,11 +85,14 @@ csys,ar32
 
 cm,ar33,area
 
-asel,r,loc,x,0,ARG1/2
+lsel,r,loc,x,0,ARG1/2
+asll,r,1
 cm,ar34,area
 
 cmsel,s,ar33
-asel,r,loc,x,ARG1/2,ar22/2
+lsla
+lsel,r,loc,x,ARG1/2,ar22/2
+asll,r,1
 cm,ar35,area
 
 cmsel,s,ar33
