@@ -22,12 +22,13 @@
 ! ar25: edgeDivs
 ! ar26: angSize
 ! ar31: newET
-! ar32: newCS
+! ar32: newCY
 ! ar33: COMPA_section
 ! ar34: COMPA_core
 ! ar35: COMPA_ring
 ! ar36: COMPL_arcs
 ! ar37: COMPL_straight
+! ar38: newCS
 
 
 ! Prepare environment
@@ -45,8 +46,12 @@ mpopbackup
 ar31 = etyiqr(0,16)
 et,ar31,82
 
-ar32 = (csyiqr(0,14)>11)
+ar38 = (csyiqr(0,14)>11)
+ar32 = ar38+1
+cswpla,ar38,cart
 cswpla,ar32,cylin
+
+csys,ar38
 
 ! Parse inputs
 ar21 = acos(-1)
@@ -63,11 +68,11 @@ ar26 = 360/ar25
 
 ! Draw cross-section shape
 cyl4 , 0 , 0 , ARG1/2
-cyl4 , 0 , 0 , ARG1/2 , ar22/2
+cyl4 , 0 , 0 , ARG1/2 ,, ar22/2
 
 wprota,,,90
 asbw,all,,delete
-wprota,,-90
+wprota,,,-90
 
 wprota,,90
 asbw,all,,delete
@@ -76,6 +81,8 @@ wprota,,-90
 nummrg,kp
 
 ! Create selection components
+csys,ar32
+
 cm,ar33,area
 
 asel,r,loc,x,0,ARG1/2
@@ -96,9 +103,9 @@ lsla
 cmsel,u,ar36
 cm,ar37,line
 
-! Mesh cross-section
-csys,ar32
+csys,ar38
 
+! Mesh cross-section
 cmsel,s,ar34
 aatt,ARG3,,ar31
 
@@ -135,6 +142,7 @@ adele,all,,,1
 
 etdele,ar31
 csdele,ar32
+csdele,ar38
 
 smdrestore
 femrestore
