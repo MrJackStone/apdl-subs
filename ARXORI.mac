@@ -1,73 +1,24 @@
-! arxori, xDir
-! ARXORI, ARG1
+! arxori , orientation
+! ARXORI , ARG1
 
 ! Description:
-! Orients the normal of selected areas along the positive or negative direction (depending on
-! the sign of ARG1) of the global X axis.
+! Makes selected areas point towards or against the orientation of X axis in the active coordinate
+! system.
 
 ! Arguments:
-! ARG1: xDir  -  orientation along X (positive or negative value)
+! ARG1: orientation  -  determines where areas should point:
+!                         [>0] point towards X (default)
+!                         [<0] point against X
 
 ! Local parameters:
-! ar20: aCount
-! ar21: nthArea
-! ar22: L1
-! ar23: L2
-! ar24: L3
-! ar25: K11
-! ar26: K21
-! ar27: K31
-! ar28: K12
-! ar29: K22
-! ar30: K32
-! ar31: K1
-! ar32: K2
-! ar33: K3
-! ar34: XNorm
-! ar35: revCheck
-! ar36: ANum
+! ar21: sign
 
-*get,ar20,area,,count
-ar36 = 0
 
-! Re-orient each selected area
-*do,ar21,1,ar20,1
+! Parse inputs
+ar21 = 1
+*if,ARG1,ne,0,then
+  ar21 = ARG1
+*endif
 
-  ar36 = arnext(ar36)
-
-  *get , ar22 , area , ar36 , loop , 1 , line , 1
-  *get , ar23 , area , ar36 , loop , 1 , line , 2
-  *get , ar24 , area , ar36 , loop , 1 , line , 3
-
-  *get , ar25 , line , ar22 , kp , 1
-  *get , ar26 , line , ar23 , kp , 1
-  *get , ar27 , line , ar24 , kp , 1
-  *get , ar28 , line , ar22 , kp , 2
-  *get , ar29 , line , ar23 , kp , 2
-  *get , ar30 , line , ar24 , kp , 2
-
-  ! Pick three different keypoints
-  ar31 = ar25
-
-  *if,ar31,eq,ar26,then
-    ar32 = ar29
-  *else
-    ar32 = ar26
-  *endif
-
-  *if,ar31,eq,ar27,or,ar32,eq,ar27,then
-    ar33 = ar30
-  *else
-    ar33 = ar27
-  *endif
-
-  ! Calcular vetor normal (componente na direção X)
-  AR34=NORMKX(AR31,AR32,AR33)
-  AR35=AR34*arg1
-
-  ! Inverter a área (se necessário)
-  *if,AR35,LT,0,THEN
-    AREVERSE,AR36
-  *endif
-
-*enddo
+! Orient areas
+arori , 'x' , ar21

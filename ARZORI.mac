@@ -12,28 +12,6 @@
 
 ! Local parameters:
 ! ar21: sign
-! ar22: COMPA_eligible
-! ar23: areaCount
-! ar24: nthArea
-! ar25: anum
-! ar30: lineCount
-! ar31: l1
-! ar32: l2
-! ar33: nthLine
-! ar40: COMPK_l1
-! ar41: k1
-! ar42: k2
-! ar43: k3
-! ar51: k1Idx
-! ar52: k2Idx
-! ar53: k3Idx
-! ar61: maxAngle
-! ar62: nthAngle
-! ar71: nthNormal
-! ar72: areaNormal
-
-! Global erased parameters:
-! ARZORI_ARR_klist
 
 
 ! Parse inputs
@@ -42,70 +20,5 @@ ar21 = 1
   ar21 = ARG1
 *endif
 
-! Prepare environment
-smdbackup
-
-! Check each selected area:
-cm,ar22,area
-*get,ar23,area,,count
-ar25 = 0
-
-*do,ar24,1,ar23,1
-
-  cmsel,s,ar22
-  ar25 = arnext(ar25)
-  asel,s,area,,ar25
-  lsla
-  *get,ar30,line,,count
-
-  *del,ARZORI_ARR_klist,,nopr
-  *dim,ARZORI_ARR_klist,,ar30
-
-  ! List area's keypoints in the correct order, following area's loop
-  *do,ar33,1,ar30-1,1
-    *get , ar31 , area , ar25 , loop , 1 , line , ar33
-    *get , ar32 , area , ar25 , loop , 1 , line , ar33+1
-
-    lsel,s,line,,ar31
-    ksll
-    cm,ar40,kp
-
-    lsel,s,line,,ar32
-    ksll,r
-    ar42 = kpnext(0)
-
-    cmsel,s,ar40
-    ksel,u,kp,,ar42
-    ar41 = kpnext(0)
-
-    ARZORI_ARR_klist(ar33)   = ar41
-    ARZORI_ARR_klist(ar33+1) = ar42
-  *enddo
-
-  ! Calculate area normal based on adjaced keypoints that yield max internal angle
-  ar61 = 0
-  *do,ar33,1,ar30-1,1
-    ar51 = mod(ar33-1,ar30)+1
-    ar52 = mod(ar33+0,ar30)+1
-    ar53 = mod(ar33+1,ar30)+1
-    ar41 = ARZORI_ARR_klist(ar51)
-    ar42 = ARZORI_ARR_klist(ar52)
-    ar43 = ARZORI_ARR_klist(ar53)
-    ar62 = anglek(ar41,ar42,ar43)
-    ar71 = normkz(ar41,ar42,ar43)
-    *if,abs(ar62),gt,abs(ar61),then
-      ar61 = ar62
-      ar72 = ar71
-    *endif
-  *enddo
-
-  ! Reverse area, if necessary
-  *if,ar72*ar21,lt,0,then
-    areverse,ar25
-  *endif
-
-*enddo
-
-! Clean up
-*del,ARZORI_ARR_klist,,nopr
-smdrestore
+! Orient areas
+arori , 'z' , ar21
