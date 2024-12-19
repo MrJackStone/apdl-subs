@@ -1,55 +1,131 @@
-! AXANNO , windowNum , position
-! AXANNO , arg1      , arg2
+! axanno , winNum , position , xLabel , yLabel
+! AXANNO , ARG1   , ARG2     , ARG3   , ARG4
+
+! Descrption:
+! Draws a cartesian 2-D axis on a window using annotations.
+
+! Arguments:
+! ARG1: winNum    -  number of window in which annotation will be drawn (defaults to 1)
+! ARG2: position  -  location in window where axis will be drawn:
+!                      ['ULC']  upper left corner (default)
+!                      ['LLC']  lower left corner
+!                      ['URC']  upper right corner
+!                      ['LRC']  lower right corner
+! ARG3: xLabel    -  text assigned to horizontal axis (defaults to 'X')
+! ARG4: yLabel    -  text assigned to vertical axis (defaults to 'Y')
+
+! Local parameters:
+! ar20: parType
+! ar21: windowNumber
+! ar22: positionKey
+! ar23: horzLabel
+! ar24: vertLabel
+! ar25: axisMargin
+! ar26: textMargin
+! ar27: textOffset
+! ar28: axisSize
+! ar31: windowXMin
+! ar32: windowXMax
+! ar33: windowYMin
+! ar34: windowYMax
+! ar41: axesOriginX
+! ar42: axesOriginY
+! ar43: axesEndX
+! ar44: axesEndY
+! ar51: labelHorX
+! ar52: labelHorY
+! ar53: labelVerX
+! ar54: labelVerY
+
+! Global erased params:
+! AXANNO_VAR_charWidth
 
 
-buffer=0.05
-textBuffer=0.02
-textOffset=0.025
-size=0.1
+! Parse inputs
+ar21 = 1
+*if,ARG1,gt,0,and,ARG1,le,5,then
+  ar21 = ARG1
+*endif
 
-! Get window's extents
-*get,windowXMin,graph,arg1,range,xmin
-*get,windowXMax,graph,arg1,range,xmax
-*get,windowYMin,graph,arg1,range,ymin
-*get,windowYMax,graph,arg1,range,ymax
+ar22 = 'ULC'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar22 = upcase(ARG2)
+*endif
 
-! Top-left position
-xOrigin=windowXMin+buffer
-yOrigin=windowYMax-size-buffer
+*if,ar22,ne,'ULC',and,ar22,ne,'LLC',then
+  *if,ar22,ne,'URC',and,ar22,ne,'LRC',then
+    *msg,warn
+AXANNO warning: invalid position (ARG2). Value changed to default ('ULC').
+    ar22 = 'ULC'
+  *endif
+*endif
 
-xHorLineEnd=xOrigin+size
-yHorLineEnd=yOrigin
+ar23 = 'X'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar23 = ARG3
+*endif
 
-xVerLineEnd=xOrigin
-yVerLineEnd=yOrigin+size
+ar24 = 'Y'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar24 = ARG4
+*endif
 
-xHorHead=xHorLineEnd
-yHorHead=yOrigin
+! Calculate positions
+g_annocharwidth,'AXANNO_VAR_charWidth'
 
-xVerHead=xOrigin
-yVerHead=yVerLineEnd
+ar25 = 2.0*AXANNO_VAR_charWidth
+ar26 = 0.5*AXANNO_VAR_charWidth
+ar27 = 0.5*AXANNO_VAR_charWidth
+ar28 = 3.0*AXANNO_VAR_charWidth
+ar29 = 30*AXANNO_VAR_charWidth
 
-xHorLabel=xHorLineEnd-textOffset
-yHorLabel=yOrigin+textBuffer
+*get,ar31,graph,ar21,range,xmin
+*get,ar32,graph,ar21,range,xmax
+*get,ar33,graph,ar21,range,ymin
+*get,ar34,graph,ar21,range,ymax
 
-xVerLabel=xOrigin+textBuffer
-yVerLabel=yVerLineEnd-textOffset
+*if,ar22,eq,'ULC',then
+  ar41 = ar31+ar25
+  ar42 = ar34-ar25-ar28
+*elseif,ar22,eq,'LLC',then
+  ar41 = ar31+ar25
+  ar42 = ar33+ar25
+*elseif,ar22,eq,'URC',then
+  ar41 = ar32-ar25-ar28
+  ar42 = ar34-ar25-ar28
+*elseif,ar22,eq,'LRC',then
+  ar41 = ar32-ar25-ar28
+  ar42 = ar33+ar25
+*endif
 
+ar43 = ar41+ar28
+ar44 = ar42+ar28
+ar51 = ar43-ar27
+ar52 = ar42+ar26
+ar53 = ar41+ar26
+ar54 = ar44-ar27
 
-! Draw X axis line
-/line,xOrigin,yOrigin,xHorLineEnd,yHorLineEnd
+! Draw axes
+/line , ar41 , ar42 , ar43 , ar42
+/line , ar41 , ar42 , ar41 , ar44
 
-! Draw Y axis line
-/line,xOrigin,yOrigin,xVerLineEnd,yVerLineEnd
+/lsymbol , ar43 , ar42 , 0  , 4 , ar29 , 0
+/lsymbol , ar41 , ar44 , 90 , 4 , ar29 , 0
 
-! Draw X axis arrow head
-/lsymbol,xHorHead,yHorHead,0,4,1,0
+! Write labels
+*cfopen,AXANNO_tmp,tmp
+    *vwrite,ar51,ar52,ar23
+/tlabel,%g,%g,%s
+    *vwrite,ar53,ar54,ar24
+/tlabel,%g,%g,%s
+*cfclos
+/nopr
+/input,AXANNO_tmp,tmp
+/delete,AXANNO_tmp,tmp
+/gopr
 
-! Draw Y axis arrow head
-/lsymbol,xVerHead,yVerHead,90,4,1,0
-
-! X axis name
-/tlabel,xHorLabel,yHorLabel,'X'
-
-! Y axis name
-/tlabel,xVerLabel,yVerLabel,'Y'
+! Clean up
+*del,AXANNO_VAR_charWidth,,nopr
