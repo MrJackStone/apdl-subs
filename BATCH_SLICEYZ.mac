@@ -1,55 +1,29 @@
-! BATCH_SLICEYZ, xPosArray, relative, sepo, mode
-! BATCH_SLICEYZ,      arg1,     arg2, arg3, arg4
+! batch_sliceyz , xPosArray , relative , sepo , mode
+! BATCH_SLICEYZ , ARG1      , ARG2     , ARG3 , ARG4
 
 ! Description:
-! Performs many YZ plane area slicing operations at given X locations.
+! Slices areas or lines at given X locations using the working plane.
 
 ! Arguments
-! arg1: xPosArray  -  name of the array parameter (string) containing slicing X coordinates
-! arg2: relative   -  controls relative or absolute location behavior:
+! ARG1: xPosArray  -  name of the array parameter (string) containing slicing X coordinates
+! ARG2: relative   -  controls relative or absolute location behavior:
 !                        [0] ABSOLUTE: interpret X as global cartesian coordinates
 !                        [1] RELATIVE: interpret X as increments from current working plane location
-! arg3: sepo       -  create merged (0) or separated (1) entities at slicing interfaces
-! arg4: mode       -  [0] Areas; [1] Lines
+! ARG3: sepo       -  create merged (0) or separated (1) entities at slicing interfaces
+! ARG4: mode       -  [0] Areas; [1] Lines
 
 ! Local parameters:
-! AR20: sliceCount
-! AR21: nthSlice
-! AR22: xCoord
+! ar21: positions
+! ar22: relativeOpt
+! ar23: sepoOpt
+! ar24: modeOpt
 
 
-*get,AR20,parm,%arg1%,dim,x
+! Prevent ARG scope issues
+ar21 = ARG1
+ar22 = ARG2
+ar23 = ARG3
+ar24 = ARG4
 
-*do,AR21,1,AR20,1
-    AR22=%arg1%(AR21)
-
-    *if,arg2,eq,1,then
-        ! Move working plane from its current position
-        wpoffs,AR22
-        wprota,,,90
-        *if,arg3,eq,1,then
-            *if,arg4,eq,0,then
-                asbw,all,sepo,delete
-            *elseif,arg4,eq,1,then
-                lsbw,all,sepo,delete
-            *endif
-        *else
-            *if,arg4,eq,0,then
-                asbw,all,,delete
-            *elseif,arg4,eq,1,then
-                lsbw,all,,delete
-            *endif
-        *endif
-        wprota,,,-90
-        wpoffs,-AR22
-
-    *else
-        ! Position working plane using global cartesian coordinates
-        wpsliceyz,AR22,arg3,arg4
-
-    *endif
-*enddo
-
-
-
-
+! Slice entities
+batch_wpslice , 'YZ' , ar21 , ar22 , ar23 , ar24

@@ -1,0 +1,119 @@
+! batch_wpslice , plane , positions , relative , sepo , mode
+! BATCH_WPSLICE , ARG1  , ARG2      , ARG3     , ARG4 , ARG5
+
+! Description:
+! Slices areas or lines at given locations using the working plane aligned with one of the
+! cartesian planes.
+
+! Arguments
+! ARG1: plane      -  cartesian plane used to slice:
+!                       'XY', 'YZ', or 'XZ'
+! ARG2: positions  -  name of the array parameter (string) containing slicing coordinates
+! ARG3: relative   -  controls relative or absolute location behavior:
+!                       [0] ABSOLUTE: interpret positions as offsets from the Global Cartesian
+!                                     Coordinate System (csys,0)
+!                       [1] RELATIVE: interpret positions as increments from the working plane's
+!                                     current location
+! ARG4: sepo       -  create merged (0, default) or separated (1) entities at slicing interfaces
+! ARG5: mode       -  type of solid model entity to slice:
+!                       [0] slice areas (ASBW command)
+!                       [1] slice lines (LSBW command)
+
+! Local parameters:
+! ar20: parType
+! ar21: cartPlane
+! ar22: sliceCoord
+! ar24: sepoOpt
+! ar25: sliceCommand
+! ar30: sliceCount
+! ar31: nthSlice
+! ar32: xOffset
+! ar33: yOffset
+! ar34: zOffset
+! ar35: xyRotation
+! ar36: yzRotation
+! ar37: xzRotation
+
+
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,error
+BATCH_WPSLICE error: expected ARG1 to be a string.%/&
+BATCH_WPSLICE command is ignored.
+  *return,-1
+*endif
+
+ar21 = upcase(ARG1)
+*if,ar21,ne,'XY',and,ar21,ne,'YZ',then
+  *if,ar21,ne,'XZ',then
+    *msg,error
+BATCH_WPSLICE error: expected ARG1 to be a valid cartesian plane (XY, YZ, or XZ).%/&
+BATCH_WPSLICE command is ignored.
+    *return,-1
+  *endif
+*endif
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,error
+BATCH_WPSLICE error: expected ARG2 to be a string.%/&
+BATCH_WPSLICE command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG2%,type
+*if,ar20,ne,1,then
+  *msg,error
+BATCH_WPSLICE error: expected the string in ARG2 to be the name of an array parameter.%/&
+BATCH_WPSLICE command is ignored.
+  *return,-1
+*endif
+
+ar24 = ''
+*if,ARG4,eq,1,then
+  ar24 = 'SEPO'
+*endif
+
+ar25 = 'ASBW'
+*if,ARG5,eq,1,then
+  ar25 = 'LSBW'
+*endif
+
+! Prepare environment
+*if,ARG3,eq,0,then
+  wpcsys,-1,0
+*endif
+
+*get,ar30,parm,%ARG2%,dim,x
+
+! Slice entities
+*do,ar31,1,ar30,1
+  ar22 = %ARG2%(ar31)
+
+  ar35 = 0
+  ar37 = 0
+  ar36 = 0
+  ar32 = 0
+  ar33 = 0
+  ar34 = 0
+
+  *if,ar21,eq,'XY',then
+    ar34 = ar22
+  *elseif,ar21,eq,'YZ',then
+    ar33 = ar22
+    ar37 = 90
+  *elseif,ar21,eq,'XZ',then
+    ar32 = ar22
+    ar36 = 90
+  *endif
+
+  wpoffs , ar32 , ar33 , ar34
+  wprota , ar35 , ar36 , ar37
+
+  %ar25%,all,%ar24%,delete
+
+  wprota , -ar35 , -ar36 , -ar37
+  wpoffs , -ar32 , -ar33 , -ar34
+
+*enddo

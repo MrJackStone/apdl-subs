@@ -1,45 +1,29 @@
-! BATCH_SLICEXY, zPosArray, relative, sepo
-! BATCH_SLICEXY,      arg1,     arg2, arg3
+! batch_slicexy , zPosArray , relative , sepo , mode
+! BATCH_SLICEXY , ARG1      , ARG2     , ARG3 , ARG4
 
 ! Description:
-! Performs many XY plane area slicing operations at given Z locations.
+! Slices areas or lines at given Z locations using the working plane.
 
 ! Arguments
-! arg1: zPosArray  -  name of the array parameter (string) containing slicing Z coordinates
-! arg2: relative   -  controls relative or absolute location behavior:
+! ARG1: zPosArray  -  name of the array parameter (string) containing slicing Z coordinates
+! ARG2: relative   -  controls relative or absolute location behavior:
 !                        [0] ABSOLUTE: interpret Z as global cartesian coordinates
 !                        [1] RELATIVE: interpret Z as increments from current working plane location
-! arg3: sepo       -  create merged (0) or separated (1) entities at slicing interfaces
+! ARG3: sepo       -  create merged (0) or separated (1) entities at slicing interfaces
+! ARG4: mode       -  [0] Areas; [1] Lines
 
 ! Local parameters:
-! AR20: sliceCount
-! AR21: nthSlice
-! AR22: zCoord
+! ar21: positions
+! ar22: relativeOpt
+! ar23: sepoOpt
+! ar24: modeOpt
 
 
-*get,AR20,parm,%arg1%,dim,x
+! Prevent ARG scope issues
+ar21 = ARG1
+ar22 = ARG2
+ar23 = ARG3
+ar24 = ARG4
 
-*do,AR21,1,AR20,1
-    AR22=%arg1%(AR21)
-
-    *if,arg2,eq,1,then
-        ! Move working plane from its current position
-        wpoffs,,,AR22
-        !wprota,,90
-        *if,arg3,eq,1,then
-            asbw,all,sepo,delete
-        *else
-            asbw,all,,delete
-        *endif
-        !wprota,,-90
-        wpoffs,,,-AR22
-
-    *else
-        ! Position working plane using global cartesian coordinates
-        wpslicexy,AR22,arg3
-
-    *endif
-*enddo
-
-
-
+! Slice entities
+batch_wpslice , 'XY' , ar21 , ar22 , ar23 , ar24
