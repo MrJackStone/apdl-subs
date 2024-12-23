@@ -1,51 +1,51 @@
 ! BHELIX , rad1 , rad2 , w1   , w2   , pitch , phi  , loops , angStep , cmSuffix
-! BHELIX , arg1 , arg2 , arg3 , arg4 , arg5  , arg6 , arg7  , arg8    , arg9
+! BHELIX , ARG1 , ARG2 , ARG3 , ARG4 , ARG5  , ARG6 , ARG7  , ARG8    , ARG9
 
 ! Description:
 ! Draws a helical blade. The helix's axis is parallel to the active CSYS's Z direction and starts
 ! at Z=0. Blade areas are approximately perpendicular to the axis of the helix.
 
 ! Arguments:
-! arg1: rad1      -  inner radius at the beginning of the helix
-! arg2: rad2      -  inner radius at the end of the helix
-! arg3: w1        -  blade width at the beginning of the helix
-! arg4: w2        -  blade width at the end of the helix
-! arg5: pitch     -  distance between loops along axial direction
+! ARG1: rad1      -  inner radius at the beginning of the helix
+! ARG2: rad2      -  inner radius at the end of the helix
+! ARG3: w1        -  blade width at the beginning of the helix
+! ARG4: w2        -  blade width at the end of the helix
+! ARG5: pitch     -  distance between loops along axial direction
 !                    (set to 0 if defining helix geometry based on PHI instead)
-! arg6: phi       -  maximum angle of the helical path measured along the helix's axis
-!                    (used only if arg5=0)
-! arg7: loops     -  number of times the helix turns (can be fractional)
-! arg8: angStep   -  angular increment between consecutive keypoints along the helical lines
+! ARG6: phi       -  maximum angle of the helical path measured along the helix's axis
+!                    (used only if ARG5=0)
+! ARG7: loops     -  number of times the helix turns (can be fractional)
+! ARG8: angStep   -  angular increment between consecutive keypoints along the helical lines
 !                    (defaults to 90 degrees and can't exceed 180 degrees)
-! arg9: cmSuffix  -  string used as component's name suffix (COMPx_%arg9%)
+! ARG9: cmSuffix  -  string used as component's name suffix (COMPx_%ARG9%)
 !                    (defaults to 'HELIX')
 
 ! Local parameters:
-! AR20: parType
-! AR21: zmax
-! AR22: zmin
-! AR23: height
-! AR24: deltaWidth
-! AR25: lc
-! AR26: lnum
-! AR27: nthLine
-! AR29: cmSuffix
-! AR31: innerHelixLcmName
-! AR32: innerHelixKcmName
-! AR33: innerHelixAcmName
-! AR41: k1
-! AR42: k2
-! AR43: x1coord
-! AR44: y1coord
-! AR45: z1coord
-! AR46: x2coord
-! AR47: y2coord
-! AR48: z2coord
-! AR51: deltaW1
-! AR52: deltaW2
-! AR53: kA
-! AR54: kB
-! AR55: kmax
+! ar20: parType
+! ar21: zmax
+! ar22: zmin
+! ar23: height
+! ar24: deltaWidth
+! ar25: lc
+! ar26: lnum
+! ar27: nthLine
+! ar29: cmSuffix
+! ar31: innerHelixLcmName
+! ar32: innerHelixKcmName
+! ar33: innerHelixAcmName
+! ar41: k1
+! ar42: k2
+! ar43: x1coord
+! ar44: y1coord
+! ar45: z1coord
+! ar46: x2coord
+! ar47: y2coord
+! ar48: z2coord
+! ar51: deltaW1
+! ar52: deltaW2
+! ar53: kA
+! ar54: kB
+! ar55: kmax
 
 
 ! Prepare environment
@@ -88,10 +88,10 @@ lhelix,BHELIX_VAR_radius,BHELIX_VAR_pitch,BHELIX_VAR_phi,BHELIX_VAR_loops,BHELIX
 
 ! Calculate necessary geometric parameters
 cmsel,s,%ar32%
-*get,AR21,kp,,mxloc,z
-*get,AR22,kp,,mnloc,z
-AR23 = AR21-AR22
-AR24 = ARG3-ARG4
+*get,ar21,kp,,mxloc,z
+*get,ar22,kp,,mnloc,z
+ar23 = ar21-ar22
+ar24 = ARG3-ARG4
 
 ! Activate cylindrical CSYS aligned with helix's axis
 csnext,'BHELIX_VAR_cylin'
@@ -102,46 +102,46 @@ asel,none
 cm,%ar33%,area
 
 cmsel,s,%ar31%
-*get,AR25,line,,count
-AR26=0
+*get,ar25,line,,count
+ar26=0
 
-*do,AR27,1,AR25,1
+*do,ar27,1,ar25,1
   cmsel,s,%ar31%
-  AR26=lsnext(AR26)
+  ar26=lsnext(ar26)
 
-  *get,AR41,line,AR26,kp,1
-  *get,AR42,line,AR26,kp,2
+  *get,ar41,line,ar26,kp,1
+  *get,ar42,line,ar26,kp,2
 
   ! Get position of first keypoint
-  AR43=kx(AR41)
-  AR44=ky(AR41)
-  AR45=kz(AR41)
-  AR51=ARG4+AR24*(AR45/AR23)
+  ar43 = kx(ar41)
+  ar44 = ky(ar41)
+  ar45 = kz(ar41)
+  ar51 = ARG4+ar24*(ar45/ar23)
 
   ! Get position of second keypoint
-  AR46=kx(AR42)
-  AR47=ky(AR42)
-  AR48=kz(AR42)
-  AR52=ARG4+AR24*(AR48/AR23)
+  ar46 = kx(ar42)
+  ar47 = ky(ar42)
+  ar48 = kz(ar42)
+  ar52 = ARG4+ar24*(ar48/ar23)
 
   ! Draw offset keypoints
-  *get,AR55,kp,,num,maxd
-  AR53=AR55+1
-  AR54=AR55+2
+  *get,ar55,kp,,num,maxd
+  ar53 = ar55+1
+  ar54 = ar55+2
 
-  k,AR53,AR43+AR51,AR44,AR45
-  k,AR54,AR46+AR52,AR47,AR48
+  k,ar53,ar43+ar51,ar44,ar45
+  k,ar54,ar46+ar52,ar47,ar48
 
   ! Draw remaining blade lines and blade area
   cmsel,s,%ar33%
-  ksel,s,kp,,AR41
-  ksel,a,kp,,AR42
-  ksel,a,kp,,AR53
-  ksel,a,kp,,AR54
+  ksel,s,kp,,ar41
+  ksel,a,kp,,ar42
+  ksel,a,kp,,ar53
+  ksel,a,kp,,ar54
   lslk,s,1
-  l,AR41,AR53
-  l,AR53,AR54
-  l,AR54,AR42
+  l,ar41,ar53
+  l,ar53,ar54
+  l,ar54,ar42
   al,all
 
   ! Update blade area component
