@@ -1,62 +1,62 @@
-! BEAMCOPY,   dx,   dy,   dz,  dir, ncmName, ecmName
-! BEAMCOPY, arg1, arg2, arg3, arg4,    arg5,    arg6
+! beamcopy , dx   , dy   , dz   , dir  , ncmName , ecmName
+! BEAMCOPY , ARG1 , ARG2 , ARG3 , ARG4 , ARG5    , ARG6
 
 ! Description:
 ! Creates a copy of current node selection and creates beam elements between each pair of
 ! consecutive nodes.
 
 ! Arguments:
-! arg1: dx       -  distance along X direction between source nodes and copied nodes
-! arg2: dy       -  distance along Y direction between source nodes and copied nodes
-! arg3: dz       -  distance along Z direction between source nodes and copied nodes
-! arg4: dir      -  direction used to define node sequence: 'x', 'y', or 'z'
-! arg5: ncmName  -  name of nodal selection component with copied nodes
-! arg6: ecmName  -  name of element selection component with created beam elements
+! ARG1: dx       -  distance along X direction between source nodes and copied nodes
+! ARG2: dy       -  distance along Y direction between source nodes and copied nodes
+! ARG3: dz       -  distance along Z direction between source nodes and copied nodes
+! ARG4: dir      -  direction used to define node sequence: 'x', 'y', or 'z'
+! ARG5: ncmName  -  name of nodal selection component with copied nodes
+! ARG6: ecmName  -  name of element selection component with created beam elements
 
 ! Local parameters:
-! AR20: COMPE_source
-! AR21: COMPN_source
-! AR22: COMPN_copy
-! AR23: nc
-! AR24: nthNode
-! AR25: n_i
-! AR26: n_j
+! ar20: COMPE_source
+! ar21: COMPN_source
+! ar22: COMPN_copy
+! ar23: nc
+! ar24: nthNode
+! ar25: n_i
+! ar26: n_j
 
 ! Global parameters (erased at the end of this subroutine):
 ! BEAMCOPY_ARR_sortedNodes
 
 
 ! Current selection
-cm,AR20,elem
-cm,AR21,node
+cm,ar20,elem
+cm,ar21,node
 
 ! Copy nodes
-ngen,2,ndinqr(0,14),AR21,,,0,0,0
-cmsel,u,AR21
-cm,AR22,node
+ngen,2,ndinqr(0,14),ar21,,,0,0,0
+cmsel,u,ar21
+cm,ar22,node
 
 ! Sort nodes
-locsort,'BEAMCOPY_ARR_sortedNodes','n',arg4
+locsort,'BEAMCOPY_ARR_sortedNodes','n',ARG4
 
 ! Create elements
-esel,u,elem,,all
-*get,AR23,parm,BEAMCOPY_ARR_sortedNodes,dim,x
-*do,AR24,1,AR23-1,1
-    AR25=BEAMCOPY_ARR_sortedNodes(AR24)
-    AR26=BEAMCOPY_ARR_sortedNodes(AR24+1)
-    e,AR25,AR26
+esel,none
+*get,ar23,parm,BEAMCOPY_ARR_sortedNodes,dim,x
+*do,ar24,1,ar23-1,1
+  ar25 = BEAMCOPY_ARR_sortedNodes(ar24)
+  ar26 = BEAMCOPY_ARR_sortedNodes(ar24+1)
+  e,ar25,ar26
 *enddo
 
 ! Define selection components
 nsle,r,active
-cm,%arg5%,node
-cm,%arg6%,elem
+cm,%ARG5%,node
+cm,%ARG6%,elem
 
 ! Output selection
-cmsel,s,AR21
-cmsel,a,%arg5%
-cmsel,s,AR20
-cmsel,a,%arg6%
+cmsel,s,ar21
+cmsel,a,%ARG5%
+cmsel,s,ar20
+cmsel,a,%ARG6%
 
 ! Clear parameters
 *del,BEAMCOPY_ARR_sortedNodes,,nopr
