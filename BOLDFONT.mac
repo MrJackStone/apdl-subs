@@ -1,16 +1,16 @@
 ! BOLDFONT, status
-! BOLDFONT, arg1
+! BOLDFONT, ARG1
 
 ! Description:
 ! Activates or deactivates large size, boldface font for text displayed on-screen.
 
 ! Arguments:
-! arg1: status  -  determines whether to turn boldface font on or off
+! ARG1: status  -  determines whether to turn boldface font on or off
 !                     [0] off (default)
 !                     [1] on
 
 
-*if,arg1,eq,1,then
+*if,ARG1,eq,1,then
   /device,font,3,Arial,1000,0,-21,0,0,,, ! Annotation font
   /device,font,2,Arial,1000,0,-21,0,0,,, ! Entity font
   /device,font,1,Arial,1000,0,-21,0,0,,, ! Legend font
