@@ -22,7 +22,7 @@
 ! ar25: n_i
 ! ar26: n_j
 
-! Global parameters (erased at the end of this subroutine):
+! Global erased parameters:
 ! BEAMCOPY_ARR_sortedNodes
 
 

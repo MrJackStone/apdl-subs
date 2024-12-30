@@ -1,4 +1,4 @@
-! BHELIX , rad1 , rad2 , w1   , w2   , pitch , phi  , loops , angStep , cmSuffix
+! bhelix , rad1 , rad2 , w1   , w2   , pitch , phi  , loops , angStep , cmSuffix
 ! BHELIX , ARG1 , ARG2 , ARG3 , ARG4 , ARG5  , ARG6 , ARG7  , ARG8    , ARG9
 
 ! Description:

@@ -17,10 +17,10 @@
 ! AR23: unitScaleFactor
 ! AR24: nameKey
 
-AR21=6
-AR22=19
-AR23=1e-3
-AR24='QY'
+AR21 = 6
+AR22 = 19
+AR23 = 1e-3
+AR24 = 'QY'
 
 etable,'TMP_%AR24%I',smisc,AR21
 etable,'TMP_%AR24%J',smisc,AR22
@@ -32,7 +32,7 @@ etable,'TMP_%AR24%I',eras
 etable,'TMP_%AR24%J',eras
 
 *cfopen,beamdiagram_tmp,tmp
-    *vwrite,'BEAM_%AR24%I','BEAM_%AR24%J',arg1,arg2,arg3
+  *vwrite,'BEAM_%AR24%I','BEAM_%AR24%J',arg1,arg2,arg3
 plls,%C,%C,%G,%I,%I
 *cfclos
 /nopr
