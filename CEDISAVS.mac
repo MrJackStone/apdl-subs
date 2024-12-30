@@ -880,7 +880,7 @@ CEDISAVS_VAR_num=AR24
    CEDISAVS_VAR_tf=0.03750
    CEDISAVS_VAR_tw=0.01600
 
-!!
+!!                                                                                                !!
 *elseif,AR20,EQ,'VS1350X420',THEN
    CEDISAVS_VAR_d=1.35000
    CEDISAVS_VAR_bf=0.50000
@@ -901,22 +901,15 @@ CEDISAVS_VAR_num=AR24
    CEDISAVS_VAR_bf=0.40000
    CEDISAVS_VAR_tf=0.02500
    CEDISAVS_VAR_tw=0.01250
-!!
+!!                                                                                                !!
 
 *else
-   *msg,WARN
-CEDISAVS WARNING: Specified section not found. Command ignored.
-   CEDISAVS_VAR_d=-1
+   *msg,WARN,ar20
+CEDISAVS WARNING: Specified section (%S) not found.%/&
+CEDISAVS command ignored.
+   *return,-1
 *endif
 
 ! Criar seção transversal
-*if,CEDISAVS_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
-   SECTYPE,CEDISAVS_VAR_num,BEAM,I,arg2,AR22
-   SECDATA,CEDISAVS_VAR_bf,CEDISAVS_VAR_bf,CEDISAVS_VAR_d,CEDISAVS_VAR_tf,CEDISAVS_VAR_tf,CEDISAVS_VAR_tw
-*endif
-
-
-
-
-
-
+sectype , CEDISAVS_VAR_num , BEAM , I , arg2 , AR22
+secdata , CEDISAVS_VAR_bf , CEDISAVS_VAR_bf , CEDISAVS_VAR_d , CEDISAVS_VAR_tf , CEDISAVS_VAR_tf , CEDISAVS_VAR_tw
