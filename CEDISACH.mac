@@ -1,274 +1,256 @@
-! CEDISACH, secID, name, refineKey, consultOnly
-! CEDISACH, arg1,  arg2, arg3,      arg4
+! CEDISACH , secID , name , refineKey , consultOnly
+! CEDISACH , arg1  , arg2 , arg3      , arg4
 
 ! Descrição:
-! Esta subrotina cria uma seção transversal a partir do catálogo de chapas da Cedisa.
+! Creates a beam flatbar cross-section from CEDISA's catalogue.
 
-! Lista de argumentos:
-! arg1: secID        -  número da seção transversal
-! arg2: name         -  nome da seção transversal como consta no catálogo da Cedisa
-! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
-! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! Arguments:
+! ARG1: secID        -  number assigned to cross-section
+! ARG2: name         -  name in CEDISA's catalogue identifying flatbar section
+! ARG3: refineKey    -  cross-section mesh refinement key, as described in SECDATA
+! ARG4: consultOnly  -  determines whether or not section should be created:opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+!                         [0]  create cross-section (default)
+!                         [1]  no cross-section creation
 
-! Lista de variáveis locais:
-! AR20: checkName
-! AR21: parType
-! AR22: refKey
-! AR23: maxSecNum
-! AR24: newSecNum
-! AR25: createSection
+! Local parameters:
+! ar20: parType
+! ar21: newSecNum
+! ar22: profileName
+! ar23: refinementKey
+! ar24: maxSecNum
 
-! Lista de variáveis de saída:
+! Output parameters:
 ! CEDISACH_VAR_num
 ! CEDISACH_VAR_b
 ! CEDISACH_VAR_t
 
-! Nome da seção em letras maiúsculas
-AR20=UPCASE(arg2)
 
-! Definição de criação da seção transversal
-*get,AR21,PARM,arg4,TYPE
-*if,AR21,NE,0,THEN
-   AR25=1
+! Parse inputs
+ar22 = upcase(arg2)
+
+ar23 = 0
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,0,then
+  ar23 = ((ARG3>0)<5)
+*endif
+
+ar21 = ARG1
+*if,ARG1,eq,0,then
+  *get,ar24,secp,,num,max
+  ar21 = ar24+1
+*endif
+
+! Get flatbar's dimensions
+*if,ar22,eq,'CH9.53X3.18',then
+  CEDISACH_VAR_b = 0.00953
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH12.7X3.18',then
+  CEDISACH_VAR_b = 0.01270
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH15.88X3.18',then
+  CEDISACH_VAR_b = 0.01588
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH19.05X3.18',then
+  CEDISACH_VAR_b = 0.01905
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH22.23X3.18',then
+  CEDISACH_VAR_b = 0.02223
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH25.4X3.18',then
+  CEDISACH_VAR_b = 0.02540
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH31.75X3.18',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH38.1X3.18',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH50.8X3.18',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.00318
+*elseif,ar22,eq,'CH12.7X4.76',then
+  CEDISACH_VAR_b = 0.01270
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH15.88X4.76',then
+  CEDISACH_VAR_b = 0.01588
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH19.05X4.76',then
+  CEDISACH_VAR_b = 0.01905
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH22.23X4.76',then
+  CEDISACH_VAR_b = 0.02223
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH25.4X4.76',then
+  CEDISACH_VAR_b = 0.02540
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH31.75X4.76',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH38.1X4.76',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH50.8X4.76',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.00476
+*elseif,ar22,eq,'CH12.7X6.35',then
+  CEDISACH_VAR_b = 0.01270
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH15.77X6.35',then
+  CEDISACH_VAR_b = 0.01577
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH19.05X6.35',then
+  CEDISACH_VAR_b = 0.01905
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH22.23X6.35',then
+  CEDISACH_VAR_b = 0.02223
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH25.4X6.35',then
+  CEDISACH_VAR_b = 0.02540
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH31.75X6.35',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH38.1X6.35',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH50.8X6.35',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH63.5X6.35',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH76.2X6.35',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH101.6X6.35',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.00635
+*elseif,ar22,eq,'CH25.4X7.94',then
+  CEDISACH_VAR_b = 0.02540
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH31.75X7.94',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH38.1X7.94',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH50.8X7.94',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH63.5X7.94',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH76.2X7.94',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH101.6X7.94',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.00794
+*elseif,ar22,eq,'CH25.4X9.53',then
+  CEDISACH_VAR_b = 0.02540
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH31.75X9.53',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH38.1X9.53',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH50.8X9.53',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH63.5X9.53',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH76.2X9.53',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH101.6X9.53',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.00953
+*elseif,ar22,eq,'CH22.23X12.7',then
+  CEDISACH_VAR_b = 0.02223
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH31.75X12.7',then
+  CEDISACH_VAR_b = 0.03175
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH38.1X12.7',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH50.8X12.7',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH63.5X12.7',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH76.2X12.7',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH101.6X12.7',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.01270
+*elseif,ar22,eq,'CH38.1X15.88',then
+  CEDISACH_VAR_b = 0.03810
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH44.45X15.88',then
+  CEDISACH_VAR_b = 0.04445
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH50.8X15.88',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH63.5X15.88',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH76.2X15.88',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH88.9X15.88',then
+  CEDISACH_VAR_b = 0.08890
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH101.6X15.88',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.01588
+*elseif,ar22,eq,'CH88.9X17.46',then
+  CEDISACH_VAR_b = 0.08890
+  CEDISACH_VAR_t = 0.01746
+*elseif,ar22,eq,'CH50.8X19.05',then
+  CEDISACH_VAR_b = 0.05080
+  CEDISACH_VAR_t = 0.01905
+*elseif,ar22,eq,'CH63.5X19.05',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.01905
+*elseif,ar22,eq,'CH76.2X19.05',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.01905
+*elseif,ar22,eq,'CH88.9X19.05',then
+  CEDISACH_VAR_b = 0.08890
+  CEDISACH_VAR_t = 0.01905
+*elseif,ar22,eq,'CH101.6X19.05',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.01905
+*elseif,ar22,eq,'CH63.5X22.23',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.02223
+*elseif,ar22,eq,'CH63.5X25.4',then
+  CEDISACH_VAR_b = 0.06350
+  CEDISACH_VAR_t = 0.02540
+*elseif,ar22,eq,'CH76.2X25.4',then
+  CEDISACH_VAR_b = 0.07620
+  CEDISACH_VAR_t = 0.02540
+*elseif,ar22,eq,'CH101.6X25.4',then
+  CEDISACH_VAR_b = 0.10160
+  CEDISACH_VAR_t = 0.02540
 *else
-   *if,arg4,NE,1,THEN
-      AR25=1
-   *else
-      AR25=0
-   *endif
+  *msg,error,ar22
+CEDISACH error: Specified section (%s) not found.%/&
+CEDISACH Command ignored.
+  *return,-1
 *endif
 
-! Obter definição de refinamento da seção
-*get,AR21,PARM,arg3,TYPE
-*if,AR21,NE,0,THEN
-   AR22=0
-*else
-   *if,arg3,LT,0,THEN
-      AR22=0
-   *elseif,arg3,GT,5,THEN
-      AR22=5
-   *else
-      AR22=arg3
-   *endif
-*endif
+! Output
+CEDISACH_VAR_num = ar21
 
-! Obter número da nova seção transversal
-*if,arg1,EQ,0,THEN
-   *get,AR23,SECP,,NUM,MAX
-   AR24=AR23+1
-*else
-   AR24=arg1
+! Create cross-section
+*if,ARG4,ne,1,then
+  sectype,CEDISACH_VAR_num,beam,rect,ARG2,ar23
+  secdata,CEDISACH_VAR_b,CEDISACH_VAR_t
 *endif
-CEDISACH_VAR_num=AR24
-
-! Determinar geometria da seção
-*if,AR20,EQ,'CH9.53X3.18',THEN
-   CEDISACH_VAR_b=0.00953
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH12.7X3.18',THEN
-   CEDISACH_VAR_b=0.01270
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH15.88X3.18',THEN
-   CEDISACH_VAR_b=0.01588
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH19.05X3.18',THEN
-   CEDISACH_VAR_b=0.01905
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH22.23X3.18',THEN
-   CEDISACH_VAR_b=0.02223
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH25.4X3.18',THEN
-   CEDISACH_VAR_b=0.02540
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH31.75X3.18',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH38.1X3.18',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH50.8X3.18',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.00318
-*elseif,AR20,EQ,'CH12.7X4.76',THEN
-   CEDISACH_VAR_b=0.01270
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH15.88X4.76',THEN
-   CEDISACH_VAR_b=0.01588
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH19.05X4.76',THEN
-   CEDISACH_VAR_b=0.01905
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH22.23X4.76',THEN
-   CEDISACH_VAR_b=0.02223
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH25.4X4.76',THEN
-   CEDISACH_VAR_b=0.02540
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH31.75X4.76',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH38.1X4.76',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH50.8X4.76',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.00476
-*elseif,AR20,EQ,'CH12.7X6.35',THEN
-   CEDISACH_VAR_b=0.01270
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH15.77X6.35',THEN
-   CEDISACH_VAR_b=0.01577
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH19.05X6.35',THEN
-   CEDISACH_VAR_b=0.01905
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH22.23X6.35',THEN
-   CEDISACH_VAR_b=0.02223
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH25.4X6.35',THEN
-   CEDISACH_VAR_b=0.02540
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH31.75X6.35',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH38.1X6.35',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH50.8X6.35',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH63.5X6.35',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH76.2X6.35',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH101.6X6.35',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.00635
-*elseif,AR20,EQ,'CH25.4X7.94',THEN
-   CEDISACH_VAR_b=0.02540
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH31.75X7.94',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH38.1X7.94',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH50.8X7.94',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH63.5X7.94',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH76.2X7.94',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH101.6X7.94',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.00794
-*elseif,AR20,EQ,'CH25.4X9.53',THEN
-   CEDISACH_VAR_b=0.02540
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH31.75X9.53',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH38.1X9.53',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH50.8X9.53',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH63.5X9.53',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH76.2X9.53',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH101.6X9.53',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.00953
-*elseif,AR20,EQ,'CH22.23X12.7',THEN
-   CEDISACH_VAR_b=0.02223
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH31.75X12.7',THEN
-   CEDISACH_VAR_b=0.03175
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH38.1X12.7',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH50.8X12.7',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH63.5X12.7',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH76.2X12.7',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH101.6X12.7',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.01270
-*elseif,AR20,EQ,'CH38.1X15.88',THEN
-   CEDISACH_VAR_b=0.03810
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH44.45X15.88',THEN
-   CEDISACH_VAR_b=0.04445
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH50.8X15.88',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH63.5X15.88',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH76.2X15.88',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH88.9X15.88',THEN
-   CEDISACH_VAR_b=0.08890
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH101.6X15.88',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.01588
-*elseif,AR20,EQ,'CH88.9X17.46',THEN
-   CEDISACH_VAR_b=0.08890
-   CEDISACH_VAR_t=0.01746
-*elseif,AR20,EQ,'CH50.8X19.05',THEN
-   CEDISACH_VAR_b=0.05080
-   CEDISACH_VAR_t=0.01905
-*elseif,AR20,EQ,'CH63.5X19.05',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.01905
-*elseif,AR20,EQ,'CH76.2X19.05',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.01905
-*elseif,AR20,EQ,'CH88.9X19.05',THEN
-   CEDISACH_VAR_b=0.08890
-   CEDISACH_VAR_t=0.01905
-*elseif,AR20,EQ,'CH101.6X19.05',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.01905
-*elseif,AR20,EQ,'CH63.5X22.23',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.02223
-*elseif,AR20,EQ,'CH63.5X25.4',THEN
-   CEDISACH_VAR_b=0.06350
-   CEDISACH_VAR_t=0.02540
-*elseif,AR20,EQ,'CH76.2X25.4',THEN
-   CEDISACH_VAR_b=0.07620
-   CEDISACH_VAR_t=0.02540
-*elseif,AR20,EQ,'CH101.6X25.4',THEN
-   CEDISACH_VAR_b=0.10160
-   CEDISACH_VAR_t=0.02540
-*else
-   *msg,WARN
-CEDISACH WARNING: Specified section not found. Command ignored.
-   CEDISACH_VAR_b=-1
-*endif
-
-! Criar seção transversal
-*if,CEDISACH_VAR_b,NE,-1,AND,AR25,EQ,1,THEN
-   SECTYPE,CEDISACH_VAR_num,BEAM,RECT,arg2,AR22
-   SECDATA,CEDISACH_VAR_b,CEDISACH_VAR_t
-*endif
-

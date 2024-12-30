@@ -1,47 +1,89 @@
-! CANIM, firstSet, lastSet, ETName, avglab, fName
-! CANIM,     arg1,    arg2,   arg3,   arg4,  arg5
+! canim , firstSet , lastSet , ETName , avglab , fName
+! CANIM , ARG1     , ARG2    , ARG3   , ARG4   , ARG5
 
-/post1
+! Description:
+! Creates an animation of an element table result across multiple result sets. The target ETABLE
+! must be able to have its values updated at each result set through ETABLE,REFL.
 
-setCount=arg2-arg1+1
+! Arguments:
+! ARG1: firstSet  -  number of result set (NSET) in which to begin animation
+! ARG2: lastSet   -  number of result set (NSET) in which to end animation
+! ARG3: etName    -  name of element table to plot
+! ARG4: avglab    -  averaging option, same as described for PLETAB
+! ARG5: fName     -  name of output animation file
 
-*del,ABSMax,,nopr
-*dim,ABSMax,ARRAY,setCount
-i=0
-*do,nthSet,arg1,arg2,1
-   i=i+1
-   SET,,,,,,,nthSet
-   ETABLE,REFL
-   PLETAB,arg3
-   *get,nthMax,PLNSOL,,MAX
-   *get,nthMin,PLNSOL,,MIN
-   *if,ABS(nthMax),GT,ABS(nthMin),THEN
-      ABSMax(i)=ABS(nthMax)
-   *else
-      ABSMax(i)=ABS(nthMin)
-   *endif
+! Local parameters:
+! ar21: setCount
+! ar22: i
+! ar23: nthSet
+! ar24: nthMax
+! ar25: nthMin
+! ar26: PeakVal
+! ar27: factor
+
+! Global erased parameters:
+! CANIM_ARR_abs_max
+! CANIM_ARR_factors
+
+
+! Prepare environment
+ar21 = ARG2-ARG1+1
+
+*del,CANIM_ARR_abs_max,,nopr
+*del,CANIM_ARR_factors,,nopr
+
+*dim,CANIM_ARR_abs_max,,ar21
+
+! First run through: collect maximum ETABLE values at each result set
+ar22 = 0
+*do,ar23,ARG1,ARG2,1
+
+  ar22 = ar22+1
+
+  set,,,,,,,ar23
+  etable,refl
+
+  pletab,ARG3
+  *get,ar24,plnsol,,max
+  *get,ar25,plnsol,,min
+
+  *if,abs(ar24),gt,abs(ar25),then
+    CANIM_ARR_abs_max(ar22) = abs(ar24)
+  *else
+    CANIM_ARR_abs_max(ar22) = abs(ar25)
+  *endif
+
 *enddo
 
-*vscfun,PeakVal,MAX,ABSMax
-*del,Factors,,nopr
-*voper,Factors,ABSMax,DIV,PeakVal*0.5
+! Setup display
+*vscfun,ar26,max,CANIM_ARR_abs_max
+*voper,CANIM_ARR_factors,CANIM_ARR_abs_max,div,ar26*0.5
 
-clims,-PeakVal,PeakVal
+clims , -ar26 , ar26
 
 /eshape,0
-/seg,DELET
-/seg,OFF
-/seg,MULTI,arg5,0.02
+/seg,delet
+/seg,off
+/seg,multi,ARG5,0.02
 
-i=0
-*do,nthSet,arg1,arg2,1
-   i=i+1
-   factor=Factors(i)
-   SET,,,,,,,nthSet
-   ETABLE,REFL
-   PLETAB,arg3,arg4
+! Second run through: create animation frames
+ar22=0
+*do,ar23,ARG1,ARG2,1
+  ar22 = ar22+1
+  ar27 = CANIM_ARR_factors(ar22)
+
+  set,,,,,,,ar23
+  etable,refl
+
+  pletab,ARG3,ARG4
 *enddo
-/seg,OFF
-ANIM,5,1,0.02
-FINISH
 
+! Close, generate animation
+/seg,off
+anim,5,1,0.02
+
+finish
+
+! Clean up
+*del,CANIM_ARR_abs_max,,nopr
+*del,CANIM_ARR_factors,,nopr
