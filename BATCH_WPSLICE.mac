@@ -101,10 +101,10 @@ ar25 = 'ASBW'
   *if,ar21,eq,'XY',then
     ar34 = ar22
   *elseif,ar21,eq,'YZ',then
-    ar33 = ar22
+    ar32 = ar22
     ar37 = 90
   *elseif,ar21,eq,'XZ',then
-    ar32 = ar22
+    ar33 = ar22
     ar36 = 90
   *endif
 
