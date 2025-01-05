@@ -101,6 +101,11 @@ AR96='NDSORT_ARR_zcoord'
 *del , NDSORT_ARR_tempZs    ,, nopr
 *del , NDSORT_ARR_temp      ,, nopr
 *del , NDSORT_ARR_data      ,, nopr
+*del , NDSORT_ARR_mask      ,, nopr
+*del , %AR93%               ,, nopr
+*del , %AR94%               ,, nopr
+*del , %AR95%               ,, nopr
+*del , %AR96%               ,, nopr
 
 ! Count nodes, initialize related arrays
 nsel,all
