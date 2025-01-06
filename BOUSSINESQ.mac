@@ -1,171 +1,267 @@
-! BOUSSINESQ , parmNF , parmNN , selCount , force , QX   , QY   , QZ   , stressDir , gravDir , N_set , dynFct
-! BOUSSINESQ , ARG1   , ARG2   , ARG3     , ARG4  , ARG5 , ARG6 , ARG7 , ARG8      , ARG9    , AR10  , AR11
+! BOUSSINESQ , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , stressDir , gravDir , apport_array , dynFct
+! BOUSSINESQ , ARG1       , ARG2      , ARG3      , ARG4       , ARG5      , ARG6      , ARG7      , ARG8      , ARG9    , AR10         , AR11
 
-! ARG8: stressDir  -  stress increase direction key: 'H' or 'V' (for horizontal and vertical)
-! AR11: dynFct     -  determines whether or not to apply dynamic impact factor
-!                        ['OFF']    -  no impact factor applied (default)
-!                        ['AREMA']  -  calculate impact factor as per AREMA (chapter 8)
+! Description:
+! Calculates through the Boussinesq soil stress increase propagation formula nodal forces for
+! currently selected nodes caused by a a point load at a remote location in 3-D space.
+! Optionally, AREMA load impact coefficient (which varies with depth) can be applied when
+! calculating nodal forces.
+
+! Arguments:
+! ARG1: parmForces    -  name of array parameter to which nodal forces will be assigned
+!                        (defaults to 'BOUSSINESQ_ARR_forces')
+! ARG2: parmNodes     -  name of array parameter to which node numbers will be assigned
+!                        (defaults to 'BOUSSINESQ_ARR_nodes')
+! ARG3: nodeCount     -  name of array parameter to which node selection count will be assigned
+!                        (defaults to 'BOUSSINESQ_VAR_nc')
+! ARG4: forceValue    -  value of the remote force (presumably applied at surface level)
+! ARG5: forcePosX     -  X coordinate of the remote force's location
+! ARG6: forcePosY     -  Y coordinate of the remote force's location
+! ARG7: forcePosZ     -  Z coordinate of the remote force's location
+! ARG8: stressDir     -  stress increase direction key:
+!                          ['H']  horizontal stress increase
+!                          ['V']  vertical stress increase
+! ARG9: gravDir       -  cartesian axis aligned with gravitational acceleration (vertical)
+!                          'X', 'Y', or 'Z'
+! AR10: apport_array  -  name of Nx2 array containing node numbers (?,1) and their corresponding
+!                        apportioned areas (?,2).
+!                        If blank, defaults to 'BOUSSINESQ_ARR_apport_areas' and apportioned areas
+!                        are then calculated inside this macro. This argument should be provided
+!                        when computational efficiency is a concern, since it avoids recalculating
+!                        nodel apportioned areas every subsequent time BOUSSINESQ is executed.
+! AR11: dynFct        -  determines whether or not to apply dynamic impact factor
+!                          ['OFF']    no impact factor applied (default)
+!                          ['AREMA']  calculate impact factor as per AREMA (chapter 8)
+
+! Local parameters:
+! ar20: parType
+! ar21: parmNameNF
+! ar22: parmNameNN
+! ar23: parmNameNC
+! ar28: gravityDir
+! ar29: boussinesqDir
+! ar30: parmNameApport
+! ar31: includeAREMAimpactFactor
+! ar32: nthNode
+! ar33: nodeNum
+! ar40: nodes_all
+! ar41: nodes_selStatus
+! ar42: nodes_x
+! ar43: nodes_y
+! ar44: nodes_z
+! ar45: delta_x
+! ar46: delta_y
+! ar47: delta_z
+! ar48: delta_x_squared
+! ar49: delta_y_squared
+! ar50: delta_z_squared
+! ar51: vertical_distances
+! ar52: direct_3d_distances
+! ar53: R_squared
+! ar54: radial_distances
+! ar55: dynamic_impact_coefficients
+! ar56: nodal_pressures
+! ar57: nodal_forces
 
 
-AREMAimpactFactor = 0
-*get,ar20,parm,AR11,type
+! Parse inputs
+ar21 = 'BOUSSINESQ_ARR_forces'
+*get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
-  *if,upcase(AR11),eq,'AREMA',then
-    AREMAimpactFactor = 1
+  ar21 = ARG1
+*endif
+
+ar22 = 'BOUSSINESQ_ARR_nodes'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar22 = ARG2
+*endif
+
+ar23 = 'BOUSSINESQ_ARR_nc'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar23 = ARG3
+*endif
+
+*if,ARG4,eq,0,then
+  *msg,warn
+BOUSSINESQ warning: null force applied.%/&
+BOUSSINESQ command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG8,type
+*if,ar20,ne,3,then
+  *msg,error
+BOUSSINESQ error: expected ARG8 to be a string.%/&
+BOUSSINESQ command is ignored.
+  *return,-1
+*endif
+
+ar28 = upcase(ARG8)
+*if,ar28,ne,'X',then
+  *if,ar28,ne,'Y',then
+    *if,ar28,ne,'Z',then
+      *msg,error
+BOUSSINESQ error: expected ARG8 to be the name of a cartesian axis (X, Y, or Z).%/&
+BOUSSINESQ command is ignored.
+      *return,-1
+    *endif
   *endif
 *endif
 
-*if,ar10,eq,0,then
-
-    ! Node numbers
-    *del,NLIST_num,,nopr
-    *vget,NLIST_num,node,,nlist
-
-    ! X, Y, Z coordinates
-    *del,NLIST_x,,nopr
-    *del,NLIST_y,,nopr
-    *del,NLIST_z,,nopr
-    *vget,NLIST_x,node,,loc,x
-    *vget,NLIST_y,node,,loc,y
-    *vget,NLIST_z,node,,loc,z
-
-
-    ! Total number of nodes
-    *get,NLIST_count,parm,NLIST_num,dim,x
-
-    ! Nodal apportioned area
-    *del,NLIST_apportioned,,nopr
-    *dim,NLIST_apportioned,,NLIST_count
-    *do,nthNode,1,NLIST_count,1
-        nodenum=NLIST_num(nthNode)
-        NLIST_apportioned(nthNode)=arnode(nodenum)
-    *enddo
+*get,ar20,parm,ARG9,type
+*if,ar20,ne,3,then
+  *msg,error
+BOUSSINESQ error: expected ARG9 to be a string.%/&
+BOUSSINESQ command is ignored.
+  *return,-1
 *endif
 
+ar29 = upcase(ARG9)
+*if,ar29,ne,'H',then
+  *if,ar28,ne,'V',then
+    *msg,error
+BOUSSINESQ error: expected ARG9 to be either H (horizontal) or V (vertical).%/&
+BOUSSINESQ command is ignored.
+    *return,-1
+  *endif
+*endif
+
+ar30 = 'BOUSSINESQ_ARR_apport_areas'
+*get,ar20,parm,AR10,type
+*if,ar20,eq,3,then
+  ar30 = AR10
+*endif
+
+ar54 = 1
+*get,ar20,parm,%ar30%,type
+*if,ar20,eq,1,then
+  *get,ar52,parm,%ar30%,dim,x
+  *get,ar53,parm,%ar30%,dim,y
+  *if,ar52,ge,1,and,ar53,ge,2,then
+    ar54 = 0
+  *endif
+*endif
+
+ar31 = 0
+*get,ar20,parm,AR11,type
+*if,ar20,eq,3,then
+  *if,upcase(AR11),eq,'AREMA',then
+    ar31 = 1
+  *endif
+*endif
+
+! Prepare environment
 afunbackup
 *afun,rad
 pi=acos(-1)
 afunrestore
 
-! Initialize arrays
-*del , deltaX        ,  , nopr
-*del , deltaY        ,  , nopr
-*del , deltaZ        ,  , nopr
-*del , deltaXSquared ,  , nopr
-*del , deltaYSquared ,  , nopr
-*del , deltaZSquared ,  , nopr
-*del , Rsquared      ,  , nopr
-*del , Rdist         ,  , nopr
-*del , tmp           ,  , nopr
-*del , pressures     ,  , nopr
-*del , forces        ,  , nopr
-*del , dynImpact     ,  , nopr
-*del , NLIST_nsel    ,  , nopr
-*del , dist          ,  , nopr
+*del , %ar21% ,  , nopr
+*del , %ar22% ,  , nopr
+*del , ar40   ,  , nopr
+*del , ar41   ,  , nopr
+*del , ar42   ,  , nopr
+*del , ar43   ,  , nopr
+*del , ar44   ,  , nopr
+*del , ar45   ,  , nopr
+*del , ar46   ,  , nopr
+*del , ar47   ,  , nopr
+*del , ar48   ,  , nopr
+*del , ar49   ,  , nopr
+*del , ar50   ,  , nopr
+*del , ar53   ,  , nopr
+*del , ar54   ,  , nopr
+*del , ar56   ,  , nopr
+*del , ar57   ,  , nopr
+*del , ar55   ,  , nopr
+*del , ar51   ,  , nopr
+*del , ar52   ,  , nopr
 
-*del, %arg1%,,nopr
-*del, %arg2%,,nopr
+! Extract nodal data
+*vget , ar40 , node ,  , nlist
+*vget , ar41 , node ,  , nsel
+*vget , ar42 , node ,  , loc   , x
+*vget , ar43 , node ,  , loc   , y
+*vget , ar44 , node ,  , loc   , z
 
-! Calculate distances
-*voper,deltaX,arg5,sub,NLIST_x
-*voper,deltaY,arg6,sub,NLIST_y
-*voper,deltaZ,arg7,sub,NLIST_z
+*get , %ar23% , parm , ar40 , dim , x
 
-! Square distances
-*vfun, deltaXSquared , pwr , deltaX , 2
-*vfun, deltaYSquared , pwr , deltaY , 2
-*vfun, deltaZSquared , pwr , deltaZ , 2
+*vmask , ar41
+*vfun  , %ar22% , comp , ar40
 
-! Calculate parameters that depend upon direction of gravitational acceleration
-*if,upcase(arg9),eq,'X',then
-    ! Gravity along X axis:
-
-    ! Dynamic impact coefficient
-    *voper, dynImpact , deltaX    , mult ,-0.2353
-    ! Plan projection radial distance
-    *voper, Rsquared , deltaYSquared,      add , deltaZSquared
-    *vfun ,    Rdist ,          sqrt, Rsquared
-    ! Vertical distance
-    *vfun, Vdist, copy, deltaX
-
-*elseif,upcase(arg9),eq,'Y',then
-    ! Gravity along Y axis:
-
-    ! Dynamic impact coefficient
-    *voper, dynImpact , deltaY    , mult ,-0.2353
-    ! Plan projection radial distance
-    *voper, Rsquared , deltaXSquared,      add , deltaZSquared
-    *vfun ,    Rdist ,          sqrt, Rsquared
-    ! Vertical distance
-    *vfun, Vdist, copy, deltaY
-
-*elseif,upcase(arg9),eq,'Z',then
-    ! Gravity along Z axis:
-
-    ! Dynamic impact coefficient
-    *voper, dynImpact , deltaZ    , mult ,-0.2353
-    ! Plan projection radial distance
-    *voper, Rsquared , deltaXSquared,      add , deltaYSquared
-    *vfun ,    Rdist ,          sqrt, Rsquared
-    ! Vertical distance
-    *vfun, Vdist, copy, deltaZ
-
+*if,ar54,eq,1,then
+  *del,%ar30%,,nopr
+  *dim,%ar30%,,%ar23%
+  *do,ar32,1,%ar23%,1
+    ar33         = ar40(ar32)
+    %ar30%(ar32) = arnode(ar33)
+  *enddo
 *endif
 
-*if,AREMAimpactFactor,eq,1,then
-  ! Calculate impact coefficients (according to AREMA Chapter 8)
-  *voper, dynImpact , dynImpact , add  , 1.7060
-  *voper, dynImpact , dynImpact , max  , 1
-  *voper, dynImpact , dynImpact , min  , 1.6
+! Calculate Boussinesq distances
+*voper , ar45 , ARG5 , sub , ar42
+*voper , ar46 , ARG6 , sub , ar43
+*voper , ar47 , ARG7 , sub , ar44
+
+*vfun , ar48 , pwr , ar45 , 2
+*vfun , ar49 , pwr , ar46 , 2
+*vfun , ar50 , pwr , ar47 , 2
+
+*voper , ar52 , ar48 , add  , ar49
+*voper , ar52 , ar52 , add  , ar50
+*vfun  , ar52 , sqrt , ar52
+
+*if,ar29,eq,'X',then
+  *vfun  , ar51 , copy , ar45
+  *voper , ar53 , ar49 , add  , ar50
+*elseif,ar29,eq,'Y',then
+  *vfun  , ar51 , copy , ar46
+  *voper , ar53 , ar48 , add  , ar50
+*elseif,ar29,eq,'Z',then
+  *vfun  , ar51 , copy , ar47
+  *voper , ar53 , ar48 , add  , ar49
+*endif
+
+*vfun , ar54 , sqrt , ar53
+
+! Calculate impact coefficients (according to AREMA Chapter 8)
+*if,ar31,eq,1,then
+  *voper , ar55 , ar51 , mult , -0.2353
+  *voper , ar55 , ar55 , add  , 1.7060
+  *voper , ar55 , ar55 , max  , 1
+  *voper , ar55 , ar55 , min  , 1.6
 *else
-  ! No impact coefficient applied
-  *vfill , dynImpact , ramp , 1 , 0
+  *vfill , ar55 , ramp , 1 , 0
 *endif
 
-*if,upcase(arg8),eq,'V',then
+! Calculate Boussinesq pressure increases
+*if,ar28,eq,'V',then
+  ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
+  *voper , ar56 , ar54 , div  , ar51
+  *vfun  , ar56 , pwr  , ar56 , 2
+  *voper , ar56 , ar56 , add  , 1
+  *vfun  , ar56 , pwr  , ar56 , 5/2
+  *voper , ar56 , ar56 , mult , ar51
+  *voper , ar56 , ar56 , mult , ar51
+  *voper , ar56 , ar56 , mult , 2*PI
+  *vfun  , ar56 , pwr  , ar56 , -1
+  *voper , ar56 , ar56 , mult , 3*ARG4
 
-    ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
-    *voper, tmp , Rdist ,  div , Vdist
-    *vfun , tmp ,   pwr ,  tmp , 2
-    *voper, tmp ,   tmp ,  add , 1
-    *vfun , tmp ,   pwr ,  tmp , 5/2
-    *voper, tmp ,   tmp , mult , Vdist
-    *voper, tmp ,   tmp , mult , Vdist
-    *voper, tmp ,   tmp , mult , 2*PI
-    *vfun , tmp ,   pwr ,  tmp , -1
-
-    ! Calculate nodal pressure
-    *voper, pressures ,       tmp , mult , 3*arg4
-
-*elseif,upcase(arg8),eq,'H',then
-
-    ! Radial distance (3D space)
-    *voper, tmp  , deltaXSquared , add , deltaYSquared
-    *voper, tmp  ,           tmp , add , deltaZSquared
-    *vfun , dist ,          sqrt , tmp
-
-    ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
-    *vfun ,       tmp , pwr , dist , 5
-    *voper,       tmp , tmp , mult , 2*PI
-    *vfun ,       tmp , pwr ,  tmp , -1
-    *voper,       tmp , tmp , mult , Vdist ![deltaY]
-    *voper,       tmp , tmp , mult , Rsquared ![deltaXSquared]
-
-    ! Calculate nodal pressure
-    *voper, pressures , tmp , mult , 6*arg4
+*elseif,ar28,eq,'H',then
+  ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
+  *vfun  , ar56 , pwr  , ar52 , 5
+  *voper , ar56 , ar56 , mult , 2*PI
+  *vfun  , ar56 , pwr  , ar56 , -1
+  *voper , ar56 , ar56 , mult , ar51
+  *voper , ar56 , ar56 , mult , ar53
+  *voper , ar56 , ar56 , mult , 6*ARG4
 
 *endif
 
-! Calculate nodal forces and apply dynamic impact coefficient
-*voper,    forces , pressures , mult , NLIST_apportioned
-*voper,    forces ,    forces , mult , dynImpact
-
-! Selected nodes
-*vget,NLIST_nsel,node,,nsel
-
-*vmask, NLIST_nsel
-*vfun ,     %arg1% , comp , forces
-*vmask, NLIST_nsel
-*vfun ,     %arg2% , comp , NLIST_num
-
-*get,%arg3%,parm,%arg2%,dim,x
+! Calculate apportioned nodal forces and apply dynamic impact coefficient
+*voper , ar57   , ar56 , mult , %ar30%
+*voper , ar57   , ar57 , mult , ar55
+*vmask , ar41
+*vfun  , %ar21% , comp , ar57
