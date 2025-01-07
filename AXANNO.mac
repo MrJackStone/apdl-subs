@@ -117,9 +117,9 @@ ar54 = ar44-ar27
 
 ! Write labels
 *cfopen,AXANNO_tmp,tmp
-    *vwrite,ar51,ar52,ar23
+  *vwrite,ar51,ar52,'%ar23%'
 /tlabel,%g,%g,%s
-    *vwrite,ar53,ar54,ar24
+  *vwrite,ar53,ar54,'%ar24%'
 /tlabel,%g,%g,%s
 *cfclos
 /nopr
