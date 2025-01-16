@@ -21,12 +21,17 @@
 !                         ['BOT'] apply offset of 0
 
 ! Local parameters:
+! ar20: parType
 ! ar21: checkName
 ! ar22: parType
 ! ar23: refKey
 ! ar24: maxSecNum
 ! ar25: newSecNum
 ! ar26: createSection
+! ar35: yOffsetType
+! ar36: zOffsetType
+! ar45: yOffsetValue
+! ar46: zOffsetValue
 
 ! Lista de variáveis de saída:
 ! GERDAUI_VAR_num
@@ -35,30 +40,50 @@
 ! GERDAUI_VAR_tf
 ! GERDAUI_VAR_tw
 
-! Nome da seção em letras maiúsculas
-ar21=UPCASE(arg2)
+! Parse inputs
+ar21 = upcase(arg2)
+
+ar35 = 'NONE'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,0,then
+  *if,ARG5,ne,0,then
+    ar35 = 'USER'
+  *endif
+*elseif,ar20,eq,3,then
+  ar35 = upcase(ARG5)
+*endif
+
+ar36 = 'NONE'
+*get,ar20,parm,ARG6,type
+*if,ar20,eq,0,then
+  *if,ARG6,ne,0,then
+    ar36 = 'USER'
+  *endif
+*elseif,ar20,eq,3,then
+  ar36 = upcase(ARG5)
+*endif
 
 ! Definição de criação da seção transversal
 *get,ar22,PARM,arg4,TYPE
 *if,ar22,NE,0,THEN
-  ar26=1
+  ar26 = 1
 *else
   *if,arg4,NE,1,THEN
-    ar26=1
+    ar26 = 1
   *else
-    ar26=0
+    ar26 = 0
   *endif
 *endif
 
 ! Obter definição de refinamento da seção
 *get,ar22,PARM,arg3,TYPE
 *if,ar22,NE,0,THEN
-  ar23=0
+  ar23 = 0
 *else
   *if,arg3,LT,0,THEN
-    ar23=0
+    ar23 = 0
   *elseif,arg3,GT,5,THEN
-    ar23=5
+    ar23 = 5
   *else
     ar23=arg3
   *endif
@@ -371,17 +396,36 @@ GERDAUI_VAR_num=ar25
   GERDAUI_VAR_tw = 0.0140
 *else
   *msg,WARN
-  GERDAUI WARNING: Specified section not found. Command ignored.
-  GERDAUI_VAR_d=-1
-  GERDAUI_VAR_bf=-1
-  GERDAUI_VAR_tf=-1
-  GERDAUI_VAR_tw=-1
+GERDAUI WARNING: Specified section not found. Command ignored.
+  *return,-1
 *endif
 
-! Criar seção transversal
-*if,GERDAUI_VAR_d,NE,-1,AND,ar26,eq,1,THEN
-  SECTYPE,GERDAUI_VAR_num,BEAM,I,arg2,ar23
-  SECDATA,GERDAUI_VAR_bf,GERDAUI_VAR_bf,GERDAUI_VAR_d,GERDAUI_VAR_tf,GERDAUI_VAR_tf,GERDAUI_VAR_tw
+! Calculate offsets
+ar45 = 0
+*if,ar35,eq,'LEFT',then
+  ar45 = -GERDAUI_VAR_bf/2
+*elseif,ar35,eq,'RIGHT',then
+  ar45 = GERDAUI_VAR_bf/2
+*elseif,ar35,eq,'USER',then
+  ar45 = ARG5
 *endif
 
+ar46 = GERDAUI_VAR_d/2
+*if,ar36,eq,'TOP',then
+  ar46 = GERDAUI_VAR_d
+*elseif,ar36,eq,'BOT',then
+  ar46 = 0
+*elseif,ar36,eq,'USER',then
+  ar46 = ARG6
+*endif
 
+! Create cross-section
+*if,ar26,eq,1,then
+  sectype , GERDAUI_VAR_num , BEAM           , I             , arg2           , ar23
+  secdata , GERDAUI_VAR_bf  , GERDAUI_VAR_bf , GERDAUI_VAR_d , GERDAUI_VAR_tf , GERDAUI_VAR_tf , GERDAUI_VAR_tw
+*endif
+
+! Apply offsets
+*if,ar35,ne,'NONE',or,ar36,ne,'NONE',then
+  secoffset,'USER',ar45,ar46
+*endif
