@@ -60,7 +60,7 @@ ar36 = 'NONE'
     ar36 = 'USER'
   *endif
 *elseif,ar20,eq,3,then
-  ar36 = upcase(ARG5)
+  ar36 = upcase(ARG6)
 *endif
 
 ! Definição de criação da seção transversal
