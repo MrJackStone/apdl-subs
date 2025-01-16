@@ -1,22 +1,32 @@
-! GERDAUI, secID, name, refineKey, consultOnly
-! GERDAUI, arg1,  arg2, arg3,      arg4
+! gerdaui , secID , name , refineKey , consultOnly , yOffset , zOffset
+! GERDAUI , ARG1  , ARG2 , ARG3      , ARG4        , ARG5    , ARG6
 
 ! Descrição:
 ! Esta subrotina cria uma seção transversal a partir do catálogo de perfis I da Gerdau.
 
 ! Lista de argumentos:
-! arg1: secID        -  número da seção transversal
-! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
-! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
-! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! ARG1: secID        -  número da seção transversal
+! ARG2: name         -  nome da seção transversal como consta no catálogo da Gerdau
+! ARG3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
+! ARG4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! ARG5: yOffset      -  Y-offset option:
+!                         [0]       no offset (default)
+!                         [=/= 0]   apply offset equal to this number
+!                         ['LEFT']  apply offset of -bf/2
+!                         ['RIGHT'] apply offset of +bf/2
+! ARG6: zOffset      -  Z-offset option:
+!                         [0]     no offset (default)
+!                         [=/= 0] apply offset equal to this number
+!                         ['TOP'] apply offset of d
+!                         ['BOT'] apply offset of 0
 
-! Lista de variáveis locais:
-! AR20: checkName
-! AR21: parType
-! AR22: refKey
-! AR23: maxSecNum
-! AR24: newSecNum
-! AR25: createSection
+! Local parameters:
+! ar21: checkName
+! ar22: parType
+! ar23: refKey
+! ar24: maxSecNum
+! ar25: newSecNum
+! ar26: createSection
 
 ! Lista de variáveis de saída:
 ! GERDAUI_VAR_num
@@ -26,352 +36,352 @@
 ! GERDAUI_VAR_tw
 
 ! Nome da seção em letras maiúsculas
-AR20=UPCASE(arg2)
+ar21=UPCASE(arg2)
 
 ! Definição de criação da seção transversal
-*get,AR21,PARM,arg4,TYPE
-*if,AR21,NE,0,THEN
-   AR25=1
+*get,ar22,PARM,arg4,TYPE
+*if,ar22,NE,0,THEN
+  ar26=1
 *else
-   *if,arg4,NE,1,THEN
-      AR25=1
-   *else
-      AR25=0
-   *endif
+  *if,arg4,NE,1,THEN
+    ar26=1
+  *else
+    ar26=0
+  *endif
 *endif
 
 ! Obter definição de refinamento da seção
-*get,AR21,PARM,arg3,TYPE
-*if,AR21,NE,0,THEN
-   AR22=0
+*get,ar22,PARM,arg3,TYPE
+*if,ar22,NE,0,THEN
+  ar23=0
 *else
-   *if,arg3,LT,0,THEN
-      AR22=0
-   *elseif,arg3,GT,5,THEN
-      AR22=5
-   *else
-      AR22=arg3
-   *endif
+  *if,arg3,LT,0,THEN
+    ar23=0
+  *elseif,arg3,GT,5,THEN
+    ar23=5
+  *else
+    ar23=arg3
+  *endif
 *endif
 
 ! Obter número da nova seção transversal
-*if,arg1,EQ,0,THEN
-   *get,AR23,SECP,,NUM,MAX
-   AR24=AR23+1
+*if,arg1,eq,0,THEN
+  *get,ar24,SECP,,NUM,MAX
+  ar25=ar24+1
 *else
-   AR24=arg1
+  ar25=arg1
 *endif
-GERDAUI_VAR_num=AR24
+GERDAUI_VAR_num=ar25
 
 ! Determinar geometria da seção
-*if,AR20,EQ,'W150X13',THEN
-   GERDAUI_VAR_d=0.1480
-   GERDAUI_VAR_bf=0.1000
-   GERDAUI_VAR_tf=0.0049
-   GERDAUI_VAR_tw=0.0043
-*elseif,AR20,EQ,'W150X18',THEN
-   GERDAUI_VAR_d=0.1530
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0071
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W150X24',THEN
-   GERDAUI_VAR_d=0.1600
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0103
-   GERDAUI_VAR_tw=0.0066
-*elseif,AR20,EQ,'W200X15',THEN
-   GERDAUI_VAR_d=0.2000
-   GERDAUI_VAR_bf=0.1000
-   GERDAUI_VAR_tf=0.0052
-   GERDAUI_VAR_tw=0.0043
-*elseif,AR20,EQ,'W200X19.3',THEN
-   GERDAUI_VAR_d=0.2030
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0065
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W200X22.5',THEN
-   GERDAUI_VAR_d=0.2060
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0080
-   GERDAUI_VAR_tw=0.0062
-*elseif,AR20,EQ,'W200X26.6',THEN
-   GERDAUI_VAR_d=0.2070
-   GERDAUI_VAR_bf=0.1330
-   GERDAUI_VAR_tf=0.0084
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W200X31.3',THEN
-   GERDAUI_VAR_d=0.2100
-   GERDAUI_VAR_bf=0.1340
-   GERDAUI_VAR_tf=0.0102
-   GERDAUI_VAR_tw=0.0064
-*elseif,AR20,EQ,'W250X17.9',THEN
-   GERDAUI_VAR_d=0.2510
-   GERDAUI_VAR_bf=0.1010
-   GERDAUI_VAR_tf=0.0053
-   GERDAUI_VAR_tw=0.0048
-*elseif,AR20,EQ,'W250X22.3',THEN
-   GERDAUI_VAR_d=0.2540
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0069
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W250X25.3',THEN
-   GERDAUI_VAR_d=0.2570
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0084
-   GERDAUI_VAR_tw=0.0061
-*elseif,AR20,EQ,'W250X28.4',THEN
-   GERDAUI_VAR_d=0.2600
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0100
-   GERDAUI_VAR_tw=0.0064
-*elseif,AR20,EQ,'W250X32.7',THEN
-   GERDAUI_VAR_d=0.2580
-   GERDAUI_VAR_bf=0.1460
-   GERDAUI_VAR_tf=0.0091
-   GERDAUI_VAR_tw=0.0061
-*elseif,AR20,EQ,'W250X38.5',THEN
-   GERDAUI_VAR_d=0.2620
-   GERDAUI_VAR_bf=0.1470
-   GERDAUI_VAR_tf=0.0112
-   GERDAUI_VAR_tw=0.0066
-*elseif,AR20,EQ,'W250X44.8',THEN
-   GERDAUI_VAR_d=0.2660
-   GERDAUI_VAR_bf=0.1480
-   GERDAUI_VAR_tf=0.0130
-   GERDAUI_VAR_tw=0.0076
-*elseif,AR20,EQ,'W310X21',THEN
-   GERDAUI_VAR_d=0.3030
-   GERDAUI_VAR_bf=0.1010
-   GERDAUI_VAR_tf=0.0057
-   GERDAUI_VAR_tw=0.0051
-*elseif,AR20,EQ,'W310X23.8',THEN
-   GERDAUI_VAR_d=0.3050
-   GERDAUI_VAR_bf=0.1010
-   GERDAUI_VAR_tf=0.0067
-   GERDAUI_VAR_tw=0.0056
-*elseif,AR20,EQ,'W310X28.3',THEN
-   GERDAUI_VAR_d=0.3090
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0089
-   GERDAUI_VAR_tw=0.0060
-*elseif,AR20,EQ,'W310X32.7',THEN
-   GERDAUI_VAR_d=0.3130
-   GERDAUI_VAR_bf=0.1020
-   GERDAUI_VAR_tf=0.0108
-   GERDAUI_VAR_tw=0.0066
-*elseif,AR20,EQ,'W310X38.7',THEN
-   GERDAUI_VAR_d=0.3100
-   GERDAUI_VAR_bf=0.1650
-   GERDAUI_VAR_tf=0.0097
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W310X44.5',THEN
-   GERDAUI_VAR_d=0.3130
-   GERDAUI_VAR_bf=0.1660
-   GERDAUI_VAR_tf=0.0112
-   GERDAUI_VAR_tw=0.0066
-*elseif,AR20,EQ,'W310X52',THEN
-   GERDAUI_VAR_d=0.3170
-   GERDAUI_VAR_bf=0.1670
-   GERDAUI_VAR_tf=0.0132
-   GERDAUI_VAR_tw=0.0076
-*elseif,AR20,EQ,'W360X32.9',THEN
-   GERDAUI_VAR_d=0.3490
-   GERDAUI_VAR_bf=0.1270
-   GERDAUI_VAR_tf=0.0085
-   GERDAUI_VAR_tw=0.0058
-*elseif,AR20,EQ,'W360X39',THEN
-   GERDAUI_VAR_d=0.3530
-   GERDAUI_VAR_bf=0.1280
-   GERDAUI_VAR_tf=0.0107
-   GERDAUI_VAR_tw=0.0065
-*elseif,AR20,EQ,'W360X44',THEN
-   GERDAUI_VAR_d=0.3520
-   GERDAUI_VAR_bf=0.1710
-   GERDAUI_VAR_tf=0.0098
-   GERDAUI_VAR_tw=0.0069
-*elseif,AR20,EQ,'W360X51',THEN
-   GERDAUI_VAR_d=0.3550
-   GERDAUI_VAR_bf=0.1710
-   GERDAUI_VAR_tf=0.0116
-   GERDAUI_VAR_tw=0.0072
-*elseif,AR20,EQ,'W360X57.8',THEN
-   GERDAUI_VAR_d=0.3580
-   GERDAUI_VAR_bf=0.1720
-   GERDAUI_VAR_tf=0.0131
-   GERDAUI_VAR_tw=0.0079
-*elseif,AR20,EQ,'W360X64',THEN
-   GERDAUI_VAR_d=0.3470
-   GERDAUI_VAR_bf=0.2030
-   GERDAUI_VAR_tf=0.0135
-   GERDAUI_VAR_tw=0.0077
-*elseif,AR20,EQ,'W360X72',THEN
-   GERDAUI_VAR_d=0.3500
-   GERDAUI_VAR_bf=0.2040
-   GERDAUI_VAR_tf=0.0151
-   GERDAUI_VAR_tw=0.0086
-*elseif,AR20,EQ,'W360X79',THEN
-   GERDAUI_VAR_d=0.3540
-   GERDAUI_VAR_bf=0.2050
-   GERDAUI_VAR_tf=0.0168
-   GERDAUI_VAR_tw=0.0094
-*elseif,AR20,EQ,'W410X38.8',THEN
-   GERDAUI_VAR_d=0.3990
-   GERDAUI_VAR_bf=0.1400
-   GERDAUI_VAR_tf=0.0088
-   GERDAUI_VAR_tw=0.0064
-*elseif,AR20,EQ,'W410X46.1',THEN
-   GERDAUI_VAR_d=0.4030
-   GERDAUI_VAR_bf=0.1400
-   GERDAUI_VAR_tf=0.0112
-   GERDAUI_VAR_tw=0.0070
-*elseif,AR20,EQ,'W410X53',THEN
-   GERDAUI_VAR_d=0.4030
-   GERDAUI_VAR_bf=0.1770
-   GERDAUI_VAR_tf=0.0109
-   GERDAUI_VAR_tw=0.0075
-*elseif,AR20,EQ,'W410X60',THEN
-   GERDAUI_VAR_d=0.4070
-   GERDAUI_VAR_bf=0.1780
-   GERDAUI_VAR_tf=0.0128
-   GERDAUI_VAR_tw=0.0077
-*elseif,AR20,EQ,'W410X67',THEN
-   GERDAUI_VAR_d=0.4100
-   GERDAUI_VAR_bf=0.1790
-   GERDAUI_VAR_tf=0.0144
-   GERDAUI_VAR_tw=0.0088
-*elseif,AR20,EQ,'W410X75',THEN
-   GERDAUI_VAR_d=0.4130
-   GERDAUI_VAR_bf=0.1800
-   GERDAUI_VAR_tf=0.0160
-   GERDAUI_VAR_tw=0.0097
-*elseif,AR20,EQ,'W410X85',THEN
-   GERDAUI_VAR_d=0.4170
-   GERDAUI_VAR_bf=0.1810
-   GERDAUI_VAR_tf=0.0182
-   GERDAUI_VAR_tw=0.0109
-*elseif,AR20,EQ,'W460X52',THEN
-   GERDAUI_VAR_d=0.4500
-   GERDAUI_VAR_bf=0.1520
-   GERDAUI_VAR_tf=0.0108
-   GERDAUI_VAR_tw=0.0076
-*elseif,AR20,EQ,'W460X60',THEN
-   GERDAUI_VAR_d=0.4550
-   GERDAUI_VAR_bf=0.1530
-   GERDAUI_VAR_tf=0.0133
-   GERDAUI_VAR_tw=0.0080
-*elseif,AR20,EQ,'W460X68',THEN
-   GERDAUI_VAR_d=0.4590
-   GERDAUI_VAR_bf=0.1540
-   GERDAUI_VAR_tf=0.0154
-   GERDAUI_VAR_tw=0.0091
-*elseif,AR20,EQ,'W460X74',THEN
-   GERDAUI_VAR_d=0.4570
-   GERDAUI_VAR_bf=0.1900
-   GERDAUI_VAR_tf=0.0145
-   GERDAUI_VAR_tw=0.0090
-*elseif,AR20,EQ,'W460X82',THEN
-   GERDAUI_VAR_d=0.4600
-   GERDAUI_VAR_bf=0.1910
-   GERDAUI_VAR_tf=0.0160
-   GERDAUI_VAR_tw=0.0099
-*elseif,AR20,EQ,'W460X89',THEN
-   GERDAUI_VAR_d=0.4630
-   GERDAUI_VAR_bf=0.1920
-   GERDAUI_VAR_tf=0.0177
-   GERDAUI_VAR_tw=0.0105
-*elseif,AR20,EQ,'W460X97',THEN
-   GERDAUI_VAR_d=0.4660
-   GERDAUI_VAR_bf=0.1930
-   GERDAUI_VAR_tf=0.0190
-   GERDAUI_VAR_tw=0.0114
-*elseif,AR20,EQ,'W460X106',THEN
-   GERDAUI_VAR_d=0.4690
-   GERDAUI_VAR_bf=0.1940
-   GERDAUI_VAR_tf=0.0206
-   GERDAUI_VAR_tw=0.0126
-*elseif,AR20,EQ,'W530X66',THEN
-   GERDAUI_VAR_d=0.5250
-   GERDAUI_VAR_bf=0.1650
-   GERDAUI_VAR_tf=0.0114
-   GERDAUI_VAR_tw=0.0089
-*elseif,AR20,EQ,'W530X72',THEN
-   GERDAUI_VAR_d=0.5240
-   GERDAUI_VAR_bf=0.2070
-   GERDAUI_VAR_tf=0.0109
-   GERDAUI_VAR_tw=0.0090
-*elseif,AR20,EQ,'W530X74',THEN
-   GERDAUI_VAR_d=0.5290
-   GERDAUI_VAR_bf=0.1660
-   GERDAUI_VAR_tf=0.0136
-   GERDAUI_VAR_tw=0.0097
-*elseif,AR20,EQ,'W530X82',THEN
-   GERDAUI_VAR_d=0.5280
-   GERDAUI_VAR_bf=0.2090
-   GERDAUI_VAR_tf=0.0133
-   GERDAUI_VAR_tw=0.0095
-*elseif,AR20,EQ,'W530X85',THEN
-   GERDAUI_VAR_d=0.5350
-   GERDAUI_VAR_bf=0.1660
-   GERDAUI_VAR_tf=0.0165
-   GERDAUI_VAR_tw=0.0103
-*elseif,AR20,EQ,'W530X92',THEN
-   GERDAUI_VAR_d=0.5330
-   GERDAUI_VAR_bf=0.2090
-   GERDAUI_VAR_tf=0.0156
-   GERDAUI_VAR_tw=0.0102
-*elseif,AR20,EQ,'W530X101',THEN
-   GERDAUI_VAR_d=0.5370
-   GERDAUI_VAR_bf=0.2100
-   GERDAUI_VAR_tf=0.0174
-   GERDAUI_VAR_tw=0.0109
-*elseif,AR20,EQ,'W530X109',THEN
-   GERDAUI_VAR_d=0.5390
-   GERDAUI_VAR_bf=0.2110
-   GERDAUI_VAR_tf=0.0188
-   GERDAUI_VAR_tw=0.0116
-*elseif,AR20,EQ,'W610X101',THEN
-   GERDAUI_VAR_d=0.6030
-   GERDAUI_VAR_bf=0.2280
-   GERDAUI_VAR_tf=0.0149
-   GERDAUI_VAR_tw=0.0105
-*elseif,AR20,EQ,'W610X113',THEN
-   GERDAUI_VAR_d=0.6080
-   GERDAUI_VAR_bf=0.2280
-   GERDAUI_VAR_tf=0.0173
-   GERDAUI_VAR_tw=0.0112
-*elseif,AR20,EQ,'W610X125',THEN
-   GERDAUI_VAR_d=0.6120
-   GERDAUI_VAR_bf=0.2290
-   GERDAUI_VAR_tf=0.0196
-   GERDAUI_VAR_tw=0.0119
-*elseif,AR20,EQ,'W610X140',THEN
-   GERDAUI_VAR_d=0.6170
-   GERDAUI_VAR_bf=0.2300
-   GERDAUI_VAR_tf=0.0222
-   GERDAUI_VAR_tw=0.0131
-*elseif,AR20,EQ,'W610X155',THEN
-   GERDAUI_VAR_d=0.6110
-   GERDAUI_VAR_bf=0.3240
-   GERDAUI_VAR_tf=0.0190
-   GERDAUI_VAR_tw=0.0127
-*elseif,AR20,EQ,'W610X174',THEN
-   GERDAUI_VAR_d=0.6160
-   GERDAUI_VAR_bf=0.3250
-   GERDAUI_VAR_tf=0.0216
-   GERDAUI_VAR_tw=0.0140
+*if,ar21,eq,'W150X13',THEN
+  GERDAUI_VAR_d  = 0.1480
+  GERDAUI_VAR_bf = 0.1000
+  GERDAUI_VAR_tf = 0.0049
+  GERDAUI_VAR_tw = 0.0043
+*elseif,ar21,eq,'W150X18',THEN
+  GERDAUI_VAR_d  = 0.1530
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0071
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W150X24',THEN
+  GERDAUI_VAR_d  = 0.1600
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0103
+  GERDAUI_VAR_tw = 0.0066
+*elseif,ar21,eq,'W200X15',THEN
+  GERDAUI_VAR_d  = 0.2000
+  GERDAUI_VAR_bf = 0.1000
+  GERDAUI_VAR_tf = 0.0052
+  GERDAUI_VAR_tw = 0.0043
+*elseif,ar21,eq,'W200X19.3',THEN
+  GERDAUI_VAR_d  = 0.2030
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0065
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W200X22.5',THEN
+  GERDAUI_VAR_d  = 0.2060
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0080
+  GERDAUI_VAR_tw = 0.0062
+*elseif,ar21,eq,'W200X26.6',THEN
+  GERDAUI_VAR_d  = 0.2070
+  GERDAUI_VAR_bf = 0.1330
+  GERDAUI_VAR_tf = 0.0084
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W200X31.3',THEN
+  GERDAUI_VAR_d  = 0.2100
+  GERDAUI_VAR_bf = 0.1340
+  GERDAUI_VAR_tf = 0.0102
+  GERDAUI_VAR_tw = 0.0064
+*elseif,ar21,eq,'W250X17.9',THEN
+  GERDAUI_VAR_d  = 0.2510
+  GERDAUI_VAR_bf = 0.1010
+  GERDAUI_VAR_tf = 0.0053
+  GERDAUI_VAR_tw = 0.0048
+*elseif,ar21,eq,'W250X22.3',THEN
+  GERDAUI_VAR_d  = 0.2540
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0069
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W250X25.3',THEN
+  GERDAUI_VAR_d  = 0.2570
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0084
+  GERDAUI_VAR_tw = 0.0061
+*elseif,ar21,eq,'W250X28.4',THEN
+  GERDAUI_VAR_d  = 0.2600
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0100
+  GERDAUI_VAR_tw = 0.0064
+*elseif,ar21,eq,'W250X32.7',THEN
+  GERDAUI_VAR_d  = 0.2580
+  GERDAUI_VAR_bf = 0.1460
+  GERDAUI_VAR_tf = 0.0091
+  GERDAUI_VAR_tw = 0.0061
+*elseif,ar21,eq,'W250X38.5',THEN
+  GERDAUI_VAR_d  = 0.2620
+  GERDAUI_VAR_bf = 0.1470
+  GERDAUI_VAR_tf = 0.0112
+  GERDAUI_VAR_tw = 0.0066
+*elseif,ar21,eq,'W250X44.8',THEN
+  GERDAUI_VAR_d  = 0.2660
+  GERDAUI_VAR_bf = 0.1480
+  GERDAUI_VAR_tf = 0.0130
+  GERDAUI_VAR_tw = 0.0076
+*elseif,ar21,eq,'W310X21',THEN
+  GERDAUI_VAR_d  = 0.3030
+  GERDAUI_VAR_bf = 0.1010
+  GERDAUI_VAR_tf = 0.0057
+  GERDAUI_VAR_tw = 0.0051
+*elseif,ar21,eq,'W310X23.8',THEN
+  GERDAUI_VAR_d  = 0.3050
+  GERDAUI_VAR_bf = 0.1010
+  GERDAUI_VAR_tf = 0.0067
+  GERDAUI_VAR_tw = 0.0056
+*elseif,ar21,eq,'W310X28.3',THEN
+  GERDAUI_VAR_d  = 0.3090
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0089
+  GERDAUI_VAR_tw = 0.0060
+*elseif,ar21,eq,'W310X32.7',THEN
+  GERDAUI_VAR_d  = 0.3130
+  GERDAUI_VAR_bf = 0.1020
+  GERDAUI_VAR_tf = 0.0108
+  GERDAUI_VAR_tw = 0.0066
+*elseif,ar21,eq,'W310X38.7',THEN
+  GERDAUI_VAR_d  = 0.3100
+  GERDAUI_VAR_bf = 0.1650
+  GERDAUI_VAR_tf = 0.0097
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W310X44.5',THEN
+  GERDAUI_VAR_d  = 0.3130
+  GERDAUI_VAR_bf = 0.1660
+  GERDAUI_VAR_tf = 0.0112
+  GERDAUI_VAR_tw = 0.0066
+*elseif,ar21,eq,'W310X52',THEN
+  GERDAUI_VAR_d  = 0.3170
+  GERDAUI_VAR_bf = 0.1670
+  GERDAUI_VAR_tf = 0.0132
+  GERDAUI_VAR_tw = 0.0076
+*elseif,ar21,eq,'W360X32.9',THEN
+  GERDAUI_VAR_d  = 0.3490
+  GERDAUI_VAR_bf = 0.1270
+  GERDAUI_VAR_tf = 0.0085
+  GERDAUI_VAR_tw = 0.0058
+*elseif,ar21,eq,'W360X39',THEN
+  GERDAUI_VAR_d  = 0.3530
+  GERDAUI_VAR_bf = 0.1280
+  GERDAUI_VAR_tf = 0.0107
+  GERDAUI_VAR_tw = 0.0065
+*elseif,ar21,eq,'W360X44',THEN
+  GERDAUI_VAR_d  = 0.3520
+  GERDAUI_VAR_bf = 0.1710
+  GERDAUI_VAR_tf = 0.0098
+  GERDAUI_VAR_tw = 0.0069
+*elseif,ar21,eq,'W360X51',THEN
+  GERDAUI_VAR_d  = 0.3550
+  GERDAUI_VAR_bf = 0.1710
+  GERDAUI_VAR_tf = 0.0116
+  GERDAUI_VAR_tw = 0.0072
+*elseif,ar21,eq,'W360X57.8',THEN
+  GERDAUI_VAR_d  = 0.3580
+  GERDAUI_VAR_bf = 0.1720
+  GERDAUI_VAR_tf = 0.0131
+  GERDAUI_VAR_tw = 0.0079
+*elseif,ar21,eq,'W360X64',THEN
+  GERDAUI_VAR_d  = 0.3470
+  GERDAUI_VAR_bf = 0.2030
+  GERDAUI_VAR_tf = 0.0135
+  GERDAUI_VAR_tw = 0.0077
+*elseif,ar21,eq,'W360X72',THEN
+  GERDAUI_VAR_d  = 0.3500
+  GERDAUI_VAR_bf = 0.2040
+  GERDAUI_VAR_tf = 0.0151
+  GERDAUI_VAR_tw = 0.0086
+*elseif,ar21,eq,'W360X79',THEN
+  GERDAUI_VAR_d  = 0.3540
+  GERDAUI_VAR_bf = 0.2050
+  GERDAUI_VAR_tf = 0.0168
+  GERDAUI_VAR_tw = 0.0094
+*elseif,ar21,eq,'W410X38.8',THEN
+  GERDAUI_VAR_d  = 0.3990
+  GERDAUI_VAR_bf = 0.1400
+  GERDAUI_VAR_tf = 0.0088
+  GERDAUI_VAR_tw = 0.0064
+*elseif,ar21,eq,'W410X46.1',THEN
+  GERDAUI_VAR_d  = 0.4030
+  GERDAUI_VAR_bf = 0.1400
+  GERDAUI_VAR_tf = 0.0112
+  GERDAUI_VAR_tw = 0.0070
+*elseif,ar21,eq,'W410X53',THEN
+  GERDAUI_VAR_d  = 0.4030
+  GERDAUI_VAR_bf = 0.1770
+  GERDAUI_VAR_tf = 0.0109
+  GERDAUI_VAR_tw = 0.0075
+*elseif,ar21,eq,'W410X60',THEN
+  GERDAUI_VAR_d  = 0.4070
+  GERDAUI_VAR_bf = 0.1780
+  GERDAUI_VAR_tf = 0.0128
+  GERDAUI_VAR_tw = 0.0077
+*elseif,ar21,eq,'W410X67',THEN
+  GERDAUI_VAR_d  = 0.4100
+  GERDAUI_VAR_bf = 0.1790
+  GERDAUI_VAR_tf = 0.0144
+  GERDAUI_VAR_tw = 0.0088
+*elseif,ar21,eq,'W410X75',THEN
+  GERDAUI_VAR_d  = 0.4130
+  GERDAUI_VAR_bf = 0.1800
+  GERDAUI_VAR_tf = 0.0160
+  GERDAUI_VAR_tw = 0.0097
+*elseif,ar21,eq,'W410X85',THEN
+  GERDAUI_VAR_d  = 0.4170
+  GERDAUI_VAR_bf = 0.1810
+  GERDAUI_VAR_tf = 0.0182
+  GERDAUI_VAR_tw = 0.0109
+*elseif,ar21,eq,'W460X52',THEN
+  GERDAUI_VAR_d  = 0.4500
+  GERDAUI_VAR_bf = 0.1520
+  GERDAUI_VAR_tf = 0.0108
+  GERDAUI_VAR_tw = 0.0076
+*elseif,ar21,eq,'W460X60',THEN
+  GERDAUI_VAR_d  = 0.4550
+  GERDAUI_VAR_bf = 0.1530
+  GERDAUI_VAR_tf = 0.0133
+  GERDAUI_VAR_tw = 0.0080
+*elseif,ar21,eq,'W460X68',THEN
+  GERDAUI_VAR_d  = 0.4590
+  GERDAUI_VAR_bf = 0.1540
+  GERDAUI_VAR_tf = 0.0154
+  GERDAUI_VAR_tw = 0.0091
+*elseif,ar21,eq,'W460X74',THEN
+  GERDAUI_VAR_d  = 0.4570
+  GERDAUI_VAR_bf = 0.1900
+  GERDAUI_VAR_tf = 0.0145
+  GERDAUI_VAR_tw = 0.0090
+*elseif,ar21,eq,'W460X82',THEN
+  GERDAUI_VAR_d  = 0.4600
+  GERDAUI_VAR_bf = 0.1910
+  GERDAUI_VAR_tf = 0.0160
+  GERDAUI_VAR_tw = 0.0099
+*elseif,ar21,eq,'W460X89',THEN
+  GERDAUI_VAR_d  = 0.4630
+  GERDAUI_VAR_bf = 0.1920
+  GERDAUI_VAR_tf = 0.0177
+  GERDAUI_VAR_tw = 0.0105
+*elseif,ar21,eq,'W460X97',THEN
+  GERDAUI_VAR_d  = 0.4660
+  GERDAUI_VAR_bf = 0.1930
+  GERDAUI_VAR_tf = 0.0190
+  GERDAUI_VAR_tw = 0.0114
+*elseif,ar21,eq,'W460X106',THEN
+  GERDAUI_VAR_d  = 0.4690
+  GERDAUI_VAR_bf = 0.1940
+  GERDAUI_VAR_tf = 0.0206
+  GERDAUI_VAR_tw = 0.0126
+*elseif,ar21,eq,'W530X66',THEN
+  GERDAUI_VAR_d  = 0.5250
+  GERDAUI_VAR_bf = 0.1650
+  GERDAUI_VAR_tf = 0.0114
+  GERDAUI_VAR_tw = 0.0089
+*elseif,ar21,eq,'W530X72',THEN
+  GERDAUI_VAR_d  = 0.5240
+  GERDAUI_VAR_bf = 0.2070
+  GERDAUI_VAR_tf = 0.0109
+  GERDAUI_VAR_tw = 0.0090
+*elseif,ar21,eq,'W530X74',THEN
+  GERDAUI_VAR_d  = 0.5290
+  GERDAUI_VAR_bf = 0.1660
+  GERDAUI_VAR_tf = 0.0136
+  GERDAUI_VAR_tw = 0.0097
+*elseif,ar21,eq,'W530X82',THEN
+  GERDAUI_VAR_d  = 0.5280
+  GERDAUI_VAR_bf = 0.2090
+  GERDAUI_VAR_tf = 0.0133
+  GERDAUI_VAR_tw = 0.0095
+*elseif,ar21,eq,'W530X85',THEN
+  GERDAUI_VAR_d  = 0.5350
+  GERDAUI_VAR_bf = 0.1660
+  GERDAUI_VAR_tf = 0.0165
+  GERDAUI_VAR_tw = 0.0103
+*elseif,ar21,eq,'W530X92',THEN
+  GERDAUI_VAR_d  = 0.5330
+  GERDAUI_VAR_bf = 0.2090
+  GERDAUI_VAR_tf = 0.0156
+  GERDAUI_VAR_tw = 0.0102
+*elseif,ar21,eq,'W530X101',THEN
+  GERDAUI_VAR_d  = 0.5370
+  GERDAUI_VAR_bf = 0.2100
+  GERDAUI_VAR_tf = 0.0174
+  GERDAUI_VAR_tw = 0.0109
+*elseif,ar21,eq,'W530X109',THEN
+  GERDAUI_VAR_d  = 0.5390
+  GERDAUI_VAR_bf = 0.2110
+  GERDAUI_VAR_tf = 0.0188
+  GERDAUI_VAR_tw = 0.0116
+*elseif,ar21,eq,'W610X101',THEN
+  GERDAUI_VAR_d  = 0.6030
+  GERDAUI_VAR_bf = 0.2280
+  GERDAUI_VAR_tf = 0.0149
+  GERDAUI_VAR_tw = 0.0105
+*elseif,ar21,eq,'W610X113',THEN
+  GERDAUI_VAR_d  = 0.6080
+  GERDAUI_VAR_bf = 0.2280
+  GERDAUI_VAR_tf = 0.0173
+  GERDAUI_VAR_tw = 0.0112
+*elseif,ar21,eq,'W610X125',THEN
+  GERDAUI_VAR_d  = 0.6120
+  GERDAUI_VAR_bf = 0.2290
+  GERDAUI_VAR_tf = 0.0196
+  GERDAUI_VAR_tw = 0.0119
+*elseif,ar21,eq,'W610X140',THEN
+  GERDAUI_VAR_d  = 0.6170
+  GERDAUI_VAR_bf = 0.2300
+  GERDAUI_VAR_tf = 0.0222
+  GERDAUI_VAR_tw = 0.0131
+*elseif,ar21,eq,'W610X155',THEN
+  GERDAUI_VAR_d  = 0.6110
+  GERDAUI_VAR_bf = 0.3240
+  GERDAUI_VAR_tf = 0.0190
+  GERDAUI_VAR_tw = 0.0127
+*elseif,ar21,eq,'W610X174',THEN
+  GERDAUI_VAR_d  = 0.6160
+  GERDAUI_VAR_bf = 0.3250
+  GERDAUI_VAR_tf = 0.0216
+  GERDAUI_VAR_tw = 0.0140
 *else
-   *msg,WARN
-GERDAUI WARNING: Specified section not found. Command ignored.
-   GERDAUI_VAR_d=-1
-   GERDAUI_VAR_bf=-1
-   GERDAUI_VAR_tf=-1
-   GERDAUI_VAR_tw=-1
+  *msg,WARN
+  GERDAUI WARNING: Specified section not found. Command ignored.
+  GERDAUI_VAR_d=-1
+  GERDAUI_VAR_bf=-1
+  GERDAUI_VAR_tf=-1
+  GERDAUI_VAR_tw=-1
 *endif
 
 ! Criar seção transversal
-*if,GERDAUI_VAR_d,NE,-1,AND,AR25,EQ,1,THEN
-   SECTYPE,GERDAUI_VAR_num,BEAM,I,arg2,AR22
-   SECDATA,GERDAUI_VAR_bf,GERDAUI_VAR_bf,GERDAUI_VAR_d,GERDAUI_VAR_tf,GERDAUI_VAR_tf,GERDAUI_VAR_tw
+*if,GERDAUI_VAR_d,NE,-1,AND,ar26,eq,1,THEN
+  SECTYPE,GERDAUI_VAR_num,BEAM,I,arg2,ar23
+  SECDATA,GERDAUI_VAR_bf,GERDAUI_VAR_bf,GERDAUI_VAR_d,GERDAUI_VAR_tf,GERDAUI_VAR_tf,GERDAUI_VAR_tw
 *endif
 
 
