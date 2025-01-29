@@ -6,35 +6,23 @@
 
 ! Arguments:
 ! ARG1: scale      -  scale factor (negative to invert)
-! ARG2: kund       -  [0] Display on undeformed shape / [1] Display on deformed shape
+! ARG2: kund       -  display option:
+!                       [0]  display on undeformed shape (default)
+!                       [1]  display on deformed shape
 ! ARG3: direction  -  undocumented PLLS argument:
-!                       [0] Direction based on view
-!                       [1] Direction based on global CS
+!                       [0]  direction based on view (default)
+!                       [1]  direction based on global CS
 
 ! Local parameters:
-! ar21: DOFtype
-! ar22: DOFdir
-! ar23: unitScaleFactor
-! ar24: nameKey
+! ar21: scale
+! ar22: kund
+! ar23: direction
 
 
-ar21 = 'rot'
-ar22 = 'z'
-ar23 = 1e3
-ar24 = 'ROTZ'
+! Parse inputs
+ar21 = ARG1
+ar22 = ARG2
+ar23 = ARG3
 
-etable,'TMP_%ar24%',ar21,ar22
-
-sadd,'BEAM_%ar24%','TMP_%ar24%',,ar23
-
-etable,'TMP_%ar24%',eras
-
-*cfopen,beamdiagram_tmp,tmp
-  *vwrite,'BEAM_%ar24%','BEAM_%ar24%',ARG1,ARG2,ARG3
-plls,%C,%C,%G,%I,%I
-*cfclos
-
-/nopr
-/input,beamdiagram_tmp,tmp
-/delete,beamdiagram_tmp,tmp
-/gopr
+! Plot diagrams
+beam_diagram , 'ROTZ' , ar21 , ar22 , ar23

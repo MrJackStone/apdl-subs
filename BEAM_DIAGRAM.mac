@@ -1,0 +1,137 @@
+! beam_diagram , diagType , scale , kund , direction
+! BEAM_DIAGRAM , ARG1     , ARG2  , ARG3 , ARG4
+
+! Description:
+! Plots BEAM188 torsional moment diagram.
+
+! Arguments:
+! ARG1: diagType   -  type of diagram:
+!                       ['N']     axial force
+!                       ['MY']    bending moment about Y
+!                       ['MZ']    bending moment about Z
+!                       ['MT']    torsional moment
+!                       ['QY']    shear force along Y
+!                       ['QZ']    shear force along Z
+!                       ['UX']    displacement along X
+!                       ['UY']    displacement along Y
+!                       ['UZ']    displacement along Z
+!                       ['ROTX']  rotation about X
+!                       ['ROTY']  rotation about Y
+!                       ['ROTZ']  rotation about Z
+! ARG2: scale      -  scale factor (negative to invert)
+! ARG3: kund       -  display option:
+!                       [0]  display on undeformed shape (default)
+!                       [1]  display on deformed shape
+! ARG4: direction  -  undocumented PLLS argument:
+!                       [0]  direction based on view (default)
+!                       [1]  direction based on global CS
+
+! Local parameters:
+! ar20: parType
+! ar21: diagramName
+! ar31: iNodeSEQN
+! ar32: jNodeSEQN
+! ar33: unitScaleFactor
+
+
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = upcase(ARG1)
+*else
+  *msg,error
+BEAM_DIAGRAM error: invalid argument type for ARG1 (expected string).%/&
+BEAM_DIAGRAM command ignored.
+  *return,-1
+*endif
+
+! Set ETABLE params based on diagram type
+*if,ar21,eq,'N',then
+  ar31 = 1
+  ar32 = 14
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'MY',then
+  ar31 = 2
+  ar32 = 15
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'MZ',then
+  ar31 = 3
+  ar32 = 16
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'MT',then
+  ar31 = 4
+  ar32 = 17
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'QY',then
+  ar31 = 6
+  ar32 = 19
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'QZ',then
+  ar31 = 5
+  ar32 = 18
+  ar33 = 1e-3
+
+*elseif,ar21,eq,'UX',then
+  ar31 = 'u'
+  ar32 = 'x'
+  ar33 = 1e3
+
+*elseif,ar21,eq,'UY',then
+  ar31 = 'u'
+  ar32 = 'y'
+  ar33 = 1e3
+
+*elseif,ar21,eq,'UZ',then
+  ar31 = 'u'
+  ar32 = 'z'
+  ar33 = 1e3
+
+*elseif,ar21,eq,'ROTX',then
+  ar31 = 'rot'
+  ar32 = 'x'
+  ar33 = 1e3
+
+*elseif,ar21,eq,'ROTY',then
+  ar31 = 'rot'
+  ar32 = 'y'
+  ar33 = 1e3
+
+*elseif,ar21,eq,'ROTZ',then
+  ar31 = 'rot'
+  ar32 = 'z'
+  ar33 = 1e3
+
+*else
+  *msg,error
+BEAM_DIAGRAM error: invalid diagram type (ARG1).%/&
+See available options in source code.%/&
+BEAM_DIAGRAM command ignored.
+  *return,-1
+
+*endif
+
+! Calculate scaled diagram
+etable , 'TMP_DIAGI' , smisc , ar31
+etable , 'TMP_DIAGJ' , smisc , ar32
+
+sadd , 'BEAM_%ar21%I' , 'TMP_DIAGI' ,  , ar33
+sadd , 'BEAM_%ar21%J' , 'TMP_DIAGJ' ,  , ar33
+
+etable , 'TMP_DIAGI' , eras
+etable , 'TMP_DIAGJ' , eras
+
+! Plot diagram
+*cfopen,BEAM_DIAGRAM,tmp
+  *vwrite,'BEAM_%ar21%I','BEAM_%ar21%J',ARG2,ARG3,ARG4
+plls,%C,%C,%G,%I,%I
+*cfclos
+
+/nopr
+/input  , BEAM_DIAGRAM , tmp
+/delete , BEAM_DIAGRAM , tmp
+/gopr
