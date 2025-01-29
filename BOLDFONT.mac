@@ -1,5 +1,5 @@
-! boldfont, status
-! BOLDFONT, ARG1
+! boldfont , status
+! BOLDFONT , ARG1
 
 ! Description:
 ! Activates or deactivates large size, boldface font for text displayed on-screen.
