@@ -1,5 +1,5 @@
-! gerdaui , secID , name , refineKey , consultOnly , yOffset , zOffset
-! GERDAUI , ARG1  , ARG2 , ARG3      , ARG4        , ARG5    , ARG6
+! gerdaui , secID , name , refineKey , consultOnly , yOffset , zOffset , thkLoss
+! GERDAUI , ARG1  , ARG2 , ARG3      , ARG4        , ARG5    , ARG6    , ARG7
 
 ! Descrição:
 ! Esta subrotina cria uma seção transversal a partir do catálogo de perfis I da Gerdau.
@@ -19,6 +19,7 @@
 !                         [=/= 0] apply offset equal to this number
 !                         ['TOP'] apply offset of d
 !                         ['BOT'] apply offset of 0
+! ARG7: thkLoss      -  thickness loss to be applied to flanges & web (defaults to 0)
 
 ! Local parameters:
 ! ar20: parType
@@ -30,6 +31,7 @@
 ! ar26: createSection
 ! ar35: yOffsetType
 ! ar36: zOffsetType
+! ar37: thicknessLoss
 ! ar45: yOffsetValue
 ! ar46: zOffsetValue
 
@@ -61,6 +63,14 @@ ar36 = 'NONE'
   *endif
 *elseif,ar20,eq,3,then
   ar36 = upcase(ARG6)
+*endif
+
+ar37 = 0
+*get,ar20,parm,ARG7,type
+*if,ar20,eq,0,then
+  *if,ARG7,gt,0,then
+    ar37 = ARG7
+  *endif
 *endif
 
 ! Definição de criação da seção transversal
@@ -418,6 +428,10 @@ ar46 = GERDAUI_VAR_d/2
 *elseif,ar36,eq,'USER',then
   ar46 = ARG6
 *endif
+
+! Subtract thickness losses
+GERDAUI_VAR_tf = GERDAUI_VAR_tf-ar37
+GERDAUI_VAR_tw = GERDAUI_VAR_tw-ar37
 
 ! Create cross-section
 *if,ar26,eq,1,then
