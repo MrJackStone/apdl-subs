@@ -1,14 +1,14 @@
-! CEDISACH , secID , name , refineKey , consultOnly
-! CEDISACH , arg1  , arg2 , arg3      , arg4
+! cedisach , secID , name , refineKey , consultOnly
+! CEDISACH , ARG1  , ARG2 , ARG3      , ARG4
 
-! Descrição:
+! Description:
 ! Creates a beam flatbar cross-section from CEDISA's catalogue.
 
 ! Arguments:
 ! ARG1: secID        -  number assigned to cross-section
 ! ARG2: name         -  name in CEDISA's catalogue identifying flatbar section
 ! ARG3: refineKey    -  cross-section mesh refinement key, as described in SECDATA
-! ARG4: consultOnly  -  determines whether or not section should be created:opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! ARG4: consultOnly  -  determines whether or not section should be created:
 !                         [0]  create cross-section (default)
 !                         [1]  no cross-section creation
 
@@ -26,7 +26,7 @@
 
 
 ! Parse inputs
-ar22 = upcase(arg2)
+ar22 = upcase(ARG2)
 
 ar23 = 0
 *get,ar20,parm,ARG3,type
@@ -251,6 +251,6 @@ CEDISACH_VAR_num = ar21
 
 ! Create cross-section
 *if,ARG4,ne,1,then
-  sectype,CEDISACH_VAR_num,beam,rect,ARG2,ar23
-  secdata,CEDISACH_VAR_b,CEDISACH_VAR_t
+  sectype , CEDISACH_VAR_num , beam           , rect , ARG2 , ar23
+  secdata , CEDISACH_VAR_b   , CEDISACH_VAR_t
 *endif

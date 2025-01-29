@@ -1,197 +1,179 @@
-! CEDISAL, secID, name, refineKey, consultOnly
-! CEDISAL, arg1,  arg2, arg3,      arg4
+! cedisal , secID , name , refineKey , consultOnly
+! CEDISAL , ARG1  , ARG2 , ARG3      , ARG4
 
-! Descrição:
-! Esta subrotina cria uma seção transversal a partir do catálogo de cantoneiras de abas iguais da
-! Cedisa.
+! Description:
+! Create a beam L-shape cross-section from CEDISA's angle shapes catalogue.
 
-! Lista de argumentos:
-! arg1: secID        -  número da seção transversal
-! arg2: name         -  nome da seção transversal como consta no catálogo da Cedisa
-! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
-! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! Arguments:
+! ARG1: secID        -  number assigned to cross-section
+! ARG2: name         -  name in CEDISA's catalogue identifying L-shape section
+! ARG3: refineKey    -  cross-section mesh refinement key, as described in SECDATA
+! ARG4: consultOnly  -  determines whether or not section should be created:
+!                         [0]  create cross-section (default)
+!                         [1]  no cross-section creation
 
-! Lista de variáveis locais:
-! AR20: checkName
-! AR21: parType
-! AR22: refKey
-! AR23: maxSecNum
-! AR24: newSecNum
-! AR25: createSection
+! Local parameters:
+! ar20: parType
+! ar21: newSecNum
+! ar22: checkName
+! ar23: refKey
+! ar24: maxSecNum
 
-! Lista de variáveis de saída:
+! Output parameters:
 ! CEDISAL_VAR_num
 ! CEDISAL_VAR_b
 ! CEDISAL_VAR_t
 
-! Nome da seção em letras maiúsculas
-AR20=UPCASE(arg2)
 
-! Definição de criação da seção transversal
-*get,AR21,PARM,arg4,TYPE
-*if,AR21,NE,0,THEN
-   AR25=1
-*else
-   *if,arg4,NE,1,THEN
-      AR25=1
-   *else
-      AR25=0
-   *endif
+! Parse inputs
+ar22 = upcase(ARG2)
+
+ar23 = 0
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,0,then
+  ar23 = ((ARG3>0)<5)
 *endif
 
-! Obter definição de refinamento da seção
-*get,AR21,PARM,arg3,TYPE
-*if,AR21,NE,0,THEN
-   AR22=0
-*else
-   *if,arg3,LT,0,THEN
-      AR22=0
-   *elseif,arg3,GT,5,THEN
-      AR22=5
-   *else
-      AR22=arg3
-   *endif
+ar21 = ARG1
+*if,ARG1,eq,0,then
+  *get,ar24,secp,,num,max
+  ar21 = ar24+1
 *endif
 
-! Obter número da nova seção transversal
-*if,arg1,EQ,0,THEN
-   *get,AR23,SECP,,NUM,MAX
-   AR24=AR23+1
+! Get L-section's dimensions
+*if,ar22,eq,'L12,7X3,18',then
+  CEDISAL_VAR_b = 0.01270
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L15,88X3,18',then
+  CEDISAL_VAR_b = 0.01588
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L19,05X3,18',then
+  CEDISAL_VAR_b = 0.01905
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L22,23X3,18',then
+  CEDISAL_VAR_b = 0.02223
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L25,4X3,18',then
+  CEDISAL_VAR_b = 0.02540
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L31,75X3,18',then
+  CEDISAL_VAR_b = 0.03175
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L38,1X3,18',then
+  CEDISAL_VAR_b = 0.03810
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L44,45X3,18',then
+  CEDISAL_VAR_b = 0.04445
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L50,8X3,18',then
+  CEDISAL_VAR_b = 0.05080
+  CEDISAL_VAR_t = 0.00318
+*elseif,ar22,eq,'L25,4X4,76',then
+  CEDISAL_VAR_b = 0.02540
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L31,75X4,76',then
+  CEDISAL_VAR_b = 0.03175
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L38,1X4,76',then
+  CEDISAL_VAR_b = 0.03810
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L44,45X4,76',then
+  CEDISAL_VAR_b = 0.04445
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L50,8X4,76',then
+  CEDISAL_VAR_b = 0.05080
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L63,5X4,76',then
+  CEDISAL_VAR_b = 0.06350
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L76,2X4,76',then
+  CEDISAL_VAR_b = 0.07620
+  CEDISAL_VAR_t = 0.00476
+*elseif,ar22,eq,'L25,4X6,35',then
+  CEDISAL_VAR_b = 0.02540
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L31,75X6,35',then
+  CEDISAL_VAR_b = 0.03175
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L38,1X6,35',then
+  CEDISAL_VAR_b = 0.03810
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L44,45X6,35',then
+  CEDISAL_VAR_b = 0.04445
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L50,8X6,35',then
+  CEDISAL_VAR_b = 0.05080
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L63,5X6,35',then
+  CEDISAL_VAR_b = 0.06350
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L76,2X6,35',then
+  CEDISAL_VAR_b = 0.07620
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L101,6X6,35',then
+  CEDISAL_VAR_b = 0.10160
+  CEDISAL_VAR_t = 0.00635
+*elseif,ar22,eq,'L50,8X7,94',then
+  CEDISAL_VAR_b = 0.05080
+  CEDISAL_VAR_t = 0.00794
+*elseif,ar22,eq,'L63,2X7,94',then
+  CEDISAL_VAR_b = 0.06320
+  CEDISAL_VAR_t = 0.00794
+*elseif,ar22,eq,'L76,2X7,94',then
+  CEDISAL_VAR_b = 0.07620
+  CEDISAL_VAR_t = 0.00794
+*elseif,ar22,eq,'L101,6X7,94',then
+  CEDISAL_VAR_b = 0.10160
+  CEDISAL_VAR_t = 0.00794
+*elseif,ar22,eq,'L50,8X9,53',then
+  CEDISAL_VAR_b = 0.05080
+  CEDISAL_VAR_t = 0.00953
+*elseif,ar22,eq,'L63,2X9,53',then
+  CEDISAL_VAR_b = 0.06320
+  CEDISAL_VAR_t = 0.00953
+*elseif,ar22,eq,'L76,2X9,53',then
+  CEDISAL_VAR_b = 0.07620
+  CEDISAL_VAR_t = 0.00953
+*elseif,ar22,eq,'L101,6X9,53',then
+  CEDISAL_VAR_b = 0.10160
+  CEDISAL_VAR_t = 0.00953
+*elseif,ar22,eq,'L152,4X9,53',then
+  CEDISAL_VAR_b = 0.15240
+  CEDISAL_VAR_t = 0.00953
+*elseif,ar22,eq,'L101,6X11,1',then
+  CEDISAL_VAR_b = 0.10160
+  CEDISAL_VAR_t = 0.01110
+*elseif,ar22,eq,'L76,2X12,7',then
+  CEDISAL_VAR_b = 0.07620
+  CEDISAL_VAR_t = 0.01270
+*elseif,ar22,eq,'L101,6X12,7',then
+  CEDISAL_VAR_b = 0.10160
+  CEDISAL_VAR_t = 0.01270
+*elseif,ar22,eq,'L127X12,7',then
+  CEDISAL_VAR_b = 0.12700
+  CEDISAL_VAR_t = 0.01270
+*elseif,ar22,eq,'L152,4X12,7',then
+  CEDISAL_VAR_b = 0.15240
+  CEDISAL_VAR_t = 0.01270
+*elseif,ar22,eq,'L152,4X15,88',then
+  CEDISAL_VAR_b = 0.15240
+  CEDISAL_VAR_t = 0.01588
+*elseif,ar22,eq,'L152,4X19,05',then
+  CEDISAL_VAR_b = 0.15240
+  CEDISAL_VAR_t = 0.01905
 *else
-   AR24=arg1
-*endif
-CEDISAL_VAR_num=AR24
-
-! Determinar geometria da seção
-*if,AR20,EQ,'L12,7X3,18',THEN
-   CEDISAL_VAR_b=0.01270
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L15,88X3,18',THEN
-   CEDISAL_VAR_b=0.01588
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L19,05X3,18',THEN
-   CEDISAL_VAR_b=0.01905
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L22,23X3,18',THEN
-   CEDISAL_VAR_b=0.02223
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L25,4X3,18',THEN
-   CEDISAL_VAR_b=0.02540
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L31,75X3,18',THEN
-   CEDISAL_VAR_b=0.03175
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L38,1X3,18',THEN
-   CEDISAL_VAR_b=0.03810
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L44,45X3,18',THEN
-   CEDISAL_VAR_b=0.04445
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L50,8X3,18',THEN
-   CEDISAL_VAR_b=0.05080
-   CEDISAL_VAR_t=0.00318
-*elseif,AR20,EQ,'L25,4X4,76',THEN
-   CEDISAL_VAR_b=0.02540
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L31,75X4,76',THEN
-   CEDISAL_VAR_b=0.03175
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L38,1X4,76',THEN
-   CEDISAL_VAR_b=0.03810
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L44,45X4,76',THEN
-   CEDISAL_VAR_b=0.04445
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L50,8X4,76',THEN
-   CEDISAL_VAR_b=0.05080
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L63,5X4,76',THEN
-   CEDISAL_VAR_b=0.06350
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L76,2X4,76',THEN
-   CEDISAL_VAR_b=0.07620
-   CEDISAL_VAR_t=0.00476
-*elseif,AR20,EQ,'L25,4X6,35',THEN
-   CEDISAL_VAR_b=0.02540
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L31,75X6,35',THEN
-   CEDISAL_VAR_b=0.03175
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L38,1X6,35',THEN
-   CEDISAL_VAR_b=0.03810
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L44,45X6,35',THEN
-   CEDISAL_VAR_b=0.04445
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L50,8X6,35',THEN
-   CEDISAL_VAR_b=0.05080
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L63,5X6,35',THEN
-   CEDISAL_VAR_b=0.06350
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L76,2X6,35',THEN
-   CEDISAL_VAR_b=0.07620
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L101,6X6,35',THEN
-   CEDISAL_VAR_b=0.10160
-   CEDISAL_VAR_t=0.00635
-*elseif,AR20,EQ,'L50,8X7,94',THEN
-   CEDISAL_VAR_b=0.05080
-   CEDISAL_VAR_t=0.00794
-*elseif,AR20,EQ,'L63,2X7,94',THEN
-   CEDISAL_VAR_b=0.06320
-   CEDISAL_VAR_t=0.00794
-*elseif,AR20,EQ,'L76,2X7,94',THEN
-   CEDISAL_VAR_b=0.07620
-   CEDISAL_VAR_t=0.00794
-*elseif,AR20,EQ,'L101,6X7,94',THEN
-   CEDISAL_VAR_b=0.10160
-   CEDISAL_VAR_t=0.00794
-*elseif,AR20,EQ,'L50,8X9,53',THEN
-   CEDISAL_VAR_b=0.05080
-   CEDISAL_VAR_t=0.00953
-*elseif,AR20,EQ,'L63,2X9,53',THEN
-   CEDISAL_VAR_b=0.06320
-   CEDISAL_VAR_t=0.00953
-*elseif,AR20,EQ,'L76,2X9,53',THEN
-   CEDISAL_VAR_b=0.07620
-   CEDISAL_VAR_t=0.00953
-*elseif,AR20,EQ,'L101,6X9,53',THEN
-   CEDISAL_VAR_b=0.10160
-   CEDISAL_VAR_t=0.00953
-*elseif,AR20,EQ,'L152,4X9,53',THEN
-   CEDISAL_VAR_b=0.15240
-   CEDISAL_VAR_t=0.00953
-*elseif,AR20,EQ,'L101,6X11,1',THEN
-   CEDISAL_VAR_b=0.10160
-   CEDISAL_VAR_t=0.01110
-*elseif,AR20,EQ,'L76,2X12,7',THEN
-   CEDISAL_VAR_b=0.07620
-   CEDISAL_VAR_t=0.01270
-*elseif,AR20,EQ,'L101,6X12,7',THEN
-   CEDISAL_VAR_b=0.10160
-   CEDISAL_VAR_t=0.01270
-*elseif,AR20,EQ,'L127X12,7',THEN
-   CEDISAL_VAR_b=0.12700
-   CEDISAL_VAR_t=0.01270
-*elseif,AR20,EQ,'L152,4X12,7',THEN
-   CEDISAL_VAR_b=0.15240
-   CEDISAL_VAR_t=0.01270
-*elseif,AR20,EQ,'L152,4X15,88',THEN
-   CEDISAL_VAR_b=0.15240
-   CEDISAL_VAR_t=0.01588
-*elseif,AR20,EQ,'L152,4X19,05',THEN
-   CEDISAL_VAR_b=0.15240
-   CEDISAL_VAR_t=0.01905
-*else
-   *msg,WARN
-CEDISAL WARNING: Specified section not found. Command ignored.
-   CEDISAL_VAR_b=-1
+  *msg,error,ar22
+CEDISAL error: Specified section (%s) not found.%/&
+CEDISAL Command ignored.
+  *return,-1
 *endif
 
-! Criar seção transversal
-*if,CEDISAL_VAR_b,NE,-1,AND,AR25,EQ,1,THEN
-   SECTYPE,CEDISAL_VAR_num,BEAM,L,arg2,AR22
-   SECDATA,CEDISAL_VAR_b,CEDISAL_VAR_b,CEDISAL_VAR_t,CEDISAL_VAR_t
+! Output
+CEDISAL_VAR_num = ar21
+
+! Create cross-section
+*if,ARG4,ne,1,then
+  sectype , CEDISAL_VAR_num , beam          , l             , ARG2          , ar23
+  secdata , CEDISAL_VAR_b   , CEDISAL_VAR_b , CEDISAL_VAR_t , CEDISAL_VAR_t
 *endif
 
