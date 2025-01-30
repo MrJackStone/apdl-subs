@@ -1,4 +1,4 @@
-! CMBBOX , cmName , xmin , xmax , ymin , ymax , zmin , zmax
+! cmbbox , cmName , xmin , xmax , ymin , ymax , zmin , zmax
 ! CMBBOX , ARG1   , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7
 
 ! Description:
@@ -26,44 +26,44 @@
 ! ar27: zmaxParm
 
 
-! Check input params
-ar22='CMBBOX_xmin'
+! Parse inputs
+ar22 = 'CMBBOX_xmin'
 *get,ar20,parm,ARG2,type
 *if,ar20,eq,3,then
-  ar22=ARG2
+  ar22 = ARG2
 *endif
 
-ar23='CMBBOX_xmax'
+ar23 = 'CMBBOX_xmax'
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
-  ar23=ARG3
+  ar23 = ARG3
 *endif
 
-ar24='CMBBOX_ymin'
+ar24 = 'CMBBOX_ymin'
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,3,then
-  ar24=ARG4
+  ar24 = ARG4
 *endif
 
-ar25='CMBBOX_ymax'
+ar25 = 'CMBBOX_ymax'
 *get,ar20,parm,ARG5,type
 *if,ar20,eq,3,then
-  ar25=ARG5
+  ar25 = ARG5
 *endif
 
-ar26='CMBBOX_zmin'
+ar26 = 'CMBBOX_zmin'
 *get,ar20,parm,ARG6,type
 *if,ar20,eq,3,then
-  ar26=ARG6
+  ar26 = ARG6
 *endif
 
-ar27='CMBBOX_zmax'
+ar27 = 'CMBBOX_zmax'
 *get,ar20,parm,ARG7,type
 *if,ar20,eq,3,then
-  ar27=ARG7
+  ar27 = ARG7
 *endif
 
-ar21=upcase(strsub(ARG1,5,1))
+ar21 = upcase(strsub(ARG1,5,1))
 
 ! Prepare environment
 kbackup
