@@ -1,102 +1,98 @@
-! CLIMS , minContour , maxContour , greyExceeding , bandCount
-! CLIMS , arg1       , arg2       , arg3          , arg4
+! clims , minContour , maxContour , greyExceeding , bandCount
+! CLIMS , ARG1       , ARG2       , ARG3          , ARG4
 
 ! Description:
 ! Sets scale limits for contour display.
 
 ! Arguments:
-! arg1: minContour     -  minimum value for contour scale
-! arg2: maxContour     -  maximum value for contour scale
-! arg3: greyExceeding  -  controls coloring of values outside min/max limits:
-!                         [0] Values below min colored BLUE;  values above max colored RED (default)
-!                         [1] Values below min colored GREY;  values above max colored GREY
-!                         [2] Values below min colored BLACK; values above max colored BLACK
-!                         [3] Values below min colored BLUE;  values above max colored GREY
-!                         [4] Values below min colored GREY;  values above max colored RED
-!                         [5] Values below min colored BLUE;  values above max colored BLACK
-!                         [6] Values below min colored BLACK; values above max colored RED
-! arg4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
+! ARG1: minContour     -  minimum value for contour scale
+! ARG2: maxContour     -  maximum value for contour scale
+! ARG3: greyExceeding  -  controls coloring of values outside min/max limits:
+!                           [0]  Values below min colored BLUE;  above max colored RED (default)
+!                           [1]  Values below min colored GREY;  above max colored GREY
+!                           [2]  Values below min colored BLACK; above max colored BLACK
+!                           [3]  Values below min colored BLUE;  above max colored GREY
+!                           [4]  Values below min colored GREY;  above max colored RED
+!                           [5]  Values below min colored BLUE;  above max colored BLACK
+!                           [6]  Values below min colored BLACK; above max colored RED
+! ARG4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
 
 ! Local parameters:
-! -
-
-! Global parameters (erased at the end on this subroutine):
-! -
-
-! Output parameters:
-! -
+! ar22: contourCount
 
 
 ! Get number of contours
-AR22=9
-*if,arg4,ne,0,then
-  AR22=arg4
+ar22 = 9
+*if,ARG4,ne,0,then
+  ar22 = ARG4
 *endif
 
 ! Apply predefined contour color configurations:
-*if,AR22,eq,9,then
+*if,ar22,eq,9,then
   ! 9 colors
   /contour,all,9
-  /color,smin,dgra
-  /color,cntr,blue,1
-  /color,cntr,cblu,2
-  /color,cntr,cyan,3
-  /color,cntr,gcya,4
-  /color,cntr,gree,5
-  /color,cntr,ygre,6
-  /color,cntr,yell,7
-  /color,cntr,oran,8
-  /color,cntr,red,9
-  /color,smax,dgra
-*elseif,AR22,eq,-9,then
+  /color , smin , dgra
+  /color , cntr , blue , 1
+  /color , cntr , cblu , 2
+  /color , cntr , cyan , 3
+  /color , cntr , gcya , 4
+  /color , cntr , gree , 5
+  /color , cntr , ygre , 6
+  /color , cntr , yell , 7
+  /color , cntr , oran , 8
+  /color , cntr , red  , 9
+  /color , smax , dgra
+*elseif,ar22,eq,-9,then
   ! 9 colors, reversed order
   /contour,all,9
-  /color,smin,dgra
-  /color,cntr,blue,9
-  /color,cntr,cblu,8
-  /color,cntr,cyan,7
-  /color,cntr,gcya,6
-  /color,cntr,gree,5
-  /color,cntr,ygre,4
-  /color,cntr,yell,3
-  /color,cntr,oran,2
-  /color,cntr,red,1
-  /color,smax,dgra
-*elseif,AR22,eq,5,then
+  /color , smin , dgra
+  /color , cntr , blue , 9
+  /color , cntr , cblu , 8
+  /color , cntr , cyan , 7
+  /color , cntr , gcya , 6
+  /color , cntr , gree , 5
+  /color , cntr , ygre , 4
+  /color , cntr , yell , 3
+  /color , cntr , oran , 2
+  /color , cntr , red  , 1
+  /color , smax , dgra
+*elseif,ar22,eq,5,then
   ! 5 colors
   /contour,all,5
-  /color,cntr,blue,1
-  /color,cntr,cyan,2
-  /color,cntr,gree,3
-  /color,cntr,yell,4
-  /color,cntr,red,5
+  /color , cntr , blue , 1
+  /color , cntr , cyan , 2
+  /color , cntr , gree , 3
+  /color , cntr , yell , 4
+  /color , cntr , red  , 5
 *endif
 
-*if,arg1,eq,0,and,arg2,eq,0,then
-    /contour,all,abs(AR22),auto
+! Enforce contour limits
+*if,ARG1,eq,0,and,ARG2,eq,0,then
+  /contour,all,abs(ar22),auto
 *else
-    /contour,all,abs(AR22),arg1,,arg2
+  /contour,all,abs(ar22),ARG1,,ARG2
 *endif
 
-*if,arg3,eq,1,then
-    /color,smin,dgra
-    /color,smax,dgra
-*elseif,arg3,eq,2,then
-    /color,smin,whit
-    /color,smax,whit
-*elseif,arg3,eq,3,then
-    /color,smin,blue
-    /color,smax,dgra
-*elseif,arg3,eq,4,then
-    /color,smin,dgra
-    /color,smax,red
-*elseif,arg3,eq,5,then
-    /color,smin,blue
-    /color,smax,whit
-*elseif,arg3,eq,6,then
-    /color,smin,whit
-    /color,smax,red
+! Set color for values exceeding limits
+*if,ARG3,eq,1,then
+  /color,smin,dgra
+  /color,smax,dgra
+*elseif,ARG3,eq,2,then
+  /color,smin,whit
+  /color,smax,whit
+*elseif,ARG3,eq,3,then
+  /color,smin,blue
+  /color,smax,dgra
+*elseif,ARG3,eq,4,then
+  /color,smin,dgra
+  /color,smax,red
+*elseif,ARG3,eq,5,then
+  /color,smin,blue
+  /color,smax,whit
+*elseif,ARG3,eq,6,then
+  /color,smin,whit
+  /color,smax,red
 *else
-    /color,smin,blue
-    /color,smax,red
+  /color,smin,blue
+  /color,smax,red
 *endif
