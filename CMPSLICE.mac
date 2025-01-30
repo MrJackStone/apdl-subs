@@ -1,13 +1,13 @@
-! CMPSLICE , compa1 , compa2
-! CMPSLICE , arg1   , arg2
+! cmpslice , compa1 , compa2
+! CMPSLICE , ARG1   , ARG2
 
 ! Description:
 ! Slices two area selection components against each other and keeps their original named selection
 ! components existing.
 
 ! Arguments:
-! arg1: compa1  -  first area selection component
-! arg2: compa2  -  second area selection component
+! ARG1: compa1  -  first area selection component
+! ARG2: compa2  -  second area selection component
 
 
 ! Prepare environment
@@ -16,22 +16,22 @@ lbackup
 kbackup
 
 ! Slice first using second component
-cmsel,s,%arg1%
-cmsel,a,%arg2%
-asba,%arg1%,%arg2%,,delete,keep
-cmsel,u,%arg2%
-cm,%arg1%,area
+cmsel,s,%ARG1%
+cmsel,a,%ARG2%
+asba,%ARG1%,%ARG2%,,delete,keep
+cmsel,u,%ARG2%
+cm,%ARG1%,area
 
 ! Slice second using first component
-cmsel,s,%arg1%
-cmsel,a,%arg2%
-asba,%arg2%,%arg1%,,delete,keep
-cmsel,u,%arg1%
-cm,%arg2%,area
+cmsel,s,%ARG1%
+cmsel,a,%ARG2%
+asba,%ARG2%,%ARG1%,,delete,keep
+cmsel,u,%ARG1%
+cm,%ARG2%,area
 
 ! Merge keypoints
-cmsel,s,%arg1%
-cmsel,a,%arg2%
+cmsel,s,%ARG1%
+cmsel,a,%ARG2%
 lsla,s
 ksll,s
 nummrg,kp
@@ -40,5 +40,5 @@ nummrg,kp
 arestore
 lrestore
 krestore
-cmsel,a,%arg1%
-cmsel,a,%arg2%
+cmsel,a,%ARG1%
+cmsel,a,%ARG2%

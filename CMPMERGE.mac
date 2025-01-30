@@ -1,8 +1,8 @@
-! CMPMERGE , fileName , fileExt
+! cmpmerge , fileName , fileExt
 ! CMPMERGE , ARG1     , ARG2
 
 ! Description:
-! Merges the current selection component definition with the one found in the named file, then! Merges the current selection component definition with the one found in the named file, then
+! Merges the current selection component definition with the one found in the named file, then
 ! overwrites the file in which the selection components were stored.
 
 ! Arguments:
