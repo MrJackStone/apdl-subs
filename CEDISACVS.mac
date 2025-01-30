@@ -2,11 +2,11 @@
 ! CEDISACVS , ARG1  , ARG2 , ARG3      , ARG4
 
 ! Description:
-! Create a beam I-shape cross-section from CEDISA's CVS welded shapes catalogue.
+! Creates a beam I-shape cross-section from CEDISA's CVS welded shapes catalogue.
 
 ! Arguments:
 ! ARG1: secID        -  number assigned to cross-section
-! ARG2: name         -  name in CEDISA's catalogue identifying I-shape section
+! ARG2: name         -  name in CEDISA's catalogue identifying the section
 ! ARG3: refineKey    -  cross-section mesh refinement key, as described in SECDATA
 ! ARG4: consultOnly  -  determines whether or not section should be created:
 !                         [0]  create cross-section (default)

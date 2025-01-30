@@ -2,7 +2,7 @@
 ! CEDISATQ , ARG1  , ARG2 , ARG3      , ARG4
 
 ! Description:
-! Create a beam rectangular tube-shape cross-section from CEDISA's catalogue.
+! Creates a beam rectangular tube-shape cross-section from CEDISA's catalogue.
 
 ! Arguments:
 ! ARG1: secID        -  number assigned to cross-section
