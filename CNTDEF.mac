@@ -59,11 +59,11 @@ nbackup
 
 ! Target element type
 ar31 = ar21+1
-et,ar31,arg3
+et,ar31,ARG3
 
 ! Contact element type
 ar32 = ar21+2
-et,ar32,arg4
+et,ar32,ARG4
 
 ! Contact element keyoptions (default values)
 keyopt , ar32 , 1  , 0     ! Degrees of freedom:      [0] UX, UY
@@ -77,18 +77,18 @@ keyopt , ar32 , 8  , 0     ! Symmetric behavior:      [0] Both pairs active, eac
 keyopt , ar32 , 9  , 0     ! Initial penetration/gap: [0] Include both
 keyopt , ar32 , 10 , 0     ! Stiffness update:        [0] Each iteration
 keyopt , ar32 , 11 , 0     ! Beam/shell thk. effect:  [0] Exclude
-keyopt , ar32 , 12 , arg5  ! Surface behavior:        [0] Standard
+keyopt , ar32 , 12 , ARG5  ! Surface behavior:        [0] Standard
 keyopt , ar32 , 14 , 0     ! Fluid pres. penetration: [0] Default
 keyopt , ar32 , 15 , 0     ! Stabilization damping:   [0] Default
 keyopt , ar32 , 18 , 0     ! Sliding behavior:        [0] Finite sliding
 
 ! Replace default CONTA keyopt values with provided ones
-*get,ar23,parm,%arg7%,type
+*get,ar23,parm,%ARG7%,type
 *if,ar23,eq,1,then
-  *get,ar27,parm,%arg7%,dim,x
+  *get,ar27,parm,%ARG7%,dim,x
   ar27=(ar27<18)
   *do,ar28,1,ar27,1
-    ar29=%arg7%(ar28)
+    ar29=%ARG7%(ar28)
     *if,ar29,ne,0,then
       keyopt, ar32, ar28, ar29
     *endif
@@ -126,12 +126,12 @@ CNTDEF_ARR_rc(7) = 0         , 0         , 1e20        , 0          , 1         
 CNTDEF_ARR_rc(13)= 0
 
 ! Replace default RC values with provided ones
-*get,ar23,parm,%arg8%,type
+*get,ar23,parm,%ARG8%,type
 *if,ar23,eq,1,then
-  *get,ar24,parm,%arg8%,dim,x
+  *get,ar24,parm,%ARG8%,dim,x
   ar24=(ar24<13)
   *do,ar25,1,ar24,1
-    ar26=%arg8%(ar25)
+    ar26=%ARG8%(ar25)
     *if,ar26,ne,0,then
       CNTDEF_ARR_rc(ar25)=ar26
     *endif
@@ -152,7 +152,7 @@ rmore , CNTDEF_ARR_rc(13)
 !!                                                                                                !!
 *get,ar22,mat,,num,max
 ar33 = ar22+1
-mp,mu,ar33,arg6
+mp,mu,ar33,ARG6
 
 
 !!                                                                                                !!
@@ -163,8 +163,8 @@ real , ar30
 mat  , ar33
 
 ! TARGE elements & nodes
-ar34 = strcat('COMPN_',arg1)
-ar35 = strcat('COMPE_',arg1)
+ar34 = strcat('COMPN_',ARG1)
+ar35 = strcat('COMPE_',ARG1)
 ar38 = strcat(ar35,'_TARGE')
 type,ar31
 cmsel,s,ar34
@@ -174,8 +174,8 @@ esel,r,type,,ar31
 cm,%ar38%,elem
 
 ! select CONTA elements & nodes
-ar36 = strcat('COMPN_',arg2)
-ar37 = strcat('COMPE_',arg2)
+ar36 = strcat('COMPN_',ARG2)
+ar37 = strcat('COMPE_',ARG2)
 ar39 = strcat(ar37,'_CONTA')
 type,ar32
 cmsel,s,ar36

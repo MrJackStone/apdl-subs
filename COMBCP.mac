@@ -1,46 +1,67 @@
-! COMBCP,keep,delete
+! combcp , keep , delete
+! COMBCP , ARG1 , ARG2
 
-! AR20: DOFKey_CP1
-! AR21: CP2NCount
-! AR22: nthNode
-! AR23: NodeNum
-! AR24: DOFKey_CP2
-! AR25: DOFname
+! Description:
+! Combines two coupling equations into a single one.
+
+! Arguments:
+! ARG1: keep    -  number of coupling equation to keep
+! ARG2: delete  -  number of coupling equation to combine & delete
+
+! Local parameters:
+! ar21: cp1DOF
+! ar22: cp2DOF
+! ar23: nthNode
+! ar24: nodeNum
+! ar25: DOFname
+! ar32: cp2NodeCount
 
 
-*get,AR20,CP,arg1,DOF
-*get,AR24,CP,arg2,DOF
-
-*if,AR20,eq,AR24,then
-
-    *if,AR20,EQ,1,THEN
-      AR25='UX'
-   *elseif,AR20,EQ,2,THEN
-      AR25='UY'
-   *elseif,AR20,EQ,3,THEN
-      AR25='UZ'
-   *elseif,AR20,EQ,4,THEN
-      AR25='ROTX'
-   *elseif,AR20,EQ,5,THEN
-      AR25='ROTY'
-   *elseif,AR20,EQ,6,THEN
-      AR25='ROTZ'
-   *endif
-
-    *get,AR21,CP,arg2,NTERM
-
-    *do,AR22,1,AR21,1
-        *get,AR23,CP,arg2,TERM,AR22,NODE
-        *if,ndinqr(AR23,1),eq,-1,then
-            nsel,a,node,,AR23
-            CP,arg1,AR25,AR23
-            nsel,u,node,,AR23
-        *else
-            CP,arg1,AR25,AR23
-        *endif
-    *enddo
-
-    CPDELE,arg2
-
+! Check that both CP's use the same DOF
+*get , ar21 , cp , ARG1 , dof
+*get , ar22 , cp , ARG2 , dof
+*if,ar21,eq,ar22,then
+  *msg,warn,ARG1,ARG2,ar21,ar22
+COMBCP warning: given CPs (%I & %I) do not use the same DOF (I% & %I, respectively).%/&
+COMBCP command ignored.
+  *return,-1
 *endif
 
+! Prepare environment
+nbackup
+
+! Get DOF name
+*if,ar21,eq,1,then
+  ar25 = 'UX'
+*elseif,ar21,eq,2,then
+  ar25 = 'UY'
+*elseif,ar21,eq,3,then
+  ar25 = 'UZ'
+*elseif,ar21,eq,4,then
+  ar25 = 'ROTX'
+*elseif,ar21,eq,5,then
+  ar25 = 'ROTY'
+*elseif,ar21,eq,6,then
+  ar25 = 'ROTZ'
+*endif
+
+! Move nodes from deleted CP to kept CP
+*get,ar32,cp,ARG2,nterm
+
+*do,ar23,1,ar32,1
+  *get,ar24,cp,ARG2,term,ar23,node
+
+  *if,ndinqr(ar24,1),eq,-1,then
+    nsel,a,node,,ar24
+    cp,ARG1,ar25,ar24
+    nsel,u,node,,ar24
+  *else
+    cp,ARG1,ar25,ar24
+  *endif
+
+*enddo
+
+cpdele,ARG2
+
+! Clean up
+nrestore

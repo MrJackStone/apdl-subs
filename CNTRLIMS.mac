@@ -1,22 +1,44 @@
-! CNTRLIMS, min, max, absmax
-! CNTRLIMS, arg1, arg2, arg3
+! cntrlims , min  , max  , absmax
+! CNTRLIMS , ARG1 , ARG2 , ARG3
 
-*get,AR20,plnsol,,min
-*get,AR21,plnsol,,max
-AR22=(abs(AR20)>abs(AR21))
+! Description:
+! Extracts min/max limits of the last contour scale plotted.
 
-*get,AR23,parm,arg1,type
-*if,AR23,eq,3,then
-    %arg1%=AR20
+! Arguments:
+! ARG1: minParm  -  name of parameter to which the minimum value will be assigned
+!                   (defaults to 'CNTRLIMS_VAR_min')
+! ARG2: minParm  -  name of parameter to which the maximum value will be assigned
+!                   (defaults to 'CNTRLIMS_VAR_max')
+! ARG3: minParm  -  name of parameter to which the absolute maximum value will be assigned
+!                   (defaults to 'CNTRLIMS_VAR_abs')
+
+! Local parameters:
+! ar20: parType
+! ar21: minParam
+! ar22: maxParam
+! ar23: absParam
+
+
+! Parse inputs
+ar21 = 'CNTRLIMS_VAR_min'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
 *endif
 
-*get,AR23,parm,arg2,type
-*if,AR23,eq,3,then
-    %arg2%=AR21
+ar22 = 'CNTRLIMS_VAR_max'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar22 = ARG2
 *endif
 
-*get,AR23,parm,arg3,type
-*if,AR23,eq,3,then
-    %arg3%=AR22
+ar23 = 'CNTRLIMS_VAR_abs'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar23 = ARG3
 *endif
 
+! Extract limits
+*get,%ar21%,plnsol,,min
+*get,%ar22%,plnsol,,max
+%ar23% = (abs(%ar21%)>abs(%ar22%))
