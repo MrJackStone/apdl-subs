@@ -38,8 +38,8 @@
 ! ar21: parmNameNF
 ! ar22: parmNameNN
 ! ar23: parmNameNC
-! ar28: gravityDir
-! ar29: boussinesqDir
+! ar28: boussinesqDir
+! ar29: gravityDir
 ! ar30: parmNameApport
 ! ar31: includeAREMAimpactFactor
 ! ar32: nthNode
@@ -101,14 +101,12 @@ BOUSSINESQ command is ignored.
 *endif
 
 ar28 = upcase(ARG8)
-*if,ar28,ne,'X',then
-  *if,ar28,ne,'Y',then
-    *if,ar28,ne,'Z',then
-      *msg,error
-BOUSSINESQ error: expected ARG8 to be the name of a cartesian axis (X, Y, or Z).%/&
+*if,ar28,ne,'H',then
+  *if,ar28,ne,'V',then
+    *msg,error
+BOUSSINESQ error: expected ARG9 to be either H (horizontal) or V (vertical).%/&
 BOUSSINESQ command is ignored.
-      *return,-1
-    *endif
+    *return,-1
   *endif
 *endif
 
@@ -121,12 +119,14 @@ BOUSSINESQ command is ignored.
 *endif
 
 ar29 = upcase(ARG9)
-*if,ar29,ne,'H',then
-  *if,ar28,ne,'V',then
-    *msg,error
-BOUSSINESQ error: expected ARG9 to be either H (horizontal) or V (vertical).%/&
+*if,ar29,ne,'X',then
+  *if,ar29,ne,'Y',then
+    *if,ar29,ne,'Z',then
+      *msg,error
+BOUSSINESQ error: expected ARG8 to be the name of a cartesian axis (X, Y, or Z).%/&
 BOUSSINESQ command is ignored.
-    *return,-1
+      *return,-1
+    *endif
   *endif
 *endif
 
