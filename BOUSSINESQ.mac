@@ -64,6 +64,8 @@
 ! ar55: dynamic_impact_coefficients
 ! ar56: nodal_pressures
 ! ar57: nodal_forces
+! ar62: apportDim1
+! ar63: apportDim2
 
 
 ! Parse inputs
@@ -139,9 +141,9 @@ ar30 = 'BOUSSINESQ_ARR_apport_areas'
 ar34 = 1
 *get,ar20,parm,%ar30%,type
 *if,ar20,eq,1,then
-  *get,ar52,parm,%ar30%,dim,x
-  *get,ar53,parm,%ar30%,dim,y
-  *if,ar52,ge,1,and,ar53,ge,2,then
+  *get,ar62,parm,%ar30%,dim,x
+  *get,ar63,parm,%ar30%,dim,y
+  *if,ar62,ge,1,and,ar63,ge,2,then
     ar34 = 0
   *endif
 *endif
@@ -160,111 +162,130 @@ afunbackup
 ar35 = acos(-1)
 afunrestore
 
+ar40 = 'BOUSSINESQ_ARR_nodes_all'
+ar41 = 'BOUSSINESQ_ARR_nodes_selStatus'
+ar42 = 'BOUSSINESQ_ARR_nodes_x'
+ar43 = 'BOUSSINESQ_ARR_nodes_y'
+ar44 = 'BOUSSINESQ_ARR_nodes_z'
+ar45 = 'BOUSSINESQ_ARR_delta_x'
+ar46 = 'BOUSSINESQ_ARR_delta_y'
+ar47 = 'BOUSSINESQ_ARR_delta_z'
+ar48 = 'BOUSSINESQ_ARR_delta_x_squared'
+ar49 = 'BOUSSINESQ_ARR_delta_y_squared'
+ar50 = 'BOUSSINESQ_ARR_delta_z_squared'
+ar51 = 'BOUSSINESQ_ARR_vertical_dists'
+ar52 = 'BOUSSINESQ_ARR_direct_3d_dists'
+ar53 = 'BOUSSINESQ_ARR_r_squared'
+ar54 = 'BOUSSINESQ_ARR_radial_distances'
+ar55 = 'BOUSSINESQ_ARR_dynImp_coefs'
+ar56 = 'BOUSSINESQ_ARR_nodal_pressures'
+ar57 = 'BOUSSINESQ_ARR_nodal_forces'
+
 *del , %ar21% ,  , nopr
 *del , %ar22% ,  , nopr
-*del , ar40   ,  , nopr
-*del , ar41   ,  , nopr
-*del , ar42   ,  , nopr
-*del , ar43   ,  , nopr
-*del , ar44   ,  , nopr
-*del , ar45   ,  , nopr
-*del , ar46   ,  , nopr
-*del , ar47   ,  , nopr
-*del , ar48   ,  , nopr
-*del , ar49   ,  , nopr
-*del , ar50   ,  , nopr
-*del , ar53   ,  , nopr
-*del , ar54   ,  , nopr
-*del , ar56   ,  , nopr
-*del , ar57   ,  , nopr
-*del , ar55   ,  , nopr
-*del , ar51   ,  , nopr
-*del , ar52   ,  , nopr
+*del , %ar40% ,  , nopr
+*del , %ar41% ,  , nopr
+*del , %ar42% ,  , nopr
+*del , %ar43% ,  , nopr
+*del , %ar44% ,  , nopr
+*del , %ar45% ,  , nopr
+*del , %ar46% ,  , nopr
+*del , %ar47% ,  , nopr
+*del , %ar48% ,  , nopr
+*del , %ar49% ,  , nopr
+*del , %ar50% ,  , nopr
+*del , %ar51% ,  , nopr
+*del , %ar52% ,  , nopr
+*del , %ar53% ,  , nopr
+*del , %ar54% ,  , nopr
+*del , %ar55% ,  , nopr
+*del , %ar56% ,  , nopr
+*del , %ar57% ,  , nopr
 
 ! Extract nodal data
-*vget , ar40 , node ,  , nlist
-*vget , ar41 , node ,  , nsel
-*vget , ar42 , node ,  , loc   , x
-*vget , ar43 , node ,  , loc   , y
-*vget , ar44 , node ,  , loc   , z
+*vget , %ar40% , node ,  , nlist
+*vget , %ar41% , node ,  , nsel
+*vget , %ar42% , node ,  , loc   , x
+*vget , %ar43% , node ,  , loc   , y
+*vget , %ar44% , node ,  , loc   , z
 
-*get , %ar23% , parm , ar40 , dim , x
+*get , %ar23% , parm , %ar40% , dim , x
 
-*vmask , ar41
-*vfun  , %ar22% , comp , ar40
+*vmask , %ar41%
+*vfun  , %ar22% , comp , %ar40%
 
 *if,ar34,eq,1,then
   *del,%ar30%,,nopr
   *dim,%ar30%,,%ar23%
   *do,ar32,1,%ar23%,1
-    ar33         = ar40(ar32)
+    ar33         = %ar40%(ar32)
     %ar30%(ar32) = arnode(ar33)
   *enddo
 *endif
 
 ! Calculate Boussinesq distances
-*voper , ar45 , ARG5 , sub , ar42
-*voper , ar46 , ARG6 , sub , ar43
-*voper , ar47 , ARG7 , sub , ar44
+*voper , %ar45% , ARG5 , sub , %ar42%
+*voper , %ar46% , ARG6 , sub , %ar43%
+*voper , %ar47% , ARG7 , sub , %ar44%
 
-*vfun , ar48 , pwr , ar45 , 2
-*vfun , ar49 , pwr , ar46 , 2
-*vfun , ar50 , pwr , ar47 , 2
+*vfun , %ar48% , pwr , %ar45% , 2
+*vfun , %ar49% , pwr , %ar46% , 2
+*vfun , %ar50% , pwr , %ar47% , 2
 
-*voper , ar52 , ar48 , add  , ar49
-*voper , ar52 , ar52 , add  , ar50
-*vfun  , ar52 , sqrt , ar52
+*voper , %ar52% , %ar48% , add  , %ar49%
+*voper , %ar52% , %ar52% , add  , %ar50%
+*vfun  , %ar52% , sqrt , %ar52%
 
 *if,ar29,eq,'X',then
-  *vfun  , ar51 , copy , ar45
-  *voper , ar53 , ar49 , add  , ar50
+  *vfun  , %ar51% , copy , %ar45%
+  *voper , %ar53% , %ar49% , add  , %ar50%
 *elseif,ar29,eq,'Y',then
-  *vfun  , ar51 , copy , ar46
-  *voper , ar53 , ar48 , add  , ar50
+  *vfun  , %ar51% , copy , %ar46%
+  *voper , %ar53% , %ar48% , add  , %ar50%
 *elseif,ar29,eq,'Z',then
-  *vfun  , ar51 , copy , ar47
-  *voper , ar53 , ar48 , add  , ar49
+  *vfun  , %ar51% , copy , %ar47%
+  *voper , %ar53% , %ar48% , add  , %ar49%
 *endif
 
-*vfun , ar54 , sqrt , ar53
+*vfun , %ar54% , sqrt , %ar53%
 
 ! Calculate impact coefficients (according to AREMA Chapter 8)
 *if,ar31,eq,1,then
   ! AREMA formula: f = 1.0 <= 1.7060-0.2353*z <= 1.6
-  *voper , ar55 , ar51 , mult , -0.2353
-  *voper , ar55 , ar55 , add  , 1.7060
-  *voper , ar55 , ar55 , max  , 1
-  *voper , ar55 , ar55 , min  , 1.6
+  *voper , %ar55% , %ar51% , mult , -0.2353
+  *voper , %ar55% , %ar55% , add  , 1.7060
+  *voper , %ar55% , %ar55% , max  , 1
+  *voper , %ar55% , %ar55% , min  , 1.6
 *else
-  *vfill , ar55 , ramp , 1 , 0
+  *vfill , %ar55% , ramp , 1 , 0
 *endif
 
 ! Calculate Boussinesq pressure increases
 *if,ar28,eq,'V',then
   ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
-  *voper , ar56 , ar54 , div  , ar51
-  *vfun  , ar56 , pwr  , ar56 , 2
-  *voper , ar56 , ar56 , add  , 1
-  *vfun  , ar56 , pwr  , ar56 , 5/2
-  *voper , ar56 , ar56 , mult , ar51
-  *voper , ar56 , ar56 , mult , ar51
-  *voper , ar56 , ar56 , mult , 2*ar35
-  *vfun  , ar56 , pwr  , ar56 , -1
-  *voper , ar56 , ar56 , mult , 3*ARG4
+  *voper , %ar56% , %ar54% , div  , %ar51%
+  *vfun  , %ar56% , pwr  , %ar56% , 2
+  *voper , %ar56% , %ar56% , add  , 1
+  *vfun  , %ar56% , pwr  , %ar56% , 5/2
+  *voper , %ar56% , %ar56% , mult , %ar51%
+  *voper , %ar56% , %ar56% , mult , %ar51%
+  *voper , %ar56% , %ar56% , mult , 2*ar35
+  *vfun  , %ar56% , pwr  , %ar56% , -1
+  *voper , %ar56% , %ar56% , mult , 3*ARG4
 
 *elseif,ar28,eq,'H',then
   ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
-  *vfun  , ar56 , pwr  , ar52 , 5
-  *voper , ar56 , ar56 , mult , 2*ar35
-  *vfun  , ar56 , pwr  , ar56 , -1
-  *voper , ar56 , ar56 , mult , ar51
-  *voper , ar56 , ar56 , mult , ar53
-  *voper , ar56 , ar56 , mult , 6*ARG4
+  *vfun  , %ar56% , pwr  , %ar52% , 5
+  *voper , %ar56% , %ar56% , mult , 2*ar35
+  *vfun  , %ar56% , pwr  , %ar56% , -1
+  *voper , %ar56% , %ar56% , mult , %ar51%
+  *voper , %ar56% , %ar56% , mult , %ar53%
+  *voper , %ar56% , %ar56% , mult , 6*ARG4
 
 *endif
 
 ! Calculate apportioned nodal forces and apply dynamic impact coefficient
-*voper , ar57   , ar56 , mult , %ar30%
-*voper , ar57   , ar57 , mult , ar55
-*vmask , ar41
-*vfun  , %ar21% , comp , ar57
+*voper , %ar57%   , %ar56% , mult , %ar30%
+*voper , %ar57%   , %ar57% , mult , %ar55%
+*vmask , %ar41%
+*vfun  , %ar21% , comp , %ar57%
