@@ -219,12 +219,17 @@ nrestore
 *get , %ar23% , parm , %ar22% , dim , x
 
 *if,ar34,eq,1,then
+  nbackup
+  nsel,all
+
   *del,%ar30%,,nopr
   *dim,%ar30%,,%ar23%
   *do,ar32,1,%ar23%,1
     ar33         = %ar22%(ar32)
     %ar30%(ar32) = arnode(ar33)
   *enddo
+
+  nrestore
 *endif
 
 ! Calculate Boussinesq distances
