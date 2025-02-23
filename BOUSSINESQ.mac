@@ -203,22 +203,26 @@ ar57 = 'BOUSSINESQ_ARR_nodal_forces'
 *del , %ar57% ,  , nopr
 
 ! Extract nodal data
+nbackup
+nsel,all
 *vget , %ar40% , node ,  , nlist
+nrestore
+
 *vget , %ar41% , node ,  , nsel
 *vget , %ar42% , node ,  , loc   , x
 *vget , %ar43% , node ,  , loc   , y
 *vget , %ar44% , node ,  , loc   , z
 
-*get , %ar23% , parm , %ar40% , dim , x
-
 *vmask , %ar41%
 *vfun  , %ar22% , comp , %ar40%
+
+*get , %ar23% , parm , %ar22% , dim , x
 
 *if,ar34,eq,1,then
   *del,%ar30%,,nopr
   *dim,%ar30%,,%ar23%
   *do,ar32,1,%ar23%,1
-    ar33         = %ar40%(ar32)
+    ar33         = %ar22%(ar32)
     %ar30%(ar32) = arnode(ar33)
   *enddo
 *endif
@@ -285,7 +289,6 @@ ar57 = 'BOUSSINESQ_ARR_nodal_forces'
 *endif
 
 ! Calculate apportioned nodal forces and apply dynamic impact coefficient
-*voper , %ar57%   , %ar56% , mult , %ar30%
-*voper , %ar57%   , %ar57% , mult , %ar55%
-*vmask , %ar41%
-*vfun  , %ar21% , comp , %ar57%
+*voper , %ar57% , %ar56% , mult   , %ar30%
+*voper , %ar57% , %ar57% , mult   , %ar55%
+*vfun  , %ar21% , comp   , %ar57%
