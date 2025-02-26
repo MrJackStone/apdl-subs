@@ -1,5 +1,13 @@
-! CORBELFCN, parName, corbelParallel, corbelOrtho, baseThk, orthoThk, corbelLen, direction, csys
-! CORBELFCN,    arg1,           arg2,        arg3,    arg4,     arg5,      arg6,      arg7, arg8
+!! TODO  this macro is broken, I don't think it works at all                                      !!
+
+*msg,fatal
+CORBELFCN error: this macro needs to be fixed before it can be used.%/&
+Program terminated.
+
+/eof
+
+! corbelfcn , parName , corbelParallel , corbelOrtho , baseThk , orthoThk , corbelLen , direction , csys
+! CORBELFCN , ARG1    , ARG2           , ARG3        , ARG4    , ARG5     , ARG6      , ARG7      , ARG8
 
 ! AR20: angularCoefficient
 ! AR21: linearCoefficient

@@ -1,37 +1,37 @@
-! CPATH , pathName , xCenter , yCenter , zCenter , radius
+! cpath , pathName , xCenter , yCenter , zCenter , radius
 ! CPATH , ARG1     , ARG2    , ARG3    , ARG4    , ARG5
 
 ! Description:
 ! Creates a circular path of a given radius centered about given X and Y coordinates.
 
 ! Arguments:
-! arg1: xCenter  -  X coordinate of circular path's center
-! arg2: yCenter  -  Y coordinate of circular path's center
-! arg3: radius   -  path radius
+! ARG1: xCenter  -  X coordinate of circular path's center
+! ARG2: yCenter  -  Y coordinate of circular path's center
+! ARG3: radius   -  path radius
 
 ! Local parameters:
-! AR20: maxCS
-! AR21: newCS
-! AR30: prevCS
-
-! Global parameters (erased at the end on this subroutine):
-! -
-
-! Output parameters:
-! -
+! ar20: maxCS
+! ar21: newCS
+! ar30: prevCS
 
 
-*get,ar30,active,,csys
+! Prepare environment
+csbackup
 
+! Create auxiliary polar coordinate system
 *get,ar20,cdsy,,num,max
-ar21=ar20+1
+ar21 = ar20+1
 local,ar21,cylin,ARG2,ARG3,0
 cscir,ar21,1
 
+! Create circular path
 path,ARG1,2,30,120
 
 ppath , 1 ,  , ARG2+ARG5+1e-6 , ARG3+1e-6 , ARG4
 ppath , 2 ,  , ARG2+ARG5-1e-6 , ARG3-1e-6 , ARG4
 
 pmap,'UNI'
-csys,ar30
+
+! Clean up
+csrestore
+csdele,ar21
