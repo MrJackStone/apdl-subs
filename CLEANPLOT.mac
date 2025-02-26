@@ -1,121 +1,142 @@
-! CLEANPLOT, plotCommand, argument1, argument2, argument3, argument4, argument5, argument6, argument7, scale, window
-! CLEANPLOT,        arg1,      arg2,      arg3,      arg4,      arg5,      arg6,      arg7,      arg8,  arg9,   ar10
+! cleanplot , plotCommand , argument1 , argument2 , argument3 , argument4 , argument5 , argument6 , argument7 , scale , window
+! CLEANPLOT , ARG1        , ARG2      , ARG3      , ARG4      , ARG5      , ARG6      , ARG7      , ARG8      , ARG9  , AR10
 
-!    /plopts,info,0
-!    %arg1%,%arg2%,%arg3%,%arg4%,%arg5%,%arg6%,%arg7%
-!    /plopts,info,3
-!    /focus,all,1e6,,,1
-!
-!    *if,arg9,ne,0,then
-!        AR20=arg9
-!        *get,AR21,graph,1,contour,vmin
-!        *get,AR22,graph,1,contour,vinc
-!        *get,AR23,graph,1,contour,ncont
-!        AR24=AR21+(AR23-1)*AR22
-!        clims,AR21*AR20,AR24*AR20
-!    *endif
-!    /replot
-!
-!    /focus,all,-1e6,,,1
-!    /plopts,info,0
-!
+! Description:
+! Issues a plotting command (with its given arguments) combined with some tricks to generate a
+! clean plot, without default symbols like the ANSYS logo, but that still shows the color scale.
+! This macro does not finish and export the image file. Rather, it assumes /NOERASE is active
+! and that the output has been redirected to an external file (using a macro like GO2PNG) that
+! will later be finished (using a macro like ENDPNG).
+
+! Arguments:
+! ARG1: plotCommand  -  name of plot command to be issued, as string (e.g. 'EPLOT', 'PLNSOL', etc.)
+! ARG2: argument1    -  1st argument of the plot command
+! ARG3: argument2    -  2nd argument of the plot command
+! ARG4: argument3    -  3rd argument of the plot command
+! ARG5: argument4    -  4th argument of the plot command
+! ARG6: argument5    -  5th argument of the plot command
+! ARG7: argument6    -  6th argument of the plot command
+! ARG8: argument7    -  7th argument of the plot command
+! ARG9: scale        -  scale factor to be applied to the contour scale (defaults to 0, no scaling)
+! AR10: window       -  number of window in which the contour scale to be scaled (ARG9=/=0) is,
+!                       useful for multi-window plots (defaults to 1)
+
+! Local parameters:
+! ar20: parType
+! ar31: commandNameFormatting
+! ar32: formattingArg1
+! ar33: formattingArg2
+! ar34: formattingArg3
+! ar35: formattingArg4
+! ar36: formattingArg5
+! ar37: formattingArg6
+! ar38: formattingArg7
 
 
-ar31='%C'
-
-*get,AR99,parm,arg2,type
-*if,AR99,ne,0,then
-    ar32='%C'
-*else
-    ar32='%G'
+! Parse inputs
+ar29 = 0
+*if,ARG9,ne,0,then
+  ar29 = ARG9
 *endif
 
-*get,AR99,parm,arg3,type
-*if,AR99,ne,0,then
-    ar33='%C'
-*else
-    ar33='%G'
+ar26 = 1
+*get,ar25,parm,AR10,type
+*if,ar25,eq,0,then
+  *if,AR10,ne,0,then
+    ar26 = AR10
+  *endif
 *endif
 
-*get,AR99,parm,arg4,type
-*if,AR99,ne,0,then
-    ar34='%C'
+! Set formatting code for plot command & its arguments
+ar31 = '%C'
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,0,then
+  ar32 = '%C'
 *else
-    ar34='%G'
+  ar32 = '%G'
 *endif
 
-*get,AR99,parm,arg5,type
-*if,AR99,ne,0,then
-    ar35='%C'
+*get,ar20,parm,ARG3,type
+*if,ar20,ne,0,then
+  ar33 = '%C'
 *else
-    ar35='%G'
+  ar33 = '%G'
 *endif
 
-*get,AR99,parm,arg6,type
-*if,AR99,ne,0,then
-    ar36='%C'
+*get,ar20,parm,ARG4,type
+*if,ar20,ne,0,then
+  ar34 = '%C'
 *else
-    ar36='%G'
+  ar34 = '%G'
 *endif
 
-*get,AR99,parm,arg7,type
-*if,AR99,ne,0,then
-    ar37='%C'
+*get,ar20,parm,ARG5,type
+*if,ar20,ne,0,then
+  ar35 = '%C'
 *else
-    ar37='%G'
+  ar35 = '%G'
 *endif
 
-*get,AR99,parm,arg8,type
-*if,AR99,ne,0,then
-    ar38='%C'
+*get,ar20,parm,ARG6,type
+*if,ar20,ne,0,then
+  ar36 = '%C'
 *else
-    ar38='%G'
+  ar36 = '%G'
 *endif
 
-! Write meta-file
+*get,ar20,parm,ARG7,type
+*if,ar20,ne,0,then
+  ar37 = '%C'
+*else
+  ar37 = '%G'
+*endif
+
+*get,ar20,parm,ARG8,type
+*if,ar20,ne,0,then
+  ar38 = '%C'
+*else
+  ar38 = '%G'
+*endif
+
+! Write meta-file with plot command
 *cfopen,cleanplot_tmp1,tmp
-    *vwrite,
-    ('*cfopen,cleanplot_tmp2,tmp')
-    *vwrite,
-    ('*vwrite,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8')
-    *vwrite,ar31,ar32,ar33,ar34,ar35,ar36,ar37,ar38
-    (A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2)
-    *vwrite,
-    ('*cfclos')
+  *vwrite,
+  ('*cfopen,cleanplot_tmp2,tmp')
+  *vwrite,
+  ('*vwrite,ARG1,ARG2,ARG3,ARG4,ARG5,ARG6,ARG7,ARG8')
+  *vwrite,ar31,ar32,ar33,ar34,ar35,ar36,ar37,ar38
+  (A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2,',',A2)
+  *vwrite,
+  ('*cfclos')
 *cfclos
 
 ! Run meta-file
 /input,cleanplot_tmp1,tmp
 
+! First part of display trick to avoid plotting ANSYS logo
 /plopts,info,0
 /nopr
 /input,cleanplot_tmp2,tmp
 /plopts,info,3
 /focus,all,1e6,,,1
 
-*if,arg9,ne,0,then
-    ! Window number
-    AR26=1
-    *get,AR25,parm,ar10,type
-    *if,AR25,eq,0,then
-        *if,ar10,ne,0,then
-            AR26=ar10
-        *endif
-    *endif
-
-    AR20=arg9
-    *get,AR21,graph,AR26,contour,vmin
-    *get,AR22,graph,AR26,contour,vinc
-    *get,AR23,graph,AR26,contour,ncont
-    AR24=AR21+(AR23-1)*AR22
-    clims,AR21*AR20,AR24*AR20
+! Scale contour scale
+*if,ARG9,ne,0,then
+  *get,ar21,graph,ar26,contour,vmin
+  *get,ar22,graph,ar26,contour,vinc
+  *get,ar23,graph,ar26,contour,ncont
+  ar24 = ar21+(ar23-1)*ar22
+  clims,ar21*ar29,ar24*ar29
 *endif
 /nopr
 /input,cleanplot_tmp2,tmp
 
+! Second part of display trick
 /focus,all,-1e6,,,1
 /plopts,info,0
 
+! Clean up
 /delete,cleanplot_tmp1,tmp
 /delete,cleanplot_tmp2,tmp
 /gopr
