@@ -1,5 +1,5 @@
-! cleanplot , plotCommand , argument1 , argument2 , argument3 , argument4 , argument5 , argument6 , argument7 , scale , window
-! CLEANPLOT , ARG1        , ARG2      , ARG3      , ARG4      , ARG5      , ARG6      , ARG7      , ARG8      , ARG9  , AR10
+! cleanplot , plotCommand , argument1 , argument2 , argument3 , argument4 , argument5 , argument6 , argument7 , scale , window , forcedClims
+! CLEANPLOT , ARG1        , ARG2      , ARG3      , ARG4      , ARG5      , ARG6      , ARG7      , ARG8      , ARG9  , AR10   , AR11
 
 ! Description:
 ! Issues a plotting command (with its given arguments) combined with some tricks to generate a
@@ -20,6 +20,8 @@
 ! ARG9: scale        -  scale factor to be applied to the contour scale (defaults to 0, no scaling)
 ! AR10: window       -  number of window in which the contour scale to be scaled (ARG9=/=0) is,
 !                       useful for multi-window plots (defaults to 1)
+! AR11: forcedClims  -  set to 1 when custom CLIMS has been applied before executing this macro
+!                       (defaults to 0)
 
 ! Local parameters:
 ! ar20: parType
@@ -31,6 +33,8 @@
 ! ar36: formattingArg5
 ! ar37: formattingArg6
 ! ar38: formattingArg7
+! ar41: useForcedClims
+! ar42: contourStepsFromMin
 
 
 ! Parse inputs
@@ -44,6 +48,14 @@ ar26 = 1
 *if,ar25,eq,0,then
   *if,AR10,ne,0,then
     ar26 = AR10
+  *endif
+*endif
+
+ar41 = 0
+*get,ar25,parm,AR11,type
+*if,ar25,eq,0,then
+  *if,AR11,eq,1,then
+    ar41 = 1
   *endif
 *endif
 
@@ -126,7 +138,14 @@ ar31 = '%C'
   *get,ar21,graph,ar26,contour,vmin
   *get,ar22,graph,ar26,contour,vinc
   *get,ar23,graph,ar26,contour,ncont
-  ar24 = ar21+(ar23-1)*ar22
+
+  *if,ar41,eq,1,then
+    ar42 = ar23
+  *else
+    ar42 = (ar23-1)
+  *endif
+
+  ar24 = ar21+ar42*ar22
   clims,ar21*ar29,ar24*ar29
 *endif
 /nopr
