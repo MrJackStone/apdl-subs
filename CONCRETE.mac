@@ -1,11 +1,16 @@
 ! concrete , matNum , fc   , dens , Poisson , ft   , linear , eRed
 ! CONCRETE , ARG1   , ARG2 , ARG3 , ARG4    , ARG5 , ARG6   , ARG7
 
+! Description:
+! Defines concrete material model using either linear-elastic approach or nonlinear
+! Drucker-Prager formulation.
+! TODO  list & reference defaults used
+
 ! Arguments:
 ! ARG1: matNum   -  material number
 ! ARG2: fc       -  compressive strength
 ! ARG3: dens     -  concrete mass density (default: 2500)
-! ARG4: Poisson  -  Poisson's coefficient (default: 0.3)
+! ARG4: Poisson  -  Poisson's coefficient (default: 0.2)
 ! ARG5: ft       -  tensile strength (default: 0.21*fck**(2/3))
 ! ARG6: linear   -  linear elastic key:
 !                     [0]  OFF (nonlinear, Drucker-Prager)
@@ -32,17 +37,16 @@
 ! ar36: delc
 
 
-! Standard values: mass density & Poisson's coefficient
+! Parse inputs
+ar21 = 2500
 *get,ar20,parm,ARG3,type
-*if,ar20,ne,0,or,ARG3,le,0,then
-  ar21 = 2500
-*else
+*if,ar20,eq,0,and,ARG3,gt,0,then
   ar21 = ARG3
 *endif
+
+ar22 = 0.2
 *get,ar20,parm,ARG4,type
-*if,ar20,ne,0,or,ARG4,le,0,then
-  ar22 = 0.2
-*else
+*if,ar20,eq,0,and,ARG4,gt,0,then
   ar22 = ARG4
 *endif
 
@@ -68,12 +72,11 @@
   ! Nonlinear model: Drucker-Prager
 
   ! Tensile strength
+  ar30 = ARG5
   *get,ar20,parm,ARG5,type
   *if,ar20,ne,0,or,ARG5,le,0,then
     ar29 = 0.3*ARG2**(2/3)
     ar30 = 0.7*ar29
-  *else
-    ar30 = ARG5
   *endif
 
   ! Deformation at peak compressive stress
