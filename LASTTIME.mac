@@ -42,7 +42,7 @@ subset,last
 
 ! Read previous substep if last one has not converged
 *if,AR21,eq,0,or,AR22,eq,999999,then
-  set,prev
+  subset,prev  ! NOTE: 'prev' is an undocumented keyword for the SUBSET command, but seems to work as expected.
 *endif
 
 ! Assign last TIME to output parameter
