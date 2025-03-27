@@ -1,24 +1,26 @@
-! CSNEXT, output
-! CSNEXT,   arg1
+! csnext , output
+! CSNEXT , ARG1
 
 ! Description:
 ! Returns a valid number to which no coordinate system is yet assigned.
 
 ! Arguments:
-! arg1: output  -  name of the parameter to which the result will be assigned (defaults to _OUTPUT)
+! ARG1: output  -  name of the parameter to which the result will be assigned (defaults to _OUTPUT)
 
 ! Local parameters:
-! AR21: maxCS
-! AR22: outputParm
+! ar21: maxCS
+! ar22: outputParm
 
-parverify,'CSNEXT_VAR_check',arg1,'CHAR'
+
+parverify,'CSNEXT_VAR_check',ARG1,'CHAR'
 *if,CSNEXT_VAR_check,eq,1,then
-    AR22=arg1
+    ar22 = ARG1
 *else
-    AR22='_OUTPUT'
+    ar22 = '_OUTPUT'
 *endif
 
-*get,AR21,cdsy,,num,max
-*del,%AR22%,,nopr
-%AR22%=((AR21+1)>11)
+*get,ar21,cdsy,,num,max
+
+*del,%ar22%,,nopr
+%ar22%=((ar21+1)>11)
 
