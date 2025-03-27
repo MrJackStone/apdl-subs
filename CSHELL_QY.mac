@@ -1,33 +1,35 @@
-! CSHELL_QY, calcOnly
-! CSHELL_QY, arg1
+! cshell_qy , calcOnly
+! CSHELL_QY , ARG1
 
 ! Description:
 ! Plots SHELL181 shear force along Y axis diagram (Q23).
 
-! Arguments:
-! arg1: calcOnly  -  option to calculate the element table but suppress plotting:
+! ARGuments:
+! ARG1: calcOnly  -  option to calculate the element table but suppress plotting:
 !                      [0] plot element table (default)
 !                      [1] suppress plotting
 
 ! Local parameters:
-! AR21: seqn_Q13
-! AR23: unitScaleFactor
-! AR24: nameKey
+! ar21: seqn_Q13
+! ar23: unitScaleFactor
+! ar24: nameKey
 
-AR21=8
 
-AR23=1e-3
-AR24='QY'
+! Calculate element table
+ar21 = 8
+ar23 = 1e-3
+ar24 = 'QY'
 
-etable,'TMP_%AR24%',smisc,AR21
+etable,'TMP_%ar24%',smisc,ar21
 
-sadd,'SHELL_%AR24%','TMP_%AR24%',,AR23
+sadd,'SHELL_%ar24%','TMP_%ar24%',,ar23
 
-etable,'TMP_%AR24%',eras
+etable,'TMP_%ar24%',eras
 
-*if,arg1,ne,1,then
+! Plot diagram
+*if,ARG1,ne,1,then
   *cfopen,shelldiagram_tmp,tmp
-    *vwrite,'SHELL_%AR24%','avg'
+    *vwrite,'SHELL_%ar24%','avg'
 pletab,%C,%C
   *cfclos
   /nopr

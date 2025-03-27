@@ -1,4 +1,4 @@
-! CSBY2P , num  , x0   , y0   , z0   , x1   , y1   , z1   , yzRotation
+! csby2p , num  , x0   , y0   , z0   , x1   , y1   , z1   , yzRotation
 ! CSBY2P , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8
 
 ! Description:

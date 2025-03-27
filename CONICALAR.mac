@@ -1,5 +1,5 @@
-! conicalar, rbot, rtop,   z1,   z2, theta1, theta2
-! CONICALAR, ARG1, ARG2, ARG3, ARG4,   ARG5,   ARG6
+! conicalar , rbot , rtop , z1   , z2   , theta1 , theta2
+! CONICALAR , ARG1 , ARG2 , ARG3 , ARG4 , ARG5   , ARG6
 
 ! Description:
 ! Creates conical areas by applying the native 'CONE' command and deleting unwanted volumes
