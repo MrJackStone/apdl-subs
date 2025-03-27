@@ -11,12 +11,12 @@
 !                      (defaults to "LASTTIME_VAR_sbst")
 
 ! Local parameters:
-! AR20: parType
-! AR21: convCheck
-! AR22: lastSS
-! AR23: lastConvergedTime
+! ar20: parType
+! ar21: convCheck
+! ar22: lastSS
+! ar23: lastConvergedTime
 ! ar24: lastConvergedSubstep
-! AR31: parmTime
+! ar31: parmTime
 ! ar32: parmSubstep
 
 
@@ -28,10 +28,10 @@ mpopbackup
 /uis,msgpop,3
 
 ! Parse inputs
-AR31='LASTTIME_VAR_time'
-*get,AR20,parm,arg1,type
-*if,AR20,eq,3,then
-  AR31=arg1
+ar31 = 'LASTTIME_VAR_time'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar31 = ARG1
 *endif
 
 ar32 = 'LASTTIME_VAR_sbst'
@@ -40,24 +40,22 @@ ar32 = 'LASTTIME_VAR_sbst'
   ar32 = ARG2
 *endif
 
-! Read last substep of last load step
+! Read last converged substep
 /post1
 nsel,none
 esel,none
 subset,last
 
-! Collect data to check convergence
-*get , AR21 , active ,, solu , cnvg
-*get , AR22 , active ,, set  , sbst
+*get , ar21 , active ,, solu , cnvg
+*get , ar22 , active ,, set  , sbst
 
-! Read previous substep if last one has not converged
-*if,AR21,eq,0,or,AR22,eq,999999,then
+*if,ar21,eq,0,or,ar22,eq,999999,then
   subset,prev  ! NOTE: 'prev' is an undocumented keyword for the SUBSET command, but seems to work as expected.
 *endif
 
-! Assign last TIME & SBST to output parameters
-*get,AR23,active,,set,time
-%AR31%=AR23
+! Assign last converged TIME & SBST to output parameters
+*get,ar23,active,,set,time
+%ar31% = ar23
 
 *get,ar24,active,,set,sbst
 %ar32% = ar24
