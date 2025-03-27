@@ -52,7 +52,7 @@ ebackup
 nbackup
 
 !!                                                                                                !!
-!! A. ELEMENT TYPES                                                                               !!
+!! A.  Element types                                                                              !!
 !!                                                                                                !!
 ! Create element types
 *get,ar21,etyp,,num,max
@@ -110,7 +110,7 @@ keyopt , ar32 , 18 , 0     ! Sliding behavior:        [0] Finite sliding
 
 
 !!                                                                                                !!
-!! B. REAL CONSTANTS                                                                              !!
+!! B.  Real constants                                                                             !!
 !!                                                                                                !!
 *get,ar20,rcon,,num,max
 ar30 = ar20+1
@@ -148,7 +148,7 @@ rmore , CNTDEF_ARR_rc(13)
 
 
 !!                                                                                                !!
-!! C. MATERIAL                                                                                    !!
+!! C.  Material                                                                                   !!
 !!                                                                                                !!
 *get,ar22,mat,,num,max
 ar33 = ar22+1
@@ -156,7 +156,7 @@ mp,mu,ar33,ARG6
 
 
 !!                                                                                                !!
-!! D. CREATE ELEMENTS                                                                             !!
+!! D.  Create elements                                                                            !!
 !!                                                                                                !!
 ! Set current RC set & material, same for CONTA & TARGE
 real , ar30
@@ -186,7 +186,7 @@ cm,%ar39%,elem
 
 
 !!                                                                                                !!
-!! E. FINISH                                                                                      !!
+!! E.  Clean up                                                                                   !!
 !!                                                                                                !!
 elrestore
 nrestore
