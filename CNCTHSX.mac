@@ -1,72 +1,78 @@
-! TODO  format
+! cncthsx , outputTable , matNum , curveDivs
+! CNCTHSX , ARG1        , ARG2   , ARG3
 
-! CNCTHSX, createTable, matNum
-! CNCTHSX,        arg1,   arg2
+! Description:
+! Fills a table with concrete's temperature-strain curve. Optionally  applies this property to a
+! given material.
 
-! Descrição:
-! Esta subrotina cria um vetor com temperaturas (de 20°C a 1200°C) e valores correspondentes
-! da deformação térmica do concreto estrutural. Dependendo dos valores dos argumentos (arg1 e arg2)
-! os valores podem ser inseridos numa tabela de temperatura e até atribuídos a um material.
+! Arguments:
+! ARG1: outputTable  -  name of param to which the temperature-strain table will be assigned
+!                       (defautls to 'CNCTHSX_ARR_temp_strain')
+! ARG2: matNum       -  index of material to which the thermal property should be applied:
+!                         [0]    do not assign to any material
+!                         [N>0]  assign to material N
+! ARG3: curveDivs    -  number of divisions applied to the continuous temperature-strain curve
+!                       to discretize it (defaults to 20)
 
-! Lista de argumentos:
-! arg1: createTable  -  determina se a tabela de temperaturas será ou não criada
-!                          [0] Não criar tabela (preencher apenas vetor)
-!                          [1] Criar tabela (comando MPTEMP)
-! arg2: matNum       -  número do material a que será atribuída a propriedade de deformação térmica
-!                          [0]   Não atribuir a um material
-!                          [n>0] Atribuir ao material número n (se arg1=1)
+! Local parameters:
+! ar20: parType
+! ar21: tempStrainTableParmName
+! ar22: matIndex
+! ar23: curveDivisions
+! ar24: temperatureIncrement
 
-! Lista de variáveis locais:
-! AR20: nPt
-! AR21: deltaTemp
-! AR22: index
-! AR23: temp
-! AR24: nthPt
-! AR25: parType
+! Global erased parameters:
+!   CNCTHSX_ARR_temp1
+!   CNCTHSX_ARR_temp2
 
-! Lista de variáveis de saída:
-!   CNCTHSX_ARR_ThermStrain
-!   CNCTHSX_ARR_Temps
+! Output parameters:
+!   %ARG1% (defaults to 'CNCTHSX_ARR_temp_strain')
 
-! Número de pontos para a discretização da curva
-AR20=20
 
-! Inicializar vetores de temperaturas e deformações
-*del,CNCTHSX_ARR_ThermStrain,,nopr
-*dim,CNCTHSX_ARR_ThermStrain,ARRAY,AR20
-*del,CNCTHSX_ARR_Temps,,nopr
-*dim,CNCTHSX_ARR_Temps,ARRAY,AR20
-
-! Calcular incremento de temperatura (com base no número de pontos da curva)
-AR21=(700-20)/(AR20-2)
-AR22=0
-
-! Calcular temperaturas e respectivas deformações
-*do,AR23,20,700,AR21
-   AR22=AR22+1
-   CNCTHSX_ARR_Temps(AR22)=AR23
-   CNCTHSX_ARR_ThermStrain(AR22)=-1.8e-4+9e-5*AR23+2.3e-11*(AR23**3)
-*enddo
-CNCTHSX_ARR_Temps(AR20)=1200
-CNCTHSX_ARR_ThermStrain(AR20)=14e-3
-
-*get,AR25,PARM,arg1,TYPE
-*if,AR25,EQ,0,THEN
-   *if,arg1,EQ,1,THEN
-      ! Criar tabela de temperaturas
-      MPTEMP
-      *do,AR24,1,AR22,1
-         MPTEMP,AR24,CNCTHSX_ARR_Temps(AR24)
-      *enddo
-      *get,AR25,PARM,arg2,TYPE
-      *if,AR25,EQ,0,THEN
-         *if,arg2,GT,0,THEN
-            ! Definir propriedade do material: expansão térmica
-            *do,AR24,1,AR22,1
-               MPDATA,THSX,arg2,AR24,CNCTHSX_ARR_ThermStrain(AR24)
-            *enddo
-         *endif
-      *endif
-   *endif
+! Parse inputs
+ar21 = 'CNCTHSX_ARR_temp_strain'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
 *endif
 
+ar22 = 0
+*if,ARG2,gt,0,then
+  ar22 = ARG2
+*endif
+
+ar23 = 20
+*if,ARG3,gt,0,then
+  ar23 = ARG3
+*endif
+
+! Prepare environment
+*del , CNCTHSX_ARR_temp1 ,  , nopr
+*del , CNCTHSX_ARR_temp2 ,  , nopr
+*del , %ARG1%            ,  , nopr
+*dim , %ARG1%            ,  , ar23 , 2
+
+! Calculate temperature table
+ar24 = (700-20)/(ar23-2)
+
+*vfill,%ARG1%(1,1),ramp,20,ar24
+
+*vfun  , CNCTHSX_ARR_temp1 , pwr               , %ARG1%(1,1) , 3
+*voper , CNCTHSX_ARR_temp1 , CNCTHSX_ARR_temp1 , mult        , 2.3e-11
+*voper , CNCTHSX_ARR_temp2 , %ARG1%(1,1)       , mult        , 9e-5
+*voper , CNCTHSX_ARR_temp2 , CNCTHSX_ARR_temp1 , add         , CNCTHSX_ARR_temp2
+*voper , %ARG1%(1,2)       , CNCTHSX_ARR_temp2 , add         , -1.8e-4
+
+%ARG1%(ar23,1) = 1200
+%ARG1%(ar23,2) = 14e-3
+
+! Set material properties
+*if,ar22,gt,0,then
+  mptemp
+  mptemp,,%ar21%(1:ar23,1)
+  mpdata,thsx,ar22,,%ar21%(1:ar23,2)
+*endif
+
+! Clean up
+*del , CNCTHSX_ARR_temp1 ,  , nopr
+*del , CNCTHSX_ARR_temp2 ,  , nopr
