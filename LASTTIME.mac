@@ -1,19 +1,23 @@
-! LASTTIME, outputParm
-! LASTTIME, arg1
+! lasttime , outputTime , outputSbst
+! LASTTIME , ARG1       , ARG2
 
 ! Description:
 ! Returns the TIME value of the last converged substep.
 
 ! Arguments:
-! arg1: outputParm  -  name of the output parameter to which the last TIME value will be assigned
+! ARG1: outputTime  -  name of the output parameter to which the last TIME value will be assigned
 !                      (defaults to "LASTTIME_VAR_time")
+! ARG2: outputSbst  -  name of the output parameter to which the last SBST value will be assigned
+!                      (defaults to "LASTTIME_VAR_sbst")
 
 ! Local parameters:
 ! AR20: parType
 ! AR21: convCheck
 ! AR22: lastSS
 ! AR23: lastConvergedTime
-! AR31: outputParmName
+! ar24: lastConvergedSubstep
+! AR31: parmTime
+! ar32: parmSubstep
 
 
 ! Prepare environment
@@ -23,11 +27,17 @@ ebackup
 mpopbackup
 /uis,msgpop,3
 
-! Default arguments
+! Parse inputs
 AR31='LASTTIME_VAR_time'
 *get,AR20,parm,arg1,type
 *if,AR20,eq,3,then
   AR31=arg1
+*endif
+
+ar32 = 'LASTTIME_VAR_sbst'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar32 = ARG2
 *endif
 
 ! Read last substep of last load step
@@ -45,9 +55,12 @@ subset,last
   subset,prev  ! NOTE: 'prev' is an undocumented keyword for the SUBSET command, but seems to work as expected.
 *endif
 
-! Assign last TIME to output parameter
+! Assign last TIME & SBST to output parameters
 *get,AR23,active,,set,time
 %AR31%=AR23
+
+*get,ar24,active,,set,sbst
+%ar32% = ar24
 
 ! Clean up
 pcrestore
