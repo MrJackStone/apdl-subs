@@ -28,7 +28,8 @@ AR20=arg2/arg1
 
 ! Inicializar vetor de tensões
 STEELLAW_VAR_npt=5
-*del,STEELLAW_ARR_sVector
+
+*del,STEELLAW_ARR_sVector,,nopr
 *dim,STEELLAW_ARR_sVector,ARRAY,STEELLAW_VAR_npt!7
 ! Preencher vetor de tensões
 STEELLAW_ARR_sVector(1)=arg2
@@ -40,7 +41,7 @@ STEELLAW_ARR_sVector(5)=arg3
 !STEELLAW_ARR_sVector(7)=0.1
 
 ! Inicializar vetor de deformações
-*del,STEELLAW_ARR_eVector
+*del,STEELLAW_ARR_eVector,,nopr
 *dim,STEELLAW_ARR_eVector,ARRAY,STEELLAW_VAR_npt!7
 ! Preencher vetor de deformações
 STEELLAW_ARR_eVector(1)=AR20
@@ -50,5 +51,3 @@ STEELLAW_ARR_eVector(4)=60*AR20
 STEELLAW_ARR_eVector(5)=160*AR20
 !STEELLAW_ARR_eVector(6)=210*AR20
 !STEELLAW_ARR_eVector(7)=1.01*210*AR20
-
-
