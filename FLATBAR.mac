@@ -1,0 +1,151 @@
+! flatbar , xi   , xj   , yi   , yj   , h    , gap  , toe  , angle , cmSuffix
+! FLATBAR , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8  , ARG9
+
+! Description:
+! Uses the WP to draw a flat bar in the X-Z plane given its two axial endpoints in the X-Y plane.
+! The length of the flat bar is drawn along the +X axis and the height is drawn along +Z.
+! Flat bar geometry includes chamfer, toe, and gap.
+
+! Arguments:
+! ARG1: xi        -  X coordinate of the start of the flat bar's axis
+! ARG2: xj        -  X coordinate of the end of the flat bar's axis
+! ARG3: yi        -  Y coordinate of the start of the flat bar's axis
+! ARG4: yj        -  Y coordinate of the end of the flat bar's axis
+! ARG5: h         -  height of the flat bar (measured along +Z)
+! ARG6: gap       -  gap distance between the given (X,Y) endpoints and the actual start of the
+!                    flat bar geometry.
+! ARG7: toe       -  perpendicular height below chamfer
+! ARG8: angle     -  chamfer angle at both ends of the flat bar (defaults to 90, no chamfer)
+! ARG9: cmSuffix  -  suffix applied to selection components created (defaults to 'FLATBAR')
+
+! Local parameters:
+! ar20: parType
+! ar21: cmaName
+! ar22: cmlName
+! ar23: cmkName
+! ar24: xDelta
+! ar25: yDelta
+! ar26: length
+! ar28: chamferAngle
+! ar29: cmsSuffix
+
+! Global erased parameters:
+! FLATBAR_VAR_wplaneCS
+! FLATBAR_VAR_dummyCS
+! FLATBAR_VAR_gxi
+! FLATBAR_VAR_gyi
+! FLATBAR_VAR_gzi
+! FLATBAR_VAR_gxj
+! FLATBAR_VAR_gyj
+! FLATBAR_VAR_gzj
+! FLATBAR_VAR_gxk
+! FLATBAR_VAR_gyk
+! FLATBAR_VAR_gzk
+
+
+! Parse inputs
+*if,ARG5,eq,0,then
+  *msg,error
+FLATBAR error: height must not be equal to zero.%/&
+FLATBAR command ignored.
+  *return,-1
+*endif
+
+*if,ARG8,eq,0,then
+  ar28 = 90
+*endif
+
+ar29 = 'FLATBAR'
+*get,ar20,parm,ARG9,type
+*if,ar20,eq,3,then
+  ar29 = ARG9
+*endif
+ar21 = 'COMPA_%ar29%'
+ar22 = 'COMPL_%ar29%'
+ar23 = 'COMPK_%ar29%'
+
+ar24 = ARG2-ARG1
+ar25 = ARG4-ARG3
+ar26 = sqrt((ar24**2)+(ar25**2))-(2*ARG6)
+
+*if,ar26,le,0,then
+  *msg,error,ar26
+FLATBAR error: invalid length (%g)%%/&
+FLATBAR command ignored.
+  *return,-1
+*endif
+
+! Prepare environment
+smdbackup,'NONE'
+csbackup
+
+csnext,'FLATBAR_VAR_wplaneCS'
+cswpla,FLATBAR_VAR_wplaneCS,cart
+
+! Draw flat bar base geometry
+loc2glo , ARG1 , ARG3 , 0 , FLATBAR_VAR_wplaneCS , 'FLATBAR_VAR_gxi' , 'FLATBAR_VAR_gyi' , 'FLATBAR_VAR_gzi'
+loc2glo , ARG2 , ARG4 , 0 , FLATBAR_VAR_wplaneCS , 'FLATBAR_VAR_gxj' , 'FLATBAR_VAR_gyj' , 'FLATBAR_VAR_gzj'
+loc2glo , ARG1 , ARG3 , 1 , FLATBAR_VAR_wplaneCS , 'FLATBAR_VAR_gxk' , 'FLATBAR_VAR_gyk' , 'FLATBAR_VAR_gzk'
+
+wplane , -1 , FLATBAR_VAR_gxi , FLATBAR_VAR_gyi , FLATBAR_VAR_gzi , FLATBAR_VAR_gxj , FLATBAR_VAR_gyj , FLATBAR_VAR_gzj , FLATBAR_VAR_gxk , FLATBAR_VAR_gyk , FLATBAR_VAR_gzk
+wpoffs , ARG6
+blc4 , 0 , 0 , ar26 , ARG5
+
+! Slice first chamfer
+csnext,'FLATBAR_VAR_dummyCS'
+wprota,,-90
+wpoffs,,,ARG7
+wprota,,,-ARG8
+cswpla,FLATBAR_VAR_dummyCS,cart
+
+asbw,all,,delete
+cm,%ar21%,area
+asel,r,loc,z,0,1e6
+adele,all,,,1
+cmsel,s,%ar21%
+
+wprota,,,ARG8
+wprota,,90
+
+! Slice second chamfer
+wpoffs,ar26
+wprota,,-90
+wprota,,,ARG8
+cswpla,FLATBAR_VAR_dummyCS,cart
+
+asbw,all,,delete
+cm,%ar21%,area
+asel,r,loc,z,0,1e6
+adele,all,,,1
+cmsel,s,%ar21%
+
+! Prepare exported selection components
+cmsel,s,%ar21%
+lsla,s
+ksll,s
+cm,%ar22%,line
+cm,%ar23%,kp
+
+! Clean up
+csys,FLATBAR_VAR_wplaneCS
+wpcsys,-1
+csdele , FLATBAR_VAR_wplaneCS
+csdele , FLATBAR_VAR_dummyCS
+csrestore
+
+smdrestore
+cmsel,a,%ar21%
+cmsel,a,%ar22%
+cmsel,a,%ar23%
+
+*del , FLATBAR_VAR_wplaneCS ,  , nopr
+*del , FLATBAR_VAR_dummyCS  ,  , nopr
+*del , FLATBAR_VAR_gxi      ,  , nopr
+*del , FLATBAR_VAR_gyi      ,  , nopr
+*del , FLATBAR_VAR_gzi      ,  , nopr
+*del , FLATBAR_VAR_gxj      ,  , nopr
+*del , FLATBAR_VAR_gyj      ,  , nopr
+*del , FLATBAR_VAR_gzj      ,  , nopr
+*del , FLATBAR_VAR_gxk      ,  , nopr
+*del , FLATBAR_VAR_gyk      ,  , nopr
+*del , FLATBAR_VAR_gzk      ,  , nopr
