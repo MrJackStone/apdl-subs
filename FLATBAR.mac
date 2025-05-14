@@ -120,9 +120,11 @@ adele,all,,,1
 cmsel,s,%ar21%
 
 ! Prepare exported selection components
+csys,FLATBAR_VAR_wplaneCS
 cmsel,s,%ar21%
 lsla,s
 ksll,s
+lsel,r,loc,z,0
 cm,%ar22%,line
 cm,%ar23%,kp
 
@@ -135,8 +137,8 @@ csrestore
 
 smdrestore
 cmsel,a,%ar21%
-cmsel,a,%ar22%
-cmsel,a,%ar23%
+lsla,a
+ksll,a
 
 *del , FLATBAR_VAR_wplaneCS ,  , nopr
 *del , FLATBAR_VAR_dummyCS  ,  , nopr
