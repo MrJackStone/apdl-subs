@@ -1,5 +1,5 @@
-! ARRFIND , output , arrayParm , searched
-! ARRFIND , ARG1   , ARG2      , ARG3
+! ARRFIND , output , arrayParm , searched , fuzz
+! ARRFIND , ARG1   , ARG2      , ARG3     , ARG4
 
 ! Description:
 ! Searches for a value in an array and returns the first position in which it was found.
@@ -10,11 +10,20 @@
 !                     (defaults to ARRFIND_VAR_output)
 ! ARG2: arrayParm  -  name of array param to be searched
 ! ARG3: searched   -  value to be searched
+! ARG4: fuzz       -  tolerance for equality comparison (defaults to 0)
+!                     If greater than 0, equality comparison becomes interval check
+!                     (a>=lb and a<=ub, for lb=ARG3-fuzz and ub=ARG3+fuzz)
 
 ! Local parameters:
 ! ar20: parType
 ! ar21: outputParm
 ! ar22: maxMatchBit
+! ar24: fuzz
+
+! Global erased parameters:
+! ARRFIND_ARR_matches
+! ARRFIND_ARR_belowUB
+! ARRFIND_ARR_aboveLB
 
 
 ! Parse inputs
@@ -24,11 +33,26 @@ ar21 = 'ARRFIND_VAR_output'
   ar21 = ARG1
 *endif
 
+ar24 = 0
+*if,ARG4,gt,0,then
+  ar24 = ARG4
+*endif
+
 ! Prepare environment
 *del,ARRFIND_ARR_matches,,nopr
+*del,ARRFIND_ARR_aboveLB,,nopr
+*del,ARRFIND_ARR_belowUB,,nopr
 
 ! Search value
-*voper,ARRFIND_ARR_matches,%ARG2%,eq,ARG3
+*if,ar24,eq,0,then
+  ! Exact match (equality check)
+  *voper,ARRFIND_ARR_matches,%ARG2%,eq,ARG3
+*else
+  ! Approximate match (interval check)
+  *voper , ARRFIND_ARR_aboveLB , %ARG2%              , ge   , ARG3-ar24
+  *voper , ARRFIND_ARR_belowUB , %ARG2%              , le   , ARG3+ar24
+  *voper , ARRFIND_ARR_matches , ARRFIND_ARR_aboveLB , mult , ARRFIND_ARR_belowUB
+*endif
 
 ! Return matches
 *vscfun,ar22,max,ARRFIND_ARR_matches
@@ -40,3 +64,5 @@ ar21 = 'ARRFIND_VAR_output'
 
 ! Clean up
 *del,ARRFIND_ARR_matches,,nopr
+*del,ARRFIND_ARR_aboveLB,,nopr
+*del,ARRFIND_ARR_belowUB,,nopr
