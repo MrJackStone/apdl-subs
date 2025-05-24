@@ -39,6 +39,10 @@
 ! ar33: nthCMname
 ! ar34: scale
 ! ar35: thkUnit
+! ar36: anyShellElements
+
+! Global output parameters:
+! ANNOTHKLEG_CHR_thks
 
 ! Global cleared parameters:
 ! ANNOTHKLEG_ARR_shell_sects
@@ -50,6 +54,18 @@
 ! Prepare environment
 ebackup
 cm,ar29,elem
+
+esel,none
+esel,a,ename,,131
+esel,a,ename,,132
+esel,a,ename,,181
+esel,a,ename,,190
+esel,a,ename,,208
+esel,a,ename,,209
+esel,a,ename,,281
+cm,ar36,elem
+
+cmsel,s,ar29
 
 ! Parse inputs
 ar33 = 'FULL'
@@ -121,6 +137,7 @@ cm,ar27,elem
     ar23 = ANNOTHKLEG_ARR_thkGroups(ar22,ar26)
     esel,a,sec,,ar23
   *enddo
+  cmsel,r,ar36
   cmsel,r,ar29
 
   ar33 = '%ar32%_%ar26%'
