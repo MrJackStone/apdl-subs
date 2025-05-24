@@ -25,6 +25,7 @@
 
 ! Local parameters:
 ! ar20: parType
+! ar29: scaleFactor
 ! ar31: commandNameFormatting
 ! ar32: formattingArg1
 ! ar33: formattingArg2
@@ -134,7 +135,7 @@ ar31 = '%C'
 /focus,all,1e6,,,1
 
 ! Scale contour scale
-*if,ARG9,ne,0,then
+*if,ar29,ne,0,then
   *get,ar21,graph,ar26,contour,vmin
   *get,ar22,graph,ar26,contour,vinc
   *get,ar23,graph,ar26,contour,ncont
