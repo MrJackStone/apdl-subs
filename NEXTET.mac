@@ -1,0 +1,28 @@
+! nextet , output
+! NEXTET , ARG1
+
+! Description:
+! Returns an undefined element type number.
+
+! Arguments:
+! ARG1: output  -  name of the parameter to which the results will be assigned (defaults to _OUTPUT)
+
+! Local parameters:
+! ar20: parType
+! ar21: maxEtype
+! ar22: outputParmName
+
+
+! Check input params
+ar22 = '_OUTPUT'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar22 = ARG1
+*endif
+
+! Get max element type defined
+*get,ar21,etyp,,num,max
+
+! Save next ETYPE to output param
+*del,%ar22%,,nopr
+%ar22%=((ar21+1)>1)
