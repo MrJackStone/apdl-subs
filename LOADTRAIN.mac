@@ -336,29 +336,49 @@ Run terminated.
 
 
 *elseif,ar21,eq,'TB-360',then
-  ! Number of point loads on either side of the locomotive
-  ar32 = nint(ARG5)
+  ! Reference TB-360 single configuration
+  ar23 = 4
 
-  ! TB-360 locomotive loads
-  %ar93% = 4+2*ar32
-  *dim,%ar91%,,%ar93%
-  *dim,%ar92%,,%ar93%
-  %ar91%(1) = -3+ARG3    , -1+ARG3    , 1+ARG3     , 3+ARG3
-  %ar92%(1) = 360e3*ar31 , 360e3*ar31 , 360e3*ar31 , 360e3*ar31
+  *dim , LOADTRAIN_ARR_refPositions , , ar23
+  *dim , LOADTRAIN_ARR_refLoads     , , ar23
+  LOADTRAIN_ARR_refPositions(1) = 0     , 2.0   , 4.0   , 6.0
+  LOADTRAIN_ARR_refLoads(1)     = 360e3 , 360e3 , 360e3 , 360e3
 
-  ! Railway car loads
-  ar33 = 3
-  ar34 = -3
-  *do,ar27,1,ar32,1
-    ar33         = ar33+1
-    ar34         = ar34-1
-    ar35         = 4+(2*ar27-1)
-    ar36         = 4+(2*ar27)
-    %ar91%(ar35) = ar33+ARG3
-    %ar92%(ar35) = 120e3*ar31
-    %ar91%(ar36) = ar34+ARG3
-    %ar92%(ar36) = 120e3*ar31
+  ! Railway car:
+  ar37 = 120e3 ! Uniformly distributed linear load value
+  ar46 = 1.0   ! Distance between point loads used to simulate UDL
+
+  ! Distance between vehicles:
+  ar24 = 2.0                                    ! Gap between vehicles
+  ar45 = LOADTRAIN_ARR_refPositions(ar23)+ar24  ! Pitch between vehicles
+
+  ! Initialize positions/forces arrays for total number of point loads
+  %ar93% = ar23*ar22+ar32
+  *dim , %ar91% ,  , %ar93%
+  *dim , %ar92% ,  , %ar93%
+
+  ! Fill positions/forces with load train repetitions
+  *do,ar26,1,ar22,1
+    ar47 = (ar26-1)*ar23+1
+    ar50 = (ar26-1)*ar45
+    *voper , %ar91%(ar47) , LOADTRAIN_ARR_refPositions(1) , add                       , ar50
+    *vfun  , %ar92%(ar47) , copy                          , LOADTRAIN_ARR_refLoads(1)
   *enddo
+
+  ! Fill positions/forces with UDL point loads
+  *if,ar32,gt,0,then
+    ar47 = ar23*ar22+1
+    ar48 = %ar91%(ar47-1)
+    ar49 = ar48+ar24
+    *vfill , %ar91%(ar47) , ramp , ar49 , ar46
+    *vfill , %ar92%(ar47) , ramp , ar37 , 0
+  *endif
+
+  ! Apply global offset
+  *voper,%ar91%,%ar91%,add,ARG3
+
+  ! Apply impact coefficient
+  *voper,%ar92%,%ar92%,add,,ar31
 
 
 *elseif,ar21,eq,'TB-450',then
