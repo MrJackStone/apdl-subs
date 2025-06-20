@@ -31,7 +31,7 @@
 
 
 ! Parse inputs
-  ar24 = 0
+ar24 = 0
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,0,then
   ar24 = ((ARG4<4)>0)
