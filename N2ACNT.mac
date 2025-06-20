@@ -61,7 +61,7 @@ keyopt , N2ACNT_VAR_targetET , 4   , 111111
 nextet,'N2ACNT_VAR_contactET'
 et     , N2ACNT_VAR_contactET , 175
 keyopt , N2ACNT_VAR_contactET , 2   , 2
-keyopt , N2ACNT_VAR_contactET , 4   , 1
+keyopt , N2ACNT_VAR_contactET , 4   , 0 ! TODO  Implement option: 0 for rigid constraint, 1 for force-distributed constraint
 keyopt , N2ACNT_VAR_contactET , 12  , 5
 
 nextreal,'N2ACNT_VAR_rc'
