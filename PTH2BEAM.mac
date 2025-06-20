@@ -1,5 +1,5 @@
-! pth2beam , topNode1 , topNode2 , botNode1 , botNode2 , pathNameRoot , dflKey , pathDiv , W    , A    , avgKey , lcEnv , planeOnly
-! pth2beam , arg1     , arg2     , arg3     , arg4     , arg5         , arg6   , arg7    , arg8 , arg9 , ar10   , ar11  , ar12
+! pth2beam , topNode1 , topNode2 , botNode1 , botNode2 , pathNameRoot , dflKey , pathDiv , W    , A    , avgKey , lcEnv , planeOnly , scaleUnits
+! pth2beam , arg1     , arg2     , arg3     , arg4     , arg5         , arg6   , arg7    , arg8 , arg9 , ar10   , ar11  , ar12      , ar13
 
 ! Description:
 ! Calculates beam internal reactions based on SHELL181 stresses. Results are stored in a load case
@@ -61,6 +61,9 @@
 ! ar12: planeOnly     -  determines whether or not to extract off-plane results:
 !                           [0] off (extract off-plane results)
 !                           [1] on (extract only in-plane results)
+! ar13: scaleUnits    -  determines whether or not to scale units from SI to kN/kNm:
+!                           [0] off (do not scale)
+!                           [1] on (scale shear forces and bending moments by factor of 1e-3)
 
 
 ! Local parameters:
@@ -112,7 +115,17 @@
 ! PTH2BEAM_ARR_m2
 ! PTH2BEAM_ARR_cols
 ! PTH2BEAM_ARR_column
+! PTH2BEAM_VAR_scaleFactor
 
+
+! Parse inputs
+PTH2BEAM_VAR_scaleFactor = 0
+*get,ar22,parm,AR13,type
+*if,ar22,eq,0,then
+  *if,AR13,eq,1,then
+    PTH2BEAM_VAR_scaleFactor = 1e-3
+  *endif
+*endif
 
 ! Path names for in-plane results
 AR20=strsub(arg5,1,5)
@@ -171,7 +184,7 @@ pdef,'DUMMY',s,eqv,avg
 
 
 !! IN-PLANE: BENDING MOMENT & AXIAL FORCE
-pths2mn, arg1, arg2, arg3, arg4, AR20, 'SM_11', arg7, arg8, arg9, ar10
+pths2mn, arg1, arg2, arg3, arg4, AR20, 'SM_11', arg7, arg8, arg9, ar10, PTH2BEAM_VAR_scaleFactor
 
 *voper, %ar11%(1, 1) , %ar11%(1, 1) , min , PTHS2MN_ARR_bendingMoment(1)
 *voper, %ar11%(1, 2) , %ar11%(1, 2) , max , PTHS2MN_ARR_bendingMoment(1)
@@ -180,7 +193,7 @@ pths2mn, arg1, arg2, arg3, arg4, AR20, 'SM_11', arg7, arg8, arg9, ar10
 
 
 !! IN-PLANE: SHEAR FORCE
-pths2v,  arg1, arg2, arg3, arg4, AR21, 'SM_12', arg7,     , arg9, ar10
+pths2v,  arg1, arg2, arg3, arg4, AR21, 'SM_12', arg7,     , arg9, ar10, PTH2BEAM_VAR_scaleFactor
 
 *voper, %ar11%(1, 7) , %ar11%(1, 7) , min , PTHS2V_ARR_shear(1)
 *voper, %ar11%(1, 8) , %ar11%(1, 8) , max , PTHS2V_ARR_shear(1)
@@ -273,3 +286,4 @@ padele , AR56
 padele , AR57
 padele , AR58
 padele , AR59
+*del,PTH2BEAM_VAR_scaleFactor,,nopr
