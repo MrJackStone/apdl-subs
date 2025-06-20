@@ -1,0 +1,89 @@
+! N2ACNT , pilotNode , cmaName
+! N2ACNT , ARG1      , ARG2
+
+! Description:
+! Creates a node-to-area connection using MPC contact.
+
+! Arguments:
+! ARG1: pilotNode  -  number of the pilot node (target)
+! ARG2: cmaName    -  name of the area selection component (contact)
+
+! Local parameters:
+! ar20: parType
+! ar21: nc
+! ar22: cmType
+
+! Global erased parameters:
+! N2ACNT_VAR_targetET
+! N2ACNT_VAR_contactET
+! N2ACNT_VAR_rc
+
+
+! Parse inputs
+*if,ARG1,le,0,then
+  *msg,error
+N2ACNT error: expected ARG1 to be a valid node number.%/&
+N2ACNT command is ignored.
+  *return,-1
+*endif
+
+nsel,s,node,,ARG1
+*get,ar21,node,,count
+*if,ar21,eq,0,then
+  *msg,error,ARG1
+N2ACNT error: node number %I does not exist.%/&
+N2ACNT command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,error
+N2ACNT error: expected ARG2 to be a string pointing to an area selection component.%/&
+N2ACNT command is ignored.
+  *return,-1
+*endif
+
+*get,ar22,comp,ARG2,type
+*if,ar22,ne,8,then
+  *msg,error,ar22
+N2ACNT error: ARG2 does not correspond to a valid area selection component (type = %I).%/&
+N2ACNT command is ignored.
+  *return,-1
+*endif
+
+! Create attributes
+nextet,'N2ACNT_VAR_targetET'
+et     , N2ACNT_VAR_targetET , 170
+keyopt , N2ACNT_VAR_targetET , 2   , 0
+keyopt , N2ACNT_VAR_targetET , 4   , 111111
+
+nextet,'N2ACNT_VAR_contactET'
+et     , N2ACNT_VAR_contactET , 175
+keyopt , N2ACNT_VAR_contactET , 2   , 2
+keyopt , N2ACNT_VAR_contactET , 4   , 1
+keyopt , N2ACNT_VAR_contactET , 12  , 5
+
+nextreal,'N2ACNT_VAR_rc'
+r,N2ACNT_VAR_rc
+
+! Create contact
+real  , N2ACNT_VAR_rc
+
+nsel,s,node,,ARG1
+type  , N2ACNT_VAR_targetET
+tshap , pilo
+e     , ARG1
+
+cmsel , s , %ARG2%
+nsla  , s , 1
+esln  , s , 0
+type,N2ACNT_VAR_contactET
+esurf
+
+! Clean up
+esel,s,real,,N2ACNT_VAR_rc
+
+*del , N2ACNT_VAR_targetET  ,  , nopr
+*del , N2ACNT_VAR_contactET ,  , nopr
+*del , N2ACNT_VAR_rc        ,  , nopr
