@@ -31,7 +31,7 @@ csbackup
 
 ! Create new temporary coordinate system at working plane
 *get,AR20,cdsy,,num,max
-AR21=AR20+1
+AR21 = (AR20+1>11)
 cswpla,AR21,cylin
 csys,AR21
 
@@ -78,5 +78,3 @@ csrestore
 csdele,AR21
 cmsel,a,%arg1%
 lsla,a
-
-
