@@ -1,18 +1,38 @@
-! afunbackup
-! AFUNBACKUP
+! afunbackup , opt
+! AFUNBACKUP , ARG1
 
 ! Description:
 ! Stores the current value of *AFUN (degrees or radians), to be later restored with AFUNRESTORE.
 
 ! Arguments:
-! -
+! ARG1: opt  -  optionally activate DEG/RAD mode after backing up state
+!                 [0]      *AFUN not changed (default)
+!                 ['DEG']  *AFUN changed to DEG (degrees)
+!                 ['RAD']  *AFUN changed to RAD (radians)
+
 
 ! Local parameters:
-! -
+! ar20: parType
+! ar21: mode
 
 ! Global output parameters:
 ! afunBackup_
 
 
+! Parse inputs
+ar21 = ''
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = upcase(ARG1)
+*endif
+
+! Backup state
 *del,afunBackup_,,nopr
 getafun,'afunBackup_'
+
+! Activate mode, if  requested
+*if,ar22,eq,'DEG',then
+  *afun,deg
+*elseif,ar22,eq,'RAD',then
+  *afun,rad
+*endif
