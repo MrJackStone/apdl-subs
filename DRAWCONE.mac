@@ -15,11 +15,11 @@
 ! ARG1: botDiam     -  conical diameter at the bottom
 ! ARG2: topDiam     -  conical diameter at the top
 ! ARG3: length      -  length of the cone
-! ARG4: keepBegKap  -  key to determine whether or not to delete the circular area (cap) at the
+! ARG4: keepBegCap  -  key to determine whether or not to delete the circular area (cap) at the
 !                      beginning of the cone:
 !                         [0] delete cap (default)
 !                         [1] keep cap
-! ARG5: keepEndKap  -  key to determine whether or not to delete the circular area (cap) at the
+! ARG5: keepEndCap  -  key to determine whether or not to delete the circular area (cap) at the
 !                      end of the cone:
 !                         [0] delete cap (default)
 !                         [1] keep cap
@@ -42,6 +42,8 @@
 ! AR34: complConeName
 ! AR35: complConeBegName
 ! AR36: complConeEndName
+! ar41: zMinRadius
+! ar42: zMaxRadius
 
 ! Global parameters (erased at the end of this subroutine):
 ! DRAWCONE_VAR_cartCS
@@ -66,6 +68,15 @@ ar26=2
 ar27 = 360/ar26
 ar30 = ar26/2
 
+! Adapt params: invert top/bottom if length is negative
+*if,ARG3,gt,0,then
+  ar41 = ARG1/2
+  ar42 = ARG2/2
+*else
+  ar41 = ARG2/2
+  ar42 = ARG1/2
+*endif
+
 ! Set selection component names
 ar31='COMPA_%ar25%'
 ar32='COMPA_%ar25%Beg'
@@ -89,11 +100,11 @@ cswpla,DRAWCONE_VAR_cylnCS,cylin
 csys,DRAWCONE_VAR_cartCS
 
 ! Draw cone, delete volume
-cone,ARG1/2,ARG2/2,0,ARG3
+cone,ar41,ar42,0,ARG3
 vdele,all,,,0
 
 ! Slice radially
-*do,ar24,1,ar30-1,1
+*do,ar24,0,ar30-1,1
   wprota,ar27*ar24
   wprota,,90
   asbw,all,,delete
