@@ -1,0 +1,87 @@
+! CMPAMESH , cmaName , mat  , real , type , esys , secn , esize , meshOpt
+! CMPAMESH , ARG1    , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7  , ARG8
+
+! Description:
+! Sets mesh attributes for areas in a given selection component and optionally meshes the areas.
+! If a mesh is created the resulting nodes and elements are stored in selection components named
+! based on ARG1 according to the following rule:
+!   - if ARG1 is formatted as 'COMPA_<suffix>', then the output selection components are
+!     'COMPN_<suffix>' and 'COMPE_<suffix>';
+!   - in all other cases the output components are 'COMPN_cmpamesh' and 'COMPE_cmpamesh'.
+
+! Arguments:
+! ARG1: cmaName  -  name of area selection component to be operated upon
+! ARG2: mat      -  material number to be assigned to areas
+! ARG3: real     -  real constant set number to be assigned to areas
+! ARG4: type     -  element type number to be assigned to areas
+! ARG5: esys     -  coordinate system number to be assigned to areas as local ESYS
+! ARG6: secn     -  section number to be assigned to areas
+! ARG7: esize    -  element size, as used in AESIZE
+! ARG8: meshOpt  -  defines whether or not to mesh areas:
+!                     [0] do not mesh (default)
+!                     [1] mesh areas with AMESH command
+
+! Local parameters:
+! ar20: parType
+! ar21: cmpType
+! ar22: ac
+! ar40: cmaPrefix
+! ar41: cmSuffix
+! ar42: cmnName
+! ar43: cmeName
+
+
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,error
+CMPAMESH error: expected ARG1 to be a string.%/&
+CMPAMESH command is ignored.
+  *return,-1
+*endif
+
+*get,ar21,comp,%ARG1%,type
+*if,ar21,ne,8,then
+  *msg,error,ar21
+CMPAMESH error: expected ARG1 to be the name of an area selection component (type 8), but got type %I instead.%/&
+CMPAMESH command is ignored.
+  *return,-1
+*endif
+
+ar40 = upcase(strsub(ARG1,1,6))
+ar41 = 'cmpamesh'
+*if,ar40,eq,'COMPA_',then
+  ar40 = strsub(ARG1,7,128)
+*endif
+ar42 = 'COMPN_%ar40%'
+ar43 = 'COMPE_%ar40%'
+
+! Prepare environment
+smdbackup,'NONE'
+fembackup,'NONE'
+
+! Set attributes
+cmsel,s,%ARG1%
+
+aatt , ARG2 , ARG3 , ARG4 , ARG5 , ARG6
+aesize , %ARG1% , ARG7
+
+! Mesh areas
+*if,ARG8,eq,1,then
+
+  *get,ac,area,,count
+  *if,ac,eq,0,then
+    *msg,warn,ARG1
+CMPAMESH warning: selection component %s contained no areas, therefore no mesh was created.
+
+  *else
+    amesh,%ARG1%
+    cm,%ar42%,node
+    cm,%ar43%,elem
+
+  *endif
+*endif
+
+! Clean up
+smdrestore
+femrestore
