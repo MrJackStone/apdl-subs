@@ -19,24 +19,46 @@
 ! ar23: areaCount
 ! ar24: nthArea
 ! ar25: anum
+! ar26: orthoAxis
+! ar27: planeHorAxis
+! ar28: planeVerAxis
 ! ar30: lineCount
 ! ar31: l1
 ! ar32: l2
 ! ar33: nthLine
-! ar40: COMPK_l1
-! ar41: k1
-! ar42: k2
-! ar43: k3
-! ar51: k1Idx
-! ar52: k2Idx
-! ar53: k3Idx
-! ar61: maxAngle
-! ar62: nthAngle
-! ar71: nthNormal
-! ar72: areaNormal
+! ar34: k1
+! ar35: k2
+! ar36: COMPK_l1
+! ar37: horMin
+! ar38: verMin
+! ar40: thisKP
+! ar41: thisX
+! ar42: thisY
+! ar43: thisZ
+! ar50: prevKP
+! ar51: prevX
+! ar52: prevY
+! ar53: prevZ
+! ar54: prevRelativeX
+! ar55: prevRelativeY
+! ar56: prevRelativeZ
+! ar57: prevIdx
+! ar60: nextKP
+! ar61: nextX
+! ar62: nextY
+! ar63: nextZ
+! ar64: nextRelativeX
+! ar65: nextRelativeY
+! ar66: nextRelativeZ
+! ar67: nextIdx
+! ar71: iComponent
+! ar72: jComponent
+! ar73: kComponent
+! ar80: convexVertexNormalComponent
 
 ! Global erased parameters:
 ! ARORI_ARR_klist
+! ARORI_VAR_thisIdx
 
 
 ! Parse inputs
@@ -66,6 +88,18 @@ ARORI command ignored.
 ! Prepare environment
 smdbackup
 
+! Determine in-plane axes for finding convex polygon vertex
+*if,ar26,eq,'x',then
+  ar27 = 'y'
+  ar28 = 'z'
+*elseif,ar26,eq,'y',then
+  ar27 = 'z'
+  ar28 = 'x'
+*elseif,ar26,eq,'z',then
+  ar27 = 'x'
+  ar28 = 'y'
+*endif
+
 ! Check each selected area:
 cm,ar22,area
 *get,ar23,area,,count
@@ -89,44 +123,80 @@ ar25 = 0
 
     lsel,s,line,,ar31
     ksll
-    cm,ar40,kp
+    cm,ar36,kp
 
     lsel,s,line,,ar32
     ksll,r
-    ar42 = kpnext(0)
+    ar35 = kpnext(0)
 
-    cmsel,s,ar40
-    ksel,u,kp,,ar42
-    ar41 = kpnext(0)
+    cmsel,s,ar36
+    ksel,u,kp,,ar35
+    ar34 = kpnext(0)
 
-    ARORI_ARR_klist(ar33)   = ar41
-    ARORI_ARR_klist(ar33+1) = ar42
+    ARORI_ARR_klist(ar33)   = ar34
+    ARORI_ARR_klist(ar33+1) = ar35
   *enddo
 
-  ! Calculate area normal based on adjaced keypoints that yield max internal angle
-  ar61 = 0
-  *do,ar33,1,ar30-1,1
-    ar51 = mod(ar33-1,ar30)+1
-    ar52 = mod(ar33+0,ar30)+1
-    ar53 = mod(ar33+1,ar30)+1
-    ar41 = ARORI_ARR_klist(ar51)
-    ar42 = ARORI_ARR_klist(ar52)
-    ar43 = ARORI_ARR_klist(ar53)
-    ar62 = anglek(ar41,ar42,ar43)
-    ar71 = normk%ar26%(ar41,ar42,ar43)
-    *if,abs(ar62),gt,abs(ar61),then
-      ar61 = ar62
-      ar72 = ar71
-    *endif
-  *enddo
+  ! Find convex vertex and its neighbors
+  ksel,none
+  ksel,a,kp,,ARORI_ARR_klist(1:ar30)
+
+  *get,ar37,kp,,mnloc,%ar27%
+
+  ksel,r,loc,%ar27%,ar37
+  *get,ar38,kp,,mnloc,%ar28%
+  ksel,r,loc,%ar28%,ar38
+  ar40 = kpnext(0)
+
+  arrfind , 'ARORI_VAR_thisIdx' , 'ARORI_ARR_klist' , ar40 , 1e-3
+  ar57 = mod(ar30+ARORI_VAR_thisIdx-2,ar30)+1
+  ar67 = mod(ARORI_VAR_thisIdx,ar30)+1
+
+  ar50 = ARORI_ARR_klist(ar57)
+  ar60 = ARORI_ARR_klist(ar67)
+
+  ! Calculate relative coordinates of previous and next keypoints
+  ar41 = kx(ar40)
+  ar42 = ky(ar40)
+  ar43 = kz(ar40)
+
+  ar51 = kx(ar50)
+  ar52 = ky(ar50)
+  ar53 = kz(ar50)
+
+  ar61 = kx(ar60)
+  ar62 = ky(ar60)
+  ar63 = kz(ar60)
+
+  ar54 = ar51-ar41
+  ar55 = ar52-ar42
+  ar56 = ar53-ar43
+
+  ar64 = ar61-ar41
+  ar65 = ar62-ar42
+  ar66 = ar63-ar43
+
+  ! Calculate cross-product
+  ar71 = (ar65*ar56)-(ar66*ar55)
+  ar72 = (ar66*ar54)-(ar64*ar56)
+  ar73 = (ar64*ar55)-(ar65*ar54)
+
+  *if,ar26,eq,'x',then
+    ar80 = ar71
+  *elseif,ar26,eq,'y',then
+    ar80 = ar72
+  *elseif,ar26,eq,'z',then
+    ar80 = ar73
+  *endif
 
   ! Reverse area, if necessary
-  *if,ar72*ar21,lt,0,then
+  *if,ar80*ar21,lt,0,then
     areverse,ar25
   *endif
 
 *enddo
 
 ! Clean up
-*del,ARORI_ARR_klist,,nopr
+*del , ARORI_ARR_klist   ,  , nopr
+*del , ARORI_VAR_thisIdx ,  , nopr
 smdrestore
