@@ -31,8 +31,8 @@ ar21 = ''
 getafun,'afunBackup_'
 
 ! Activate mode, if  requested
-*if,ar22,eq,'DEG',then
+*if,ar21,eq,'DEG',then
   *afun,deg
-*elseif,ar22,eq,'RAD',then
+*elseif,ar21,eq,'RAD',then
   *afun,rad
 *endif
