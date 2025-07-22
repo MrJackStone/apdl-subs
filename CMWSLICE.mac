@@ -10,5 +10,14 @@
 
 
 cmsel,s,%ARG1%
+
+*get,ar21,area,,count
+*if,ar21,eq,0,then
+  *msg,warn,ARG1
+CMWSLICE warning: selection component %s contained no areas.%/&
+No operation performed.
+  *return,-1
+*endif
+
 asbw,%ARG1%,,delete
 cm,%ARG1%,area
