@@ -4,32 +4,30 @@
 ! Description:
 ! Plots SHELL181 bending moment about Y axis diagram (M11).
 
-! ARGuments:
+! Arguments:
 ! ARG1: calcOnly  -  option to calculate the element table but suppress plotting:
 !                      [0] plot element table (default)
 !                      [1] suppress plotting
 
 ! Local parameters:
-! ar21: seqn_M11
-! ar23: unitScaleFactor
-! ar24: nameKey
+! -
 
 
 ! Calculate element table
-ar21 = 4
-ar23 = 1e-3
-ar24 = 'MY'
+etable , 'TMP_SB'   , smisc     , 37
+etable , 'TMP_THK'  , smisc     , 17
+sexp   , 'TMP_THK2' , 'TMP_THK' ,    , 2
 
-etable,'TMP_%ar24%',smisc,ar21
+smult , 'SHELL_MY' , 'TMP_SB' , 'TMP_THK2' , 1e-3 , -1/6
 
-sadd,'SHELL_%ar24%','TMP_%ar24%',,ar23
-
-etable,'TMP_%ar24%',eras
+etable , 'TMP_SB'   , eras
+etable , 'TMP_THK'  , eras
+etable , 'TMP_THK2' , eras
 
 ! Plot diagram
 *if,ARG1,ne,1,then
   *cfopen,shelldiagram_tmp,tmp
-    *vwrite,'SHELL_%ar24%','avg'
+    *vwrite,'SHELL_MY','avg'
 pletab,%C,%C
   *cfclos
   /nopr
