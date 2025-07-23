@@ -18,6 +18,8 @@
 
 ! Local parameters:
 ! ar20: parType
+! ar21: areaCount
+! ar22: lineCount
 ! ar24: activeDOFoption
 
 ! Global erased parameters:
@@ -35,6 +37,20 @@ ar24 = 0
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,0,then
   ar24 = ((ARG4<4)>0)
+*endif
+
+! Check early return: incomplete area/line pair
+cmsel,s,%ARG1%
+*get,ar21,area,,count
+
+cmsel,s,%ARG2%
+*get,ar22,line,,count
+
+*if,ar21,eq,0,or,ar22,eq,0,then
+  *msg,warn,ARG1,ARG2
+L2ACNT warning: area (%s) or line (%s) selection component empty.%/&
+No contact created.
+  *return,-1
 *endif
 
 ! Define contact settings
