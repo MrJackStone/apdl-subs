@@ -1,0 +1,56 @@
+! DEFADOFETABS , prefix , scale
+! DEFADOFETABS , ARG1   , ARG2
+
+! Description:
+! Creates default element tables with structural DOFs. The element tables created have the
+! following names, optionally prefixed by a string of up to 6 characters:
+!
+!   Name   DOF
+!   UX     UX
+!   UY     UY
+!   UZ     UZ
+!   ROTX   ROTX
+!   ROTY   ROTY
+!   ROTZ   ROTZ
+!
+! The created ETABLEs are frozen, that is, they are calculated, and therefore cannot be updated
+! by issuing ETAB,REFL.
+
+! Arguments:
+! ARG1: prefix  -  prefix applied to default element table names
+! ARG2: scale   -  scale factor applied to element table results. A value of zero defaults to no
+!                  scaling (1.0 scale factor). Usually equal to 1e-3 to convert N to kN.
+
+! Local parameters:
+! ar20: parType
+! ar21: etabPrefix
+! ar22: etabScale
+
+
+! Parse inputs
+ar21 = ''
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = strsub(ARG1,1,6)
+*endif
+
+ar22 = 1
+*if,ARG2,ne,0,and,ARG2,ne,1,then
+  ar22 = ARG2
+*endif
+
+! Raw DOF element tables
+etable , %ar21%UX   , u   , x
+etable , %ar21%UY   , u   , y
+etable , %ar21%UZ   , u   , z
+etable , %ar21%ROTX , rot , x
+etable , %ar21%ROTY , rot , y
+etable , %ar21%ROTZ , rot , z
+
+! Freeze & scale element tables
+sadd , %ar21%UX   , %ar21%UX   ,  , ar22
+sadd , %ar21%UY   , %ar21%UY   ,  , ar22
+sadd , %ar21%UZ   , %ar21%UZ   ,  , ar22
+sadd , %ar21%ROTX , %ar21%ROTX ,  , ar22
+sadd , %ar21%ROTY , %ar21%ROTY ,  , ar22
+sadd , %ar21%ROTZ , %ar21%ROTZ ,  , ar22

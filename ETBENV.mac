@@ -1,0 +1,97 @@
+! ETBENV , firstNSET , lastNSET , etab_names , updateMacro , mute
+! ETBENV , ARG1      , ARG2     , ARG3       , ARG4        , ARG5
+
+! Description:
+! Calculates envelopes of listed element tables across a span of result sets.
+! Three envelope values are calculated: minimum, maximum, and absolute maximum. The resulting
+! element tables are named by concatenating a prefix associated with the type of envelope
+! (EMN_, EMX_, and EAB_ for the three listed before, respectively) with the name of the element
+! table (which is truncated, keeping only its first four characters).
+! Element tables are updated (after reading each result set) by executing a macro (ARG4) that
+! must have no arguments. Defaults to ETAB,REFL.
+
+! Arguments:
+! ARG1: firstNSET    -  number of the first result set defining the span to scan
+! ARG2: lastNSET     -  number of the last result set defining the span to scan
+! ARG3: etab_names   -  names of the element tables to be included in the envelope calculation
+! ARG4: updateMacro  -  name of the macro executed after reading each result set to update ETABLEs
+! ARG5: mute         -  suppress UI message indicating last set read
+!                         [0]  display UI messages
+!                         [1]  do not display UI messages
+
+! Local parameters:
+! ar20: parType
+! ar21: nthNSET
+! ar22: nthEtable
+! ar23: etCount
+! ar24: macroName
+! ar25: etbName
+
+
+! Parse inputs
+ar24 = 'ETAB,REFL'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar24 = ARG4
+*endif
+
+*get,ar20,parm,ARG3,type
+*if,ar20,ne,3,then
+  *msg,error
+ETBENV error: expected ARG3 to be a string representing the name of a char array.%/&
+ETBENV command ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG3%,type
+*if,ar20,ne,4,then
+  *msg,error
+ETBENV error: expected ARG3 to be the name of a char array, filled with ETABLE names.%/&
+ETBENV command ignored.
+  *return,-1
+*endif
+
+! Initialize envelope tables
+*get,ar23,parm,%ARG3%,dim,x
+
+set,,,,,,,ARG1
+%ar24%
+
+*do,ar22,1,ar23,1
+  ar25 = %ARG3%(ar22)
+  smax , 'EMX_%ar25%' , %ar25%
+  smin , 'EMN_%ar25%' , %ar25%
+  sabs , 1
+  smax , 'EAB_%ar25%' , %ar25%
+  sabs , 0
+*enddo
+
+! Loop remaining result sets, update envelopes
+*do,ar21,ARG1+1,ARG2,1
+
+  *if,ARG5,ne,1,then
+    *msg,ui,ar21,ARG2
+ETBENV: reading set %I / %I
+  *endif
+
+  ! Update element tables
+  set,,,,,,,ar21
+  %ar24%
+
+  ! Calculate envelope
+  *do,ar22,1,ar23,1
+    ar25 = %ARG3%(ar22)
+    smax , 'EMX_%ar25%' , 'EMX_%ar25%' , %ar25%
+    smin , 'EMN_%ar25%' , 'EMN_%ar25%' , %ar25%
+    sabs , 1
+    smax , 'EAB_%ar25%' , 'EAB_%ar25%' , %ar25%
+    sabs , 0
+  *enddo
+
+*enddo
+
+! Clean up
+*if,ARG5,ne,1,then
+  *msg,ui,
+ETBENV: done!
+*endif

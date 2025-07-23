@@ -1,0 +1,74 @@
+! DEFA188ETABS , prefix , scale
+! DEFA188ETABS , ARG1   , ARG2
+
+! Description:
+! Creates default element tables for post-processing BEAM188 elements. The element tables created
+! have the following names, optionally prefixed by a string of up to 5 characters:
+!
+!   Name  SMISC
+!   Ni    1
+!   Nj    14
+!   MYi   2
+!   MYj   15
+!   MZi   3
+!   MZj   16
+!   QYi   6
+!   QYj   19
+!   QZi   5
+!   QZj   18
+!   TQi   4
+!   TQj   17
+!
+! The created ETABLEs are frozen, that is, they are calculated, and therefore cannot be updated
+! by issuing ETABL,REFL.
+
+! Arguments:
+! ARG1: prefix  -  prefix applied to default element table names
+! ARG2: scale   -  scale factor applied to element table results. A value of zero defaults to no
+!                  scaling (1.0 scale factor). Usually equal to 1e-3 to convert N to kN.
+
+! Local parameters:
+! ar20: parType
+! ar21: etabPrefix
+! ar22: etabScale
+
+
+! Parse inputs
+ar21 = ''
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = strsub(ARG1,1,5)
+*endif
+
+ar22 = 1
+*if,ARG2,ne,0,and,ARG2,ne,1,then
+  ar22 = ARG2
+*endif
+
+! Create element tables
+etable , %ar21%Ni  , smisc , 1
+etable , %ar21%MYi , smisc , 2
+etable , %ar21%MZi , smisc , 3
+etable , %ar21%TQi , smisc , 4
+etable , %ar21%QZi , smisc , 5
+etable , %ar21%QYi , smisc , 6
+etable , %ar21%Nj  , smisc , 14
+etable , %ar21%MYj , smisc , 15
+etable , %ar21%MZj , smisc , 16
+etable , %ar21%TQj , smisc , 17
+etable , %ar21%QZj , smisc , 18
+etable , %ar21%QYj , smisc , 19
+
+! Freeze & scale element tables
+sadd , %ar21%Ni  , %ar21%Ni  ,  , ar22
+sadd , %ar21%Nj  , %ar21%Nj  ,  , ar22
+sadd , %ar21%MYi , %ar21%MYi ,  , ar22
+sadd , %ar21%MYj , %ar21%MYj ,  , ar22
+sadd , %ar21%MZi , %ar21%MZi ,  , ar22
+sadd , %ar21%MZj , %ar21%MZj ,  , ar22
+sadd , %ar21%QYi , %ar21%QYi ,  , ar22
+sadd , %ar21%QYj , %ar21%QYj ,  , ar22
+sadd , %ar21%QZi , %ar21%QZi ,  , ar22
+sadd , %ar21%QZj , %ar21%QZj ,  , ar22
+sadd , %ar21%TQi , %ar21%TQi ,  , ar22
+sadd , %ar21%TQj , %ar21%TQj ,  , ar22

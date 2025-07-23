@@ -1,0 +1,69 @@
+! DEFA181ETABS , prefix , scale
+! DEFA181ETABS , ARG1   , ARG2
+
+! Description:
+! Creates default element tables for post-processing SHELL181 elements. The element tables created
+! have the following names, optionally prefixed by a string of up to 5 characters:
+!
+!   Name  SMISC
+!   MX    -{38}*({17}^2)/6
+!   MY    -{37}*({17}^2)/6
+!   NX    1
+!   NY    2
+!   QX    7
+!   QY    8
+!
+! The created ETABLEs are frozen, that is, they are calculated, and therefore cannot be updated
+! by issuing ETAB,REFL.
+
+! Arguments:
+! ARG1: prefix  -  prefix applied to default element table names
+! ARG2: scale   -  scale factor applied to element table results. A value of zero defaults to no
+!                  scaling (1.0 scale factor). Usually equal to 1e-3 to convert N to kN.
+
+! Local parameters:
+! ar20: parType
+! ar21: etabPrefix
+! ar22: etabScale
+
+
+! Parse inputs
+ar21 = ''
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = strsub(ARG1,1,5)
+*endif
+
+ar22 = 1
+*if,ARG2,ne,0,and,ARG2,ne,1,then
+  ar22 = ARG2
+*endif
+
+! Calculated element tables: bending moments (pure bending, not affected by section offsets)
+etable , TMP_THK  , smisc   , 17
+sexp   , TMP_THK2 , TMP_THK ,    , 2
+
+etable , TMP_SBX  , smisc   , 37
+smult  , %ar21%MY , TMP_SBX , TMP_THK2 , 1 , -1/6
+
+etable , TMP_SBY  , smisc   , 38
+smult  , %ar21%MX , TMP_SBY , TMP_THK2 , 1 , -1/6
+
+etable , TMP_SBX  , eras
+etable , TMP_SBY  , eras
+etable , TMP_THK  , eras
+etable , TMP_THK2 , eras
+
+! Simple element tables: axial & shear forces
+etable , %ar21%NX , smisc , 1
+etable , %ar21%NY , smisc , 2
+etable , %ar21%QX , smisc , 7
+etable , %ar21%QY , smisc , 8
+
+! Freeze & scale element tables
+sadd , %ar21%MX , %ar21%MX ,  , ar22
+sadd , %ar21%MY , %ar21%MY ,  , ar22
+sadd , %ar21%NX , %ar21%NX ,  , ar22
+sadd , %ar21%NY , %ar21%NY ,  , ar22
+sadd , %ar21%QX , %ar21%QX ,  , ar22
+sadd , %ar21%QY , %ar21%QY ,  , ar22
