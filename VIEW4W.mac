@@ -1,28 +1,36 @@
-! VIEW4W , keepView
-! VIEW4W , arg1
+! VIEW4W , keepView , insideWindow
+! VIEW4W , ARG1     , ARG2
 
 ! Description:
 ! Activates display in four windows (square), each with a given view.
 
-! Delete all windows
-/window,ALL,DELE
 
-! Create the four windows
-/window,1,-1,0.335,0,1
-/window,2,-1,0.335,-1,0
-/window,3,0.335,1.67,0,1
-/window,4,0.335,1.67,-1,0
+/window,all,dele
 
-*if,arg1,ne,1,then
-  ! Set view for each window
-  ! Window 1: XY plane
-  /view,1,0,0,1
-  ! Window 2: YZ plane
-  /view,2,1,0,0
-  ! Window 3: XZ plane
-  /view,3,0,1,0
-  ! Window 4: isometric
-  /view,4,1,1,1
-  ! Set auto zoom
-  /auto,all
+*if,ARG2,ge,1,and,ARG2,le,5,then
+  *get,ar21,graph,ARG2,range,xmin
+  *get,ar22,graph,ARG2,range,xmax
+  *get,ar23,graph,ARG2,range,ymin
+  *get,ar24,graph,ARG2,range,ymax
+*else
+  ar21 = -1.00
+  ar22 =  1.67
+  ar23 = -1.00
+  ar24 =  1.00
+*endif
+
+ar25 = (ar22+ar21)/2
+ar26 = (ar24+ar23)/2
+
+/window , 1 , ar21 , ar25 , ar26 , ar24
+/window , 2 , ar21 , ar25 , ar23 , ar26
+/window , 3 , ar25 , ar22 , ar26 , ar24
+/window , 4 , ar25 , ar22 , ar23 , ar26
+
+*if,ARG1,ne,1,then
+  /view , 1   , 0 , 0 , 1
+  /view , 2   , 1 , 0 , 0
+  /view , 3   , 0 , 1 , 0
+  /view , 4   , 1 , 1 , 1
+  /auto , all
 *endif
