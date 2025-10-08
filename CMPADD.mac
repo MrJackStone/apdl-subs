@@ -1,87 +1,113 @@
-! cmpadd , cmName , entType
-! CMPADD , ARG1   , ARG2
+! cmpadd , cmName , entType , entNumber
+! CMPADD , ARG1   , ARG2    , ARG3
 
 ! Description:
 ! Adds current selection to existing named selection component. A component's type is obtained from
 ! the provided component when it exists, extracted directly from ARG2 when it is provided, and,
 ! when both these methods fail, inferred based on the 5 first characters in the component's name
 ! ('COMPE' for elements, 'COMPL' for lines, etc.).
+! Optionally a single entity may be added to the set (instead of using curring selected set) by
+! passing it as ARG3.
 
 ! Arguments:
-! ARG1: cmName   -  component name (string)
-! ARG2: entType  -  entity type (string), used only if component is undefined.
-!                   Options: 'NODE', 'ELEM', 'KP', 'LINE', 'AREA', 'VOLU'
+! ARG1: cmName     -  component name (string)
+! ARG2: entType    -  entity type (string), used only if component is undefined.
+!                     Options (only first char read): 'Node', 'Elem', 'Kp', 'Line', 'Area', 'Volu'
+! ARG3: entNumber  -  number of entity to add to selection component
+!                     (defaults to 0, in which case the whole current selection is added)
+
 
 ! Local parameters:
-! ar20: cmType
-! ar21: cmKey
-! ar22: parmType
-! ar23: prefix
+! ar20: parType
+! ar21: cmTypeIndex
+! ar22: cmTypeName
+! ar23: addSingleEntity
+! ar32: cmTypeKey
 
 ! Global erased parameters:
-! CMPADD_COMP_temp
+! CMPADD_ARR_keys
 
 
-! Get selection component type
-*get,ar20,comp,%ARG1%,type
-
-! When component is already defined:
-*if,ar20,eq,1,then
-  ar21 = 'NODE'
-*elseif,ar20,eq,2,then
-  ar21 = 'ELEM'
-*elseif,ar20,eq,6,then
-  ar21 = 'KP'
-*elseif,ar20,eq,7,then
-  ar21 = 'LINE'
-*elseif,ar20,eq,8,then
-  ar21 = 'AREA'
-*elseif,ar20,eq,9,then
-  ar21 = 'VOLU'
-
-*elseif,ar20,eq,0,then
-  ! When component is undefined:
-  *get,ar22,parm,ARG2,type
-
-  *if,ar22,eq,3,then
-    ! Type of component directly provided
-    ar21 = ARG2
-
-  *else
-    ! Type of component inferred based on component name
-    ar23 = upcase(strsub(ARG1,1,5))
-    *if,ar23,eq,'COMPN',then
-      ar21 = 'NODE'
-    *elseif,ar23,eq,'COMPE',then
-      ar21 = 'ELEM'
-    *elseif,ar23,eq,'COMPK',then
-      ar21 = 'KP'
-    *elseif,ar23,eq,'COMPL',then
-      ar21 = 'LINE'
-    *elseif,ar23,eq,'COMPA',then
-      ar21 = 'AREA'
-    *elseif,ar23,eq,'COMPV',then
-      ar21 = 'VOLU'
-    *else
-      ar21 = 'ERROR'
-    *endif
-  *endif
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,error
+CMPADD error: expected ARG1 to be a string.%/&
+CMPADD command ignored.
+  *return,-1
 *endif
 
-! Add to selection component
-*if,ar20,ne,0,then
-  ! When component exists
-  cm,CMPADD_COMP_temp,ar21
-  cmsel,a,%ARG1%
-  cm,%ARG1%,ar21
+ar32 = ' '
 
-  ! Restore previous selection
-  cmsel,s,CMPADD_COMP_temp
-  cmdele,CMPADD_COMP_temp
-  *del,CMPADD_COMP_temp,,nopr
+*if,upcase(strsub(ARG1,1,4)),eq,'COMP',then
+  ar32 = upcase(strsub(ARG1,5,1))
+*endif
 
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar32 = upcase(strsub(ARG2,1,1))
+*endif
+
+*del,CMPADD_ARR_keys,,nopr
+*dim,CMPADD_ARR_keys,char,9
+CMPADD_ARR_keys(1) = 'N','E',' ',' ',' ','K','L','A','V'
+*get,ar21,comp,%ARG1%,type
+*if,ar20,gt,0,then
+  ar32 = CMPADD_ARR_keys(ar21)
+*endif
+*del,CMPADD_ARR_keys,,nopr
+
+*if,ar32,eq,'N',then
+  ar22 = 'NODE'
+*elseif,ar32,eq,'E',then
+  ar22 = 'ELEM'
+*elseif,ar32,eq,'K',then
+  ar22 = 'KP'
+*elseif,ar32,eq,'L',then
+  ar22 = 'LINE'
+*elseif,ar32,eq,'A',then
+  ar22 = 'AREA'
+*elseif,ar32,eq,'V',then
+  ar22 = 'VOLU'
 *else
-  ! When component does not exist
-  cm,%ARG1%,ar21
-
+  *msg,error,ar32
+CMPADD error: failed to determine component type (invalid key '%s').%/&
+CMPADD command ignored.
+  *return,-1
 *endif
+
+ar23 = 0
+*if,ARG3,gt,0,then
+  ar23 = 1
+*endif
+
+! Prepare environment
+nbackup
+ebackup
+kbackup
+lbackup
+abackup
+vbackup
+
+! Select entities to append
+*if,ar23,eq,1,then
+  %ar32%sel,s,,,ARG3
+*endif
+
+! Select component to be appended
+*if,ar21,le,0,then
+  ! Yet undefined
+  cm,%ARG1%,ar22
+*else
+  ! Previously existing
+  cmsel,a,%ARG1%
+  cm,%ARG1%,ar22
+*endif
+
+! Clean up
+nrestore
+elrestore
+krestore
+lrestore
+arestore
+vrestore

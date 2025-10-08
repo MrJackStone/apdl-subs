@@ -2,7 +2,9 @@
 ! CSHELL_MY , ARG1
 
 ! Description:
-! Plots SHELL181 bending moment about Y axis diagram (M11).
+! Plots SHELL181 bending moment about Y axis diagram (M11). Sign convention is as follows:
+!   MY+ (positive): tension at Z+; compression at Z-
+!   MY- (positive): tension at Z-; compression at Z+
 
 ! Arguments:
 ! ARG1: calcOnly  -  option to calculate the element table but suppress plotting:
