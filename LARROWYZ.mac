@@ -1,15 +1,95 @@
-! LARROWYZ, x,y,z
+! larrowyz , x    , y    , z    , scale , cmRoot
+! LARROWYZ , ARG1 , ARG2 , ARG3 , ARG4  , ARG5
 
-*get,AR30,KP,,NUM,MAXD
-AR20=AR30+1
-AR21=AR30+2
-AR22=AR30+3
-AR23=AR30+4
-K,AR20,arg1,arg2,arg3
-K,AR21,arg1,arg2+2,arg3
-K,AR22,arg1,arg2+0.5,arg3-0.3
-K,AR23,arg1,arg2+0.5,arg3+0.3
-L,AR20,AR21
-L,AR20,AR22
-L,AR20,AR23
+! Description:
+! Draws an arrow at a given point in space (active CSYS) using lines and keypoints. Useful for
+! representing the position of virtual forces.
+!
+! The arrow's size can be uniformly scaled by providing an ARG4 greater than zero. By default the
+! arrow dimensions are:
+!
+!   PARAM    DESCRIPTION   DIRECTION   VALUE
+!   width    arrowhead     X & Z       0.3
+!   height   arrowhead     Y           0.5
+!   length   arrow tail    Y           2.0
 
+! Arguments:
+! ARG1: x       -  X-coordinate of the tip of the arrowhead
+! ARG2: y       -  Y-coordinate of the tip of the arrowhead
+! ARG3: z       -  Z-coordinate of the tip of the arrowhead
+! ARG4: scale   -  scale applied to arrow size (defaults to 1.0)
+! ARG5: cmRoot  -  suffix of the name of the exported selection components (defaults to 'LARROW')
+
+! Local parameters:
+! ar20: parType
+! ar21: kpArrowhead
+! ar22: kpRight
+! ar23: kpLeft
+! ar24: kpFront
+! ar25: kpBack
+! ar26: kpLineEnd
+! ar31: width
+! ar32: height
+! ar33: length
+! ar34: arrowScale
+! ar35: cmNameRoot
+! ar45: cmkName
+! ar46: cmlName
+
+
+! Parse inputs
+ar34 = 1.0
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,0,then
+  *if,ARG4,gt,0,then
+    ar34 = ARG4
+  *endif
+*endif
+
+ar35 = 'LARROW'
+*get,ar20,parm,ARG5,type
+*if,ar20,eq,3,then
+  ar35 = ARG5
+*endif
+ar45 = 'COMPK_%ar35%'
+ar46 = 'COMPL_%ar35%'
+
+! Calculate arrow geometry
+ar31 = ar34*(0.3)
+ar32 = ar34*(0.5)
+ar33 = ar34*(2.0)
+
+! Prepare environment
+smdbackup,'NONE'
+
+*get,ar30,kp,,num,maxd
+
+ar21 = ar30+1
+ar22 = ar30+2
+ar23 = ar30+3
+ar24 = ar30+4
+ar25 = ar30+5
+ar26 = ar30+6
+
+! Draw arrow
+k , ar21 , ARG1          , ARG2          , ARG3
+k , ar22 , ARG1          , ARG2+(ar32/2) , ARG3+(ar31/2)
+k , ar23 , ARG1          , ARG2+(ar32/2) , ARG3-(ar31/2)
+k , ar24 , ARG1+(ar31/2) , ARG2+(ar32/2) , ARG3
+k , ar25 , ARG1-(ar31/2) , ARG2+(ar32/2) , ARG3
+k , ar26 , ARG1          , ARG2+(ar33)   , ARG3
+
+l , ar21 , ar22
+l , ar21 , ar23
+l , ar21 , ar24
+l , ar21 , ar25
+l , ar21 , ar26
+
+! Create exported selection components
+cm,%ar45%,kp
+cm,%ar46%,line
+
+! Clean up
+smdrestore
+cmsel,a,%ar45%
+cmsel,a,%ar46%
