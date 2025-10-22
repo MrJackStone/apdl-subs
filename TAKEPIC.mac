@@ -29,31 +29,34 @@
 ! AR22: ParmType
 ! AR23: imgExt
 ! AR24: outputFileName
-! AR25: folderPrefix
 ! AR26: renameOpt
-! AR27: newName
 
 ! Global parameters (erased at the end of this subroutine):
-! TAKEPIC_filename
+! TAKEPIC_jobname
+! TAKEPIC_STR_prevDir
 
+
+! Prepare environment
+*del , TAKEPIC_STR_prevDir ,  , nopr
+*del , TAKEPIC_jobname     ,  , nopr
+
+/inquire , TAKEPIC_STR_prevDir , directory
 
 ! Set rename file option
 AR26=0
-AR27=''
+AR24=''
 *get,AR20,parm,arg1,type
 *if,AR20,eq,3,then
   AR26=1
-  AR27=arg1
+  AR24=arg1
 *endif
 
-! Define output file's name, prefixed with the optional folder name
-AR25=''
+! Change output folder
 *get,AR20,parm,arg6,type
 *if,AR20,eq,3,then
   /syp,mkdir,arg6
-  AR25=strcat(arg6,'\')
+  /cwd,ARG6
 *endif
-AR24=strcat(AR25,AR27)
 
 ! Image file format
 AR23='PNG'
@@ -136,10 +139,11 @@ pngr,tmod,1
 
 ! Rename file
 *if,AR26,eq,1,then
-   *del,TAKEPIC_filename
-   *get,TAKEPIC_filename,active,0,jobnam
-   /rename,'%TAKEPIC_filename%','%AR23%',,'%AR24%','%AR23%'
+   *get,TAKEPIC_jobname,active,0,jobnam
+   /rename,'%TAKEPIC_jobname%','%AR23%',,'%AR24%','%AR23%'
 *endif
 
 ! Clean up
-*del,TAKEPIC_filename,,nopr
+/cwd , '%TAKEPIC_STR_prevDir(1)%'
+*del , TAKEPIC_jobname            ,  , nopr
+*del , TAKEPIC_STR_prevDir        ,  , nopr

@@ -23,7 +23,15 @@
 
 ! Global parameters (erased at the end of this subroutine):
 ! ENDPNG_jobname
+! ENDPNG_STR_outputFilePath
 
+
+! Prepare environment
+*del , ENDPNG_STR_outputFilePath ,  , nopr
+*del , ENDPNG_jobname            ,  , nopr
+
+*dim , ENDPNG_STR_outputFilePath , string , 248 , 1
+*get , ENDPNG_jobname            , active ,     , jobnam
 
 ! Set rename file option
 AR26=0
@@ -41,7 +49,7 @@ AR25=''
   /syp,mkdir,arg6
   AR25=strcat(arg6,'\')
 *endif
-AR24=strcat(AR25,AR27)
+ENDPNG_STR_outputFilePath(1,1) = strcat(ar25,ar27)
 
 ! Invert background
 *if,arg2,ne,1,then
@@ -59,10 +67,9 @@ AR24=strcat(AR25,AR27)
 
 ! Rename file
 *if,AR26,eq,1,then
-  *del,ENDPNG_jobname,,nopr
-  *get,ENDPNG_jobname,active,,jobnam
-  /rename,'%ENDPNG_jobname%000','png',,'%AR24%','png'
+  /rename,'%ENDPNG_jobname%000','png',,ENDPNG_STR_outputFilePath(1,1),'png'
 *endif
 
 ! Clean up
-*del,ENDPNG_jobname,,nopr
+*del , ENDPNG_jobname            ,  , nopr
+*del , ENDPNG_STR_outputFilePath ,  , nopr
