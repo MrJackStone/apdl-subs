@@ -5,8 +5,6 @@
 ! Activates display in four windows (square), each with a given view.
 
 
-/window,all,dele
-
 *if,ARG2,ge,1,and,ARG2,le,5,then
   *get,ar21,graph,ARG2,range,xmin
   *get,ar22,graph,ARG2,range,xmax
@@ -21,6 +19,8 @@
 
 ar25 = (ar22+ar21)/2
 ar26 = (ar24+ar23)/2
+
+/window,all,dele
 
 /window , 1 , ar21 , ar25 , ar26 , ar24
 /window , 2 , ar21 , ar25 , ar23 , ar26
