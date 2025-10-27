@@ -37,6 +37,7 @@
 ! ar30: lcsIndex
 ! ar40: hypothesisCount
 ! ar41: hypothesisLst
+! ar42: nthHypothesis
 ! ar50: combinationCount
 ! ar51: nthCombination
 ! ar52: combCoefficient
@@ -163,65 +164,67 @@ LDCOMB command is ignored.
 *endif
 
 ! Collect table sizes
-*get , hypothesisCount  , parm , hypo_lstid , dim , x
-*get , combinationCount , parm , comb_coefs , dim , y
-*get , scenarioCount    , parm , scen_names , dim , x
+*get , ar40 , parm , %ARG4% , dim , x
+*get , ar50 , parm , %ARG1% , dim , y
+*get , ar60 , parm , %ARG3% , dim , x
 
 ! Build base hypotheses
-*do,nthHypothesis,1,hypothesisCount,1
-  hypothesisLst = hypo_lstid(nthHypothesis)
-  lcsIndex = hypo_lcsid(nthHypothesis)
-  lcdef,lcsIndex,hypothesisLst
+*do,ar42,1,ar40,1
+  ar41 = %ARG4%(ar42)
+  ar30 = %ARG5%(ar42)
+  lcdef,ar30,ar41
 *enddo
 
 ! Build combinations
-*do,nthCombination,1,combinationCount,1
+*do,ar51,1,ar50,1
 
   lczero
 
-  *do,nthHypothesis,1,hypothesisCount,1
-    combCoefficient = comb_coefs(nthHypothesis,nthCombination)
-    *if,combCoefficient,eq,0,cycle
-    lcfact,nthHypothesis,combCoefficient
-    lcoper,add,nthHypothesis
+  *do,ar42,1,ar40,1
+    ar52 = %ARG1%(ar42,ar51)
+
+    *if,ar52,eq,0,cycle
+
+    lcfact,ar42,ar52
+    lcoper,add,ar42
     lcfact
   *enddo
 
-  lcsIndex = comb_lcsid(nthCombination)
-  lcwrite,lcsIndex
+  ar30 = %ARG6%(ar51)
+  lcwrite,ar30
 
 *enddo
 
 ! Build envelopes
-*do,nthScenario,1,scenarioCount,1
+*do,ar62,1,ar60,1
 
-  scenMinIndex = scen_lcsid(1,nthScenario)
-  scenMaxIndex = scen_lcsid(2,nthScenario)
-  scenAbsIndex = scen_lcsid(3,nthScenario)
-  scenName     = scen_names(nthScenario)
+  ar63 = %ARG7%(1,ar62)
+  ar64 = %ARG7%(2,ar62)
+  ar65 = %ARG7%(3,ar62)
+  ar66 = %ARG3%(ar62)
 
   lczero
-  lcwrite,scenMinIndex
-  lcwrite,scenMaxIndex
-  lcwrite,scenAbsIndex
+  lcwrite , ar63
+  lcwrite , ar64
+  lcwrite , ar65
 
-  *do,nthCombination,1,combinationCount,1
-    cmbScenario = comb_scen(nthScenario)
-    lcsIndex    = comb_lcsid(nthCombination)
+  *do,ar51,1,ar50,1
+    ar61 = %ARG2%(ar62)
+    ar30 = %ARG6%(ar51)
 
-    *if,upcase(cmbScenario),ne,upcase(scenName),cycle
+    *if,upcase(ar61),ne,upcase(ar66),cycle
 
-    lcase,scenMinIndex
-    lcoper,min,lcsIndex
-    lcwrite,scenMinIndex
+    lcase   , ar63
+    lcoper  , min  , ar30
+    lcwrite , ar63
 
-    lcase,scenMaxIndex
-    lcoper,max,lcsIndex
-    lcwrite,scenMaxIndex
+    lcase   , ar64
+    lcoper  , max  , ar30
+    lcwrite , ar64
 
-    lcase,scenAbsIndex
-    lcoper,abmx,lcsIndex
-    lcwrite,scenAbsIndex
+    lcase   , ar65
+    lcoper  , abmx , ar30
+    lcwrite , ar65
   *enddo
 
 *enddo
