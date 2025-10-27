@@ -108,7 +108,7 @@ LDCOMB command is ignored.
 *endif
 
 *get,ar20,parm,%ARG4%,type
-*if,ar20,ne,4,then
+*if,ar20,ne,1,then
   *msg,error
 LDCOMB error: expected ARG4 to be the name of an array parameter listing load step indices of each base hypothesis.%/&
 LDCOMB command is ignored.
@@ -124,7 +124,7 @@ LDCOMB command is ignored.
 *endif
 
 *get,ar20,parm,%ARG5%,type
-*if,ar20,ne,4,then
+*if,ar20,ne,1,then
   *msg,error
 LDCOMB error: expected ARG5 to be the name of an array parameter giving load case indices for each base hypothesis.%/&
 LDCOMB command is ignored.
@@ -140,7 +140,7 @@ LDCOMB command is ignored.
 *endif
 
 *get,ar20,parm,%ARG6%,type
-*if,ar20,ne,4,then
+*if,ar20,ne,1,then
   *msg,error
 LDCOMB error: expected ARG6 to be the name of an array parameter giving load case indices for each combination created.%/&
 LDCOMB command is ignored.
@@ -156,7 +156,7 @@ LDCOMB command is ignored.
 *endif
 
 *get,ar20,parm,%ARG7%,type
-*if,ar20,ne,4,then
+*if,ar20,ne,1,then
   *msg,error
 LDCOMB error: expected ARG7 to be the name of a 3xN array parameter giving load case indices for MIN/MAX/ABMX envelopes of each scenario.%/&
 LDCOMB command is ignored.
