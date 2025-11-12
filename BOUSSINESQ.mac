@@ -1,6 +1,8 @@
 ! boussinesq , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , dynFct , stressDir , gravDir , apport_array , apportCalcOpt
 ! BOUSSINESQ , ARG1       , ARG2      , ARG3      , ARG4       , ARG5      , ARG6      , ARG7      , ARG8   , ARG9      , AR10    , AR11         , AR12
 
+! TODO  code design decisions needed, mostly regarding how to handle pre-calculated apportioned area arrays
+
 ! Description:
 ! Calculates, through the Boussinesq soil stress increase propagation formula, nodal forces for
 ! currently selected nodes caused by a a point load at a remote location in 3-D space.
@@ -26,7 +28,7 @@
 !                          ['V']  vertical stress increase
 ! AR10: gravDir       -  cartesian axis aligned with gravitational acceleration (vertical)
 !                          'X', 'Y', or 'Z'
-! AR11: apport_array  -  name of Nx2 array containing node numbers (?,1) and their corresponding
+! AR11: apport_array  -  name of Nx2 array containing node numbers (?,1) and their corresponding  !  TODO  actually implemented as a 1-D array
 !                        apportioned areas (?,2). Defaults to BOUSSINESQ_ARR_apport_areas.
 ! AR12: apportCalcOpt -  determines whether or not to calculate apportioned areas:
 !                          [0]  do not calculate (default)
@@ -35,6 +37,12 @@
 !                        Note: calculating apportioned areas incurs significant computational cost,
 !                              therefore it is recommended that, if possible, values are calculated
 !                              once and stored for future calls to BOUSSINESQ.
+
+! TODO  come up with an approach to deal with pre-calculated apportioned area arrays
+!       Problem: the array with apportioned areas must correspond to the array of node numbers
+!       Possible solution: turn the apportioned array into a 2-D matrix in which the first column is the node number.
+!                          then the list of apportioned areas could be made to match the list of selected nodes.
+!                          (this process of matching might be too slow, maybe even slower than recalculating the whole apportioned area array -- need to check)
 
 ! Local parameters:
 ! ar20: parType
@@ -152,6 +160,26 @@ ar30 = 'BOUSSINESQ_ARR_apport_areas'
 ar34 = 0
 *if,AR12,gt,0,and,AR12,le,2,then
   ar34 = nint(AR12)
+*endif
+
+*if,ar34,eq,0,then
+
+  *get,ar20,parm,%ar30%,type
+  *if,ar20,ne,1,then
+    *msg,error
+BOUSSINESQ error: expected AR11 to be the name of an array.%/&
+BOUSSINESQ command is ignored.
+    *return,-1
+  *endif
+
+  *get,ar20,parm,%ar30%,dim,y
+  *if,ar20,ne,2,then
+    *msg,error
+BOUSSINESQ error: expected AR11 array to be of order N x 2.%/&
+BOUSSINESQ command is ignored.
+    *return,-1
+  *endif
+
 *endif
 
 ! Prepare environment
