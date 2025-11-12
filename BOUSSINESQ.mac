@@ -1,8 +1,8 @@
-! boussinesq , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , stressDir , gravDir , apport_array , dynFct
-! BOUSSINESQ , ARG1       , ARG2      , ARG3      , ARG4       , ARG5      , ARG6      , ARG7      , ARG8      , ARG9    , AR10         , AR11
+! boussinesq , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , dynFct , stressDir , gravDir , apport_array , apportCalcOpt
+! BOUSSINESQ , ARG1       , ARG2      , ARG3      , ARG4       , ARG5      , ARG6      , ARG7      , ARG8   , ARG9      , AR10    , AR11         , AR12
 
 ! Description:
-! Calculates through the Boussinesq soil stress increase propagation formula nodal forces for
+! Calculates, through the Boussinesq soil stress increase propagation formula, nodal forces for
 ! currently selected nodes caused by a a point load at a remote location in 3-D space.
 ! Optionally, AREMA load impact coefficient (which varies with depth) can be applied when
 ! calculating nodal forces.
@@ -18,20 +18,23 @@
 ! ARG5: forcePosX     -  X coordinate of the remote force's location
 ! ARG6: forcePosY     -  Y coordinate of the remote force's location
 ! ARG7: forcePosZ     -  Z coordinate of the remote force's location
-! ARG8: stressDir     -  stress increase direction key:
-!                          ['H']  horizontal stress increase
-!                          ['V']  vertical stress increase
-! ARG9: gravDir       -  cartesian axis aligned with gravitational acceleration (vertical)
-!                          'X', 'Y', or 'Z'
-! AR10: apport_array  -  name of Nx2 array containing node numbers (?,1) and their corresponding
-!                        apportioned areas (?,2).
-!                        If blank, defaults to 'BOUSSINESQ_ARR_apport_areas' and apportioned areas
-!                        are then calculated inside this macro. This argument should be provided
-!                        when computational efficiency is a concern, since it avoids recalculating
-!                        nodel apportioned areas every subsequent time BOUSSINESQ is executed.
-! AR11: dynFct        -  determines whether or not to apply dynamic impact factor
+! ARG8: dynFct        -  determines whether or not to apply dynamic impact factor
 !                          ['OFF']    no impact factor applied (default)
 !                          ['AREMA']  calculate impact factor as per AREMA (chapter 8)
+! ARG9: stressDir     -  stress increase direction key:
+!                          ['H']  horizontal stress increase
+!                          ['V']  vertical stress increase
+! AR10: gravDir       -  cartesian axis aligned with gravitational acceleration (vertical)
+!                          'X', 'Y', or 'Z'
+! AR11: apport_array  -  name of Nx2 array containing node numbers (?,1) and their corresponding
+!                        apportioned areas (?,2). Defaults to BOUSSINESQ_ARR_apport_areas.
+! AR12: apportCalcOpt -  determines whether or not to calculate apportioned areas:
+!                          [0]  do not calculate (default)
+!                          [1]  calculate using all existing nodes
+!                          [2]  calculate using only currently selected nodes
+!                        Note: calculating apportioned areas incurs significant computational cost,
+!                              therefore it is recommended that, if possible, values are calculated
+!                              once and stored for future calls to BOUSSINESQ.
 
 ! Local parameters:
 ! ar20: parType
@@ -64,8 +67,8 @@
 ! ar55: dynamic_impact_coefficients
 ! ar56: nodal_pressures
 ! ar57: nodal_forces
-! ar62: apportDim1
-! ar63: apportDim2
+! ar58: COMPN_selected
+! ar59: COMPN_eligible
 
 
 ! Parse inputs
@@ -94,21 +97,11 @@ BOUSSINESQ command is ignored.
   *return,-1
 *endif
 
+ar31 = 0
 *get,ar20,parm,ARG8,type
-*if,ar20,ne,3,then
-  *msg,error
-BOUSSINESQ error: expected ARG8 to be a string.%/&
-BOUSSINESQ command is ignored.
-  *return,-1
-*endif
-
-ar28 = upcase(ARG8)
-*if,ar28,ne,'H',then
-  *if,ar28,ne,'V',then
-    *msg,error
-BOUSSINESQ error: expected ARG9 to be either H (horizontal) or V (vertical).%/&
-BOUSSINESQ command is ignored.
-    *return,-1
+*if,ar20,eq,3,then
+  *if,upcase(ARG8),eq,'AREMA',then
+    ar31 = 1
   *endif
 *endif
 
@@ -120,12 +113,30 @@ BOUSSINESQ command is ignored.
   *return,-1
 *endif
 
-ar29 = upcase(ARG9)
+ar28 = upcase(ARG9)
+*if,ar28,ne,'H',then
+  *if,ar28,ne,'V',then
+    *msg,error
+BOUSSINESQ error: expected ARG9 to be either H (horizontal) or V (vertical).%/&
+BOUSSINESQ command is ignored.
+    *return,-1
+  *endif
+*endif
+
+*get,ar20,parm,AR10,type
+*if,ar20,ne,3,then
+  *msg,error
+BOUSSINESQ error: expected AR10 to be a string.%/&
+BOUSSINESQ command is ignored.
+  *return,-1
+*endif
+
+ar29 = upcase(AR10)
 *if,ar29,ne,'X',then
   *if,ar29,ne,'Y',then
     *if,ar29,ne,'Z',then
       *msg,error
-BOUSSINESQ error: expected ARG8 to be the name of a cartesian axis (X, Y, or Z).%/&
+BOUSSINESQ error: expected AR10 to be the name of a cartesian axis (X, Y, or Z).%/&
 BOUSSINESQ command is ignored.
       *return,-1
     *endif
@@ -133,32 +144,18 @@ BOUSSINESQ command is ignored.
 *endif
 
 ar30 = 'BOUSSINESQ_ARR_apport_areas'
-*get,ar20,parm,AR10,type
-*if,ar20,eq,3,then
-  ar30 = AR10
-*endif
-
-ar34 = 1
-*get,ar20,parm,%ar30%,type
-*if,ar20,eq,1,then
-  *get,ar62,parm,%ar30%,dim,x
-  *get,ar63,parm,%ar30%,dim,y
-  *if,ar62,ge,1,and,ar63,ge,2,then
-    ar34 = 0
-  *endif
-*endif
-
-ar31 = 0
 *get,ar20,parm,AR11,type
 *if,ar20,eq,3,then
-  *if,upcase(AR11),eq,'AREMA',then
-    ar31 = 1
-  *endif
+  ar30 = AR11
+*endif
+
+ar34 = 0
+*if,AR12,gt,0,and,AR12,le,2,then
+  ar34 = nint(AR12)
 *endif
 
 ! Prepare environment
-afunbackup
-*afun,rad
+afunbackup,'RAD'
 ar35 = acos(-1)
 afunrestore
 
@@ -202,11 +199,17 @@ ar57 = 'BOUSSINESQ_ARR_nodal_forces'
 *del , %ar56% ,  , nopr
 *del , %ar57% ,  , nopr
 
+cm,ar58,node
+
+*if,ar34,eq,1,then
+  nsel,all
+*endif
+cm,ar59,node
+
 ! Extract nodal data
-nbackup
 nsel,all
 *vget , %ar40% , node ,  , nlist
-nrestore
+cmsel,s,ar58
 
 *vget , %ar41% , node ,  , nsel
 *vget , %ar42% , node ,  , loc   , x
@@ -218,9 +221,8 @@ nrestore
 
 *get , %ar23% , parm , %ar22% , dim , x
 
-*if,ar34,eq,1,then
-  nbackup
-  nsel,all
+*if,ar34,eq,1,or,ar34,eq,2,then
+  cmsel,s,ar59
 
   *del,%ar30%,,nopr
   *dim,%ar30%,,%ar23%
@@ -229,7 +231,7 @@ nrestore
     %ar30%(ar32) = arnode(ar33)
   *enddo
 
-  nrestore
+  cmsel,s,ar58
 *endif
 
 ! Calculate Boussinesq distances
@@ -271,7 +273,7 @@ nrestore
 
 ! Calculate Boussinesq pressure increases
 *if,ar28,eq,'V',then
-  ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
+  ! Boussinesq formula: q = -3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
   *voper , %ar56% , %ar54% , div    , %ar51%
   *vfun  , %ar56% , pwr    , %ar56% , 2
   *voper , %ar56% , %ar56% , add    , 1
@@ -283,7 +285,7 @@ nrestore
   *voper , %ar56% , %ar56% , mult   , 3*ARG4
 
 *elseif,ar28,eq,'H',then
-  ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
+  ! Boussinesq formula: q = 6*F*r²*z/(2*PI*D^5)
   *vfun  , %ar56% , pwr    , %ar52% , 5
   *voper , %ar56% , %ar56% , mult   , 2*ar35
   *vfun  , %ar56% , pwr    , %ar56% , -1
@@ -297,3 +299,29 @@ nrestore
 *voper , %ar57% , %ar56% , mult   , %ar30%
 *voper , %ar57% , %ar57% , mult   , %ar55%
 *vfun  , %ar21% , comp   , %ar57%
+
+! Clean up
+cmsel,a,ar59
+cmdele,ar59
+
+cmsel,s,ar58
+cmdele,ar58
+
+*del , %ar40% ,  , nopr
+*del , %ar41% ,  , nopr
+*del , %ar42% ,  , nopr
+*del , %ar43% ,  , nopr
+*del , %ar44% ,  , nopr
+*del , %ar45% ,  , nopr
+*del , %ar46% ,  , nopr
+*del , %ar47% ,  , nopr
+*del , %ar48% ,  , nopr
+*del , %ar49% ,  , nopr
+*del , %ar50% ,  , nopr
+*del , %ar51% ,  , nopr
+*del , %ar52% ,  , nopr
+*del , %ar53% ,  , nopr
+*del , %ar54% ,  , nopr
+*del , %ar55% ,  , nopr
+*del , %ar56% ,  , nopr
+*del , %ar57% ,  , nopr
