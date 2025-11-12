@@ -1,4 +1,4 @@
-! boussinesq , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , stressDir , gravDir , apport_array , dynFct
+! BOUSSINESQ , parmForces , parmNodes , nodeCount , forceValue , forcePosX , forcePosY , forcePosZ , stressDir , gravDir , apport_array , dynFct
 ! BOUSSINESQ , ARG1       , ARG2      , ARG3      , ARG4       , ARG5      , ARG6      , ARG7      , ARG8      , ARG9    , AR10         , AR11
 
 ! Description:
@@ -44,8 +44,6 @@
 ! ar31: includeAREMAimpactFactor
 ! ar32: nthNode
 ! ar33: nodeNum
-! ar34: calculateApportioned
-! ar35: pi
 ! ar40: nodes_all
 ! ar41: nodes_selStatus
 ! ar42: nodes_x
@@ -136,13 +134,13 @@ ar30 = 'BOUSSINESQ_ARR_apport_areas'
   ar30 = AR10
 *endif
 
-ar34 = 1
+ar54 = 1
 *get,ar20,parm,%ar30%,type
 *if,ar20,eq,1,then
   *get,ar52,parm,%ar30%,dim,x
   *get,ar53,parm,%ar30%,dim,y
   *if,ar52,ge,1,and,ar53,ge,2,then
-    ar34 = 0
+    ar54 = 0
   *endif
 *endif
 
@@ -193,7 +191,7 @@ afunrestore
 *vmask , ar41
 *vfun  , %ar22% , comp , ar40
 
-*if,ar34,eq,1,then
+*if,ar54,eq,1,then
   *del,%ar30%,,nopr
   *dim,%ar30%,,%ar23%
   *do,ar32,1,%ar23%,1
@@ -230,7 +228,6 @@ afunrestore
 
 ! Calculate impact coefficients (according to AREMA Chapter 8)
 *if,ar31,eq,1,then
-  ! AREMA formula: f = 1.0 <= 1.7060-0.2353*z <= 1.6
   *voper , ar55 , ar51 , mult , -0.2353
   *voper , ar55 , ar55 , add  , 1.7060
   *voper , ar55 , ar55 , max  , 1
@@ -248,14 +245,14 @@ afunrestore
   *vfun  , ar56 , pwr  , ar56 , 5/2
   *voper , ar56 , ar56 , mult , ar51
   *voper , ar56 , ar56 , mult , ar51
-  *voper , ar56 , ar56 , mult , 2*ar35
+  *voper , ar56 , ar56 , mult , 2*PI
   *vfun  , ar56 , pwr  , ar56 , -1
   *voper , ar56 , ar56 , mult , 3*ARG4
 
 *elseif,ar28,eq,'H',then
   ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
   *vfun  , ar56 , pwr  , ar52 , 5
-  *voper , ar56 , ar56 , mult , 2*ar35
+  *voper , ar56 , ar56 , mult , 2*PI
   *vfun  , ar56 , pwr  , ar56 , -1
   *voper , ar56 , ar56 , mult , ar51
   *voper , ar56 , ar56 , mult , ar53
