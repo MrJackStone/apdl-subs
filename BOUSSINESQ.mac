@@ -241,19 +241,19 @@ nrestore
 *vfun , %ar49% , pwr , %ar46% , 2
 *vfun , %ar50% , pwr , %ar47% , 2
 
-*voper , %ar52% , %ar48% , add  , %ar49%
-*voper , %ar52% , %ar52% , add  , %ar50%
-*vfun  , %ar52% , sqrt , %ar52%
+*voper , %ar52% , %ar48% , add    , %ar49%
+*voper , %ar52% , %ar52% , add    , %ar50%
+*vfun  , %ar52% , sqrt   , %ar52%
 
 *if,ar29,eq,'X',then
-  *vfun  , %ar51% , copy , %ar45%
-  *voper , %ar53% , %ar49% , add  , %ar50%
+  *vfun  , %ar51% , copy   , %ar45%
+  *voper , %ar53% , %ar49% , add    , %ar50%
 *elseif,ar29,eq,'Y',then
-  *vfun  , %ar51% , copy , %ar46%
-  *voper , %ar53% , %ar48% , add  , %ar50%
+  *vfun  , %ar51% , copy   , %ar46%
+  *voper , %ar53% , %ar48% , add    , %ar50%
 *elseif,ar29,eq,'Z',then
-  *vfun  , %ar51% , copy , %ar47%
-  *voper , %ar53% , %ar48% , add  , %ar49%
+  *vfun  , %ar51% , copy   , %ar47%
+  *voper , %ar53% , %ar48% , add    , %ar49%
 *endif
 
 *vfun , %ar54% , sqrt , %ar53%
@@ -272,24 +272,24 @@ nrestore
 ! Calculate Boussinesq pressure increases
 *if,ar28,eq,'V',then
   ! Boussinesq formula: q=-3*F/(2*PI*z²*(1+(R/z)²)^(5/2))
-  *voper , %ar56% , %ar54% , div  , %ar51%
-  *vfun  , %ar56% , pwr  , %ar56% , 2
-  *voper , %ar56% , %ar56% , add  , 1
-  *vfun  , %ar56% , pwr  , %ar56% , 5/2
-  *voper , %ar56% , %ar56% , mult , %ar51%
-  *voper , %ar56% , %ar56% , mult , %ar51%
-  *voper , %ar56% , %ar56% , mult , 2*ar35
-  *vfun  , %ar56% , pwr  , %ar56% , -1
-  *voper , %ar56% , %ar56% , mult , 3*ARG4
+  *voper , %ar56% , %ar54% , div    , %ar51%
+  *vfun  , %ar56% , pwr    , %ar56% , 2
+  *voper , %ar56% , %ar56% , add    , 1
+  *vfun  , %ar56% , pwr    , %ar56% , 5/2
+  *voper , %ar56% , %ar56% , mult   , %ar51%
+  *voper , %ar56% , %ar56% , mult   , %ar51%
+  *voper , %ar56% , %ar56% , mult   , 2*ar35
+  *vfun  , %ar56% , pwr    , %ar56% , -1
+  *voper , %ar56% , %ar56% , mult   , 3*ARG4
 
 *elseif,ar28,eq,'H',then
   ! Boussinesq formula: 6*F*r²*z/(2*PI*D^5)
-  *vfun  , %ar56% , pwr  , %ar52% , 5
-  *voper , %ar56% , %ar56% , mult , 2*ar35
-  *vfun  , %ar56% , pwr  , %ar56% , -1
-  *voper , %ar56% , %ar56% , mult , %ar51%
-  *voper , %ar56% , %ar56% , mult , %ar53%
-  *voper , %ar56% , %ar56% , mult , 6*ARG4
+  *vfun  , %ar56% , pwr    , %ar52% , 5
+  *voper , %ar56% , %ar56% , mult   , 2*ar35
+  *vfun  , %ar56% , pwr    , %ar56% , -1
+  *voper , %ar56% , %ar56% , mult   , %ar51%
+  *voper , %ar56% , %ar56% , mult   , %ar53%
+  *voper , %ar56% , %ar56% , mult   , 6*ARG4
 
 *endif
 
