@@ -1,32 +1,230 @@
-! LDCOMB, loadCase1, loadCase2, loadCase3, loadCase4, loadCase5, coef1, coef2, coef3, coef4, coef5
-! LDCOMB,      arg1,      arg2,      arg3,      arg4,      arg5,  arg6,  arg7,  arg8,  arg9,  ar10
+! ldcomb , comb_coefs , comb_scen , scen_names , hypo_lstid , hypo_lcsid , comb_lcsid , scen_lcsid
+! LDCOMB , ARG1       , ARG2      , ARG3       , ARG4       , ARG5       , ARG6       , ARG7
+
+! Description:
+! Creates load combinations & envelopes using post-process load cases.
+!
+! Combinations are created the following way:
+!   • Each base hypothesis is saved as a load case;
+!   • Each load combination is a load case created by linear combination of the base hypotheses;
+!   • Each load combination has combination coefficients and a scenario it belongs to;
+!   • Load combinations are grouped by scenario and used to generate three envelope load cases:
+!       - MIN (minimum values)
+!       - MAX (maximum values)
+!       - ABMX (absolute maximum values)
+!
+! The total number of load cases created (LCS_COUNT), which must respect the maximum of 99, is given
+! by the following expresion:
+!
+!   LCS_COUNT = HYPOTHESIS_COUNT + COMBINATION_COUNT + 3*SCENARIO_COUNT <= 99
+
+! Arguments:
+! ARG1: comb_coefs  -  name of 2-D array containing combination coefficients for each combination
+!                      for each base hypothesis
+! ARG2: comb_scen   -  name of 1-D char array containing the name of the scenario that each
+!                      combination belongs to
+! ARG3: scen_names  -  name of 1-D char array containing the name of each scenario
+! ARG4: hypo_lstid  -  name of 1-D array listing the load step indices of each base hypothesis
+! ARG5: hypo_lcsid  -  name of 1-D array listing the load case index assigned to each base
+!                      hypothesis
+! ARG6: comb_lcsid  -  name of 1-D array listing the load case index assigned to each load
+!                      combination created
+! ARG7: scen_lcsid  -  name of 2-D array listing the load case index assigned to each of the three
+!                      envelopes (min, max, and abmx) created for each scenario
+
+! Local parameters:
+! ar20: parType
+! ar30: lcsIndex
+! ar40: hypothesisCount
+! ar41: hypothesisLst
+! ar42: nthHypothesis
+! ar50: combinationCount
+! ar51: nthCombination
+! ar52: combCoefficient
+! ar60: scenarioCount
+! ar61: cmbScenario
+! ar62: nthScenario
+! ar63: scenMinIndex
+! ar64: scenMaxIndex
+! ar65: scenAbsIndex
+! ar66: scenName
 
 
-
-
-*if,arg5,NE,0,THEN
-    lc1=arg1
-    cf1=arg5
-*elseif,arg6,NE,0,THEN
-    lc1=arg2
-    cf1=arg5
-*elseif,arg6,NE,0,THEN
-    lc1=arg3
-    cf1=arg5
-*elseif,arg6,NE,0,THEN
-    lc1=arg4
-    cf1=arg5
-*elseif,arg6,NE,0,THEN
-    lc1=arg5
-    cf1=arg5
-*else
-    'return zero'
+! Parse inputs
+*get,ar20,parm,ARG1,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG1 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
 *endif
 
+*get,ar20,parm,%ARG1%,type
+*if,ar20,ne,1,then
+  *msg,error
+LDCOMB error: expected ARG1 to be the name of a MxN array parameter containing load combination coefficients.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,ARG2,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG2 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,%ARG2%,type
+*if,ar20,ne,4,then
+  *msg,error
+LDCOMB error: expected ARG2 to be the name of a char array parameter containing scenario names.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,ARG3,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG3 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,%ARG3%,type
+*if,ar20,ne,4,then
+  *msg,error
+LDCOMB error: expected ARG3 to be the name of a char array parameter listing all scenario names.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,ARG4,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG4 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,%ARG4%,type
+*if,ar20,ne,1,then
+  *msg,error
+LDCOMB error: expected ARG4 to be the name of an array parameter listing load step indices of each base hypothesis.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
 
+*get,ar20,parm,ARG5,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG5 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG5%,type
+*if,ar20,ne,1,then
+  *msg,error
+LDCOMB error: expected ARG5 to be the name of an array parameter giving load case indices for each base hypothesis.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG6,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG6 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG6%,type
+*if,ar20,ne,1,then
+  *msg,error
+LDCOMB error: expected ARG6 to be the name of an array parameter giving load case indices for each combination created.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,ARG7,type
+*if,ar20,ne,3,then
+  *msg,error
+LDCOMB error: expected ARG7 to be a string.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+*get,ar20,parm,%ARG7%,type
+*if,ar20,ne,1,then
+  *msg,error
+LDCOMB error: expected ARG7 to be the name of a 3xN array parameter giving load case indices for MIN/MAX/ABMX envelopes of each scenario.%/&
+LDCOMB command is ignored.
+  *return,-1
+*endif
+
+! Collect table sizes
+*get , ar40 , parm , %ARG4% , dim , x
+*get , ar50 , parm , %ARG1% , dim , y
+*get , ar60 , parm , %ARG3% , dim , x
+
+! Build base hypotheses
+*do,ar42,1,ar40,1
+  ar41 = %ARG4%(ar42)
+  ar30 = %ARG5%(ar42)
+  lcdef,ar30,ar41
+*enddo
+
+! Build combinations
+*do,ar51,1,ar50,1
+
+  lczero
+
+  *do,ar42,1,ar40,1
+    ar52 = %ARG1%(ar42,ar51)
+
+    *if,ar52,eq,0,cycle
+
+    lcfact,ar42,ar52
+    lcoper,add,ar42
+    lcfact
+  *enddo
+
+  ar30 = %ARG6%(ar51)
+  lcwrite,ar30
+
+*enddo
+
+! Build envelopes
+*do,ar62,1,ar60,1
+
+  ar63 = %ARG7%(1,ar62)
+  ar64 = %ARG7%(2,ar62)
+  ar65 = %ARG7%(3,ar62)
+  ar66 = %ARG3%(ar62)
+
+  lczero
+  lcwrite , ar63
+  lcwrite , ar64
+  lcwrite , ar65
+
+  *do,ar51,1,ar50,1
+    ar61 = %ARG2%(ar62)
+    ar30 = %ARG6%(ar51)
+
+    *if,upcase(ar61),ne,upcase(ar66),cycle
+
+    lcase   , ar63
+    lcoper  , min  , ar30
+    lcwrite , ar63
+
+    lcase   , ar64
+    lcoper  , max  , ar30
+    lcwrite , ar64
+
+    lcase   , ar65
+    lcoper  , abmx , ar30
+    lcwrite , ar65
+  *enddo
+
+*enddo
