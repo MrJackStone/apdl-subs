@@ -45,47 +45,47 @@ ar21 = ARG1
 *if,ar22,eq,'U76.2X6.1',then
   CEDISAU_VAR_d  = 0.0762
   CEDISAU_VAR_bf = 0.0358
-  CEDISAU_VAR_tf = 0.0043
+  CEDISAU_VAR_tf = 0.0069
   CEDISAU_VAR_tw = 0.0043
 *elseif,ar22,eq,'U76.2X7.44',then
   CEDISAU_VAR_d  = 0.0762
   CEDISAU_VAR_bf = 0.0381
-  CEDISAU_VAR_tf = 0.0066
+  CEDISAU_VAR_tf = 0.0069
   CEDISAU_VAR_tw = 0.0066
 *elseif,ar22,eq,'U76.2X8.93',then
   CEDISAU_VAR_d  = 0.0762
   CEDISAU_VAR_bf = 0.0405
-  CEDISAU_VAR_tf = 0.0090
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0090
 *elseif,ar22,eq,'U101.6X8.04',then
   CEDISAU_VAR_d  = 0.1016
   CEDISAU_VAR_bf = 0.0401
-  CEDISAU_VAR_tf = 0.0046
+  CEDISAU_VAR_tf = 0.0075
   CEDISAU_VAR_tw = 0.0046
 *elseif,ar22,eq,'U101.6X9.3',then
   CEDISAU_VAR_d  = 0.1016
   CEDISAU_VAR_bf = 0.0418
-  CEDISAU_VAR_tf = 0.0063
+  CEDISAU_VAR_tf = 0.0075
   CEDISAU_VAR_tw = 0.0063
 *elseif,ar22,eq,'U101.6X10.79',then
   CEDISAU_VAR_d  = 0.1016
   CEDISAU_VAR_bf = 0.0437
-  CEDISAU_VAR_tf = 0.0081
+  CEDISAU_VAR_tf = 0.0075
   CEDISAU_VAR_tw = 0.0081
 *elseif,ar22,eq,'U152.4X12.2',then
   CEDISAU_VAR_d  = 0.1524
-  CEDISAU_VAR_bf = 0.0488
-  CEDISAU_VAR_tf = 0.0051
+  CEDISAU_VAR_bf = 0.0468
+  CEDISAU_VAR_tf = 0.0087
   CEDISAU_VAR_tw = 0.0051
 *elseif,ar22,eq,'U152.4X15.63',then
   CEDISAU_VAR_d  = 0.1524
   CEDISAU_VAR_bf = 0.0517
-  CEDISAU_VAR_tf = 0.0080
+  CEDISAU_VAR_tf = 0.0087
   CEDISAU_VAR_tw = 0.0080
 *elseif,ar22,eq,'U152.4X19.35',then
   CEDISAU_VAR_d  = 0.1524
   CEDISAU_VAR_bf = 0.0548
-  CEDISAU_VAR_tf = 0.0111
+  CEDISAU_VAR_tf = 0.0087
   CEDISAU_VAR_tw = 0.0111
 *elseif,ar22,eq,'U152.4X23.07',then
   CEDISAU_VAR_d  = 0.1524
@@ -95,107 +95,107 @@ ar21 = ARG1
 *elseif,ar22,eq,'U203.2X17.11',then
   CEDISAU_VAR_d  = 0.2032
   CEDISAU_VAR_bf = 0.0574
-  CEDISAU_VAR_tf = 0.0056
+  CEDISAU_VAR_tf = 0.0095
   CEDISAU_VAR_tw = 0.0056
 *elseif,ar22,eq,'U203.2X20.46',then
   CEDISAU_VAR_d  = 0.2032
   CEDISAU_VAR_bf = 0.0595
-  CEDISAU_VAR_tf = 0.0077
+  CEDISAU_VAR_tf = 0.0095
   CEDISAU_VAR_tw = 0.0077
 *elseif,ar22,eq,'U203.2X24.18',then
   CEDISAU_VAR_d  = 0.2032
   CEDISAU_VAR_bf = 0.0619
-  CEDISAU_VAR_tf = 0.0100
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0100
 *elseif,ar22,eq,'U203.2X27.9',then
   CEDISAU_VAR_d  = 0.2032
   CEDISAU_VAR_bf = 0.0642
-  CEDISAU_VAR_tf = 0.0124
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0124
 *elseif,ar22,eq,'U203.2X31.62',then
   CEDISAU_VAR_d  = 0.2032
   CEDISAU_VAR_bf = 0.0665
-  CEDISAU_VAR_tf = 0.0147
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0147
 *elseif,ar22,eq,'U254X22.77',then
   CEDISAU_VAR_d  = 0.2540
   CEDISAU_VAR_bf = 0.0660
-  CEDISAU_VAR_tf = 0.0061
+  CEDISAU_VAR_tf = 0.0111
   CEDISAU_VAR_tw = 0.0061
 *elseif,ar22,eq,'U254X29.76',then
   CEDISAU_VAR_d  = 0.2540
   CEDISAU_VAR_bf = 0.0696
-  CEDISAU_VAR_tf = 0.0096
+  CEDISAU_VAR_tf = 0.0111
   CEDISAU_VAR_tw = 0.0096
 *elseif,ar22,eq,'U254X37.2',then
   CEDISAU_VAR_d  = 0.2540
   CEDISAU_VAR_bf = 0.0733
-  CEDISAU_VAR_tf = 0.0134
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0134
 *elseif,ar22,eq,'U254X44.65',then
   CEDISAU_VAR_d  = 0.2540
   CEDISAU_VAR_bf = 0.0770
-  CEDISAU_VAR_tf = 0.0171
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0171
 *elseif,ar22,eq,'U254X52.09',then
   CEDISAU_VAR_d  = 0.2540
   CEDISAU_VAR_bf = 0.0808
-  CEDISAU_VAR_tf = 0.0208
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0208
 *elseif,ar22,eq,'U304.8X30.81',then
   CEDISAU_VAR_d  = 0.3048
   CEDISAU_VAR_bf = 0.0747
-  CEDISAU_VAR_tf = 0.0071
+  CEDISAU_VAR_tf = 0.0127
   CEDISAU_VAR_tw = 0.0071
 *elseif,ar22,eq,'U304.8X37.2',then
   CEDISAU_VAR_d  = 0.3048
   CEDISAU_VAR_bf = 0.0774
-  CEDISAU_VAR_tf = 0.0098
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0098
 *elseif,ar22,eq,'U304.8X44.65',then
   CEDISAU_VAR_d  = 0.3048
   CEDISAU_VAR_bf = 0.0805
-  CEDISAU_VAR_tf = 0.0130
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0130
 *elseif,ar22,eq,'U304.8X52.09',then
   CEDISAU_VAR_d  = 0.3048
   CEDISAU_VAR_bf = 0.0836
-  CEDISAU_VAR_tf = 0.0161
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0161
 *elseif,ar22,eq,'U304.8X59.53',then
   CEDISAU_VAR_d  = 0.3048
   CEDISAU_VAR_bf = 0.0867
-  CEDISAU_VAR_tf = 0.0192
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0192
 *elseif,ar22,eq,'U381X50.45',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0864
-  CEDISAU_VAR_tf = 0.0102
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0102
 *elseif,ar22,eq,'U381X52.09',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0869
-  CEDISAU_VAR_tf = 0.0107
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0107
 *elseif,ar22,eq,'U381X59.53',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0894
-  CEDISAU_VAR_tf = 0.0132
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0132
 *elseif,ar22,eq,'U381X66.97',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0919
-  CEDISAU_VAR_tf = 0.0157
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0157
 *elseif,ar22,eq,'U381X74.41',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0944
-  CEDISAU_VAR_tf = 0.0182
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0182
 *elseif,ar22,eq,'U381X81.85',then
   CEDISAU_VAR_d  = 0.3810
   CEDISAU_VAR_bf = 0.0969
-  CEDISAU_VAR_tf = 0.0207
+  CEDISAU_VAR_tf = ?
   CEDISAU_VAR_tw = 0.0207
 *else
   *msg,error,ar22
