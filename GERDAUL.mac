@@ -1,5 +1,5 @@
-! GERDAUL, secID, name, refineKey, consultOnly
-! GERDAUL, arg1,  arg2, arg3,      arg4
+! GERDAUL , secID , name , refineKey , consultOnly , etOpt , tenskey
+! GERDAUL , arg1  , arg2 , arg3      , arg4        , ARG5  , ARG6
 
 ! Descrição:
 ! Esta subrotina cria uma seção transversal a partir do catálogo de cantoneiras de abas iguais da
@@ -10,6 +10,13 @@
 ! arg2: name         -  nome da seção transversal como consta no catálogo da Gerdau
 ! arg3: refineKey    -  refinamento da seção transversal conforme definido no comando SECDATA
 ! arg4: consultOnly  -  opção de criação da seção transversal: [0] Criar seção; [1] Não criar seção
+! ARG5: etOpt        -  element type option:
+!                         [0, 188] BEAM188 (default)
+!                         [180]    LINK180
+! ARG6: tenskey      -  flag specifying tension/compression behavior (for LINK180 only):
+!                         [ 0] tension & compression (default)
+!                         [ 1] tension only
+!                         [-1] compression only
 
 ! Lista de variáveis locais:
 ! AR20: checkName
@@ -18,11 +25,31 @@
 ! AR23: maxSecNum
 ! AR24: newSecNum
 ! AR25: createSection
+! ar30: parType
+! ar31: elemType
+! ar32: crossSectionalArea
+! ar33: tenskeyOpt
 
 ! Lista de variáveis de saída:
 ! GERDAUL_VAR_num
 ! GERDAUL_VAR_b
 ! GERDAUL_VAR_t
+
+
+! Parse inputs
+ar31 = 188
+*get,ar30,parm,ARG5,type
+*if,ar30,eq,0,then
+  *if,ARG5,eq,180,then
+    ar31 = 180
+  *endif
+*endif
+
+ar33 = 0
+*get,ar30,parm,ARG6,type
+*if,ar30,eq,0,then
+  ar33 = ARG6
+*endif
 
 ! Nome da seção em letras maiúsculas
 AR20=UPCASE(arg2)
@@ -332,7 +359,16 @@ GERDAUL WARNING: Specified section not found. Command ignored.
 
 ! Criar seção transversal
 *if,GERDAUL_VAR_b,NE,-1,AND,AR25,EQ,1,THEN
-   SECTYPE,GERDAUL_VAR_num,BEAM,L,arg2,AR22
-   SECDATA,GERDAUL_VAR_b,GERDAUL_VAR_b,GERDAUL_VAR_t,GERDAUL_VAR_t
-*endif
 
+  *if,ar31,eq,188,then
+    SECTYPE,GERDAUL_VAR_num,BEAM,L,arg2,AR22
+    SECDATA,GERDAUL_VAR_b,GERDAUL_VAR_b,GERDAUL_VAR_t,GERDAUL_VAR_t
+
+  *elseif,ar31,eq,180,then
+    ar32 = 2*(GERDAUL_VAR_b*GERDAUL_VAR_t)-(GERDAUL_VAR_t**2)
+    sectype,GERDAUL_VAR_num,link,,arg2
+    secdata,ar32
+    seccontrol,,ar33
+
+  *endif
+*endif
