@@ -1,12 +1,12 @@
-! CTIME , strTime , t0   , separator
-! CTIME , arg1    , arg2 , arg3
+! ctime , parmName , t0   , separator
+! CTIME , ARG1     , ARG2 , ARG3
 
 ! Description:
 ! Returns current time (CPU clock) or elapsed time (if t0 is given) as a string (HH:MM:SS). The
 ! separator character can be set by arg3, replacing the default ':'.
 
 ! Arguments:
-! ARG1: parm       -  parameter name (string)
+! ARG1: parmName   -  name of parameter to which time as string is assigned (defaults to '_OUTPUT')
 ! ARG2: t0         -  previous time value to calculate elapsed time (if undefined current CPU time
 !                     is returned)
 ! ARG3: separator  -  string character that separates hours, minutes, and seconds (defaults to ":")
@@ -20,15 +20,21 @@
 ! _output
 
 
+ar21 = '_OUTPUT'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar31 = ARG1
+*endif
+
 ! Get current time on wall clock
 *get,ar21,active,,time,wall
 
 *if,ARG2,gt,0,then
     ! Calculate elapsed time
-    ar22=ar21-ARG2
+    ar22 = ar21-ARG2
 *else
     ! Calculate 24h time
-    ar22=mod(ar21,24)
+    ar22 = mod(ar21,24)
 *endif
 
 ! Convert time to string
