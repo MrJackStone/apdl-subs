@@ -2,22 +2,45 @@
 ! CMWSLICE, ARG1
 
 ! Description:
-! Slices an area selection component at the working's planes current position and rebuilds the
-! selection component after the operation, keeping the original name.
+! Slices an area or line selection component at the working's planes current position and rebuilds
+! the selection component after the operation, keeping the original name.
 
 ! Arguments:
-! ARG1: cmaName  -  name of the area selection component to be operated upon
+! ARG1: cmName  -  name of the area or line selection component to be operated upon
+
+! Local parameters:
+! ar21: cmType
+! ar22: smKey
+! ar23: booleanOperator
 
 
+! Analyze type of selection component
+*get,ar21,comp,%ARG1%,type
+*if,ar21,eq,7,then
+  ! Lines
+  ar22 = 'line'
+  ar23 = 'lsbw'
+*elseif,ar21,eq,8,then
+  ! Areas
+  ar22 = 'area'
+  ar23 = 'asbw'
+*else
+  *msg,error,ar21
+CMWSLICE error: invalid selection component (type %I).%/&
+CMWSLICE command ignored.
+  *return,-1
+*endif
+
+! Break if selection component is empty
 cmsel,s,%ARG1%
-
-*get,ar21,area,,count
+*get,ar21,%ar22%,,count
 *if,ar21,eq,0,then
   *msg,warn,ARG1
-CMWSLICE warning: selection component %s contained no areas.%/&
+CMWSLICE warning: selection component %s contained no areas/lines.%/&
 No operation performed.
   *return,-1
 *endif
 
-asbw,%ARG1%,,delete
-cm,%ARG1%,area
+! Slice & rebuild
+%ar23%,%ARG1%,,delete
+cm,%ARG1%,%ar22%
