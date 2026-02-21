@@ -70,8 +70,8 @@ CMPADD_ARR_keys(1) = 'N','E',' ',' ',' ','K','L','A','V'
 *elseif,ar32,eq,'V',then
   ar22 = 'VOLU'
 *else
-  *msg,error,ar32
-CMPADD error: failed to determine component type (invalid key '%s').%/&
+  *msg,error,ARG1,ar32
+CMPADD error: failed to determine component '%S' type (invalid key '%s').%/&
 CMPADD command ignored.
   *return,-1
 *endif
