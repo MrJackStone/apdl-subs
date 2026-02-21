@@ -52,7 +52,7 @@ ar32 = ' '
 *dim,CMPADD_ARR_keys,char,9
 CMPADD_ARR_keys(1) = 'N','E',' ',' ',' ','K','L','A','V'
 *get,ar21,comp,%ARG1%,type
-*if,ar20,gt,0,then
+*if,ar21,gt,0,then
   ar32 = CMPADD_ARR_keys(ar21)
 *endif
 *del,CMPADD_ARR_keys,,nopr
