@@ -467,7 +467,7 @@ CM,AR30,AREA
    CMSEL,S,AR28
    CMSEL,A,AR29
    CMSEL,A,AR30
-   SLICEXZ,AR46,AR73,AR77,AR74,AR78
+   SLICEXZ,AR46,AR73,AR77,AR74,AR78  ! TODO  deprecated, replace
    CM,AR28,KP
    CM,AR29,LINE
    CM,AR30,AREA
@@ -538,15 +538,15 @@ CM,AR30,AREA
 
 ! Fatiar mesa maior na largura da mesa menor
 *if,AR44,NE,AR45,THEN
-   SLICEXY,ar15+AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
-   SLICEXY,ar15-AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+   SLICEXY,ar15+AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4  ! TODO  deprecated, replace
+   SLICEXY,ar15-AR45/2,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4  ! TODO  deprecated, replace
 *endif
 
 ! Fatiar áreas na largura dos enrijecedores de abertura
 *if,AR20,EQ,1,THEN
    *if,ar12,NE,AR45/2,AND,ar12,NE,AR44/2,THEN
-      SLICEXY,ar15+ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
-      SLICEXY,ar15-ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4
+      SLICEXY,ar15+ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4  ! TODO  deprecated, replace
+      SLICEXY,ar15-ar12,ar13-arg1,ar14-arg4,ar13+2*arg1,ar14+2*arg4  ! TODO  deprecated, replace
    *endif
 *endif
 

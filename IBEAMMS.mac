@@ -136,7 +136,7 @@ AR36=arg7+arg2
 CMSEL,S,AR28
 CMSEL,A,AR29
 CMSEL,A,AR30
-SLICEXZ,arg6+arg4/2,AR33,AR35,AR34,AR36
+SLICEXZ,arg6+arg4/2,AR33,AR35,AR34,AR36  ! TODO  deprecated, replace
 CM,AR28,KP
 CM,AR29,LINE
 CM,AR30,AREA
@@ -152,8 +152,8 @@ CM,AR30,AREA
 
 ! Fatiar mesa maior na largura da mesa menor
 *if,AR44,NE,AR45,THEN
-   SLICEXY,arg7+AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4
-   SLICEXY,arg7-AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4
+   SLICEXY,arg7+AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4  ! TODO  deprecated, replace
+   SLICEXY,arg7-AR45/2,arg5-arg1,arg6-arg4,arg5+2*arg1,arg6+2*arg4  ! TODO  deprecated, replace
    CM,AR28,KP
    CM,AR29,LINE
    CM,AR30,AREA

@@ -293,7 +293,7 @@ CM,AR30,AREA
     CMSEL,A,AR29
     CMSEL,A,AR30
     AR79=(arg3-arg4)/2
-    SLICEXZ,ar11+arg3/2,AR73,AR77,AR74,AR78
+    SLICEXZ,ar11+arg3/2,AR73,AR77,AR74,AR78  ! TODO  deprecated, replace
     CM,AR28,KP
     CM,AR29,LINE
     CM,AR30,AREA
