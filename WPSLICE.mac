@@ -6,7 +6,10 @@
 ! cartesian axes.
 
 ! Arguments:
-! ARG1: plane    -  name of the plane used for slicing ('XY', 'YZ', or 'XZ')
+! ARG1: plane    -  name of the plane used for slicing:
+!                     ['XY' or 'YX']  slice along XY plane (default)
+!                     ['YZ' or 'ZY']  slice along YZ plane
+!                     ['XZ' or 'ZX']  slice along XZ plane
 ! ARG2: offset   -  distance by which the working plane will be offset to perform the slicing
 ! ARG3: csReset  -  determines whether or not to reset the working plane position to the origin
 !                   of a user defined coordinate system before applying offset and slicing:
@@ -67,9 +70,9 @@ ar31 = 0
 ar32 = 0
 ar33 = 0
 ar21 = upcase(ARG1)
-*if,ar21,eq,'YZ',then
+*if,ar21,eq,'YZ',or,ar21,eq,'ZY',then
   ar33 = 90
-*elseif,ar21,eq,'XZ',then
+*elseif,ar21,eq,'XZ',or,ar21,eq,'ZX',then
   ar32 = -90
 *else
   *msg,error
