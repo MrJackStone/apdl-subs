@@ -1,35 +1,33 @@
-! WPSLICEYZ, x, sepo, mode
-! WPSLICEYZ, arg1, arg2, arg3
+! wpsliceyz , x    , sepo , mode
+! WPSLICEYZ , ARG1 , ARG2 , ARG3
 
 ! Description:
-! Divides all selected areas at the working plane (positioned according to arg1=x)
+! Divides all selected areas or lines along the YZ plane at a given X location.
 
-! Position working plane
-WPLANE,-1,arg1,,,arg1,,1,arg1,1,0
+! Arguments:
+! ARG1: offs  -  offset along X direction applied to slicing plane
+! ARG2: sepo  -  SEPO key (see xSBW commands):
+!                  [0] blank
+!                  [1] SEPO
+! ARG3: mode  -  type of solid model entity to slice:
+!                  [0] areas (default)
+!                  [1] lines
 
-! Hide working plane
-WPSTYL,,,,,,,,0
+! Local parameters:
+! ar21: offset
+! ar22: sepoOpt
+! ar23: modeKey
 
-! Divide areas
-*if,arg2,eq,1,then
-    *if,arg3,eq,0,then
-        ASBW,ALL,sepo,DELETE
-    *elseif,arg3,eq,1,then
-        lsbw,all,sepo,delete
-    *endif
-*else
-    *if,arg3,eq,0,then
-        ASBW,ALL,,DELETE
-    *elseif,arg3,eq,1,then
-        lsbw,all,,delete
-    *endif
+
+! Parse inputs
+ar21 = ARG1
+ar22 = ARG2
+
+*if,ARG3,eq,0,then
+  ar23 = 'A'
+*elseif,ARG3,eq,1,then
+  ar23 = 'L'
 *endif
 
-! Reset working plane to original location
-WPCSYS,-1,0
-
-! Hide working plane
-WPSTYL,,,,,,,,0
-
-
-
+! Slice entities
+wpslice , 'YZ' , ar21 , 0 , ar23 , ar22
