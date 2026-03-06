@@ -23,11 +23,12 @@
 ! Local parameters:
 ! ar20: parType
 ! ar21: plane
+! ar23: csNum
 ! ar24: entKey
 ! ar25: sepoOpt
-! ar31: xOffset
-! ar32: yOffset
-! ar33: zOffset
+! ar31: thetaXY
+! ar32: thetaYZ
+! ar33: thetaZX
 ! ar34: booleanOperation
 
 
@@ -66,12 +67,10 @@ ar31 = 0
 ar32 = 0
 ar33 = 0
 ar21 = upcase(ARG1)
-*if,ar21,eq,'XY',then
-  ar33 = ARG2
-*elseif,ar21,eq,'YZ',then
-  ar31 = ARG2
+*if,ar21,eq,'YZ',then
+  ar33 = 90
 *elseif,ar21,eq,'XZ',then
-  ar32 = ARG2
+  ar32 = -90
 *else
   *msg,error
 WPSLICE error: expected ARG1 to be a valid cartesian ar21 ('XY', 'YZ', or 'XZ').%/&
@@ -79,10 +78,11 @@ WPSLICE command ignored.
   *return,-1
 *endif
 
+ar23 = 0
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,0,then
   *if,ARG3,ge,11,then
-    wpcsys,-1,ARG3
+    ar23 = ARG3
   *endif
 *endif
 
@@ -94,9 +94,14 @@ ar25 = ''
   *endif
 *endif
 
+! Position working plane
+wpcsys,-1,ar23
+wprota,ar31,ar32,ar33
+wpoffs,,,ARG2
+
 ! Slice parts
-wpoffs,ar31,ar32,ar33
 %ar34%,all,%ar25%,delete
 
 ! Clean up
-wpoffs,-ar31,-ar32,-ar33
+wpoffs,,,-ARG2
+wprota,-ar31,-ar32,-ar33
