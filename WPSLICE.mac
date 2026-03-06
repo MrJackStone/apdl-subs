@@ -1,0 +1,102 @@
+! wpslice , plane , offset , csReset , entType , sepo
+! WPSLICE , ARG1  , ARG2   , ARG3    , ARG4    , ARG5
+
+! Description:
+! Slices solid model entities using the working plane offset by a given amount along one of the
+! cartesian axes.
+
+! Arguments:
+! ARG1: plane    -  name of the plane used for slicing ('XY', 'YZ', or 'XZ')
+! ARG2: offset   -  distance by which the working plane will be offset to perform the slicing
+! ARG3: csReset  -  determines whether or not to reset the working plane position to the origin
+!                   of a user defined coordinate system before applying offset and slicing:
+!                     [<=10] do not reset (offset applied from its current location - default)
+!                     [>=11] reset WP to CSYS defined by ARG3 before offsetting & slicing
+! ARG4: entType  -  type of solid model entity to be sliced:
+!                     ['L']  lines (LSBW operation)
+!                     ['A']  areas (ASBW operation)
+!                     ['V']  volumes (VSBW operation)
+! ARG5: sepo     -  SEPO option from xSBW operations:
+!                     [0]  shared keypoints (default)
+!                     [1]  separate keypoints
+
+! Local parameters:
+! ar20: parType
+! ar21: plane
+! ar24: entKey
+! ar25: sepoOpt
+! ar31: xOffset
+! ar32: yOffset
+! ar33: zOffset
+! ar34: booleanOperation
+
+
+! Parse inputs
+*get,parType,parm,ARG1,type
+*if,parType,ne,3,then
+  *msg,error
+WPSLICE error: expected ARG1 to be a string.%/&
+WPSLICE command ignored.
+  *return,-1
+*endif
+
+*get,parType,parm,ARG3,type
+*if,parType,eq,0,then
+  *if,ARG3,ge,11,then
+    wpcsys,-1,ARG3
+  *endif
+*endif
+
+*get,parType,parm,ARG4,type
+*if,parType,ne,3,then
+  *msg,error
+WPSLICE error: expected ARG4 to be a string.%/&
+WPSLICE command ignored.
+  *return,-1
+*endif
+
+entKey = upcase(strsub(ARG4,1,1))
+*if,entKey,eq,'L',then
+  booleanOperation = 'LSBW'
+*elseif,entKey,eq,'A',then
+  booleanOperation = 'ASBW'
+*elseif,entKey,eq,'V',then
+  booleanOperation = 'VSBW'
+*else
+  *msg,error,entKey
+WPSLICE error: invalid entity type (ARG4=%S). Expected 'L', 'A', or 'V'.%/&
+WPSLICE command ignored.
+  *return,-1
+*endif
+
+xOffset = 0
+yOffset = 0
+zOffset = 0
+plane = upcase(ARG1)
+*if,plane,eq,'XY',then
+  zOffset = ARG2
+*elseif,plane,eq,'YZ',then
+  xOffset = ARG2
+*elseif,plane,eq,'XZ',then
+  yOffset = ARG2
+*else
+  *msg,error
+WPSLICE error: expected ARG1 to be a valid cartesian plane ('XY', 'YZ', or 'XZ').%/&
+WPSLICE command ignored.
+  *return,-1
+*endif
+
+sepoOpt = ' '
+*get,parType,parm,ARG5,type
+*if,parType,eq,0,then
+  *if,ARG5,eq,1,then
+    sepoOpt = 'SEPO'
+  *endif
+*endif
+
+! Slice parts
+wpoffs,xOffset,yOffset,zOffset
+%booleanOperation%,all,%sepoOpt%,delete
+
+! Clean up
+wpoffs,-xOffset,-yOffset,-zOffset
