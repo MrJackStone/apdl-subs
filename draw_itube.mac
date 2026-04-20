@@ -1,0 +1,286 @@
+! draw_itube , CS_top , bodyL , bodyD , neckL , neckD , skirtL , skirtD , tailL , tailAngle , wpOffset , cmInfix
+! DRAW_ITUBE , ARG1   , ARG2  , ARG3  , ARG4  , ARG5  , ARG6   , ARG7   , ARG8  , ARG9      , AR10     , AR11
+
+! Description:
+! Draws an I-tube comprised of a cylindrical body, cylindrical tail (optional), conical neck
+! (optional), and conical skirt (optional), and marks the position of the workpoint (where riser
+! loads will be applied).
+
+! Arguments:
+! ARG1: CS_top     -  coordinate system used as origin of the I-tube (should already be rotated by
+!                     an azimuth, if one is required)
+! ARG2: bodyL      -  length of the straight portion of the I-tube (see additional documentation)
+! ARG3: bodyD      -  I-tube's diameter
+! ARG4: neckL      -  neck length
+! ARG5: neckD      -  neck diameter (set to 0 to turn off)
+! ARG6: skirtL     -  skirt length
+! ARG7: skirtD     -  skirt diameter (set to 0 to turn off)
+! ARG8: tailL      -  tail length (set to 0 to turn off)
+! ARG9: tailAngle  -  angle of the I-tube's tail relative to the vertical axis
+! AR10: wpOffset   -  distance to the workpoint measured from the last I-tube section (skirt,
+!                     tail, or body, depending on which parts are turned on)
+! AR11: cmInfix    -  string used as infix to compose the names of the output selection components
+
+! Local parameters:
+! ar20: parType
+! ar21:
+
+
+! Parse inputs
+*if,ARG2,le,0,then
+  *msg,error
+DRAW_ITUBE error: expected ARG2 (bodyL) to be positive.%/&
+DRAW_ITUBE command ignored.
+  *return,-1
+*endif
+
+*if,ARG3,le,0,then
+  *msg,error
+DRAW_ITUBE error: expected ARG3 (bodyD) to be positive.%/&
+DRAW_ITUBE command ignored.
+  *return,-1
+*endif
+
+neckStatus = 0
+*if,ARG5,gt,0,then
+  neckStatus = 1
+*endif
+
+skirtStatus = 0
+*if,ARG7,gt,0,then
+  skirtStatus = 1
+*endif
+
+tailStatus = 0
+*if,ARG8,gt,0,then
+  tailStatus = 1
+*endif
+
+cmInfix = 'ITUBE'
+*get,ar20,parm,AR11,type
+*if,ar20,eq,3,then
+  cmInfix = AR11
+*endif
+
+cmaItube     = 'COMPA_%cmInfix%_itube'
+cmaNeck      = 'COMPA_%cmInfix%_neck'
+cmaBody      = 'COMPA_%cmInfix%_body'
+cmaTail      = 'COMPA_%cmInfix%_tail'
+cmaSkirt     = 'COMPA_%cmInfix%_skirt'
+
+cmlNeck      = 'COMPL_%cmInfix%_neck'
+cmlTop       = 'COMPL_%cmInfix%_top'
+cmlBot       = 'COMPL_%cmInfix%_bot'
+cmlTail      = 'COMPL_%cmInfix%_tail'
+cmlSkirt     = 'COMPL_%cmInfix%_skirt'
+
+cmkNeck      = 'COMPK_%cmInfix%_neck'
+cmkTop       = 'COMPK_%cmInfix%_top'
+cmkBot       = 'COMPK_%cmInfix%_bot'
+cmkTail      = 'COMPK_%cmInfix%_tail'
+cmkSkirt     = 'COMPK_%cmInfix%_skirt'
+cmkWorkpoint = 'COMPK_%cmInfix%_workpoint'
+
+! Prepare environment
+asel , none
+cm   , COMPA_body     , area
+cm   , COMPA_neck     , area
+cm   , COMPA_tail     , area
+cm   , COMPA_skirt    , area
+cm   , %cmaItube%     , area
+cm   , %cmaNeck%      , area
+cm   , %cmaBody%      , area
+cm   , %cmaTail%      , area
+cm   , %cmaSkirt%     , area
+
+lsel,none
+cm   , %cmlNeck%      , line
+cm   , %cmlTop%       , line
+cm   , %cmlBot%       , line
+cm   , %cmlTail%      , line
+cm   , %cmlSkirt%     , line
+
+ksel,kp
+cm   , %cmkNeck%      , kp
+cm   , %cmkTop%       , kp
+cm   , %cmkBot%       , kp
+cm   , %cmkTail%      , kp
+cm   , %cmkSkirt%     , kp
+cm   , %cmkWorkpoint% , kp
+
+! Calculate geometric params
+bodyExtendedL = 2*(GEO_ITUBE_length)+(bodyD/2)*tan(tailAngle/2)
+
+! Create coordinate systems
+csnext,'CS_neck'
+csys,ARG1
+clocal , CS_neck , cart , 0 , 0 , -neckL
+
+csnext,'CS_bot'
+csnext,'CS_tail'
+csnext,'CS_skirt'
+csnext,'CS_workpoint'
+
+! Draw body
+asel,none
+wpcsys,-1,CS_top
+drawpipe,bodyD,bodyExtendedL,,,'BODY',4
+
+! Draw tail
+*if,tailStatus,eq,1,then
+  csys,CS_bend
+  wpcsys,-1
+
+  cmwslice,'COMPA_body'
+  asel,r,loc,z,0,1e6
+  adele,all,,,1
+
+  cmsel,s,COMPA_body
+  arsym,z,COMPA_body
+
+  cmsel,u,COMPA_body
+  cm,COMPA_tail,area
+  lsla
+  ksll
+  ksel,u,loc,z,0
+  csys,CS_tail
+  kmodif,all,,,tailL
+*endif
+
+! Draw neck
+*if,neckStatus,eq,1,then
+  wpcsys,-1,CS_top
+  drawcone,bodyD,neckD,-neckL,,,'NECK',4
+*endif
+
+! Draw skirt
+*if,skirtStatus,eq,1,then
+  wpcsys,-1,CS_tail
+  drawcone,bodyD,skirtD,skirtL,,,'SKIRT',4
+*endif
+
+! Merge solid model
+
+! Draw master keypoints
+nextkp,'KP_master',6
+
+*del,CS_master,,nopr
+*dim,CS_master,,6
+CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
+
+*do,nthMaster,1,6,1
+  csNum = CS_master(nthMaster)
+  kpNum = KP_master(nthMaster)
+  csys,csNum
+  k,kpNum,0,0,0
+*enddo
+
+! Export selection components
+
+! Clean up
+
+
+! Output selection components:
+! COMPA_itube
+! COMPA_neck
+! COMPA_body
+! COMPA_tail
+! COMPA_skirt
+!
+! COMPL_neck
+! COMPL_top
+! COMPL_bot
+! COMPL_tail
+! COMPL_skirt
+!
+! COMPK_neck
+! COMPK_top
+! COMPK_bot
+! COMPK_tail
+! COMPK_skirt
+! COMPK_workpoint
+
+! Output coordinate systems:
+! CS_neck
+! CS_top
+! CS_bot
+! CS_bend
+! CS_tail
+! CS_skirt
+! CS_workpoint
+
+!--------------------------- Additional documentation: I-tube sketches ----------------------------!
+!                                                                                                  !
+! I-tube with straight tail: --------------------------------------------------------------------- !
+!                                                                                                  !
+!                                                                                                  !
+!           ┌─ ───────────󰵉───────────  󰵉  CS_neck                               !
+!      neck │                |                                                                   !
+!           │                |                                                                   !
+!           ├─ ────────󰵉────────   󰵉  CS_top                                !
+!           │        │        |        │                                                          !
+!      body │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │ bodyL                                             !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │                                                          !
+!           ├─ ────────󰵉────────   󰵉  CS_bot (CS_bend, CS_tail)             !
+!     skirt │                |                                                                   !
+!           │                |                                                                   !
+!           └─ ───────────󰵉───────────  󰵉  CS_skirt                              !
+!                             |                                                                    !
+!                             |                                                                    !
+!                             |                                                                    !
+!                             󰵉  󰵉  CS_workpoint                          !
+!                                                                                                  !
+!                                                                                                  !
+!                                                                                                  !
+!                                                                                                  !
+! I-tube with bent tail: ------------------------------------------------------------------------- !
+!                                                                                                  !
+!                                                                                                  !
+!           ┌─ ───────────󰵉───────────  󰵉  CS_neck                               !
+!      neck │                |                                                                   !
+!           │                |                                                                   !
+!           ├─ ────────󰵉────────  󰵉  CS_top                                !
+!           │        │        |        │                                                          !
+!      body │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │ bodyL                                             !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │       │                                                   !
+!           │        │        |        │                                                          !
+!           │        │        󰵉  󰵉  CS_bot                                !
+!           │        │        󰵉   󰵉  CS_bend                               !
+!           ├─         \                                                                  !
+!           │                 \                                                                 !
+!      tail │                  \                                                                !
+!           │                󰤷󰀫 \                                                               !
+!           │                     \       . ─────                                               !
+!           │                      \   .       .                                                  !
+!           │                      .󰵉  . 󰵉  CS_tail                               !
+!           │                  .     \   .                                                        !
+!           ├─          󰵉  󰵉  CS_skirt                              !
+!     skirt │                │     .    \                                                          !
+!           │                │  .        \                                                         !
+!           └─             \                                                        !
+!                                          \                                                       !
+!                                           \                                                      !
+!                                            \                                                     !
+!                                             󰵉  󰵉  CS_workpoint                          !
+!                                                                                                  !
+!                                                                                                  !
+! ------------------------------------------------------------------------------------------------ !
+
