@@ -25,6 +25,29 @@
 ! ar20: parType
 ! ar21:
 
+! neckStatus
+! skirtStatus
+! tailStatus
+! cmInfix
+! cmaItube
+! cmaNeck
+! cmaTail
+! cmaSkirt
+! cmlNeck
+! cmlTop
+! cmlBot
+! cmlTail
+! cmlSkirt
+! cmkNeck
+! cmkTop
+! cmkBot
+! cmkTail
+! cmkSkirt
+! cmkWorkpoint
+! bodyExtendedL
+! csNum
+! kpNum
+
 
 ! Parse inputs
 *if,ARG2,le,0,then
