@@ -1,5 +1,5 @@
-! draw_itube , CS_top , bodyL , bodyD , neckL , neckD , skirtL , skirtD , tailL , tailAngle , wpOffset , cmInfix
-! DRAW_ITUBE , ARG1   , ARG2  , ARG3  , ARG4  , ARG5  , ARG6   , ARG7   , ARG8  , ARG9      , AR10     , AR11
+! draw_itube , CS_bodyTop , bodyL , bodyD , neckL , neckD , skirtL , skirtD , tailL , tailAngle , wpOffset , cmInfix
+! DRAW_ITUBE , ARG1       , ARG2  , ARG3  , ARG4  , ARG5  , ARG6   , ARG7   , ARG8  , ARG9      , AR10     , AR11
 
 ! Description:
 ! Draws an I-tube comprised of a cylindrical body, cylindrical tail (optional), conical neck
@@ -7,7 +7,7 @@
 ! loads will be applied).
 
 ! Arguments:
-! ARG1: CS_top     -  coordinate system used as origin of the I-tube (should already be rotated by
+! ARG1: CS_bodyTop -  coordinate system used as origin of the I-tube (should already be rotated by
 !                     an azimuth, if one is required)
 ! ARG2: bodyL      -  length of the straight portion of the I-tube (see additional documentation)
 ! ARG3: bodyD      -  I-tube's diameter
@@ -45,9 +45,26 @@
 ! cmkSkirt
 ! cmkWorkpoint
 ! bodyExtendedL
+! overflowL
 ! csNum
 ! kpNum
 
+! Global erased parameters:
+! CS_neck
+! CS_bodyTop
+! CS_bodyBot
+! CS_mirror
+! CS_tailTop
+! CS_tailBot
+! CS_skirt
+! CS_workpoint
+! KP_master
+! CS_master
+
+! COMPA__body
+! COMPA__beck
+! COMPA__tail
+! COMPA__skirt
 
 ! Parse inputs
 *if,ARG2,le,0,then
@@ -65,18 +82,24 @@ DRAW_ITUBE command ignored.
 *endif
 
 neckStatus = 0
+neckL      = 0
 *if,ARG5,gt,0,then
   neckStatus = 1
+  neckL      = ARG4
 *endif
 
 skirtStatus = 0
+skirtL      = 0
 *if,ARG7,gt,0,then
   skirtStatus = 1
+  skirtL      = ARG6
 *endif
 
 tailStatus = 0
+tailAngle  = 0
 *if,ARG8,gt,0,then
   tailStatus = 1
+  tailAngle  = ARG9
 *endif
 
 cmInfix = 'ITUBE'
@@ -132,26 +155,51 @@ cm   , %cmkSkirt%     , kp
 cm   , %cmkWorkpoint% , kp
 
 ! Calculate geometric params
-bodyExtendedL = 2*(GEO_ITUBE_length)+(bodyD/2)*tan(tailAngle/2)
+overflowL     = 1
+bodyExtendedL = (bodyL)+tailStatus*((overflowL)+(bodyD)*tan(tailAngle/2))
+mirrorDelta   = (bodyD/2)*tan(tailAngle/2)
 
 ! Create coordinate systems
-csnext,'CS_neck'
-csys,ARG1
-clocal , CS_neck , cart , 0 , 0 , -neckL
+csnext , 'CS_neck'
+csys   , ARG1
+clocal , CS_neck        , cart , 0 , 0 , -neckL
 
-csnext,'CS_bot'
-csnext,'CS_tail'
-csnext,'CS_skirt'
-csnext,'CS_workpoint'
+csnext , 'CS_bodyTop'
+csys   , ARG1
+clocal , CS_bodyTop     , cart , 0 , 0 , 0
+
+csnext , 'CS_bodyBot'
+csys   , ARG1
+clocal , CS_bodyBot     , cart , 0 , 0 , bodyL
+
+csnext , 'CS_mirror'
+csys   , ARG1
+clocal , CS_mirror      , cart , 0 , 0 , mirrorDelta ,  ,  , tailAngle/2
+
+csnext , 'CS_tailTop'
+csys   , CS_mirror
+clocal , CS_tailTop     , cart , 0 , 0 , 0           ,  ,  , tailAngle/2
+
+csnext , 'CS_tailBot'
+csys   , CS_tailTop
+clocal , CS_tailBot     , cart , 0 , 0 , tailL
+
+csnext , 'CS_skirt'
+csys   , CS_tailBot
+clocal , CS_skirt       , cart , 0 , 0 , skirtL
+
+csnext , 'CS_workpoint'
+csys   , CS_skirt
+clocal , CS_workpoint   , cart , 0 , 0 , wpOffset
 
 ! Draw body
 asel,none
-wpcsys,-1,CS_top
+wpcsys,-1,CS_bodyTop
 drawpipe,bodyD,bodyExtendedL,,,'BODY',4
 
 ! Draw tail
 *if,tailStatus,eq,1,then
-  csys,CS_bend
+  csys,CS_mirror
   wpcsys,-1
 
   cmwslice,'COMPA_body'
@@ -166,19 +214,19 @@ drawpipe,bodyD,bodyExtendedL,,,'BODY',4
   lsla
   ksll
   ksel,u,loc,z,0
-  csys,CS_tail
+  csys,CS_tailTop
   kmodif,all,,,tailL
 *endif
 
 ! Draw neck
 *if,neckStatus,eq,1,then
-  wpcsys,-1,CS_top
+  wpcsys,-1,CS_bodyTop
   drawcone,bodyD,neckD,-neckL,,,'NECK',4
 *endif
 
 ! Draw skirt
 *if,skirtStatus,eq,1,then
-  wpcsys,-1,CS_tail
+  wpcsys,-1,CS_tailBot
   drawcone,bodyD,skirtD,skirtL,,,'SKIRT',4
 *endif
 
@@ -189,7 +237,7 @@ nextkp,'KP_master',6
 
 *del,CS_master,,nopr
 *dim,CS_master,,6
-CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
+CS_master(1) = CS_neck , CS_bodyTop , CS_bodyBot , CS_tailBot , CS_skirt , CS_workpoint
 
 *do,nthMaster,1,6,1
   csNum = CS_master(nthMaster)
@@ -225,10 +273,11 @@ CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
 
 ! Output coordinate systems:
 ! CS_neck
-! CS_top
-! CS_bot
-! CS_bend
-! CS_tail
+! CS_bodyTop
+! CS_bodyBot
+! CS_mirror
+! CS_tailTop
+! CS_tailBot
 ! CS_skirt
 ! CS_workpoint
 
@@ -240,7 +289,7 @@ CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
 !           ┌─ ───────────󰵉───────────  󰵉  CS_neck                               !
 !      neck │                |                                                                   !
 !           │                |                                                                   !
-!           ├─ ────────󰵉────────   󰵉  CS_top                                !
+!           ├─ ────────󰵉────────   󰵉  CS_bodyTop                            !
 !           │        │        |        │                                                          !
 !      body │        │        |        │       │                                                   !
 !           │        │        |        │       │                                                   !
@@ -254,8 +303,8 @@ CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
 !           │        │        |        │       │                                                   !
 !           │        │        |        │       │                                                   !
 !           │        │        |        │                                                          !
-!           ├─ ────────󰵉────────   󰵉  CS_bot (CS_bend, CS_tail)             !
-!     skirt │                |                                                                   !
+!           ├─ ────────󰵉────────   󰵉  CS_bodyBot (CS_mirror, CS_tailTop,    !
+!     skirt │                |                                         CS_tailBot)               !
 !           │                |                                                                   !
 !           └─ ───────────󰵉───────────  󰵉  CS_skirt                              !
 !                             |                                                                    !
@@ -272,7 +321,7 @@ CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
 !           ┌─ ───────────󰵉───────────  󰵉  CS_neck                               !
 !      neck │                |                                                                   !
 !           │                |                                                                   !
-!           ├─ ────────󰵉────────  󰵉  CS_top                                !
+!           ├─ ────────󰵉────────  󰵉  CS_bodyTop                            !
 !           │        │        |        │                                                          !
 !      body │        │        |        │       │                                                   !
 !           │        │        |        │       │                                                   !
@@ -285,15 +334,15 @@ CS_master(1) = CS_neck , CS_top , CS_bot , CS_tail , CS_skirt , CS_workpoint
 !           │        │        |        │       │                                                   !
 !           │        │        |        │       │                                                   !
 !           │        │        |        │                                                          !
-!           │        │        󰵉  󰵉  CS_bot                                !
-!           │        │        󰵉   󰵉  CS_bend                               !
+!           │        │        󰵉  󰵉  CS_bodyBot                            !
+!           │        │        󰵉   󰵉  CS_mirror, CS_tailTop                 !
 !           ├─         \                                                                  !
 !           │                 \                                                                 !
 !      tail │                  \                                                                !
 !           │                󰤷󰀫 \                                                               !
 !           │                     \       . ─────                                               !
 !           │                      \   .       .                                                  !
-!           │                      .󰵉  . 󰵉  CS_tail                               !
+!           │                      .󰵉  . 󰵉  CS_tailBot                            !
 !           │                  .     \   .                                                        !
 !           ├─          󰵉  󰵉  CS_skirt                              !
 !     skirt │                │     .    \                                                          !
