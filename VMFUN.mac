@@ -97,8 +97,8 @@ AR27=UPCASE(arg3)
 *if,AR30,EQ,0,THEN
 
     %AR26%=0
-    *msg,WARN
-VMFUN WARNING: Masking excluded all array values. VMFUN outputs zero.
+    *msg,warn,ARG1
+VMFUN WARNING: Masking excluded all array values. VMFUN outputs zero to '%s'.
 
 *else
 
