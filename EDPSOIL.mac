@@ -46,7 +46,7 @@ MP,DENS,arg1,arg4
 !    TBDATA,1,AR23
 !!
 
-compare,'cohe','max',2,arg6,1e3
+cohe = (arg6>1e3)
 
 TB,MC,arg1,,,BASE
 TBDATA,1,arg5,cohe,arg5/6,arg5,cohe
