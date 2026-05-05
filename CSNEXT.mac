@@ -1,26 +1,43 @@
-! csnext , output
-! CSNEXT , ARG1
+! csnext , parm , count
+! CSNEXT , ARG1 , ARG2
 
 ! Description:
-! Returns a valid number to which no coordinate system is yet assigned.
+! Returns valid CSYS numbers to which no coordinate system is yet assigned.
 
 ! Arguments:
-! ARG1: output  -  name of the parameter to which the result will be assigned (defaults to _OUTPUT)
+! ARG1: parm   -  name of the parameter to which the result will be assigned (defaults to _OUTPUT)
+! ARG2: count  -  count of coordinate system numbers to return (defaults to 1)
 
 ! Local parameters:
-! ar21: maxCS
-! ar22: outputParm
+! ar20: parType
+! ar21: outputParm
+! ar22: maxCS
+! ar23: freeCS
 
 
-parverify,'CSNEXT_VAR_check',ARG1,'CHAR'
-*if,CSNEXT_VAR_check,eq,1,then
-    ar22 = ARG1
-*else
-    ar22 = '_OUTPUT'
+! Parse inputs
+ar21 = '_OUTPUT'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
 *endif
 
-*get,ar21,cdsy,,num,max
+! Calculate next valid and available CSYS number
+*get,ar22,cdsy,,num,max
+ar23 = ((ar22+1)>11)
 
-*del,%ar22%,,nopr
-%ar22%=((ar21+1)>11)
+! Return CSYS number(s)
+*if,ARG2,gt,1,then
+
+  ! Output: array
+  *del,%ar21%,,nopr
+  *dim,%ar21%,,ARG2
+  *vfill,%ar21%,ramp,ar23,1
+
+*else
+
+  ! Output: scalar
+  %ar21% = ar23
+
+*endif
 
