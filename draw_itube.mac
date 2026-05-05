@@ -117,56 +117,56 @@ DRAW_ITUBE command ignored.
   *return,-1
 *endif
 
-master_kps = 'DRAW_ITUBE_MASTER_KPS'
+ar73 = 'DRAW_ITUBE_MASTER_KPS'
 *get,ar20,parm,AR12,type
 *if,ar20,eq,3,then
-  master_kps = AR12
+  ar73 = AR12
 *endif
 
-master_cs = 'DRAW_ITUBE_MASTER_CS'
+ar74 = 'DRAW_ITUBE_MASTER_CS'
 *get,ar20,parm,AR13,type
 *if,ar20,eq,3,then
-  master_cs = AR13
+  ar74 = AR13
 *endif
 
-neckStatus = 0
-neckL      = 0
+ar31 = 0
+ar32 = 0
 *if,ARG5,gt,0,then
-  neckStatus = 1
-  neckL      = ARG4
+  ar31 = 1
+  ar32 = ARG4
 *endif
 
-skirtStatus = 0
-skirtL      = 0
+ar33 = 0
+ar34 = 0
 *if,ARG7,gt,0,then
-  skirtStatus = 1
-  skirtL      = ARG6
+  ar33 = 1
+  ar34 = ARG6
 *endif
 
-tailStatus = 0
-tailAngle  = 0
+ar35 = 0
+ar36 = 0
 *if,ARG8,gt,0,then
-  tailStatus = 1
-  tailAngle  = ARG9
+  ar35 = 1
+  ar36 = ARG9
 *endif
 
-cmInfix = 'ITUBE'
+ar23 = 'ITUBE'
 *get,ar20,parm,AR11,type
 *if,ar20,eq,3,then
-  cmInfix = AR11
+  ar23 = AR11
 *endif
 
-cmaItube   = 'COMPA_%cmInfix%_itube'
-cmaNeck    = 'COMPA_%cmInfix%_neck'
-cmaBody    = 'COMPA_%cmInfix%_body'
-cmaTail    = 'COMPA_%cmInfix%_tail'
-cmaSkirt   = 'COMPA_%cmInfix%_skirt'
+ar51 = 'COMPA_%ar23%_itube'
+ar52 = 'COMPA_%ar23%_neck'
+ar53 = 'COMPA_%ar23%_body'
+ar54 = 'COMPA_%ar23%_tail'
+ar55 = 'COMPA_%ar23%_skirt'
 
-cmlNeck    = 'COMPL_%cmInfix%_neck'
-cmlBodyTop = 'COMPL_%cmInfix%_bodyTop'
-cmlBodyBot = 'COMPL_%cmInfix%_bodyBot'
-cmlTail    = 'COMPL_%cmInfix%_tail'
-cmlSkirt   = 'COMPL_%cmInfix%_skirt'
+ar61 = 'COMPL_%ar23%_neck'
+ar62 = 'COMPL_%ar23%_bodyTop'
+ar63 = 'COMPL_%ar23%_bodyBot'
+ar64 = 'COMPL_%ar23%_tail'
+ar65 = 'COMPL_%ar23%_skirt'
 
 ! Prepare environment
 csbackup
@@ -175,87 +175,87 @@ lbackup
 kbackup
 
 asel , none
-cm , COMPA__body   , area
-cm , COMPA__neck   , area
-cm , COMPA__tail   , area
-cm , COMPA__skirt  , area
-cm , COMPA__itube  , area
-cm , %cmaItube%    , area
-cm , %cmaNeck%     , area
-cm , %cmaBody%     , area
-cm , %cmaTail%     , area
-cm , %cmaSkirt%    , area
+cm , COMPA__body  , area
+cm , COMPA__neck  , area
+cm , COMPA__tail  , area
+cm , COMPA__skirt , area
+cm , COMPA__itube , area
+cm , %ar51%       , area
+cm , %ar52%       , area
+cm , %ar53%       , area
+cm , %ar54%       , area
+cm , %ar55%       , area
 
 lsel , none
-cm , %cmlNeck%    , line
-cm , %cmlBodyTop% , line
-cm , %cmlBodyBot% , line
-cm , %cmlTail%    , line
-cm , %cmlSkirt%   , line
+cm , %ar61% , line
+cm , %ar62% , line
+cm , %ar63% , line
+cm , %ar64% , line
+cm , %ar65% , line
 
 ksel , none
-cm , cmkMaster , kp
+cm , ar75 , kp
 
-*del , csNeck       ,  , nopr
-*del , csBodyTop    ,  , nopr
-*del , csBodyBot    ,  , nopr
-*del , csMirror     ,  , nopr
-*del , csTailTop    ,  , nopr
-*del , csTailBot    ,  , nopr
-*del , csSkirt      ,  , nopr
-*del , csWorkpoint  ,  , nopr
-*del , %master_kps% ,  , nopr
-*del , %master_cs%  ,  , nopr
+*del , ar41   ,  , nopr
+*del , ar42   ,  , nopr
+*del , ar43   ,  , nopr
+*del , ar44   ,  , nopr
+*del , ar45   ,  , nopr
+*del , ar46   ,  , nopr
+*del , ar47   ,  , nopr
+*del , ar48   ,  , nopr
+*del , %ar73% ,  , nopr
+*del , %ar74% ,  , nopr
 
 ! Calculate geometric params
-overflowL        = 1
-bodyExtendedL    = (bodyL)+tailStatus*((overflowL)+(bodyD)*tan(tailAngle/2))
-mirrorDeltaL     = (bodyD/2)*tan(tailAngle/2)
+ar37 = 1
+ar38 = (bodyL)+ar35*((ar37)+(bodyD)*tan(ar36/2))
+ar39 = (bodyD/2)*tan(ar36/2)
 
 ! Create coordinate systems
 csnext , 'DRAW_ITUBE_CS_NUMS' , 8
 
-csNeck      = DRAW_ITUBE_CS_NUMS(1)
-csBodyTop   = DRAW_ITUBE_CS_NUMS(2)
-csBodyBot   = DRAW_ITUBE_CS_NUMS(3)
-csTailBot   = DRAW_ITUBE_CS_NUMS(4)
-csSkirt     = DRAW_ITUBE_CS_NUMS(5)
-csWorkpoint = DRAW_ITUBE_CS_NUMS(6)
-csMirror    = DRAW_ITUBE_CS_NUMS(7)
-csTailTop   = DRAW_ITUBE_CS_NUMS(8)
+ar41 = DRAW_ITUBE_CS_NUMS(1)
+ar42 = DRAW_ITUBE_CS_NUMS(2)
+ar43 = DRAW_ITUBE_CS_NUMS(3)
+ar46 = DRAW_ITUBE_CS_NUMS(4)
+ar47 = DRAW_ITUBE_CS_NUMS(5)
+ar48 = DRAW_ITUBE_CS_NUMS(6)
+ar44 = DRAW_ITUBE_CS_NUMS(7)
+ar45 = DRAW_ITUBE_CS_NUMS(8)
 
 csys   , ARG1
-clocal , csNeck      , cart , 0 , 0 , -neckL
+clocal , ar41 , cart , 0 , 0 , -ar32
 
 csys   , ARG1
-clocal , csBodyTop   , cart , 0 , 0 , 0
+clocal , ar42 , cart , 0 , 0 , 0
 
 csys   , ARG1
-clocal , csBodyBot   , cart , 0 , 0 , bodyL
+clocal , ar43 , cart , 0 , 0 , bodyL
 
 csys   , ARG1
-clocal , csMirror    , cart , 0 , 0 , mirrorDeltaL ,  ,  , tailAngle/2
+clocal , ar44 , cart , 0 , 0 , ar39     ,  ,  , ar36/2
 
-csys   , csMirror
-clocal , csTailTop   , cart , 0 , 0 , 0            ,  ,  , tailAngle/2
+csys   , ar44
+clocal , ar45 , cart , 0 , 0 , 0        ,  ,  , ar36/2
 
-csys   , csTailTop
-clocal , csTailBot   , cart , 0 , 0 , tailL
+csys   , ar45
+clocal , ar46 , cart , 0 , 0 , tailL
 
-csys   , csTailBot
-clocal , csSkirt     , cart , 0 , 0 , skirtL
+csys   , ar46
+clocal , ar47 , cart , 0 , 0 , ar34
 
-csys   , csSkirt
-clocal , csWorkpoint , cart , 0 , 0 , wpOffset
+csys   , ar47
+clocal , ar48 , cart , 0 , 0 , wpOffset
 
 ! Draw body
 asel,none
-wpcsys,-1,csBodyTop
-drawpipe,bodyD,bodyExtendedL,,,'_BODY',4
+wpcsys,-1,ar42
+drawpipe,bodyD,ar38,,,'_BODY',4
 
 ! Draw tail
-*if,tailStatus,eq,1,then
-  csys,csMirror
+*if,ar35,eq,1,then
+  csys,ar44
   wpcsys,-1
 
   cmwslice,'COMPA__body'
@@ -270,20 +270,20 @@ drawpipe,bodyD,bodyExtendedL,,,'_BODY',4
   lsla
   ksll
   ksel,u,loc,z,0
-  csys,csTailTop
+  csys,ar45
   kmodif,all,,,tailL
 *endif
 
 ! Draw neck
-*if,neckStatus,eq,1,then
-  wpcsys,-1,csBodyTop
-  drawcone,bodyD,neckD,-neckL,,,'_NECK',4
+*if,ar31,eq,1,then
+  wpcsys,-1,ar42
+  drawcone,bodyD,neckD,-ar32,,,'_NECK',4
 *endif
 
 ! Draw skirt
-*if,skirtStatus,eq,1,then
-  wpcsys,-1,csTailBot
-  drawcone,bodyD,skirtD,skirtL,,,'_SKIRT',4
+*if,ar33,eq,1,then
+  wpcsys,-1,ar46
+  drawcone,bodyD,skirtD,ar34,,,'_SKIRT',4
 *endif
 
 ! Merge solid model
@@ -297,68 +297,68 @@ ksll
 nummrg,kp
 
 ! Draw master keypoints
-masterPlaneCount = 6
+ar72 = 6
 
-nextkp,master_kps,masterPlaneCount
+nextkp,ar73,ar72
 
-*dim,%master_cs%,,masterPlaneCount
-%master_cs%(1) = csNeck    , csBodyTop , csBodyBot
-%master_cs%(4) = csTailBot , csSkirt   , csWorkpoint
+*dim,%ar74%,,ar72
+%ar74%(1) = ar41 , ar42 , ar43
+%ar74%(4) = ar46 , ar47 , ar48
 
 ksel,none
-*do,nthMaster,1,masterPlaneCount,1
-  csNum = %master_cs%(nthMaster)
-  kpNum = %master_kps%(nthMaster)
-  csys,csNum
-  k,kpNum,0,0,0
+*do,ar71,1,ar72,1
+  ar21 = %ar74%(ar71)
+  ar22 = %ar73%(ar71)
+  csys,ar21
+  k,ar22,0,0,0
 *enddo
-cm,cmkMaster,kp
+cm,ar75,kp
 
 ! Export selection components
 cmsel,s,COMPA__body
-cm,%cmaBody%,area
+cm,%ar53%,area
 
 cmsel,s,COMPA__tail
-cm,%cmaTail%,area
+cm,%ar54%,area
 
 cmsel,s,COMPA__neck
-cm,%cmaNeck%,area
+cm,%ar52%,area
 
 cmsel,s,COMPA__skirt
-cm,%cmaSkirt%,area
+cm,%ar55%,area
 
 cmsel,s,COMPA__itube
-cm,%cmaItube%,area
+cm,%ar51%,area
 
-csys,csNeck
+csys,ar41
 cmsel,s,COMPA__neck
 lsla
 lsel,r,loc,z,0
-cm,%cmlNeck%,line
+cm,%ar61%,line
 
-csys,csBodyTop
+csys,ar42
 cmsel,s,COMPA__body
 lsla
 lsel,r,loc,z,0
-cm,%cmlBodyTop%,line
+cm,%ar62%,line
 
-csys,csBodyBot
+csys,ar43
 cmsel,s,COMPA__body
 lsla
 lsel,r,loc,z,0
-cm,%cmlBodyBot%,line
+cm,%ar63%,line
 
-csys,csTailBot
+csys,ar46
 cmsel,s,COMPA__tail
 lsla
 lsel,r,loc,z,0
-cm,%cmlTail%,line
+cm,%ar64%,line
 
-csys,csSkirt
+csys,ar47
 cmsel,s,COMPA__skirt
 lsla
 lsel,r,loc,z,0
-cm,%cmlSkirt%,line
+cm,%ar65%,line
 
 ! Clean up
 csrestore
@@ -369,26 +369,18 @@ krestore
 cmsel,a,COMPA__itube
 lsla,a
 ksll,a
-cmsel,a,cmkMaster
+cmsel,a,ar75
 
 cmdele,COMPA__neck
 cmdele,COMPA__body
 cmdele,COMPA__tail
 cmdele,COMPA__skirt
 cmdele,COMPA__itube
-cmdele,cmkMaster
+cmdele,ar75
 
-csdele , csMirror
-csdele , csTailTop
+csdele , ar44
+csdele , ar45
 
-*del , csNeck      ,  , nopr
-*del , csBodyTop   ,  , nopr
-*del , csBodyBot   ,  , nopr
-*del , csMirror    ,  , nopr
-*del , csTailTop   ,  , nopr
-*del , csTailBot   ,  , nopr
-*del , csSkirt     ,  , nopr
-*del , csWorkpoint ,  , nopr
 
 !--------------------------- Additional documentation: I-tube sketches ----------------------------!
 !                                                                                                  !
