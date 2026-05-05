@@ -1,10 +1,16 @@
-! draw_itube , CS_bodyTop , bodyL , bodyD , neckL , neckD , skirtL , skirtD , tailL , tailAngle , wpOffset , cmInfix
-! DRAW_ITUBE , ARG1       , ARG2  , ARG3  , ARG4  , ARG5  , ARG6   , ARG7   , ARG8  , ARG9      , AR10     , AR11
+! draw_itube , CS_bodyTop , bodyL , bodyD , neckL , neckD , skirtL , skirtD , tailL , tailAngle , wpOffset , cmInfix , master_kps , master_cs
+! DRAW_ITUBE , ARG1       , ARG2  , ARG3  , ARG4  , ARG5  , ARG6   , ARG7   , ARG8  , ARG9      , AR10     , AR11    , AR12       , AR13
 
 ! Description:
 ! Draws an I-tube comprised of a cylindrical body, cylindrical tail (optional), conical neck
 ! (optional), and conical skirt (optional), and marks the position of the workpoint (where riser
 ! loads will be applied).
+! The following entities are exported:
+!   - area selection components for: neck, body, tail, skirt, whole I-tube
+!   - line selection components composing the whole circular perimeter at: neck (free), body (top),
+!     body (bottom), tail (bottom), skirt (free)
+!   - array with the numbers of each master keypoint at key locations (see AR12 below)
+!   - array with the numbers of each coordinate system at key locations (see AR13 below)
 
 ! Arguments:
 ! ARG1: CS_bodyTop -  coordinate system used as origin of the I-tube (should already be rotated by
@@ -20,11 +26,26 @@
 ! AR10: wpOffset   -  distance to the workpoint measured from the last I-tube section (skirt,
 !                     tail, or body, depending on which parts are turned on)
 ! AR11: cmInfix    -  string used as infix to compose the names of the output selection components
+!                     (defaults to 'ITUBE')
+! AR12: master_kps -  name of array to which master keypoint numbers are assigned, in the following
+!                     order (defaults to 'DRAW_ITUBE_MASTER_KPS'):
+!                       POS  KP
+!                        1   neck (free end)
+!                        2   top of the body
+!                        3   bottom of the body
+!                        4   bottom of the tail
+!                        5   skirt (free end)
+!                        6   workpoint
+! AR13: master_cs  -  name of array to which the numbers of coordinate systems created at master
+!                     keypoint locations will be assigned, following the same order presented for
+!                     AR12 (defaults to 'DRAW_ITUBE_MASTER_CS')
 
 ! Local parameters:
 ! ar20: parType
 ! ar21:
 
+! master_kps
+! master_cs
 ! neckStatus
 ! skirtStatus
 ! tailStatus
@@ -34,8 +55,8 @@
 ! cmaTail
 ! cmaSkirt
 ! cmlNeck
-! cmlTop
-! cmlBot
+! cmlBodyTop
+! cmlBodyBot
 ! cmlTail
 ! cmlSkirt
 ! cmkNeck
@@ -50,21 +71,38 @@
 ! kpNum
 
 ! Global erased parameters:
-! CS_neck
-! CS_bodyTop
-! CS_bodyBot
-! CS_mirror
-! CS_tailTop
-! CS_tailBot
-! CS_skirt
-! CS_workpoint
-! KP_master
-! CS_master
-
+! DRAW_ITUBE_CS_neck
+! DRAW_ITUBE_CS_bodyTop
+! DRAW_ITUBE_CS_bodyBot
+! DRAW_ITUBE_CS_mirror
+! DRAW_ITUBE_CS_tailTop
+! DRAW_ITUBE_CS_tailBot
+! DRAW_ITUBE_CS_skirt
+! DRAW_ITUBE_CS_workpoint
+!
+! COMPK__master
+! COMPA__itube
+! COMPA__neck
 ! COMPA__body
-! COMPA__beck
 ! COMPA__tail
 ! COMPA__skirt
+
+! Output parameters:
+! <AR12> (master keypoint array)
+! <AR13> (coordinate system array)
+!
+! COMPA_<AR11>_itube
+! COMPA_<AR11>_neck
+! COMPA_<AR11>_body
+! COMPA_<AR11>_tail
+! COMPA_<AR11>_skirt
+!
+! COMPL_<AR11>_neck
+! COMPL_<AR11>_bodyTop
+! COMPL_<AR11>_bodyBot
+! COMPL_<AR11>_tail
+! COMPL_<AR11>_skirt
+
 
 ! Parse inputs
 *if,ARG2,le,0,then
@@ -79,6 +117,18 @@ DRAW_ITUBE command ignored.
 DRAW_ITUBE error: expected ARG3 (bodyD) to be positive.%/&
 DRAW_ITUBE command ignored.
   *return,-1
+*endif
+
+master_kps = 'DRAW_ITUBE_MASTER_KPS'
+*get,ar20,parm,AR12,type
+*if,ar20,eq,3,then
+  master_kps = AR12
+*endif
+
+master_cs = 'DRAW_ITUBE_MASTER_CS'
+*get,ar20,parm,AR13,type
+*if,ar20,eq,3,then
+  master_cs = AR13
 *endif
 
 neckStatus = 0
@@ -108,178 +158,239 @@ cmInfix = 'ITUBE'
   cmInfix = AR11
 *endif
 
-cmaItube     = 'COMPA_%cmInfix%_itube'
-cmaNeck      = 'COMPA_%cmInfix%_neck'
-cmaBody      = 'COMPA_%cmInfix%_body'
-cmaTail      = 'COMPA_%cmInfix%_tail'
-cmaSkirt     = 'COMPA_%cmInfix%_skirt'
+cmaItube   = 'COMPA_%cmInfix%_itube'
+cmaNeck    = 'COMPA_%cmInfix%_neck'
+cmaBody    = 'COMPA_%cmInfix%_body'
+cmaTail    = 'COMPA_%cmInfix%_tail'
+cmaSkirt   = 'COMPA_%cmInfix%_skirt'
 
-cmlNeck      = 'COMPL_%cmInfix%_neck'
-cmlTop       = 'COMPL_%cmInfix%_top'
-cmlBot       = 'COMPL_%cmInfix%_bot'
-cmlTail      = 'COMPL_%cmInfix%_tail'
-cmlSkirt     = 'COMPL_%cmInfix%_skirt'
-
-cmkNeck      = 'COMPK_%cmInfix%_neck'
-cmkTop       = 'COMPK_%cmInfix%_top'
-cmkBot       = 'COMPK_%cmInfix%_bot'
-cmkTail      = 'COMPK_%cmInfix%_tail'
-cmkSkirt     = 'COMPK_%cmInfix%_skirt'
-cmkWorkpoint = 'COMPK_%cmInfix%_workpoint'
+cmlNeck    = 'COMPL_%cmInfix%_neck'
+cmlBodyTop = 'COMPL_%cmInfix%_bodyTop'
+cmlBodyBot = 'COMPL_%cmInfix%_bodyBot'
+cmlTail    = 'COMPL_%cmInfix%_tail'
+cmlSkirt   = 'COMPL_%cmInfix%_skirt'
 
 ! Prepare environment
+csbackup
+abackup
+lbackup
+kbackup
+
 asel , none
-cm   , COMPA_body     , area
-cm   , COMPA_neck     , area
-cm   , COMPA_tail     , area
-cm   , COMPA_skirt    , area
-cm   , %cmaItube%     , area
-cm   , %cmaNeck%      , area
-cm   , %cmaBody%      , area
-cm   , %cmaTail%      , area
-cm   , %cmaSkirt%     , area
+cm , COMPA__body   , area
+cm , COMPA__neck   , area
+cm , COMPA__tail   , area
+cm , COMPA__skirt  , area
+cm , COMPA__itube  , area
+cm , %cmaItube%    , area
+cm , %cmaNeck%     , area
+cm , %cmaBody%     , area
+cm , %cmaTail%     , area
+cm , %cmaSkirt%    , area
 
-lsel,none
-cm   , %cmlNeck%      , line
-cm   , %cmlTop%       , line
-cm   , %cmlBot%       , line
-cm   , %cmlTail%      , line
-cm   , %cmlSkirt%     , line
+lsel , none
+cm , %cmlNeck%    , line
+cm , %cmlBodyTop% , line
+cm , %cmlBodyBot% , line
+cm , %cmlTail%    , line
+cm , %cmlSkirt%   , line
 
-ksel,kp
-cm   , %cmkNeck%      , kp
-cm   , %cmkTop%       , kp
-cm   , %cmkBot%       , kp
-cm   , %cmkTail%      , kp
-cm   , %cmkSkirt%     , kp
-cm   , %cmkWorkpoint% , kp
+ksel , none
+cm , COMPK__master , kp
+
+*del , DRAW_ITUBE_CS_neck      ,  , nopr
+*del , DRAW_ITUBE_CS_bodyTop   ,  , nopr
+*del , DRAW_ITUBE_CS_bodyBot   ,  , nopr
+*del , DRAW_ITUBE_CS_mirror    ,  , nopr
+*del , DRAW_ITUBE_CS_tailTop   ,  , nopr
+*del , DRAW_ITUBE_CS_tailBot   ,  , nopr
+*del , DRAW_ITUBE_CS_skirt     ,  , nopr
+*del , DRAW_ITUBE_CS_workpoint ,  , nopr
+*del , %master_kps%            ,  , nopr
+*del , %master_cs%             ,  , nopr
 
 ! Calculate geometric params
-overflowL     = 1
-bodyExtendedL = (bodyL)+tailStatus*((overflowL)+(bodyD)*tan(tailAngle/2))
-mirrorDelta   = (bodyD/2)*tan(tailAngle/2)
+overflowL        = 1
+bodyExtendedL    = (bodyL)+tailStatus*((overflowL)+(bodyD)*tan(tailAngle/2))
+mirrorDeltaL     = (bodyD/2)*tan(tailAngle/2)
 
 ! Create coordinate systems
-csnext , 'CS_neck'
+csnext , 'DRAW_ITUBE_CS_NUMS' , 8
+
+DRAW_ITUBE_CS_neck      = DRAW_ITUBE_CS_NUMS(1)
+DRAW_ITUBE_CS_bodyTop   = DRAW_ITUBE_CS_NUMS(2)
+DRAW_ITUBE_CS_bodyBot   = DRAW_ITUBE_CS_NUMS(3)
+DRAW_ITUBE_CS_tailBot   = DRAW_ITUBE_CS_NUMS(4)
+DRAW_ITUBE_CS_skirt     = DRAW_ITUBE_CS_NUMS(5)
+DRAW_ITUBE_CS_workpoint = DRAW_ITUBE_CS_NUMS(6)
+DRAW_ITUBE_CS_mirror    = DRAW_ITUBE_CS_NUMS(7)
+DRAW_ITUBE_CS_tailTop   = DRAW_ITUBE_CS_NUMS(8)
+
 csys   , ARG1
-clocal , CS_neck        , cart , 0 , 0 , -neckL
+clocal , DRAW_ITUBE_CS_neck      , cart , 0 , 0 , -neckL
 
-csnext , 'CS_bodyTop'
 csys   , ARG1
-clocal , CS_bodyTop     , cart , 0 , 0 , 0
+clocal , DRAW_ITUBE_CS_bodyTop   , cart , 0 , 0 , 0
 
-csnext , 'CS_bodyBot'
 csys   , ARG1
-clocal , CS_bodyBot     , cart , 0 , 0 , bodyL
+clocal , DRAW_ITUBE_CS_bodyBot   , cart , 0 , 0 , bodyL
 
-csnext , 'CS_mirror'
 csys   , ARG1
-clocal , CS_mirror      , cart , 0 , 0 , mirrorDelta ,  ,  , tailAngle/2
+clocal , DRAW_ITUBE_CS_mirror    , cart , 0 , 0 , mirrorDeltaL ,  ,  , tailAngle/2
 
-csnext , 'CS_tailTop'
-csys   , CS_mirror
-clocal , CS_tailTop     , cart , 0 , 0 , 0           ,  ,  , tailAngle/2
+csys   , DRAW_ITUBE_CS_mirror
+clocal , DRAW_ITUBE_CS_tailTop   , cart , 0 , 0 , 0            ,  ,  , tailAngle/2
 
-csnext , 'CS_tailBot'
-csys   , CS_tailTop
-clocal , CS_tailBot     , cart , 0 , 0 , tailL
+csys   , DRAW_ITUBE_CS_tailTop
+clocal , DRAW_ITUBE_CS_tailBot   , cart , 0 , 0 , tailL
 
-csnext , 'CS_skirt'
-csys   , CS_tailBot
-clocal , CS_skirt       , cart , 0 , 0 , skirtL
+csys   , DRAW_ITUBE_CS_tailBot
+clocal , DRAW_ITUBE_CS_skirt     , cart , 0 , 0 , skirtL
 
-csnext , 'CS_workpoint'
-csys   , CS_skirt
-clocal , CS_workpoint   , cart , 0 , 0 , wpOffset
+csys   , DRAW_ITUBE_CS_skirt
+clocal , DRAW_ITUBE_CS_workpoint , cart , 0 , 0 , wpOffset
 
 ! Draw body
 asel,none
-wpcsys,-1,CS_bodyTop
-drawpipe,bodyD,bodyExtendedL,,,'BODY',4
+wpcsys,-1,DRAW_ITUBE_CS_bodyTop
+drawpipe,bodyD,bodyExtendedL,,,'_BODY',4
 
 ! Draw tail
 *if,tailStatus,eq,1,then
-  csys,CS_mirror
+  csys,DRAW_ITUBE_CS_mirror
   wpcsys,-1
 
-  cmwslice,'COMPA_body'
+  cmwslice,'COMPA__body'
   asel,r,loc,z,0,1e6
   adele,all,,,1
 
-  cmsel,s,COMPA_body
-  arsym,z,COMPA_body
+  cmsel,s,COMPA__body
+  arsym,z,COMPA__body
 
-  cmsel,u,COMPA_body
-  cm,COMPA_tail,area
+  cmsel,u,COMPA__body
+  cm,COMPA__tail,area
   lsla
   ksll
   ksel,u,loc,z,0
-  csys,CS_tailTop
+  csys,DRAW_ITUBE_CS_tailTop
   kmodif,all,,,tailL
 *endif
 
 ! Draw neck
 *if,neckStatus,eq,1,then
-  wpcsys,-1,CS_bodyTop
-  drawcone,bodyD,neckD,-neckL,,,'NECK',4
+  wpcsys,-1,DRAW_ITUBE_CS_bodyTop
+  drawcone,bodyD,neckD,-neckL,,,'_NECK',4
 *endif
 
 ! Draw skirt
 *if,skirtStatus,eq,1,then
-  wpcsys,-1,CS_tailBot
-  drawcone,bodyD,skirtD,skirtL,,,'SKIRT',4
+  wpcsys,-1,DRAW_ITUBE_CS_tailBot
+  drawcone,bodyD,skirtD,skirtL,,,'_SKIRT',4
 *endif
 
 ! Merge solid model
+cmsel,s,COMPA__body
+cmsel,a,COMPA__tail
+cmsel,a,COMPA__neck
+cmsel,a,COMPA__skirt
+cm,COMPA__itube,area
+lsla
+ksll
+nummrg,kp
 
 ! Draw master keypoints
-nextkp,'KP_master',6
+masterPlaneCount = 6
 
-*del,CS_master,,nopr
-*dim,CS_master,,6
-CS_master(1) = CS_neck , CS_bodyTop , CS_bodyBot , CS_tailBot , CS_skirt , CS_workpoint
+nextkp,master_kps,masterPlaneCount
 
-*do,nthMaster,1,6,1
-  csNum = CS_master(nthMaster)
-  kpNum = KP_master(nthMaster)
+*dim,%master_cs%,,masterPlaneCount
+%master_cs%(1) = DRAW_ITUBE_CS_neck    , DRAW_ITUBE_CS_bodyTop , DRAW_ITUBE_CS_bodyBot
+%master_cs%(4) = DRAW_ITUBE_CS_tailBot , DRAW_ITUBE_CS_skirt   , DRAW_ITUBE_CS_workpoint
+
+ksel,none
+*do,nthMaster,1,masterPlaneCount,1
+  csNum = %master_cs%(nthMaster)
+  kpNum = %master_kps%(nthMaster)
   csys,csNum
   k,kpNum,0,0,0
 *enddo
+cm,COMPK__master,kp
 
 ! Export selection components
+cmsel,s,COMPA__body
+cm,%cmaBody%,area
+
+cmsel,s,COMPA__tail
+cm,%cmaTail%,area
+
+cmsel,s,COMPA__neck
+cm,%cmaNeck%,area
+
+cmsel,s,COMPA__skirt
+cm,%cmaSkirt%,area
+
+cmsel,s,COMPA__itube
+cm,%cmaItube%,area
+
+csys,DRAW_ITUBE_CS_neck
+cmsel,s,COMPA__neck
+lsla
+lsel,r,loc,z,0
+cm,%cmlNeck%,line
+
+csys,DRAW_ITUBE_CS_bodyTop
+cmsel,s,COMPA__body
+lsla
+lsel,r,loc,z,0
+cm,%cmlBodyTop%,line
+
+csys,DRAW_ITUBE_CS_bodyBot
+cmsel,s,COMPA__body
+lsla
+lsel,r,loc,z,0
+cm,%cmlBodyBot%,line
+
+csys,DRAW_ITUBE_CS_tailBot
+cmsel,s,COMPA__tail
+lsla
+lsel,r,loc,z,0
+cm,%cmlTail%,line
+
+csys,DRAW_ITUBE_CS_skirt
+cmsel,s,COMPA__skirt
+lsla
+lsel,r,loc,z,0
+cm,%cmlSkirt%,line
 
 ! Clean up
+csrestore
+arestore
+lrestore
+krestore
 
+cmsel,a,COMPA__itube
+lsla,a
+ksll,a
+cmsel,a,COMPK__master
 
-! Output selection components:
-! COMPA_itube
-! COMPA_neck
-! COMPA_body
-! COMPA_tail
-! COMPA_skirt
-!
-! COMPL_neck
-! COMPL_top
-! COMPL_bot
-! COMPL_tail
-! COMPL_skirt
-!
-! COMPK_neck
-! COMPK_top
-! COMPK_bot
-! COMPK_tail
-! COMPK_skirt
-! COMPK_workpoint
+cmdele,COMPA__neck
+cmdele,COMPA__body
+cmdele,COMPA__tail
+cmdele,COMPA__skirt
+cmdele,COMPA__itube
+cmdele,COMPK__master
 
-! Output coordinate systems:
-! CS_neck
-! CS_bodyTop
-! CS_bodyBot
-! CS_mirror
-! CS_tailTop
-! CS_tailBot
-! CS_skirt
-! CS_workpoint
+csdele , DRAW_ITUBE_CS_mirror
+csdele , DRAW_ITUBE_CS_tailTop
+
+*del , DRAW_ITUBE_CS_neck      ,  , nopr
+*del , DRAW_ITUBE_CS_bodyTop   ,  , nopr
+*del , DRAW_ITUBE_CS_bodyBot   ,  , nopr
+*del , DRAW_ITUBE_CS_mirror    ,  , nopr
+*del , DRAW_ITUBE_CS_tailTop   ,  , nopr
+*del , DRAW_ITUBE_CS_tailBot   ,  , nopr
+*del , DRAW_ITUBE_CS_skirt     ,  , nopr
+*del , DRAW_ITUBE_CS_workpoint ,  , nopr
 
 !--------------------------- Additional documentation: I-tube sketches ----------------------------!
 !                                                                                                  !
