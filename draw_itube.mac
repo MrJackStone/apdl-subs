@@ -13,32 +13,39 @@
 !   - array with the numbers of each coordinate system at key locations (see AR13 below)
 
 ! Arguments:
-! ARG1: CS_bodyTop -  coordinate system used as origin of the I-tube (should already be rotated by
-!                     an azimuth, if one is required)
-! ARG2: bodyL      -  length of the straight portion of the I-tube (see additional documentation)
-! ARG3: bodyD      -  I-tube's diameter
-! ARG4: neckL      -  neck length
-! ARG5: neckD      -  neck diameter (set to 0 to turn off)
-! ARG6: skirtL     -  skirt length
-! ARG7: skirtD     -  skirt diameter (set to 0 to turn off)
-! ARG8: tailL      -  tail length (set to 0 to turn off)
-! ARG9: tailAngle  -  angle of the I-tube's tail relative to the vertical axis
-! AR10: wpOffset   -  distance to the workpoint measured from the last I-tube section (skirt,
-!                     tail, or body, depending on which parts are turned on)
-! AR11: cmInfix    -  string used as infix to compose the names of the output selection components
-!                     (defaults to 'ITUBE')
-! AR12: master_kps -  name of array to which master keypoint numbers are assigned, in the following
-!                     order (defaults to 'DRAW_ITUBE_MASTER_KPS'):
-!                       POS  KP
-!                        1   neck (free end)
-!                        2   top of the body
-!                        3   bottom of the body
-!                        4   bottom of the tail
-!                        5   skirt (free end)
-!                        6   workpoint
-! AR13: master_cs  -  name of array to which the numbers of coordinate systems created at master
-!                     keypoint locations will be assigned, following the same order presented for
-!                     AR12 (defaults to 'DRAW_ITUBE_MASTER_CS')
+! ARG1: CS_bodyTop  -  coordinate system used as origin of the I-tube (should already be rotated by
+!                      an azimuth, if one is required)
+! ARG2: bodyL       -  length of the straight portion of the I-tube (see additional documentation)
+! ARG3: bodyD       -  I-tube's diameter
+! ARG4: neckL       -  neck length
+! ARG5: neckD       -  neck diameter (set to 0 to turn off)
+! ARG6: skirtL      -  skirt length
+! ARG7: skirtD      -  skirt diameter (set to 0 to turn off)
+! ARG8: tailL       -  tail length (set to 0 to turn off)
+! ARG9: tailAngle   -  angle of the I-tube's tail relative to the vertical axis
+! AR10: wpOffset    -  distance to the workpoint measured from the last I-tube section (skirt,
+!                      tail, or body, depending on which parts are turned on)
+! AR11: cmInfix     -  string used as infix to compose the names of the output selection components
+!                      (defaults to 'ITUBE')
+! AR12: master_kps  -  name of array to which master keypoint numbers are assigned, in the following
+!                      order (defaults to 'DRAW_ITUBE_MASTER_KPS'):
+!                        IDX  POSITION
+!                         1   neck (free end)
+!                         2   top of the body
+!                         3   bottom of the body
+!                         4   bottom of the tail
+!                         5   skirt (free end)
+!                         6   workpoint
+! AR13: master_cs   -  name of array (defaults to 'DRAW_ITUBE_MASTER_CS') to which the numbers of
+!                      coordinate systems created at master keypoint locations will be assigned,
+!                      in the following order:
+!                        IDX  TYPE         POSITION
+!                         1   cylindrical  neck (free end)
+!                         2   cylindrical  top of the body
+!                         3   cylindrical  bottom of the body
+!                         4   cylindrical  bottom of the tail
+!                         5   cylindrical  skirt (free end)
+!                         6   cartesian    workpoint
 
 ! Local parameters:
 ! ar20: parType
@@ -220,28 +227,28 @@ ar47 = DRAW_ITUBE_CS_NUMS(7)
 ar48 = DRAW_ITUBE_CS_NUMS(8)
 
 csys   , ARG1
-clocal , ar41 , cart , 0 , 0 , -ar32
+clocal , ar41 , cylin , 0 , 0 , -ar32
 
 csys   , ARG1
-clocal , ar42 , cart , 0 , 0 , 0
+clocal , ar42 , cylin , 0 , 0 , 0
 
 csys   , ARG1
-clocal , ar43 , cart , 0 , 0 , ARG2
+clocal , ar43 , cylin , 0 , 0 , ARG2
 
 csys   , ar43
-clocal , ar44 , cart , 0 , 0 , ar39  ,  ,  , ar36/2
+clocal , ar44 , cart  , 0 , 0 , ar39  ,  ,  , ar36/2
 
 csys   , ar44
-clocal , ar45 , cart , 0 , 0 , 0     ,  ,  , ar36/2
+clocal , ar45 , cylin , 0 , 0 , 0     ,  ,  , ar36/2
 
 csys   , ar45
-clocal , ar46 , cart , 0 , 0 , ARG8
+clocal , ar46 , cylin , 0 , 0 , ARG8
 
 csys   , ar46
-clocal , ar47 , cart , 0 , 0 , ar34
+clocal , ar47 , cylin , 0 , 0 , ar34
 
 csys   , ar47
-clocal , ar48 , cart , 0 , 0 , AR10
+clocal , ar48 , cart  , 0 , 0 , AR10
 
 ! Draw body
 asel,none
@@ -266,14 +273,14 @@ drawpipe,ARG3,ar38,,,'_BODY',4
   ksll
   ksel,u,loc,z,0
   csys,ar45
-  kmodif,all,,,tailL
   kmodif,all,,,ARG8
+  cm,COMPA__tail,area
 *endif
 
 ! Draw neck
 *if,ar31,eq,1,then
   wpcsys,-1,ar42
-  drawcone,bodyD,neckD,-ar32,,,'_NECK',4
+  drawcone,ARG3,ARG5,-ar32,,,'_NECK',4
 *endif
 
 ! Draw skirt
@@ -326,11 +333,13 @@ cm,%ar55%,area
 cmsel,s,COMPA__itube
 cm,%ar51%,area
 
-csys,ar41
-cmsel,s,COMPA__neck
-lsla
-lsel,r,loc,z,0
-cm,%ar61%,line
+*if,ar31,eq,1,then
+  csys,ar41
+  cmsel,s,COMPA__neck
+  lsla
+  lsel,r,loc,z,0
+  cm,%ar61%,line
+*endif
 
 csys,ar42
 cmsel,s,COMPA__body
@@ -344,17 +353,21 @@ lsla
 lsel,r,loc,z,0
 cm,%ar63%,line
 
-csys,ar46
-cmsel,s,COMPA__tail
-lsla
-lsel,r,loc,z,0
-cm,%ar64%,line
+*if,ar35,eq,1,then
+  csys,ar46
+  cmsel,s,COMPA__tail
+  lsla
+  lsel,r,loc,z,0
+  cm,%ar64%,line
+*endif
 
-csys,ar47
-cmsel,s,COMPA__skirt
-lsla
-lsel,r,loc,z,0
-cm,%ar65%,line
+*if,ar33,eq,1,then
+  csys,ar47
+  cmsel,s,COMPA__skirt
+  lsla
+  lsel,r,loc,z,0
+  cm,%ar65%,line
+*endif
 
 ! Clean up
 csrestore
@@ -454,4 +467,3 @@ csdele , ar45
 !                                                                                                  !
 !                                                                                                  !
 ! ------------------------------------------------------------------------------------------------ !
-
