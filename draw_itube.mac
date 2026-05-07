@@ -84,6 +84,7 @@
 ! COMPA__body
 ! COMPA__tail
 ! COMPA__skirt
+! DRAW_ITUBE_CS_NUMS
 
 ! Output parameters:
 ! <AR12> (master keypoint array)
@@ -196,21 +197,15 @@ cm , %ar65% , line
 ksel , none
 cm , ar75 , kp
 
-*del , ar41   ,  , nopr
-*del , ar42   ,  , nopr
-*del , ar43   ,  , nopr
-*del , ar44   ,  , nopr
-*del , ar45   ,  , nopr
-*del , ar46   ,  , nopr
-*del , ar47   ,  , nopr
-*del , ar48   ,  , nopr
 *del , %ar73% ,  , nopr
 *del , %ar74% ,  , nopr
 
 ! Calculate geometric params
+afunbackup,'DEG'
 ar37 = 1
-ar38 = (bodyL)+ar35*((ar37)+(bodyD)*tan(ar36/2))
-ar39 = (bodyD/2)*tan(ar36/2)
+ar38 = (ARG2)+ar35*((ar37)+(ARG3)*tan(ar36/2))
+ar39 = (ARG3/2)*tan(ar36/2)
+afunrestore
 
 ! Create coordinate systems
 csnext , 'DRAW_ITUBE_CS_NUMS' , 8
@@ -218,11 +213,11 @@ csnext , 'DRAW_ITUBE_CS_NUMS' , 8
 ar41 = DRAW_ITUBE_CS_NUMS(1)
 ar42 = DRAW_ITUBE_CS_NUMS(2)
 ar43 = DRAW_ITUBE_CS_NUMS(3)
-ar46 = DRAW_ITUBE_CS_NUMS(4)
-ar47 = DRAW_ITUBE_CS_NUMS(5)
-ar48 = DRAW_ITUBE_CS_NUMS(6)
-ar44 = DRAW_ITUBE_CS_NUMS(7)
-ar45 = DRAW_ITUBE_CS_NUMS(8)
+ar44 = DRAW_ITUBE_CS_NUMS(4)
+ar45 = DRAW_ITUBE_CS_NUMS(5)
+ar46 = DRAW_ITUBE_CS_NUMS(6)
+ar47 = DRAW_ITUBE_CS_NUMS(7)
+ar48 = DRAW_ITUBE_CS_NUMS(8)
 
 csys   , ARG1
 clocal , ar41 , cart , 0 , 0 , -ar32
@@ -231,27 +226,27 @@ csys   , ARG1
 clocal , ar42 , cart , 0 , 0 , 0
 
 csys   , ARG1
-clocal , ar43 , cart , 0 , 0 , bodyL
+clocal , ar43 , cart , 0 , 0 , ARG2
 
-csys   , ARG1
-clocal , ar44 , cart , 0 , 0 , ar39     ,  ,  , ar36/2
+csys   , ar43
+clocal , ar44 , cart , 0 , 0 , ar39  ,  ,  , ar36/2
 
 csys   , ar44
-clocal , ar45 , cart , 0 , 0 , 0        ,  ,  , ar36/2
+clocal , ar45 , cart , 0 , 0 , 0     ,  ,  , ar36/2
 
 csys   , ar45
-clocal , ar46 , cart , 0 , 0 , tailL
+clocal , ar46 , cart , 0 , 0 , ARG8
 
 csys   , ar46
 clocal , ar47 , cart , 0 , 0 , ar34
 
 csys   , ar47
-clocal , ar48 , cart , 0 , 0 , wpOffset
+clocal , ar48 , cart , 0 , 0 , AR10
 
 ! Draw body
 asel,none
 wpcsys,-1,ar42
-drawpipe,bodyD,ar38,,,'_BODY',4
+drawpipe,ARG3,ar38,,,'_BODY',4
 
 ! Draw tail
 *if,ar35,eq,1,then
@@ -272,6 +267,7 @@ drawpipe,bodyD,ar38,,,'_BODY',4
   ksel,u,loc,z,0
   csys,ar45
   kmodif,all,,,tailL
+  kmodif,all,,,ARG8
 *endif
 
 ! Draw neck
@@ -283,7 +279,7 @@ drawpipe,bodyD,ar38,,,'_BODY',4
 ! Draw skirt
 *if,ar33,eq,1,then
   wpcsys,-1,ar46
-  drawcone,bodyD,skirtD,ar34,,,'_SKIRT',4
+  drawcone,ARG3,ARG7,ar34,,,'_SKIRT',4
 *endif
 
 ! Merge solid model
@@ -380,6 +376,8 @@ cmdele,ar75
 
 csdele , ar44
 csdele , ar45
+
+*del,DRAW_ITUBE_CS_NUMS,,nopr
 
 
 !--------------------------- Additional documentation: I-tube sketches ----------------------------!
