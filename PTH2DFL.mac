@@ -1,4 +1,4 @@
-! PTH2DFL , begNode , endNode , -    , -    , pathName , direction , pathDiv , -    , defType , avgKey , dirMult
+! PTH2DFL , begNode , endNode , -    , -    , pathName , direction , pathDiv , -    , defType , avgKey , signScaling
 ! PTH2DFL , ARG1    , ARG2    , ARG3 , ARG4 , ARG5     , ARG6      , ARG7    , ARG8 , ARG9    , AR10   , AR11
 
 ! Description:
@@ -6,26 +6,26 @@
 ! defined by two nodes.
 
 ! Arguments:
-! ARG1: begNode    -  node that marks the beginning of the segment
-! ARG2: endNode    -  node that marks the end of the segment
-! ARG3: [blank]    -  unused
-! ARG4: [blank]    -  unused
-! ARG5: pathName   -  name of the path created to map displacements and deflections
-! ARG6: direction  -  string indicating direction along which displacements will be measured:
-!                        ['X']    X direction
-!                        ['Y']    Y direction
-!                        ['Z']    Z direction
-!                        ['SUM']  vector sum of all directions
-! ARG7: pathDiv    -  number of divisions along the path defined by cross-sectional boundaries
-! ARG8: [blank]    -  unused.
-! ARG9: defType    -  key indicating how relative deflections should be measured (based on
-!                     expected deformed shape):
-!                        [0] secant (default)
-!                        [1] tangent to first node
-! AR10: avgKey     -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
-!                        [0] AVG  (take average value, default)
-!                        [1] NOAV (don't take average value)
-! AR11: dirMult    -  signed unit used to invert diagram
+! ARG1: begNode      -  node that marks the beginning of the segment
+! ARG2: endNode      -  node that marks the end of the segment
+! ARG3: [blank]      -  unused
+! ARG4: [blank]      -  unused
+! ARG5: pathName     -  name of the path created to map displacements and deflections
+! ARG6: direction    -  string indicating direction along which displacements will be measured:
+!                          ['X']    X direction
+!                          ['Y']    Y direction
+!                          ['Z']    Z direction
+!                          ['SUM']  vector sum of all directions
+! ARG7: pathDiv      -  number of divisions along the path defined by cross-sectional boundaries
+! ARG8: [blank]      -  unused.
+! ARG9: defType      -  key indicating how relative deflections should be measured (based on
+!                       expected deformed shape):
+!                          [0] secant (default)
+!                          [1] tangent to first node
+! AR10: avgKey       -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
+!                          [0] AVG  (take average value, default)
+!                          [1] NOAV (don't take average value)
+! AR11: signScaling  -  signed scale factor applied to U & deflection (defaults to 1)
 
 ! Local parameters:
 ! ar20: avglab
@@ -43,16 +43,17 @@
 ! ar38: S_pos2
 ! ar39: deltaS
 ! ar40: tan_thetai
-! ar41: begNode_U
+! ar41: -
 ! ar42: endNode_U
 ! ar43: coef_a
 ! ar44: coef_b
 ! ar45: pathLength
 ! ar46: arrLen
+! ar51: dflSign
+! ar52: scaling
 
 ! Global parameters (erased at the end of this subroutine):
 ! PTH2DFL_ARR_S
-! PTH2DFL_ARR_U
 
 ! Output parameters:
 ! PTH2DFL_ARR_disp
@@ -87,6 +88,16 @@ ar32 = strcat(ar30,'_F')
 ar25 = upcase(ARG6)
 ar26 = strcat('U',ar25)
 
+dflSign = 1
+*if,AR11,lt,0,then
+  dflSign = -1
+*endif
+
+scaling = 1
+*if,AR11,ne,0,then
+  scaling = abs(AR11)
+*endif
+
 ! Create path
 path  , ar30 , 2    , 20 , ARG7
 path  , ar30
@@ -94,34 +105,31 @@ ppath , 1    , ARG1
 ppath , 2    , ARG2
 
 ! Map DOF
-pdef , ar26 , u , ar25 , ar20
+pdef  , ar26 , u    , ar25 , ar20
+pcalc , add  , ar26 , ar26 ,      , scaling
 
 ! Calculate initial slope
-pth2arr,ar26,'PTH2DFL_ARR_U'
-ar34 = PTH2DFL_ARR_U(1)
-ar35 = PTH2DFL_ARR_U(2)
-ar36 = ar35-ar34
 pth2arr,'S','PTH2DFL_ARR_S'
+*get,ar46,parm,PTH2DFL_ARR_S,dim,x
 ar37 = PTH2DFL_ARR_S(1)
 ar38 = PTH2DFL_ARR_S(2)
+ar45 = PTH2DFL_ARR_S(ar46)
+
+pth2arr,ar26,'PTH2DFL_ARR_disp'
+ar34 = PTH2DFL_ARR_disp(1)
+ar35 = PTH2DFL_ARR_disp(2)
+ar42 = PTH2DFL_ARR_disp(ar46)
+ar36 = ar35-ar34
 ar39 = ar38-ar37
 ar40 = ar36/ar39
 
-! Get path length
-*get,ar46,parm,PTH2DFL_ARR_S,dim,x
-ar45 = PTH2DFL_ARR_S(ar46)
-
-! Reference displacements
-*get , ar41 , node , ARG1 , u , ar25
-*get , ar42 , node , ARG2 , u , ar25
-
 ! Calculate reference path's polynomial coefficients
 *if,ar33,eq,'SEC',then
-  ar43 = (ar42-ar41)/ar45
+  ar43 = (ar42-ar34)/ar45
 *elseif,ar33,eq,'TAN',then
   ar43 = ar40
 *endif
-ar44 = ar41
+ar44 = ar34
 
 ! Prevent coefficient equal to zero from triggering default coefficient of 1.0 in PCALC operation below
 *if,abs(ar43),lt,1e-10,then
@@ -135,16 +143,10 @@ ar44 = ar41
 pcalc,add,ar31,'S',,ar43,,ar44
 
 ! Calculate relative deflection
-*if,AR11,ne,0,then
-  pcalc,add,ar32,ar26,ar31,AR11,-AR11
-*else
-  pcalc,add,ar32,ar26,ar31,1,-1
-*endif
+pcalc,add,ar32,ar26,ar31,dflSign,-dflSign
 
-! Store path values in arrays
-pth2arr , ar26 , 'PTH2DFL_ARR_disp'
+! Export deflection
 pth2arr , ar32 , 'PTH2DFL_ARR_defl'
 
-! Clear parameters
+! Clean up
 *del , PTH2DFL_ARR_S ,  , nopr
-*del , PTH2DFL_ARR_U ,  , nopr
