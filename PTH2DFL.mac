@@ -88,14 +88,14 @@ ar32 = strcat(ar30,'_F')
 ar25 = upcase(ARG6)
 ar26 = strcat('U',ar25)
 
-dflSign = 1
+ar51 = 1
 *if,AR11,lt,0,then
-  dflSign = -1
+  ar51 = -1
 *endif
 
-scaling = 1
+ar52 = 1
 *if,AR11,ne,0,then
-  scaling = abs(AR11)
+  ar52 = abs(AR11)
 *endif
 
 ! Create path
@@ -106,7 +106,7 @@ ppath , 2    , ARG2
 
 ! Map DOF
 pdef  , ar26 , u    , ar25 , ar20
-pcalc , add  , ar26 , ar26 ,      , scaling
+pcalc , add  , ar26 , ar26 ,      , ar52
 
 ! Calculate initial slope
 pth2arr,'S','PTH2DFL_ARR_S'
@@ -143,7 +143,7 @@ ar44 = ar34
 pcalc,add,ar31,'S',,ar43,,ar44
 
 ! Calculate relative deflection
-pcalc,add,ar32,ar26,ar31,dflSign,-dflSign
+pcalc,add,ar32,ar26,ar31,ar51,-ar51
 
 ! Export deflection
 pth2arr , ar32 , 'PTH2DFL_ARR_defl'
