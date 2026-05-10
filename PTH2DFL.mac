@@ -1,158 +1,150 @@
-! PTH2DFL, begNode, endNode,    -,    -, pathName, direction, pathDiv,    -, defType, avgKey, dirMult
-! PTH2DFL,    arg1,    arg2, arg3, arg4,     arg5,      arg6,    arg7, arg8,    arg9,   ar10,    ar11
+! PTH2DFL , begNode , endNode , -    , -    , pathName , direction , pathDiv , -    , defType , avgKey , dirMult
+! PTH2DFL , ARG1    , ARG2    , ARG3 , ARG4 , ARG5     , ARG6      , ARG7    , ARG8 , ARG9    , AR10   , AR11
 
 ! Description:
 ! Calculates absolute displacements and relative deflections along a given direction for a path
 ! defined by two nodes.
 
 ! Arguments:
-! arg1: begNode    -  node that marks the beginning of the segment
-! arg2: endNode    -  node that marks the end of the segment
-! arg3: [blank]    -  unused
-! arg4: [blank]    -  unused
-! arg5: pathName   -  name of the path created to map displacements and deflections
-! arg6: direction  -  string indicating direction along which displacements will be measured:
+! ARG1: begNode    -  node that marks the beginning of the segment
+! ARG2: endNode    -  node that marks the end of the segment
+! ARG3: [blank]    -  unused
+! ARG4: [blank]    -  unused
+! ARG5: pathName   -  name of the path created to map displacements and deflections
+! ARG6: direction  -  string indicating direction along which displacements will be measured:
 !                        ['X']    X direction
 !                        ['Y']    Y direction
 !                        ['Z']    Z direction
 !                        ['SUM']  vector sum of all directions
-! arg7: pathDiv    -  number of divisions along the path defined by cross-sectional boundaries
-! arg8: [blank]    -  unused.
-! arg9: defType    -  key indicating how relative deflections should be measured (based on
+! ARG7: pathDiv    -  number of divisions along the path defined by cross-sectional boundaries
+! ARG8: [blank]    -  unused.
+! ARG9: defType    -  key indicating how relative deflections should be measured (based on
 !                     expected deformed shape):
 !                        [0] secant (default)
 !                        [1] tangent to first node
-! ar10: avgKey     -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
+! AR10: avgKey     -  'AVGLAB' of the 'PDEF' command (controls averaging across boundaries)
 !                        [0] AVG  (take average value, default)
 !                        [1] NOAV (don't take average value)
-! ar11: dirMult    -  signed unit used to invert diagram
+! AR11: dirMult    -  signed unit used to invert diagram
 
 ! Local parameters:
-! AR20: avglab
-! AR21: parType
-! AR25: upcaseDOFName
-! AR26: DOFLabel
-! AR30: DOFPathName
-! AR31: refPathLabel
-! AR32: dflPathLabel
-! AR33: deflectionRefLine
-! AR34: U_pos1
-! AR35: U_pos2
-! AR36: deltaU
-! AR37: S_pos1
-! AR38: S_pos2
-! AR39: deltaS
-! AR40: tan_thetai
-! AR41: begNode_U
-! AR42: endNode_U
-! AR43: coef_a
-! AR44: coef_b
-! AR45: pathLength
-! AR46: arrLen
+! ar20: avglab
+! ar21: parType
+! ar25: upcaseDOFName
+! ar26: DOFLabel
+! ar30: DOFPathName
+! ar31: refPathLabel
+! ar32: dflPathLabel
+! ar33: deflectionRefLine
+! ar34: U_pos1
+! ar35: U_pos2
+! ar36: deltaU
+! ar37: S_pos1
+! ar38: S_pos2
+! ar39: deltaS
+! ar40: tan_thetai
+! ar41: begNode_U
+! ar42: endNode_U
+! ar43: coef_a
+! ar44: coef_b
+! ar45: pathLength
+! ar46: arrLen
 
 ! Global parameters (erased at the end of this subroutine):
-! PTH2ARR_ARR_OUTPUT
+! PTH2DFL_ARR_S
+! PTH2DFL_ARR_U
 
 ! Output parameters:
 ! PTH2DFL_ARR_disp
 ! PTH2DFL_ARR_defl
 
-! Averaging key
-AR20='AVG'
-*get,AR21,PARM,ar10,TYPE
-*if,AR21,EQ,0,THEN
-    *if,ar10,EQ,1,THEN
-        AR20='NOAV'
-    *endif
+
+! Parse inputs
+ar20 = 'AVG'
+*get,ar21,parm,AR10,type
+*if,ar21,eq,0,then
+  *if,AR10,eq,1,then
+    ar20 = 'NOAV'
+  *endif
 *endif
 
-! Reference line option
-*get,AR21,PARM,arg9,TYPE
-*if,AR21,NE,0,THEN
-    AR33='SEC'
-*else
-    *if,arg9,EQ,1,THEN
-        AR33='TAN'
-    *else
-        AR33='SEC'
-    *endif
+ar33 = 'SEC'
+*get,ar21,parm,ARG9,type
+*if,ar21,eq,0,then
+  *if,ARG9,eq,1,then
+    ar33 = 'TAN'
+  *endif
 *endif
 
-! Path names
-*get,AR21,PARM,arg5,TYPE
-*if,AR21,EQ,3,THEN
-    AR30=STRSUB(arg5,1,6)
-*else
-    AR30='U2D'
+ar30 = 'U2D'
+*get,ar21,parm,ARG5,type
+*if,ar21,eq,3,then
+  ar30 = strsub(ARG5,1,6)
 *endif
-AR31=STRCAT(AR30,'_R')
-AR32=STRCAT(AR30,'_F')
+ar31 = strcat(ar30,'_R')
+ar32 = strcat(ar30,'_F')
 
-! DOF name
-AR25=UPCASE(arg6)
-AR26=STRCAT('U',AR25)
+ar25 = upcase(ARG6)
+ar26 = strcat('U',ar25)
 
 ! Create path
-PATH,AR30,2,20,arg7
-PATH,AR30
-PPATH,1,arg1
-PPATH,2,arg2
+path  , ar30 , 2    , 20 , ARG7
+path  , ar30
+ppath , 1    , ARG1
+ppath , 2    , ARG2
 
 ! Map DOF
-PDEF,AR26,U,AR25,AR20
+pdef , ar26 , u , ar25 , ar20
 
 ! Calculate initial slope
-PTH2ARR,AR26
-AR34=PTH2ARR_ARR_OUTPUT(1)
-AR35=PTH2ARR_ARR_OUTPUT(2)
-AR36=AR35-AR34
-PTH2ARR,'S'
-AR37=PTH2ARR_ARR_OUTPUT(1)
-AR38=PTH2ARR_ARR_OUTPUT(2)
-AR39=AR38-AR37
-AR40=AR36/AR39
+pth2arr,ar26,'PTH2DFL_ARR_U'
+ar34 = PTH2DFL_ARR_U(1)
+ar35 = PTH2DFL_ARR_U(2)
+ar36 = ar35-ar34
+pth2arr,'S','PTH2DFL_ARR_S'
+ar37 = PTH2DFL_ARR_S(1)
+ar38 = PTH2DFL_ARR_S(2)
+ar39 = ar38-ar37
+ar40 = ar36/ar39
 
 ! Get path length
-*get,AR46,PARM,PTH2ARR_ARR_OUTPUT,DIM,X
-AR45=PTH2ARR_ARR_OUTPUT(AR46)
+*get,ar46,parm,PTH2DFL_ARR_S,dim,x
+ar45 = PTH2DFL_ARR_S(ar46)
 
 ! Reference displacements
-*get,AR41,NODE,arg1,U,AR25
-*get,AR42,NODE,arg2,U,AR25
+*get , ar41 , node , ARG1 , u , ar25
+*get , ar42 , node , ARG2 , u , ar25
 
-! Calculate reference path
-*if,AR33,EQ,'SEC',THEN
-    AR43=(AR42-AR41)/AR45
-*elseif,AR33,EQ,'TAN',THEN
-    AR43=AR40
+! Calculate reference path's polynomial coefficients
+*if,ar33,eq,'SEC',then
+  ar43 = (ar42-ar41)/ar45
+*elseif,ar33,eq,'TAN',then
+  ar43 = ar40
 *endif
-AR44=AR41
-*if,ABS(AR43),LT,1E-10,THEN
-    AR43=1E-10
+ar44 = ar41
+
+! Prevent coefficient equal to zero from triggering default coefficient of 1.0 in PCALC operation below
+*if,abs(ar43),lt,1e-10,then
+  ar43 = 1e-10
 *endif
-*if,ABS(AR44),LT,1E-10,THEN
-    AR44=1E-10
+*if,abs(ar44),lt,1e-10,then
+  ar44 = 1e-10
 *endif
-PCALC,ADD,AR31,'S',,AR43,,AR44
+
+! Generate reference path
+pcalc,add,ar31,'S',,ar43,,ar44
 
 ! Calculate relative deflection
-*if,ar11,ne,0,then
-    pcalc,add,AR32,AR26,AR31,ar11,-ar11
+*if,AR11,ne,0,then
+  pcalc,add,ar32,ar26,ar31,AR11,-AR11
 *else
-    PCALC,ADD,AR32,AR26,AR31,1,-1
+  pcalc,add,ar32,ar26,ar31,1,-1
 *endif
 
 ! Store path values in arrays
-PTH2ARR,AR26
-*del,PTH2DFL_ARR_disp,,nopr
-*vfun,PTH2DFL_ARR_disp,COPY,PTH2ARR_ARR_OUTPUT
-PTH2ARR,AR32
-*del,PTH2DFL_ARR_defl,,nopr
-*vfun,PTH2DFL_ARR_defl,COPY,PTH2ARR_ARR_OUTPUT
+pth2arr , ar26 , 'PTH2DFL_ARR_disp'
+pth2arr , ar32 , 'PTH2DFL_ARR_defl'
 
 ! Clear parameters
-*del,PTH2ARR_ARR_OUTPUT,,nopr
-
-
-
-
+*del , PTH2DFL_ARR_S ,  , nopr
+*del , PTH2DFL_ARR_U ,  , nopr
