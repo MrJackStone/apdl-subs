@@ -144,8 +144,11 @@ AR21=strcat(AR20,'_C')
 *if,AR22,ne,1,then
     *del,%ar11%,,nopr
     *dim,%ar11%,,arg7+1,20
-    *do,AR23,1,18,1
-        *vfill,%ar11%(1,AR23),ramp,0,0
+    *do,AR23,1,20,2
+        *vfill,%ar11%(1,AR23),ramp,1e20,0
+    *enddo
+    *do,AR23,2,20,2
+        *vfill,%ar11%(1,AR23),ramp,-1e20,0
     *enddo
 *endif
 
