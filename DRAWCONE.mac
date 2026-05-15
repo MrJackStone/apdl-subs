@@ -139,56 +139,51 @@ cm,ar29,area
 cm,ar28,line
 
 ! Delete beginning cap
+cmsel,s,ar29
+asel,r,loc,z,0
+lsla,s
+cm,%ar32%,area
+cm,%ar35%,line
+
 *if,ar44,eq,1,then
-  cmsel,s,ar29
-  asel,r,loc,z,0
-  lsla,s
   csys,DRAWCONE_VAR_cylnCS
+  cmsel,s,%ar35%
   lsel,u,loc,x,ARG1/2
-  csys,DRAWCONE_VAR_cartCS
   adele,all,,,0
   ldele,all,,,1
-
-  cm,%ar35%,line
-
-  asel,none
-  cm,%ar32%,area
-
-*else
-  cmsel,s,ar29
-  asel,r,loc,z,0
-  lsla,s
-  cm,%ar32%,area
-  cm,%ar35%,line
-
+  csys,DRAWCONE_VAR_cartCS
+  cm , %ar35% , line
+  cm , %ar32% , area
 *endif
 
 ! Delete end cap
+cmsel,s,ar29
+asel,r,loc,z,ARG3
+lsla,s
+cm,%ar33%,area
+cm,%ar36%,line
+
 *if,ar45,eq,1,then
-  cmsel,s,ar29
-  asel,r,loc,z,ARG3
-  lsla,s
   csys,DRAWCONE_VAR_cylnCS
+  cmsel,s,%ar36%
   lsel,u,loc,x,ARG2/2
-  csys,DRAWCONE_VAR_cartCS
   adele,all,,,0
   ldele,all,,,1
-
-  cm,%ar36%,line
-
-  asel,none
-  cm,%ar33%,area
-
-*else
-  cmsel,s,ar29
-  asel,r,loc,z,ARG3
-  lsla,s
-  cm,%ar33%,area
-  cm,%ar36%,line
-
+  csys,DRAWCONE_VAR_cartCS
+  cm , %ar36% , line
+  cm , %ar33% , area
 *endif
 
 ! Create selection components
+*if,ARG3,eq,0,then
+  asel,none
+  lsel,none
+  cm,%ar32%,area
+  cm,%ar33%,area
+  cm,%ar35%,line
+  cm,%ar36%,line
+*endif
+
 cmsel,s,ar29
 cmsel,u,%ar32%
 cmsel,u,%ar33%
