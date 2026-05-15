@@ -14,7 +14,7 @@
 ! Arguments:
 ! ARG1: botDiam     -  conical diameter at the bottom
 ! ARG2: topDiam     -  conical diameter at the top
-! ARG3: length      -  length of the cone
+! ARG3: height      -  height of the cone
 ! ARG4: keepBegCap  -  key to determine whether or not to delete the circular area (cap) at the
 !                      beginning of the cone:
 !                         [0] delete cap (default)
@@ -29,28 +29,30 @@
 
 
 ! Local parameters:
-! AR24: nthSlice
-! AR25: selCompSuf
-! AR26: sectors
-! AR27: angIncrement
-! AR28: COMPL_temp
-! AR29: COMPA_temp
-! AR30: sliceCount
-! AR31: compaConeName
-! AR32: compaConeBegName
-! AR33: compaConeEndName
-! AR34: complConeName
-! AR35: complConeBegName
-! AR36: complConeEndName
+! ar24: nthSlice
+! ar25: selCompSuf
+! ar26: sectors
+! ar27: angIncrement
+! ar28: COMPL_temp
+! ar29: COMPA_temp
+! ar30: sliceCount
+! ar31: compaConeName
+! ar32: compaConeBegName
+! ar33: compaConeEndName
+! ar34: complConeName
+! ar35: complConeBegName
+! ar36: complConeEndName
 ! ar41: zMinRadius
 ! ar42: zMaxRadius
+! ar44: deleteBegCap
+! ar45: deleteEndCap
 
 ! Global parameters (erased at the end of this subroutine):
 ! DRAWCONE_VAR_cartCS
 ! DRAWCONE_VAR_cylnCS
 
 
-! Check input parameters
+! Parse inputs
 ar25='CONE'
 *get,ar20,parm,ARG6,type
 *if,ar20,eq,3,then
@@ -68,7 +70,23 @@ ar26=2
 ar27 = 360/ar26
 ar30 = ar26/2
 
-! Adapt params: invert top/bottom if length is negative
+*if,ARG3,eq,0,then
+  ar44 = 0
+  ar45 = 0
+*else
+  ar44 = 1
+  ar45 = 1
+*endif
+
+*if,ARG4,eq,1,then
+  ar44 = 0
+*endif
+
+*if,ARG5,eq,1,then
+  ar45 = 0
+*endif
+
+! Adapt params: invert top/bottom if height is negative
 *if,ARG3,gt,0,then
   ar41 = ARG1/2
   ar42 = ARG2/2
@@ -99,9 +117,13 @@ csnext,'DRAWCONE_VAR_cylnCS'
 cswpla,DRAWCONE_VAR_cylnCS,cylin
 csys,DRAWCONE_VAR_cartCS
 
-! Draw cone, delete volume
-cone,ar41,ar42,0,ARG3
-vdele,all,,,0
+! Draw cone or ring
+*if,ARG3,eq,0,then
+  cyl4,0,0,ar41,,ar42
+*else
+  cone,ar41,ar42,0,ARG3
+  vdele,all,,,0
+*endif
 
 ! Slice radially
 *do,ar24,0,ar30-1,1
@@ -117,7 +139,7 @@ cm,ar29,area
 cm,ar28,line
 
 ! Delete beginning cap
-*if,ARG4,ne,1,then
+*if,ar44,eq,1,then
   cmsel,s,ar29
   asel,r,loc,z,0
   lsla,s
@@ -142,7 +164,7 @@ cm,ar28,line
 *endif
 
 ! Delete end cap
-*if,ARG5,ne,1,then
+*if,ar45,eq,1,then
   cmsel,s,ar29
   asel,r,loc,z,ARG3
   lsla,s
