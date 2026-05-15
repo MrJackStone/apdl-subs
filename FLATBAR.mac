@@ -1,6 +1,8 @@
 ! flatbar , xi   , xj   , yi   , yj   , h    , gap  , toe  , angle , cmSuffix
 ! FLATBAR , ARG1 , ARG2 , ARG3 , ARG4 , ARG5 , ARG6 , ARG7 , ARG8  , ARG9
 
+! TODO  implement flat bars with different end shapes
+
 ! Description:
 ! Uses the WP to draw a flat bar in the X-Z plane given its two axial endpoints in the X-Y plane.
 ! The length of the flat bar is drawn along the +X axis and the height is drawn along +Z.
