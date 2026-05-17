@@ -53,7 +53,6 @@
 ! AR24: botPathName
 ! AR25: upcaseSKey
 ! AR26: stressLabel
-! AR27: errorKey
 ! AR28: i
 ! AR29: nthValue
 ! AR80: appliedScale
@@ -117,9 +116,6 @@ PATH,AR24
 PPATH,1,arg3
 PPATH,2,arg4
 
-! Inicializar indicador de erros
-AR27=0
-
 ! Mapear tensão nos paths
 *do,AR28,1,2,1
     ! Ativar path (superior ou inferior)
@@ -167,15 +163,10 @@ AR27=0
     *else
         AR26=AR25
         pdef,AR26,etab,AR26,AR40
-        !AR27=1
-        !*msg,WARN,AR27
-!'PTHS2MN error (%I): INVALID STRESS KEY. PTHS2MN COMMAND IS IGNORED.'
-        !*exit
     *endif
 
 *enddo
 
-*if,AR27,EQ,0,THEN
     ! Transferir tensões na face superior para vetor
     PATH,AR23
     PTH2ARR,AR26
@@ -244,8 +235,6 @@ AR27=0
     PAPUT,PTHS2MN_ARR_botPoints,POINTS
     PAPUT,PTHS2MN_ARR_botTable,TABLE
     PAPUT,PTHS2MN_ARR_botLabel,LABEL
-
-*endif
 
 *del , PTH2ARR_ARR_OUTPUT           ,  , nopr
 *del , PTHS2MN_ARR_stressDifference ,  , nopr
