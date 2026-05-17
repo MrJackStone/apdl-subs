@@ -89,17 +89,17 @@ AR80=1
 AR40='AVG'
 *get,AR20,PARM,ar10,TYPE
 *if,AR20,EQ,0,THEN
-    *if,ar10,EQ,1,THEN
-        AR40='NOAV'
-    *endif
+  *if,ar10,EQ,1,THEN
+    AR40='NOAV'
+  *endif
 *endif
 
 ! Nomes dos paths
 *get,AR20,PARM,arg5,TYPE
 *if,AR20,EQ,3,THEN
-    AR22=STRSUB(arg5,1,6)
+  AR22=STRSUB(arg5,1,6)
 *else
-    AR22='S2MN'
+  AR22='S2MN'
 *endif
 AR23=STRCAT(AR22,'_T')
 AR24=STRCAT(AR22,'_B')
@@ -118,123 +118,123 @@ PPATH,2,arg4
 
 ! Mapear tensão nos paths
 *do,AR28,1,2,1
-    ! Ativar path (superior ou inferior)
-    *if,AR28,EQ,1,THEN
-        PATH,AR23
-    *else
-        PATH,AR24
-    *endif
+  ! Ativar path (superior ou inferior)
+  *if,AR28,EQ,1,THEN
+    PATH,AR23
+  *else
+    PATH,AR24
+  *endif
 
-    ! Mapear tensão selecionada no path ativo
-    AR25=UPCASE(arg6)
-    *if,AR25,EQ,'X',THEN
-        AR26='SX'
-        PDEF,AR26,S,X,AR40
-    *elseif,AR25,EQ,'Y',THEN
-        AR26='SY'
-        PDEF,AR26,S,Y,AR40
-    *elseif,AR25,EQ,'Z',THEN
-        AR26='SZ'
-        PDEF,AR26,S,Z,AR40
-    *elseif,AR25,EQ,'XY',THEN
-        AR26='SXY'
-        PDEF,AR26,S,XY,AR40
-    *elseif,AR25,EQ,'YZ',THEN
-        AR26='SYZ'
-        PDEF,AR26,S,YZ,AR40
-    *elseif,AR25,EQ,'XZ',THEN
-        AR26='SXZ'
-        PDEF,AR26,S,XZ,AR40
-    *elseif,AR25,EQ,'1',THEN
-        AR26='S1'
-        PDEF,AR26,S,1,AR40
-    *elseif,AR25,EQ,'2',THEN
-        AR26='S2'
-        PDEF,AR26,S,2,AR40
-    *elseif,AR25,EQ,'3',THEN
-        AR26='S3'
-        PDEF,AR26,S,3,AR40
-    *elseif,AR25,EQ,'INT',THEN
-        AR26='SINT'
-        PDEF,AR26,S,INT,AR40
-    *elseif,AR25,EQ,'EQV',THEN
-        AR26='SEQV'
-        PDEF,AR26,S,EQV,AR40
-    *else
-        AR26=AR25
-        pdef,AR26,etab,AR26,AR40
-    *endif
+  ! Mapear tensão selecionada no path ativo
+  AR25=UPCASE(arg6)
+  *if,AR25,EQ,'X',THEN
+    AR26='SX'
+    PDEF,AR26,S,X,AR40
+  *elseif,AR25,EQ,'Y',THEN
+    AR26='SY'
+    PDEF,AR26,S,Y,AR40
+  *elseif,AR25,EQ,'Z',THEN
+    AR26='SZ'
+    PDEF,AR26,S,Z,AR40
+  *elseif,AR25,EQ,'XY',THEN
+    AR26='SXY'
+    PDEF,AR26,S,XY,AR40
+  *elseif,AR25,EQ,'YZ',THEN
+    AR26='SYZ'
+    PDEF,AR26,S,YZ,AR40
+  *elseif,AR25,EQ,'XZ',THEN
+    AR26='SXZ'
+    PDEF,AR26,S,XZ,AR40
+  *elseif,AR25,EQ,'1',THEN
+    AR26='S1'
+    PDEF,AR26,S,1,AR40
+  *elseif,AR25,EQ,'2',THEN
+    AR26='S2'
+    PDEF,AR26,S,2,AR40
+  *elseif,AR25,EQ,'3',THEN
+    AR26='S3'
+    PDEF,AR26,S,3,AR40
+  *elseif,AR25,EQ,'INT',THEN
+    AR26='SINT'
+    PDEF,AR26,S,INT,AR40
+  *elseif,AR25,EQ,'EQV',THEN
+    AR26='SEQV'
+    PDEF,AR26,S,EQV,AR40
+  *else
+    AR26=AR25
+    pdef,AR26,etab,AR26,AR40
+  *endif
 
 *enddo
 
-    ! Transferir tensões na face superior para vetor
-    PATH,AR23
-    PTH2ARR,AR26
-    *del,PTHS2MN_ARR_topStress,,nopr
-    *vfun,PTHS2MN_ARR_topStress,COPY,PTH2ARR_ARR_OUTPUT
+! Transferir tensões na face superior para vetor
+PATH,AR23
+PTH2ARR,AR26
+*del,PTHS2MN_ARR_topStress,,nopr
+*vfun,PTHS2MN_ARR_topStress,COPY,PTH2ARR_ARR_OUTPUT
 
-    ! Transferir tensões na face inferior para vetor
-    PATH,AR24
-    PTH2ARR,AR26
-    *del,PTHS2MN_ARR_botStress,,nopr
-    *vfun,PTHS2MN_ARR_botStress,COPY,PTH2ARR_ARR_OUTPUT
+! Transferir tensões na face inferior para vetor
+PATH,AR24
+PTH2ARR,AR26
+*del,PTHS2MN_ARR_botStress,,nopr
+*vfun,PTHS2MN_ARR_botStress,COPY,PTH2ARR_ARR_OUTPUT
 
-    ! Calcular esforços internos
-    *del,PTHS2MN_ARR_stressDifference,,nopr
-    *del,PTHS2MN_ARR_bendingStress,,nopr
-    *del,PTHS2MN_ARR_bendingMoment,,nopr
-    *del,PTHS2MN_ARR_normalStress,,nopr
-    *del,PTHS2MN_ARR_axialForce,,nopr
-    *voper,PTHS2MN_ARR_stressDifference, PTHS2MN_ARR_botStress,        SUB,  PTHS2MN_ARR_topStress
-    *voper,PTHS2MN_ARR_bendingStress,    PTHS2MN_ARR_stressDifference, DIV,  2
-    *voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8*AR80
-    *voper,PTHS2MN_ARR_normalStress,     PTHS2MN_ARR_topStress,        ADD,  PTHS2MN_ARR_bendingStress
-    *voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9*AR80
+! Calcular esforços internos
+*del,PTHS2MN_ARR_stressDifference,,nopr
+*del,PTHS2MN_ARR_bendingStress,,nopr
+*del,PTHS2MN_ARR_bendingMoment,,nopr
+*del,PTHS2MN_ARR_normalStress,,nopr
+*del,PTHS2MN_ARR_axialForce,,nopr
+*voper,PTHS2MN_ARR_stressDifference, PTHS2MN_ARR_botStress,        SUB,  PTHS2MN_ARR_topStress
+*voper,PTHS2MN_ARR_bendingStress,    PTHS2MN_ARR_stressDifference, DIV,  2
+*voper,PTHS2MN_ARR_bendingMoment,    PTHS2MN_ARR_bendingStress,    MULT, arg8*AR80
+*voper,PTHS2MN_ARR_normalStress,     PTHS2MN_ARR_topStress,        ADD,  PTHS2MN_ARR_bendingStress
+*voper,PTHS2MN_ARR_axialForce,       PTHS2MN_ARR_normalStress,     MULT, arg9*AR80
 
-    ! Adicionar vetores calculados às tabelas extraídas dos paths
-    *del,PTHS2MN_ARR_topTable,,nopr
-    *del,PTHS2MN_ARR_topLabel,,nopr
-    *del,PTHS2MN_ARR_topPoints,,nopr
-    PATH,AR23
-    PAGET,PTHS2MN_ARR_topTable,TABLE
-    PAGET,PTHS2MN_ARR_topLabel,LABEL
-    PAGET,PTHS2MN_ARR_topPoints,POINTS
-    *do,AR29,1,arg7+1,1
-        PTHS2MN_ARR_topTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
-        PTHS2MN_ARR_topTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
-        PTHS2MN_ARR_topTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
-        PTHS2MN_ARR_topTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
-    *enddo
-    PTHS2MN_ARR_topLabel(6,1,1)='M'
-    PTHS2MN_ARR_topLabel(7,1,1)='N'
-    PTHS2MN_ARR_topLabel(8,1,1)='BS'
-    PTHS2MN_ARR_topLabel(9,1,1)='NS'
-    PATH,AR23
-    PAPUT,PTHS2MN_ARR_topPoints,POINTS
-    PAPUT,PTHS2MN_ARR_topTable,TABLE
-    PAPUT,PTHS2MN_ARR_topLabel,LABEL
+! Adicionar vetores calculados às tabelas extraídas dos paths
+*del,PTHS2MN_ARR_topTable,,nopr
+*del,PTHS2MN_ARR_topLabel,,nopr
+*del,PTHS2MN_ARR_topPoints,,nopr
+PATH,AR23
+PAGET,PTHS2MN_ARR_topTable,TABLE
+PAGET,PTHS2MN_ARR_topLabel,LABEL
+PAGET,PTHS2MN_ARR_topPoints,POINTS
+*do,AR29,1,arg7+1,1
+  PTHS2MN_ARR_topTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
+  PTHS2MN_ARR_topTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
+  PTHS2MN_ARR_topTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
+  PTHS2MN_ARR_topTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
+*enddo
+PTHS2MN_ARR_topLabel(6,1,1)='M'
+PTHS2MN_ARR_topLabel(7,1,1)='N'
+PTHS2MN_ARR_topLabel(8,1,1)='BS'
+PTHS2MN_ARR_topLabel(9,1,1)='NS'
+PATH,AR23
+PAPUT,PTHS2MN_ARR_topPoints,POINTS
+PAPUT,PTHS2MN_ARR_topTable,TABLE
+PAPUT,PTHS2MN_ARR_topLabel,LABEL
 
-    *del,PTHS2MN_ARR_botTable,,nopr
-    *del,PTHS2MN_ARR_botLabel,,nopr
-    *del,PTHS2MN_ARR_botPoints,,nopr
-    PATH,AR24
-    PAGET,PTHS2MN_ARR_botTable,TABLE
-    PAGET,PTHS2MN_ARR_botLabel,LABEL
-    PAGET,PTHS2MN_ARR_botPoints,POINTS
-    *do,AR29,1,arg7+1,1
-        PTHS2MN_ARR_botTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
-        PTHS2MN_ARR_botTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
-        PTHS2MN_ARR_botTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
-        PTHS2MN_ARR_botTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
-    *enddo
-    PTHS2MN_ARR_botLabel(6,1,1)='M'
-    PTHS2MN_ARR_botLabel(7,1,1)='N'
-    PTHS2MN_ARR_botLabel(8,1,1)='BS'
-    PTHS2MN_ARR_botLabel(9,1,1)='NS'
-    PATH,AR24
-    PAPUT,PTHS2MN_ARR_botPoints,POINTS
-    PAPUT,PTHS2MN_ARR_botTable,TABLE
-    PAPUT,PTHS2MN_ARR_botLabel,LABEL
+*del,PTHS2MN_ARR_botTable,,nopr
+*del,PTHS2MN_ARR_botLabel,,nopr
+*del,PTHS2MN_ARR_botPoints,,nopr
+PATH,AR24
+PAGET,PTHS2MN_ARR_botTable,TABLE
+PAGET,PTHS2MN_ARR_botLabel,LABEL
+PAGET,PTHS2MN_ARR_botPoints,POINTS
+*do,AR29,1,arg7+1,1
+  PTHS2MN_ARR_botTable(AR29,6,1)=PTHS2MN_ARR_bendingMoment(AR29)
+  PTHS2MN_ARR_botTable(AR29,7,1)=PTHS2MN_ARR_axialForce(AR29)
+  PTHS2MN_ARR_botTable(AR29,8,1)=PTHS2MN_ARR_bendingStress(AR29)
+  PTHS2MN_ARR_botTable(AR29,9,1)=PTHS2MN_ARR_normalStress(AR29)
+*enddo
+PTHS2MN_ARR_botLabel(6,1,1)='M'
+PTHS2MN_ARR_botLabel(7,1,1)='N'
+PTHS2MN_ARR_botLabel(8,1,1)='BS'
+PTHS2MN_ARR_botLabel(9,1,1)='NS'
+PATH,AR24
+PAPUT,PTHS2MN_ARR_botPoints,POINTS
+PAPUT,PTHS2MN_ARR_botTable,TABLE
+PAPUT,PTHS2MN_ARR_botLabel,LABEL
 
 *del , PTH2ARR_ARR_OUTPUT           ,  , nopr
 *del , PTHS2MN_ARR_stressDifference ,  , nopr
