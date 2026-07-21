@@ -1,5 +1,5 @@
-! INIT, defaultsMacro
-! INIT, arg1
+! init , defaultsMacro , outPopOpt
+! INIT , ARG1          , ARG2
 
 ! Description:
 ! This subroutine creates a clean slate to begin a new model. Existing parameters are saved before
@@ -10,12 +10,22 @@
 ! updated with the call to PARRES.
 
 ! Arguments:
-! arg1: defaultsMacro  -  name of a macro file to be called after clearing the model and before
+! ARG1: defaultsMacro  -  name of a macro file to be called after clearing the model and before
 !                         restoring the original param values
+! ARG2: outPopOpt      -  output & message pop-up option:
+!                           [0]  do nothing (default)
+!                           [1]  redirect output to file (outfile.out) and set message suppression
+!                                level to 3
 
 ! Local parameter:
 ! AR20: parType
 
+
+! Handle output & pop-up messages
+*if,ARG2,eq,1,then
+  /output,outfile,out
+  /uis,msgpop,3
+*endif
 
 ! Save existing parameters
 parsav,all,'DATA_PARM_BACKUP',parm
