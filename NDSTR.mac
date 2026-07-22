@@ -1,5 +1,5 @@
-! ndstr , firstNode , reselectElems
-! NDSTR , ARG1      , ARG2
+! ndstr , firstNode , reselectElems , output
+! NDSTR , ARG1      , ARG2          , ARG3
 
 ! Description:
 ! Generates a list with the number of the selected nodes in a specific order. One node is given
@@ -11,9 +11,10 @@
 ! ARG2: reselectElems  -  adjacency through element selection option:
 !                            [0] from full (S);
 !                            [1] reselect (R);
+! ARG3: output         -  name of output array parameter (defaults to 'NDSTR_ARR_nodeList')
 
 ! Local parameters:
-! ar20: COMPN_allNodes
+! ar20: parType
 ! ar21: NodeCount
 ! ar22: NCount
 ! ar23: prevNode
@@ -24,24 +25,50 @@
 ! ar28: parType
 ! ar29: selectMode
 ! ar30: COMPE_prevElems
+! ar50: COMPN_pool
+! ar83: outputParm
+! ar31: nselStatus
 
 ! Output parameters:
-! NDSTR_ARR_NodeList
+! %ARG3% (defaults to 'NDSTR_ARR_nodeList')
 
 
-! Gerar componente com nós selecionados
-cm,ar20,node
-*get,ar21,node,,count
-*del,NDSTR_ARR_NodeList,,nopr
-*dim,NDSTR_ARR_NodeList,,ar21
-
-! Obter tipo de seleção dos nós
-*get,ar28,parm,ARG2,type
-*if,ar28,ne,0,then
-  ar29 = 0
-*else
-  ar29 = ARG2
+! Parse inputs
+*if,ARG1,le,0,then
+  *msg,error
+NDSTR error: invalid node number.%/&
+NDSTR command ignored.
+  *return,-1
 *endif
+
+*get,ar31,node,ARG1,nsel
+*if,ar31,ne,1,then
+  *msg,error
+NDSTR error: first node does not exist or is unselected.%/&
+NDSTR command ignored.
+  *return,-1
+*endif
+
+ar29 = 0
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,0,then
+  *if,ARG2,eq,1,then
+    ar29 = 1
+  *endif
+*endif
+
+ar83 = 'NDSTR_ARR_nodeList'
+*get,ar20,parm,ARG3,type
+*if,ar20,eq,3,then
+  ar83 = ARG3
+*endif
+
+! Prepare environment
+cm,ar50,node
+*get,ar21,node,,count
+*del,%ar83%,,nopr
+*dim,%ar83%,,ar21
+
 *if,ar29,eq,1,then
   cm,ar30,elem
 *endif
@@ -57,7 +84,7 @@ WARNING: FIRST NODE (%I) DOES NOT BELONG TO SELECTED SET.
 
 *else
   ! Armazenar número do primeiro nó no vetor de nós
-  NDSTR_ARR_NodeList(1) = ARG1
+  %ar83%(1) = ARG1
   ! Criar componente de nós processados
   cm,ar26,node
   ar23 = ARG1
@@ -66,7 +93,7 @@ WARNING: FIRST NODE (%I) DOES NOT BELONG TO SELECTED SET.
     ! Verificar abortKey
     *if,ar24,eq,1,then
       ! Preencher vetor de número de nós com entrada nula (zero)
-      NDSTR_ARR_NodeList(ar27+1) = 0
+      %ar83%(ar27+1) = 0
     *else
       ! Selecionar o nó prévio
       nsel,s,node,,ar23
@@ -78,22 +105,22 @@ WARNING: FIRST NODE (%I) DOES NOT BELONG TO SELECTED SET.
         esln,s,0
       *endif
       nsle,s,all
-      cmsel,r,ar20
+      cmsel,r,ar50
       cmsel,u,ar26
       ! Verificar se há nó selecionado
       *get,ar22,node,,count
       *if,ar22,eq,0,then
         ! Nenhum nó selecionado (perda de conectividade): ativar abortKey
-        ar24                       = 1
-        NDSTR_ARR_NodeList(ar27+1) = 0
+        ar24           = 1
+        %ar83%(ar27+1) = 0
         *msg,warn,ar23
 WARNING: NODE CONNECTIVITY LOST AT NODE %I.
       *else
         ! Armazenar número do nó no vetor de nós
         *get,ar25,node,,num,min
         nsel,s,node,,ar25
-        NDSTR_ARR_NodeList(ar27+1) = ar25
-        ar23                       = ar25
+        %ar83%(ar27+1) = ar25
+        ar23           = ar25
         ! Atualizar componente de nós processados
         cmsel,a,ar26
         cm,ar26,node
@@ -109,4 +136,4 @@ WARNING: NODE CONNECTIVITY LOST AT NODE %I.
 *endif
 
 ! Retomar seleção inicial
-cmsel,s,ar20
+cmsel,s,ar50
