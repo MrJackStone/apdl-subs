@@ -84,7 +84,9 @@ cm,ar31,node
   cmsel,s,ar40
   esln,r,0
   nsle,r,all
-  ar34 = ndnext(0)
+  ar34 = ndnext(0)  ! TODO  'ndnext' can be replaced with 'nnear' to account for cases in which
+                    !       there is node ambiguity, like for forks along the nodal path or
+                    !       for elements with midside nodes
 
   ! Break if connectivity is lost
   *if,ar34,eq,0,then
