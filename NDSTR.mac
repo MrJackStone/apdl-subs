@@ -1,5 +1,5 @@
-! ndstr , firstNode , reselectElems , output
-! NDSTR , ARG1      , ARG2          , ARG3
+! ndstr , firstNode , epoolOpt , output
+! NDSTR , ARG1      , ARG2     , ARG3
 
 ! Description:
 ! Generates a list with the number of the selected nodes in a specific order. One node is given
@@ -7,27 +7,23 @@
 ! through elements in common.
 
 ! Arguments:
-! ARG1: firstNode      -  number of the first node
-! ARG2: reselectElems  -  adjacency through element selection option:
-!                            [0] from full (S);
-!                            [1] reselect (R);
-! ARG3: output         -  name of output array parameter (defaults to 'NDSTR_ARR_nodeList')
+! ARG1: firstNode -  number of the first node
+! ARG2: epoolOpt  -  adjacency through element selection option:
+!                      [0] from full (S);
+!                      [1] reselect (R);
+! ARG3: output    -  name of output array parameter (defaults to 'NDSTR_ARR_nodeList')
 
 ! Local parameters:
 ! ar20: parType
-! ar21: NodeCount
-! ar22: NCount
-! ar23: prevNode
-! ar24: abortKey
-! ar25: thisNode
-! ar26: COMPN_processedNodes
-! ar27: nthNode
-! ar28: parType
-! ar29: selectMode
-! ar30: COMPE_prevElems
-! ar50: COMPN_pool
-! ar83: outputParm
-! ar31: nselStatus
+! ar21: nselStatus
+! ar22: selectMode
+! ar23: outputParm
+! ar30: COMPN_pool
+! ar31: COMPN_processed
+! ar32: nodePoolCount
+! ar33: nthNode
+! ar34: adjacentNode
+! ar40: COMPE_pool
 
 ! Output parameters:
 ! %ARG3% (defaults to 'NDSTR_ARR_nodeList')
@@ -41,99 +37,72 @@ NDSTR command ignored.
   *return,-1
 *endif
 
-*get,ar31,node,ARG1,nsel
-*if,ar31,ne,1,then
+*get,ar21,node,ARG1,nsel
+*if,ar21,ne,1,then
   *msg,error
 NDSTR error: first node does not exist or is unselected.%/&
 NDSTR command ignored.
   *return,-1
 *endif
 
-ar29 = 0
+ar22 = 0
 *get,ar20,parm,ARG2,type
 *if,ar20,eq,0,then
   *if,ARG2,eq,1,then
-    ar29 = 1
+    ar22 = 1
   *endif
 *endif
 
-ar83 = 'NDSTR_ARR_nodeList'
+ar23 = 'NDSTR_ARR_nodeList'
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
-  ar83 = ARG3
+  ar23 = ARG3
 *endif
 
 ! Prepare environment
-cm,ar50,node
-*get,ar21,node,,count
-*del,%ar83%,,nopr
-*dim,%ar83%,,ar21
-
-*if,ar29,eq,1,then
-  cm,ar30,elem
-*endif
-
-! Selecionar nó inicial
-nsel,r,node,,ARG1
-*get,ar22,node,,count
+cm,ar30,node
+*get,ar32,node,,count
+*del,%ar23%,,nopr
+*dim,%ar23%,,ar32
 
 *if,ar22,eq,0,then
-  ! ERRO: Nó inicial não faz parte dos nós selecionados
-  *msg,warn,ARG1
-WARNING: FIRST NODE (%I) DOES NOT BELONG TO SELECTED SET.
-
-*else
-  ! Armazenar número do primeiro nó no vetor de nós
-  %ar83%(1) = ARG1
-  ! Criar componente de nós processados
-  cm,ar26,node
-  ar23 = ARG1
-  ar24 = 0
-  *do,ar27,1,ar21-1,1
-    ! Verificar abortKey
-    *if,ar24,eq,1,then
-      ! Preencher vetor de número de nós com entrada nula (zero)
-      %ar83%(ar27+1) = 0
-    *else
-      ! Selecionar o nó prévio
-      nsel,s,node,,ar23
-      ! Selecionar o próximo nó (adjacente a elemento em comum)
-      *if,ar29,eq,1,then
-        cmsel,s,ar30
-        esln,r,0
-      *else
-        esln,s,0
-      *endif
-      nsle,s,all
-      cmsel,r,ar50
-      cmsel,u,ar26
-      ! Verificar se há nó selecionado
-      *get,ar22,node,,count
-      *if,ar22,eq,0,then
-        ! Nenhum nó selecionado (perda de conectividade): ativar abortKey
-        ar24           = 1
-        %ar83%(ar27+1) = 0
-        *msg,warn,ar23
-WARNING: NODE CONNECTIVITY LOST AT NODE %I.
-      *else
-        ! Armazenar número do nó no vetor de nós
-        *get,ar25,node,,num,min
-        nsel,s,node,,ar25
-        %ar83%(ar27+1) = ar25
-        ar23           = ar25
-        ! Atualizar componente de nós processados
-        cmsel,a,ar26
-        cm,ar26,node
-      *endif
-    *endif
-  *enddo
+  esel,all
 *endif
+cm,ar40,elem
 
-! Excluir componente
-*if,ar29,eq,1,then
+nsel,s,node,,ARG1
+cm,ar31,node
+
+! Loop over nodes excluding reference one
+%ar23%(1) = ARG1
+
+*do,ar33,1,ar32-1,1
+
+  ! Select next node through adjacent element
   cmsel,s,ar30
-  cmdele,ar30
-*endif
+  cmsel,u,ar31
+  cmsel,s,ar40
+  esln,r,0
+  nsle,r,all
+  ar34 = ndnext(0)
 
-! Retomar seleção inicial
-cmsel,s,ar50
+  ! Break if connectivity is lost
+  *if,ar34,eq,0,then
+    *msg,warn,%ar23%(ar33)
+NDSTR warning: connectivity lost after node %I.%/&
+Returned array of nodes might be incomplete.
+    *exit
+  *endif
+
+  ! Increment processed nodes selection component & output array
+  %ar23%(ar33+1) = ar34
+  nsel,s,node,,ar34
+  cmsel,a,ar31
+  cm,ar31,node
+
+*enddo
+
+! Clean up
+cmsel,s,ar40
+cmdele,ar40
+cmsel,s,ar30
