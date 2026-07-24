@@ -79,11 +79,12 @@ cm,ar31,node
 *do,ar33,1,ar32-1,1
 
   ! Select next node through adjacent element
-  cmsel,s,ar30
-  cmsel,u,ar31
-  cmsel,s,ar40
-  esln,r,0
-  nsle,r,all
+  cmsel , s , ar31
+  esln  , s
+  cmsel , r , ar40
+  nsle  , s
+  cmsel , r , ar30
+  cmsel , u , ar31
   ar34 = ndnext(0)  ! TODO  'ndnext' can be replaced with 'nnear' to account for cases in which
                     !       there is node ambiguity, like for forks along the nodal path or
                     !       for elements with midside nodes
