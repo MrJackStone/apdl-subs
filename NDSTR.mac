@@ -7,17 +7,19 @@
 ! through elements in common.
 
 ! Arguments:
-! ARG1: firstNode -  number of the first node
-! ARG2: epoolOpt  -  adjacency through element selection option:
-!                      [0] from full (S);
-!                      [1] reselect (R);
-! ARG3: output    -  name of output array parameter (defaults to 'NDSTR_ARR_nodeList')
+! ARG1: firstNode  -  number of the first node
+! ARG2: epoolOpt   -  adjacency through element selection option:
+!                       [0]     from full (S);
+!                       [1]     reselect (R);
+!                       [<STR>] name of element selection component to use as pool;
+! ARG3: output     -  name of output array parameter (defaults to 'NDSTR_ARR_nodeList')
 
 ! Local parameters:
 ! ar20: parType
 ! ar21: nselStatus
 ! ar22: selectMode
 ! ar23: outputParm
+! ar24: cmType
 ! ar30: COMPN_pool
 ! ar31: COMPN_processed
 ! ar32: nodePoolCount
@@ -48,8 +50,20 @@ NDSTR command ignored.
 ar22 = 0
 *get,ar20,parm,ARG2,type
 *if,ar20,eq,0,then
+  ! Numeric value: 'from full' or 'reselect'
   *if,ARG2,eq,1,then
     ar22 = 1
+  *endif
+*elseif,ar20,eq,3,then
+  ! String: element selection component
+  *get,ar24,comp,%ARG2%,type
+  *if,ar24,eq,2,then
+    ar22 = 2
+  *else
+    *msg,error
+NDSTR error: when ARG2 is a string it is expected to be the name of an element selection component.%/&
+NDSTR command ignored.
+    *return,-1
   *endif
 *endif
 
@@ -67,6 +81,10 @@ cm,ar30,node
 
 *if,ar22,eq,0,then
   esel,all
+*elseif,ar22,eq,1,then
+  ! Use current selection -- nothing to do
+*elseif,ar22,eq,2,then
+  cmsel,s,%ARG2%
 *endif
 cm,ar40,elem
 
