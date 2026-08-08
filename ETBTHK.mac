@@ -1,0 +1,106 @@
+! ETBTHK , cmePool , etLabel , scale , output
+! ETBTHK , ARG1    , ARG2    , ARG3  , ARG4
+
+! Description:
+! Creates and populates an element table with the total thickness (TTHK) of each SHELL181 element.
+! Elements of other types are assigned a value of zero. The thickness value can be scaled, usually
+! as a form of unit conversion.
+
+! Arguments:
+! ARG1: cmePool  -  elements to have their respective entries in the element table filled with the
+!                   total thickness value (defaults to all SHELL181 elements).
+! ARG2: etLabel  -  label of the element table to be created (defaults to 'SHELLTHK')
+! ARG3: scale    -  scale factor applied to thicknesses (defaults to 1.0)
+! ARG4: output   -  name of output array to which thicknesses are assigned
+!                   (defaults to 'ETBTHK_ARR_shellThks')
+
+! Local parameters:
+! ar20: parType
+! ar21: cmTYpe
+! ar22: ec
+! ar31: cmeOpt
+! ar32: etabLabel
+! ar33: scaleFactor
+! ar34: outParmName
+! ar41: cmePool
+
+! Global erased parameters:
+! ETBTHK_ARR_enums
+! ETBTHK_ARR_mask
+! ETBTHK_ARR_secnums
+! %ARG4% (defaults to 'ETBTHK_ARR_shellThks')
+
+
+! Parse inputs
+ar31 = 'ALL'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  *get,ar21,comp,%ARG1%,type
+  *if,ar21,eq,2,then
+    ar31 = ARG1
+  *endif
+*endif
+
+ar32 = 'SHELLTHK'
+*get,ar20,parm,ARG2,type
+*if,ar20,eq,3,then
+  ar32 = strsub(ARG2,1,8)
+*endif
+
+ar33 = 1
+*if,ARG3,ne,0,then
+  ar33 = ARG3
+*endif
+
+ar34 = 'ETBTHK_ARR_shellThks'
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  ar34 = ARG4
+*endif
+
+! Prepare environment
+ebackup
+
+*del , ETBTHK_ARR_enums   ,  , nopr
+*del , ETBTHK_ARR_secnums ,  , nopr
+*del , ETBTHK_ARR_mask    ,  , nopr
+*del , %ar34%             ,  , nopr
+
+*if,ar31,eq,'ALL',then
+  esel,all
+*else
+  cmsel,s,%ar31%
+*endif
+esel,r,ename,,181
+cm,ar41,elem
+
+! Get element numbers & selection status
+esel,all
+*vget,ETBTHK_ARR_enums,elem,,elist
+*get,ar22,elem,,count
+
+cmsel,s,ar41
+*vget,ETBTHK_ARR_mask,elem,,esel
+
+! Collect & scale section thicknesses
+*dim , ETBTHK_ARR_secnums ,  , ar22
+*dim , %ar34%             ,  , ar22
+
+*vmask,ETBTHK_ARR_mask
+*get,ETBTHK_ARR_secnums(1:ar22),elem,ETBTHK_ARR_enums(1:ar22),attr,secn
+
+*vmask,ETBTHK_ARR_mask
+*get,%ar34%(1:ar22),shel,ETBTHK_ARR_secnums(1:ar22),prop,tthk
+*voper,%ar34%,%ar34%,mult,ar33
+
+! Assign thicknesses to element table
+esel,all
+etable,%ar32%,u,x
+*vput,%ar34%,elem,,etab,%ar32%
+
+! Clean up
+*del , ETBTHK_ARR_enums   ,  , nopr
+*del , ETBTHK_ARR_secnums ,  , nopr
+*del , ETBTHK_ARR_mask    ,  , nopr
+
+elrestore
