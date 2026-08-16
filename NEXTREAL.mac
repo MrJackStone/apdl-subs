@@ -1,28 +1,48 @@
-! NEXTREAL , output
-! NEXTREAL , ARG1
+! NEXTREAL , output , count
+! NEXTREAL , ARG1   , ARG2
 
 ! Description:
-! Returns an undefined real constant set number.
+! Returns the next N undefined real constant set numbers.
 
 ! Arguments:
 ! ARG1: output  -  name of the parameter to which the results will be assigned (defaults to _OUTPUT)
+! ARG2: count   -  number of real constant sets to return (defaults to 1)
 
 ! Local parameters:
 ! ar20: parType
-! ar21: maxRcon
-! ar22: outputParmName
+! ar21: outputParmName
+! ar22: outputSize
+! ar30: maxRcon
+! ar31: freeRcon
 
 
-! Check input params
-ar22 = '_OUTPUT'
+! Parse inputs
+ar21 = '_OUTPUT'
 *get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
-  ar22 = ARG1
+  ar21 = ARG1
 *endif
 
-! Get max real constant defined
-*get,ar21,rcon,,num,max
+ar22 = 1
+*if,ARG2,gt,1,then
+  ar22 = ARG2
+*endif
 
-! Save next RCON to output param
-*del,%ar22%,,nopr
-%ar22% = ((ar21+1)>1)
+! Prepare environment
+*del,%ar21%,,nopr
+
+! Get next free real constant set number
+*get,ar30,rcon,,num,max
+ar31 = ar30+1
+
+! Save next real constant(s) to output param
+*if,ar22,eq,1,then
+  ! Scalar output
+  %ar21% = ar31
+
+*elseif,ar22,gt,1,then
+  ! Array output
+  *dim,%ar21%,,ARG2
+  *vfill,%ar21%,ramp,ar31,1
+
+*endif
