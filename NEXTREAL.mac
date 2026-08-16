@@ -1,5 +1,5 @@
-! NEXTREAL, output
-! NEXTREAL, ARG1
+! NEXTREAL , output
+! NEXTREAL , ARG1
 
 ! Description:
 ! Returns an undefined real constant set number.
@@ -14,10 +14,10 @@
 
 
 ! Check input params
-ar22='_OUTPUT'
+ar22 = '_OUTPUT'
 *get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
-  ar22=ARG1
+  ar22 = ARG1
 *endif
 
 ! Get max real constant defined
@@ -25,4 +25,4 @@ ar22='_OUTPUT'
 
 ! Save next RCON to output param
 *del,%ar22%,,nopr
-%ar22%=((ar21+1)>1)
+%ar22% = ((ar21+1)>1)
