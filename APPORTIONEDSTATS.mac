@@ -84,9 +84,9 @@ cm,ar33,node
 
 ! Set element pool selection component
 esel,all
-*get,ar20,parm,ARG3,type
+*get,ar20,parm,ARG4,type
 *if,ar20,eq,3,then
-  cmsel,s,%ARG3%
+  cmsel,s,%ARG4%
 *endif
 cm,ar34,elem
 
