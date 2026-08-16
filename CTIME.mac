@@ -20,7 +20,7 @@
 ! _output
 
 
-ar21 = '_OUTPUT'
+ar31 = '_OUTPUT'
 *get,ar20,parm,ARG1,type
 *if,ar20,eq,3,then
   ar31 = ARG1
@@ -38,6 +38,6 @@ ar21 = '_OUTPUT'
 *endif
 
 ! Convert time to string
-fhour, ARG1, ar22, arg3
+fhour , ar31 , ar22 , arg3
 
-_output = %ARG1%
+_output = %ar31%
