@@ -1,5 +1,5 @@
-! arr2pth, valuesArrName, itemName, tableColIndex
-! ARR2PTH,          ARG1,     ARG2,          ARG3
+! arr2pth , valuesArrName , itemName , tableColIndex , jIndex , kIndex
+! ARR2PTH , ARG1          , ARG2     , ARG3          , ARG4   , ARG5
 
 ! Description:
 ! Puts values of an array into the active path under a given label.
@@ -8,12 +8,18 @@
 ! ARG1: valueArrName   -  name of the 1-D array parameter containing the values
 ! ARG2: itemName       -  label for these values in the path definition
 ! ARG3: tableColIndex  -  number of the column at which the values will be placed in the path table
+! ARG4: jIndex         -  static index of 2nd dimension (column) from which values will be read
+!                         (for 2-D arrays)
+! ARG5: kIndex         -  static index of 3rd dimension (plane) from which values will be read
+!                         (for 3-D arrays)
 
 ! Local parameters:
 ! ar20: pathTableSize
 ! ar21: arrayLen
 ! ar22: copiedPositions
 ! ar23: nthPosition
+! ar24: jIdx
+! ar25: kIdx
 
 ! Global erased parameters:
 ! ARR2PTH_ARR_table
@@ -24,6 +30,18 @@
 ! -
 
 
+! Parse inputs
+ar24 = 1
+*if,ARG4,gt,0,then
+  ar24 = ARG4
+*endif
+
+ar25 = 1
+*if,ARG5,gt,0,then
+  ar25 = ARG5
+*endif
+
+! Prepare environment
 *del , ARR2PTH_ARR_table  ,  , nopr
 *del , ARR2PTH_ARR_labels ,  , nopr
 *del , ARR2PTH_ARR_points ,  , nopr
@@ -49,8 +67,9 @@ ARR2PTH WARNING: array with %I positions shorter than path of %I size.
   ar22 = ar21
 *endif
 
+! Transfer array data to path
 *do,ar23,1,ar22,1
-  ARR2PTH_ARR_table(ar23,ARG3,1) = %ARG1%(ar23)
+  ARR2PTH_ARR_table(ar23,ARG3,1) = %ARG1%(ar23,ar24,ar25)
 *enddo
 
 ARR2PTH_ARR_labels(ARG3,1,1) = upcase(ARG2)
@@ -59,6 +78,7 @@ paput , ARR2PTH_ARR_points , points
 paput , ARR2PTH_ARR_table  , table
 paput , ARR2PTH_ARR_labels , label
 
+! Clean up
 *del , ARR2PTH_ARR_table  ,  , nopr
 *del , ARR2PTH_ARR_labels ,  , nopr
 *del , ARR2PTH_ARR_points ,  , nopr
