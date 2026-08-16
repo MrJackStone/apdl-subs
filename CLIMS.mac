@@ -15,6 +15,7 @@
 !                           [4]  Values below min colored GREY;  above max colored RED
 !                           [5]  Values below min colored BLUE;  above max colored BLACK
 !                           [6]  Values below min colored BLACK; above max colored RED
+!                           [7]  Values below min colored WHITE; above max colored RED
 ! ARG4: bandCount      -  number of color bands to be used in the contour scale (default: 9)
 
 ! Local parameters:
@@ -91,6 +92,9 @@ ar22 = 9
   /color,smax,whit
 *elseif,ARG3,eq,6,then
   /color,smin,whit
+  /color,smax,red
+*elseif,ARG3,eq,7,then
+  /color,smin,blac
   /color,smax,red
 *else
   /color,smin,blue
