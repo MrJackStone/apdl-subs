@@ -64,17 +64,11 @@ ar22 = 'APPORTIONEDSTATS_ARR_areas'
 nbackup
 ebackup
 
-! Initialize output arrays
-*get,ar25,node,,count
-
 *del , %ar21% ,  , nopr
 *del , %ar22% ,  , nopr
 *dim , %ar21% ,  , 8
-*dim , %ar22% ,  , ar25 , 2
 
-*vget,%ar22%(1,1),node,,nlist
-
-! Set node pool selection component
+! Set node & element pools
 nsel,all
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
@@ -82,7 +76,6 @@ nsel,all
 *endif
 cm,ar33,node
 
-! Set element pool selection component
 esel,all
 *get,ar20,parm,ARG4,type
 *if,ar20,eq,3,then
@@ -90,7 +83,14 @@ esel,all
 *endif
 cm,ar34,elem
 
-! Calculate apportioned areas for target nodes
+! Populate array with numbers of nodes in node pool
+cmsel,s,ar33
+*get,ar25,node,,count
+
+*dim,%ar22%,,ar25,2
+*vget,%ar22%(1,1),node,,nlist
+
+! Calculate apportioned areas for pool nodes
 cmsel,s,ar33
 cmsel,s,ar34
 *do,ar35,1,ar25,1
