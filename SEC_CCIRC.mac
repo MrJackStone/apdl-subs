@@ -267,5 +267,7 @@ SEC_CCIRC error: invalid geometry definition. Command is ignored.
 *endif
 
 ! Clear parameters
+cmdele,ar26
+
 *del,SEC_CCIRC_d
 *del,SEC_CCIRC_m

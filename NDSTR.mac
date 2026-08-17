@@ -125,5 +125,8 @@ Returned array of nodes might be incomplete.
 
 ! Clean up
 cmsel,s,ar40
-cmdele,ar40
 cmsel,s,ar30
+
+cmdele,ar30
+cmdele,ar31
+cmdele,ar40

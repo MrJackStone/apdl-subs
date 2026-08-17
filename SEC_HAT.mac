@@ -161,14 +161,16 @@ etdele,AR21
     secread,arg7,sect,,mesh
 *endif
 
-! Restore previous selection
+! Clean up
+cmdele,ar28
+cmdele,ar29
+
 arestore
 lrestore
 krestore
 elrestore
 nrestore
 
-! Reactivate automatic display refreshing
 /gopr
 immed,1
 /uis,replot,1

@@ -45,11 +45,6 @@ AR53=0
 !!
 
 
-!*del,ROT188_ARR_mask2
-!*vfun,ROT188_ARR_mask2(1),NOT,BITWISE_ARR_bits(1)
-!*vmask,ROT188_ARR_mask2(1)
-!*vfun,ROT188_ARR_coupled,COMP,ROT188_ARR_DOFs
-
 NBACKUP
 EBACKUP
 
@@ -105,12 +100,14 @@ CMSEL,R,AR23
 
 *endif
 
-ELRESTORE
-NRESTORE
-CMSEL,A,AR23
+! clean up
+elrestore
+nrestore
+
+cmsel,a,ar23
+
+cmdele,ar23
 
 *del,ROT188_ARR_DOFs
 *del,BITWISE_ARR_bits
 *del,ROT188_ARR_decoupled
-!*del,ROT188_ARR_mask2
-!*del,ROT188_ARR_coupled

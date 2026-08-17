@@ -197,6 +197,9 @@ ar25 = 0
 *enddo
 
 ! Clean up
+cmdele,ar36
+cmdele,ar22
+
 *del , ARORI_ARR_klist   ,  , nopr
 *del , ARORI_VAR_thisIdx ,  , nopr
 smdrestore

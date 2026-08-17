@@ -486,4 +486,10 @@ VCELU_VAR_sb=0
 VCELU_VAR_swi=AR27-arg6/2
 VCELU_VAR_swf=arg1-(AR25*arg7-arg5+VCELU_VAR_swi)
 
-
+! Clean up
+cmdele,ar28
+cmdele,ar29
+cmdele,ar30
+cmdele,ar34
+cmdele,ar80
+cmdele,ar86

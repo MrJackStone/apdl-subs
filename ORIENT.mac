@@ -102,11 +102,12 @@ Line %I is already meshed and was ignored.
 
 *endif
 
-! Restore previous selection (lines and keypoints)
-KRESTORE
-LRESTORE
+! clean up
+cmdele,ar22
 
-! Display conclusion message
+krestore
+lrestore
+
 *msg,UI,AR21,AR20
 Operation concluded! %/&
 %I Line(s) oriented. %/&

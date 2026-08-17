@@ -698,5 +698,10 @@ VCELUMS_VAR_swi=AR27-arg9/2
 ! Largura do montante final (swf)
 VCELUMS_VAR_swf=arg1-(AR25*ar10-arg8+VCELUMS_VAR_swi)
 
-
-
+! Clean up
+cmdele,ar28
+cmdele,ar29
+cmdele,ar30
+cmdele,ar34
+cmdele,ar80
+cmdele,ar86

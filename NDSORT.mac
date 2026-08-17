@@ -158,6 +158,9 @@ cmsel,s,AR25
 *del , NDSORT_ARR_tempXs    ,, nopr
 *del , NDSORT_ARR_tempYs    ,, nopr
 *del , NDSORT_ARR_tempZs    ,, nopr
+
+cmdele,ar25
+
 mpoprestore
 
 /eof

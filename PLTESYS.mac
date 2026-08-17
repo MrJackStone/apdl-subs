@@ -181,9 +181,7 @@ elrestore
   *enddo
 *endif
 
-*if,ar29,eq,1,then
-  cmdele,ar31
-*endif
+cmdele,ar31
 
 *del , PLTESYS_ARR_esel_status ,  , nopr
 *del , PLTESYS_ARR_all_esys    ,  , nopr

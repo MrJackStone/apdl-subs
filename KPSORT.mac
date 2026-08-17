@@ -152,4 +152,7 @@ cmsel,s,ar25
 *del , KPSORT_ARR_tempXs  ,  , nopr
 *del , KPSORT_ARR_tempYs  ,  , nopr
 *del , KPSORT_ARR_tempZs  ,  , nopr
+
+cmdele,ar25
+
 mpoprestore

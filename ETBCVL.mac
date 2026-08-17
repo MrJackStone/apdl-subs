@@ -150,6 +150,10 @@ ar24 = 0
 *enddo
 
 ! Clean up
+cmdele,ar21
+cmdele,ar22
+
 nrestore
 elrestore
+
 *del,ETBCVL_ARR_neighbor_sums,,nopr

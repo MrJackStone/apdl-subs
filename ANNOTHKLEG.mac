@@ -160,6 +160,11 @@ ar30 = 'THK [%ar35%]'
 annoleg , ARG1 , ARG2 , ar30 , 'ANNOTHKLEG_CHR_thks'
 
 ! Clean up
+cmdele,ar27
+cmdele,ar28
+cmdele,ar29
+cmdele,ar36
+
 elrestore
 *del , ANNOTHKLEG_ARR_shell_sects    ,  , nopr
 *del , ANNOTHKLEG_ARR_thkGroups      ,  , nopr

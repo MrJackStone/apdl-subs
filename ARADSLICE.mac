@@ -64,3 +64,10 @@ lsel,none
   cmsel,s,ar25
   vsba,ar24,ar25,,delete,delete
 *endif
+
+! Clean up
+cmdele,ar20
+cmdele,ar21
+cmdele,ar23
+cmdele,ar24
+cmdele,ar25

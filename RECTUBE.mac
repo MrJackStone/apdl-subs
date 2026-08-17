@@ -111,20 +111,22 @@ cmsel,s,AR23
 *endif
 
 ! Store new entities in selection components
-cmdele,AR23
 lsla,s
 ksll,s
 cm,%AR26%,area
 cm,%AR27%,line
 cm,%AR28%,kp
 
-! Restore previous selection
+! Clean up
 vrestore
 arestore
 lrestore
 krestore
 
-! Add new entities to current selection
 cmsel,a,AR26
 cmsel,a,AR27
 cmsel,a,AR28
+
+cmdele,ar21
+cmdele,ar22
+cmdele,ar23

@@ -180,5 +180,8 @@ cmsel,a,AR28
 csdele,DRAWPIPE_VAR_cartCS
 csdele,DRAWPIPE_VAR_cylnCS
 
+cmdele,ar28
+cmdele,ar29
+
 *del,DRAWPIPE_VAR_cartCS,,nopr
 *del,DRAWPIPE_VAR_cylnCS,,nopr

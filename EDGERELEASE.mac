@@ -59,5 +59,7 @@ AR22=0
 *enddo
 
 ! Clean up
+cmdele,ar24
+
 *del , EDGERELEASE_VAR_index   ,  , nopr
 *del , EDGERELEASE_VAR_newNode ,  , nopr

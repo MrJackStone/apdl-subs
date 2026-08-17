@@ -203,5 +203,8 @@ cmsel,a,ar28
 csdele,DRAWCONE_VAR_cartCS
 csdele,DRAWCONE_VAR_cylnCS
 
+cmdele,ar28
+cmdele,ar29
+
 *del,DRAWCONE_VAR_cartCS,,nopr
 *del,DRAWCONE_VAR_cylnCS,,nopr

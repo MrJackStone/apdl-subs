@@ -651,12 +651,21 @@ CMDELE,AR50
 IMMED,1
 /uis,REPLOT,1
 
-! Restaurar seleção prévia
+! Clean up
+cmdele,ar43
+cmdele,ar44
+cmdele,ar45
+cmdele,ar46
+cmdele,ar47
+cmdele,ar48
+cmdele,ar50
+
 mpoprestore
-VRESTORE
-ARESTORE
-LRESTORE
-KRESTORE
+
+vrestore
+arestore
+lrestore
+krestore
 elrestore
-NRESTORE
+nrestore
 

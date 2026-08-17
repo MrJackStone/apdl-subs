@@ -225,5 +225,7 @@ CPSMERGE: elapsed time = %s
   *del , CPSMERGE_ARR_node_numbers_%ar32%    ,  , nopr
 *enddo
 
+cmdele,ar50
+
 smdrestore
 femrestore

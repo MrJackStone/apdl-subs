@@ -51,3 +51,7 @@ AR23=0
 
 cmsel,s,AR20
 cmsel,s,AR21
+
+! Clean up
+cmdele,ar20
+cmdele,ar21

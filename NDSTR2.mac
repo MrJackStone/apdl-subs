@@ -130,6 +130,8 @@ WARNING: NODE CONNECTIVITY LOST AT NODE %I.
    CMDELE,AR30
 *endif
 
-! Retomar seleção inicial
+! Clean up
 CMSEL,S,AR20
 
+cmdele,ar20
+cmdele,ar26

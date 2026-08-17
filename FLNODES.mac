@@ -113,7 +113,9 @@ CM,AR20,LINE
    CM,AR20,LINE
 *enddo
 
-! Restaurar seleção prévia
-LRESTORE
-NRESTORE
-ELRESTORE
+! Clean up
+cmdele,ar20
+
+lrestore
+nrestore
+elrestore

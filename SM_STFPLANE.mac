@@ -184,7 +184,11 @@ cmsel,a,%ar24%
 cm,%ar28%,area
 
 ! Clean up
+cmdele,ar29
+cmdele,ar36
+
 csrestore
 smdrestore
+
 *del,SMSTFPLANE_VAR_xTopPlate,,nopr
 *del,SMSTFPLANE_VAR_xBotPlate,,nopr

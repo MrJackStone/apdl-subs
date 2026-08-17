@@ -133,29 +133,26 @@ AMESH,ALL
 
 SECWRITE,ar12,SECT,,AR21
 
+! Clean up
 ACLEAR,ALL
 ADELE,ALL
 LDELE,ALL
 KDELE,ALL
 ETDELE,AR21
+
 CMDELE,AR29
 CMDELE,AR30
 
 *del,SEC_ICOMP_KPs
 
-! Reativar exibição automática
 /gopr
 IMMED,1
 /uis,REPLOT,1
 /uis,MSGPOP,2
 
-! Restaurar seleção prévia
-VRESTORE
-ARESTORE
-LRESTORE
-KRESTORE
+vrestore
+arestore
+lrestore
+krestore
 elrestore
-NRESTORE
-
-
-
+nrestore

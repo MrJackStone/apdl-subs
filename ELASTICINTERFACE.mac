@@ -226,6 +226,12 @@ Corresponding spring element (%I) will be set to material number 999 for debuggi
     %arg1%(1)=AR33,0,AR31,0,0,0,0
 *endif
 
+! Clean up
+cmdele,ar28
+cmdele,ar29
+cmdele,ar30
+cmdele,ar49
+cmdele,ar50
+
 *del,ELASTICINTERFACE_ARR_appoAreas,,nopr
 *del,ELASTICINTERFACE_ARR_nodematch,,nopr
-

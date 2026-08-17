@@ -341,11 +341,11 @@ CMSEL,A,AR28
 CMSEL,A,AR29
 CMSEL,A,AR30
 
-! Excluir componentes
-CMDELE,AR28
-CMDELE,AR29
-CMDELE,AR30
+! clean up
+cmdele,ar28
+cmdele,ar29
+cmdele,ar30
+cmdele,ar58
 
-*del,IBEAM_ARR_LNUMS,,nopr
-*del,IBEAM_ARR_KPNUMS,,nopr
-
+*del , IBEAM_ARR_LNUMS  ,  , nopr
+*del , IBEAM_ARR_KPNUMS ,  , nopr

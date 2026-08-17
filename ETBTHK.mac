@@ -103,4 +103,6 @@ etable,%ar32%,u,x
 *del , ETBTHK_ARR_secnums ,  , nopr
 *del , ETBTHK_ARR_mask    ,  , nopr
 
+cmdele,ar41
+
 elrestore

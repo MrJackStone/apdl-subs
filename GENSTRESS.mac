@@ -135,19 +135,21 @@ AR23=0
     *vscfun,%arg6%,sum,GENSTRESS_ARR_mz
 *endif
 
+! Clean up
+*del , GENSTRESS_ARR_nn  ,  , nopr
+*del , GENSTRESS_ARR_nx  ,  , nopr
+*del , GENSTRESS_ARR_ny  ,  , nopr
+*del , GENSTRESS_ARR_fx  ,  , nopr
+*del , GENSTRESS_ARR_fy  ,  , nopr
+*del , GENSTRESS_ARR_fz  ,  , nopr
+*del , GENSTRESS_ARR_mx  ,  , nopr
+*del , GENSTRESS_ARR_my  ,  , nopr
+*del , GENSTRESS_ARR_mz1 ,  , nopr
+*del , GENSTRESS_ARR_mz2 ,  , nopr
+*del , GENSTRESS_ARR_mz  ,  , nopr
 
-*del,GENSTRESS_ARR_nn,,nopr
-*del,GENSTRESS_ARR_nx,,nopr
-*del,GENSTRESS_ARR_ny,,nopr
-*del,GENSTRESS_ARR_fx,,nopr
-*del,GENSTRESS_ARR_fy,,nopr
-*del,GENSTRESS_ARR_fz,,nopr
-*del,GENSTRESS_ARR_mx,,nopr
-*del,GENSTRESS_ARR_my,,nopr
-*del,GENSTRESS_ARR_mz1,,nopr
-*del,GENSTRESS_ARR_mz2,,nopr
-*del,GENSTRESS_ARR_mz,,nopr
+cmdele,ar20
+cmdele,ar21
 
 nrestore
 elrestore
-
