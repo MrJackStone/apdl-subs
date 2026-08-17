@@ -110,5 +110,10 @@ cmsel,s,ar34
 %ar21%(1) = ar91 , ar92 , ar93 , ar94 , ar95 , ar96 , ar97 , ar98
 
 ! Clean up
+cmsel,s,ar33
+cmdele,ar33
+cmsel,s,ar34
+cmdele,ar34
+
 nrestore
 elrestore
