@@ -156,6 +156,7 @@ Only one ESYS (number %I) will be plotted.
     wpcsys , -1
     nwpave , all
     cswpla , PLTESYS_VAR_cs   , cart
+    wpstyl ,,,,,,,,0
 
     %ar27%(ar34) = PLTESYS_VAR_cs
   *enddo

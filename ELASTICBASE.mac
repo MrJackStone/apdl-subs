@@ -27,7 +27,7 @@
 !                       value of the chosen XYZ coordinate) or "behind" them (towards a
 !                       decreasing value of the coordinate)
 ! ARG6: refE         -  elastic modulus of the material assigned to the springs. This value
-!                       can be zero, in which case it is automaticall calculated based on the
+!                       can be zero, in which case it is automatically calculated based on the
 !                       cross-sectional area
 ! ARG7: refA         -  cross-sectional area of the spring elements created. This value is
 !                       only used if ARG6 (refE) is zero
