@@ -1,5 +1,5 @@
-! annotable, data_values, row_labels, column_headers, tableTitle, xllc, yllc, cellAlignment
-! ANNOTABLE,        ARG1,       ARG2,           ARG3,       ARG4, ARG5, ARG6,          ARG7
+! annotable , data_values , row_labels , column_headers , tableTitle , xllc , yllc , cellAlignment , tableHotspot
+! ANNOTABLE , ARG1        , ARG2       , ARG3           , ARG4       , ARG5 , ARG6 , ARG7          , ARG8
 
 ! Description:
 ! Draws a table filled with data passed as arrays of characters.
@@ -18,11 +18,14 @@
 ! ARG5: xllc           -  X coordinate (in window display units) of the table's lower left corner
 !                         (defaults to 0.0)
 ! ARG6: yllc           -  Y coordinate (in window display units) of the table's lower left corner
-!                        (defaults to 0.0)
+!                         (defaults to 0.0)
 ! ARG7: cellAlignment  -  horizontal placement of text within each cell:
 !                            [0] left-justified
 !                            [1] centered
 !                            [2] right-justified
+! ARG8: tableHotspot   -  table position for coordinates given in ARG5 and ARG6:
+!                            [0] lower left corner
+!                            [1] middle center
 
 ! Local parameters:
 ! ar20: parType
@@ -56,6 +59,9 @@
 ! ar52: titleLeftPadding
 ! ar55: xTitle
 ! ar56: yTitle
+! ar64: hotspotKey
+! ar65: xLLC
+! ar66: yLLC
 
 ! Global parameters (erased at the end of this subroutine):
 ! ANNOTABLE_ARR_colWidths
@@ -68,6 +74,12 @@
 ! Global output parameters:
 ! ANNOTABLE_ARR_table
 
+
+! Parse inputs
+ar64 = 'LLC'
+*if,ARG8,eq,1,then
+  ar64 = 'MC'
+*endif
 
 ! Calculate resolution-dependent parameters
 g_annocharwidth,'ANNOTABLE_VAR_charWidth'
@@ -166,13 +178,22 @@ ar30=1+ar32
 ! Calculate overall table size
 *vscfun,ar41,sum,ANNOTABLE_ARR_colWidths
 *vscfun,ar40,sum,ANNOTABLE_ARR_rowHeights
-ar46=ARG6+ar40
+
+*if,ar64,eq,'LLC',then
+  ar65 = ARG5
+  ar66 = ARG6
+*elseif,ar64,eq,'MC',then
+  ar65 = ARG5-(ar41/2)
+  ar66 = ARG6-(ar40/2)
+*endif
+
+ar46=ar66+ar40
 
 ! Draw table grid lines
-annogrid,ARG5,ARG6,'ANNOTABLE_ARR_rowHeights','ANNOTABLE_ARR_colWidths'
+annogrid,ar65,ar66,'ANNOTABLE_ARR_rowHeights','ANNOTABLE_ARR_colWidths'
 
 ! Draw annotations, column by column
-ar44=ARG5
+ar44=ar65
 *do,ar43,1,ar28,1
     ! Get column width
     ar23=ANNOTABLE_ARR_colWidths(ar43)
@@ -193,7 +214,7 @@ ar44=ARG5
 ! Strike top left cell when column headers and row labels exist
 *if,ar33,eq,1,and,ar32,eq,1,then
     /anum,,4
-    /line,ARG5,ar46,ARG5+ANNOTABLE_ARR_colWidths(1),ar46-ar22
+    /line,ar65,ar46,ar65+ANNOTABLE_ARR_colWidths(1),ar46-ar22
 *endif
 
 ! Create table title annotation
@@ -202,7 +223,7 @@ ar44=ARG5
     ar50=strleng(ARG4)
     ar51=ar50*ANNOTABLE_VAR_charWidth
     ar52=(ar41-ar51)/2
-    ar55=ARG5+ar52
+    ar55=ar65+ar52
     ar56=ar46+ar24+ar31
     anno,ar55,ar56,ARG4
 *endif
