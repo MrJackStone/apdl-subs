@@ -22,9 +22,13 @@
 ! ar26: present
 ! ar33: index
 ! ar34: value
+! ar35: fuzz
+! ar36: minVal
 
 ! Global erased parameters:
 ! ARRGROUP_ARR_match
+! ARRGROUP_ARR_lbound
+! ARRGROUP_ARR_ubound
 
 
 ! Parse inputs
@@ -44,6 +48,8 @@ ar82 = 'ARRGROUP_ARR_sparseHeaders'
 
 ! Initialize arrays
 *get,ar24,parm,%ARG4%,dim,x
+*vabs,1,1
+*vscfun,ar36,min,%ARG4%
 
 *del , %ar82% ,  , nopr
 *del , %ar91% ,  , nopr
@@ -51,14 +57,19 @@ ar82 = 'ARRGROUP_ARR_sparseHeaders'
 *dim , %ar91% ,  , ar24 , ar24
 
 ar23 = 0
+ar35 = 1e-6*ar36
 
 ! Create groups
 *do,ar25,1,ar24,1
   ar33 = %ARG3%(ar25)
   ar34 = %ARG4%(ar25)
 
-  *del,ARRGROUP_ARR_match,,nopr
-  *voper,ARRGROUP_ARR_match,%ar82%,eq,ar34
+  *del , ARRGROUP_ARR_match  ,  , nopr
+  *del , ARRGROUP_ARR_lbound ,  , nopr
+  *del , ARRGROUP_ARR_ubound ,  , nopr
+  *voper , ARRGROUP_ARR_lbound , %ar82%              , ge   , ar34-ar35
+  *voper , ARRGROUP_ARR_ubound , %ar82%              , le   , ar34+ar35
+  *voper , ARRGROUP_ARR_match  , ARRGROUP_ARR_lbound , mult , ARRGROUP_ARR_ubound
 
   *vscfun,ar26,sum,ARRGROUP_ARR_match
   *if,ar26,ge,1,then
@@ -77,4 +88,6 @@ ar23 = 0
 *vfun  , %ar92% , comp , %ar82%
 
 ! Clean up
-*del , ARRGROUP_ARR_match ,  , nopr
+*del , ARRGROUP_ARR_match  ,  , nopr
+*del , ARRGROUP_ARR_lbound ,  , nopr
+*del , ARRGROUP_ARR_ubound ,  , nopr
