@@ -40,6 +40,8 @@
 ! ar34: scale
 ! ar35: thkUnit
 ! ar36: anyShellElements
+! ar37: uniqueThk
+! ar38: colorIdx
 
 ! Global output parameters:
 ! ANNOTHKLEG_CHR_thks
@@ -48,7 +50,10 @@
 ! ANNOTHKLEG_ARR_shell_sects
 ! ANNOTHKLEG_ARR_thkGroups
 ! ANNOTHKLEG_ARR_thkUnique
+! ANNOTHKLEG_ARR_thkSorted
+! ANNOTHKLEG_ARR_thkColors
 ! ANNOTHKLEG_VAR_selectSectName
+! ANNOTHKLEG_VAR_idx
 
 
 ! Prepare environment
@@ -120,11 +125,22 @@ getsects,'ANNOTHKLEG_ARR_shell_sects','SHELL',1
 arrgroup,'ANNOTHKLEG_ARR_thkGroups','ANNOTHKLEG_ARR_thkUnique','ANNOTHKLEG_ARR_shell_sects','ANNOTHKLEG_ARR_shell_thks'
 *get , ar25 , parm , ANNOTHKLEG_ARR_thkUnique , dim , x
 
+! Sort by ascending thickness
+arruniq,'ANNOTHKLEG_ARR_thkUnique','ANNOTHKLEG_ARR_thkSorted',1
+
+*del,ANNOTHKLEG_ARR_thkColors,,nopr
+*dim,ANNOTHKLEG_ARR_thkColors,,ar25
+*do,ar26,1,ar25,1
+  ar37 = ANNOTHKLEG_ARR_thkUnique(ar26)
+  arrfind,'ANNOTHKLEG_VAR_idx','ANNOTHKLEG_ARR_thkSorted',ar37
+  ANNOTHKLEG_ARR_thkColors(ar26) = ANNOTHKLEG_VAR_idx
+*enddo
+
 ! Convert shell thicknesses to char array
 *del , ANNOTHKLEG_CHR_thks ,      , nopr
 *dim , ANNOTHKLEG_CHR_thks , char , ar25
 *do,ar26,1,ar25,1
-  ANNOTHKLEG_CHR_thks(ar26) = '%ANNOTHKLEG_ARR_thkUnique(ar26)*ar34%'
+  ANNOTHKLEG_CHR_thks(ar26) = '%ANNOTHKLEG_ARR_thkSorted(ar26)*ar34%'
 *enddo
 
 ! Create & color selection components (filtered through current selection)
@@ -145,7 +161,8 @@ cm,ar27,elem
   cmsel,a,ar27
   cm,ar27,elem
 
-  annocolors,'ANNOTHKLEG_VAR_color',ar26
+  ar38 = ANNOTHKLEG_ARR_thkColors(ar26)
+  annocolors,'ANNOTHKLEG_VAR_color',ar38
   /color,cm,ANNOTHKLEG_VAR_color,%ar33%
 *enddo
 
@@ -169,4 +186,7 @@ elrestore
 *del , ANNOTHKLEG_ARR_shell_sects    ,  , nopr
 *del , ANNOTHKLEG_ARR_thkGroups      ,  , nopr
 *del , ANNOTHKLEG_ARR_thkUnique      ,  , nopr
+*del , ANNOTHKLEG_ARR_thkSorted      ,  , nopr
+*del , ANNOTHKLEG_ARR_thkColors      ,  , nopr
 *del , ANNOTHKLEG_VAR_selectSectName ,  , nopr
+*del , ANNOTHKLEG_VAR_idx            ,  , nopr
