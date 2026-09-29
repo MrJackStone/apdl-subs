@@ -119,9 +119,11 @@ ebackup
 
 *elseif,ARG9,eq,1,then
   ! Calculate apportioned areas
-  apportionedstats,,'SPRSUP_ARR_nnum_apport'
+  cm,SPRSUP_COMPN_pool,node
+  apportionedstats,,'SPRSUP_ARR_nnum_apport','SPRSUP_COMPN_pool'
   *vfun , SPRSUP_ARR_base_nodes  , copy , SPRSUP_ARR_nnum_apport(1,1)
   *vfun , SPRSUP_ARR_apportioned , copy , SPRSUP_ARR_nnum_apport(1,2)
+  cmdele,SPRSUP_COMPN_pool
 
 *elseif,ARG9,eq,2,then
   ! Apportioned areas previously calculated
