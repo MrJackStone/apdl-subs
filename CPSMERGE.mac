@@ -98,6 +98,7 @@ CPSMERGE: running iteration #%I.
   *vget , CPSMERGE_ARR_node_numbers , node ,      , nlist
 
   *do,ar32,1,ar31,1
+    ! TODO  turns out these repeated calls to *DIM are bad for memory management -- rewrite
     *del , CPSMERGE_ARR_nodal_cps_%ar32%       ,  , nopr
     *del , CPSMERGE_ARR_nodal_cps_count_%ar32% ,  , nopr
     *del , CPSMERGE_ARR_cps_count_mask_%ar32%  ,  , nopr
