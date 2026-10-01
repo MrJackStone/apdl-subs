@@ -17,7 +17,6 @@
 ! ar23: iter
 ! ar24: freeIndex
 ! ar25: minRowValue
-! ar26: unoccupiedColumn
 ! ar31: DOFcount
 ! ar32: nthDOF
 ! ar33: strDOF
@@ -63,7 +62,6 @@ ar21 = 2
 ar22 = 1
 ar23 = 0
 ar31 = 6
-ar26 = 0
 
 *dim,CPSMERGE_ARR_empty_dof_check,,ar31
 *dim,CPSMERGE_ARR_dof_names,char,ar31
@@ -123,8 +121,6 @@ CPSMERGE: running iteration #%I.
       *if,CPSMERGE_VAR_ndIndex,eq,0,cycle
 
       *vscfun , ar24 , lmin , CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
-      *vscfun , ar25 , min  , CPSMERGE_ARR_nodal_cps_%ar34%(1,CPSMERGE_VAR_ndIndex)
-      ar26 = (ar26>ar25)
 
       CPSMERGE_ARR_nodal_cps_%ar34%(ar24,CPSMERGE_VAR_ndIndex)  = ar41
       CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex) = CPSMERGE_ARR_nodal_cps_count_%ar34%(CPSMERGE_VAR_ndIndex)+1
@@ -194,12 +190,6 @@ CPSMERGE: running iteration #%I.
   *if,ar46,eq,ar45,then
     ar22 = 0
   *endif
-
-  ! TODO  this break criterion does not work -- investigate or eliminate
-  ! ! Break recursive process if CPs-by-node table had enough column width
-  ! *if,ar26,eq,0,then
-  !   ar22 = 0
-  ! *endif
 
 *enddo
 

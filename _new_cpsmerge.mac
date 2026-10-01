@@ -1,0 +1,60 @@
+! /input,'C:\repos\apdl-subs\_new_cpsmerge',mac
+
+allsel
+numcmp,cp
+
+*get,cpCount,cp,,num
+
+*del,CPSMERGE_ARR_cp_nums,,nopr
+*dim,CPSMERGE_ARR_cp_nums,,cpCount
+*vfill,CPSMERGE_ARR_cp_nums,ramp,1,1
+
+*del,CPSMERGE_ARR_cp_dofs,,nopr
+*dim,CPSMERGE_ARR_cp_dofs,,cpCount
+*do,cpNum,1,cpCount,1
+  *get,cpDOF,cp,cpNum,dof
+  CPSMERGE_ARR_cp_dofs(cpNum) = cpDOF
+*enddo
+
+*do,nthDOF,1,6,1
+  *del,CPSMERGE_ARR_dof_mask,,nopr
+  *voper , CPSMERGE_ARR_dof_mask , CPSMERGE_ARR_cp_dofs , eq , nthDOF
+  arrfilter , 'CPSMERGE_ARR_cp_nums_%nthDOF%' , 'CPSMERGE_ARR_cp_nums' , 'CPSMERGE_ARR_dof_mask' , 1
+*enddo
+
+*del,CPSMERGE_ARR_cp_uncoupled,,nopr
+*dim,CPSMERGE_ARR_cp_uncoupled,,cpCount
+uncoupledFreeIdx = 0
+
+*do,nthDOF,1,6,1
+
+  cpArrName = 'CPSMERGE_ARR_cp_nums_%nthDOF%'
+  *get,dofCpCount,parm,%cpArrName%,dim,x
+  *if,dofCpCount,lt,2,cycle
+
+  *do,nthCP,1,dofCpCount,1
+    cpNum = %cpArrName%(nthCP)
+    nsel,none
+    nsel,a,cp,,cpNum
+    cm,COMPN_cpChildren,node
+
+    nsel,none
+    nsel,a,cp,,%cpArrName%(2:dofCpCount)
+    cm,COMPN_other,node
+
+    cmsel,s,COMPN_cpChildren
+    cmsel,r,COMPN_other
+    *get,nc,node,,count
+
+    *if,nc,eq,0,then
+      uncoupledFreeIdx = uncoupledFreeIdx+1
+      CPSMERGE_ARR_cp_uncoupled(uncoupledFreeIdx) = cpNum
+    *endif
+
+  *enddo
+*enddo
+
+*del,CPSMERGE_ARR_cp_skip,,nopr
+*vmask,CPSMERGE_ARR_cp_uncoupled
+*vfun,CPSMERGE_ARR_cp_skip,copy,CPSMERGE_ARR_cp_uncoupled
+*get,skipCount,parm,CPSMERGE_ARR_cp_skip,dim,x
