@@ -1,0 +1,60 @@
+! round , output , number , digits , direction
+! ROUND , ARG1   , ARG2   , ARG3   , ARG4
+
+! Description:
+! Rounds a number (up, down, or to nearest) to a given number of significant digits.
+
+! Arguments:
+! ARG1: output     -  name of output parameter to which rounded number is assigned
+!                     (defaults to 'ROUND_VAR_output')
+! ARG2: number     -  number to be rounded
+! ARG3: digits     -  number of significant digits to use when rounding number
+! ARG4: direction  -  rounding direction:
+!                       ['UP']    round up
+!                       ['DOWN']  round down
+!                       ['NEAR']  round to nearest (default)
+
+! Local parameters:
+! ar20: parTYpe
+! ar22: absNumber
+! ar24: roundingCorrection
+! ar31: digitsLeftOfDecimalPoint
+! ar32: roundingMagnitude
+! ar33: numberSign
+! ar34: absRounded
+
+
+! Parse inputs
+ar21 = 'ROUND_VAR_output'
+*get,ar20,parm,ARG1,type
+*if,ar20,eq,3,then
+  ar21 = ARG1
+*endif
+
+ar22 = abs(ARG2)
+
+ar24 = 0
+*get,ar20,parm,ARG4,type
+*if,ar20,eq,3,then
+  *if,upcase(ARG4),eq,'UP',then
+    ar24 = 0.5
+  *elseif,upcase(ARG4),eq,'DOWN',then
+    ar24 = -0.5
+  *endif
+*endif
+
+! Manage number sign
+ar33 = 1
+*if,ARG2,lt,0,then
+  ar33 = -1
+*endif
+
+ar24 = ar33*ar24
+
+! Round number
+ar31 = nint(log10(ar22)+0.5)
+ar32 = 10**(ARG3-ar31)
+ar34 = nint(ar24+ar22*(ar32))/ar32
+
+! Apply original sign
+%ar21% = ar33*ar34
