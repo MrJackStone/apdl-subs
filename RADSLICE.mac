@@ -1,80 +1,79 @@
-! RADSLICE, COMPA_split,    r, COMPL_ring
-! RADSLICE,        arg1, arg2,       arg3
+! radslice , cmInput , r    , cmOutput
+! RADSLICE , ARG1    , ARG2 , ARG3
 
 ! Descrption:
 ! Performs circular slicing of given areas using a cylinder centered at the working plane, with
 ! height measured along the Z axis.
 
 ! Arguments:
-! arg1: COMPA_split  -  name of area selection component containing areas to be sliced
-! arg2: r            -  slice radius
-! arg3: COMPL_ring   -  name of line selection component to be created to contain lines generated
-!                       when performing the slicing operation
+! ARG1: cmInput   -  name of area selection component containing areas to be sliced
+! ARG2: r         -  slice radius
+! ARG3: cmOutput  -  name of line selection component to be created to contain lines generated
+!                    when performing the slicing operation
 
 ! Local parameters:
-! AR20: maxCsys
-! AR21: newCsys
-! AR22: minZ
-! AR23: maxZ
-! AR24: cylinderHeight
-! AR25: cylinderZcenter
-! AR26: voluNum
-! AR27: parType
+! ar20: maxCsys
+! ar21: newCsys
+! ar22: minZ
+! ar23: maxZ
+! ar24: cylinderHeight
+! ar25: cylinderZcenter
+! ar26: voluNum
+! ar27: parType
 
 ! Global parameters (erased at the end of this subroutine):
 ! RADSLICE_COMPA_slicer
 
 
-! Store current environment
+! Prepare environment
 vbackup
 csbackup
 
-! Create new temporary coordinate system at working plane
-*get,AR20,cdsy,,num,max
-AR21 = (AR20+1>11)
-cswpla,AR21,cylin
-csys,AR21
+*get,ar20,cdsy,,num,max
+ar21 = (ar20+1>11)
+cswpla,ar21,cylin
+csys,ar21
 
 ! Calculate slicer cylinder height
-cmsel,s,%arg1%
+cmsel,s,%ARG1%
 lsla,s
 ksll,s
-*get,AR22,kp,,mnloc,z
-*get,AR23,kp,,mxloc,z
-AR24=(AR23-AR22>1)
-AR25=(AR23+AR22)/2
+*get,ar22,kp,,mnloc,z
+*get,ar23,kp,,mxloc,z
+ar24 = (ar23-ar22>1)
+ar25 = (ar23+ar22)/2
 
 ! Draw slicer cylinder
-asel,u,area,,all
-vsel,u,volu,,all
-wpoffs,,,AR25-AR24
-cyl4,0,0,arg2,,,,2*AR24
-wpoffs,,,-(AR25-AR24)
+asel,none
+vsel,none
+wpoffs,,,ar25-ar24
+cyl4,0,0,ARG2,,,,2*ar24
+wpoffs,,,-(ar25-ar24)
 cm,RADSLICE_COMPA_slicer,area
-AR26=vlnext(0)
+ar26 = vlnext(0)
 
 ! Slice areas
 cmsel,s,RADSLICE_COMPA_slicer
-cmsel,a,%arg1%
-asba,%arg1%,RADSLICE_COMPA_slicer,,delete,keep
+cmsel,a,%ARG1%
+asba,%ARG1%,RADSLICE_COMPA_slicer,,delete,keep
 
 ! Delete slicer volume, areas, lines, and keypoints
 cmdele,RADSLICE_COMPA_slicer
-vdele,AR26,,,1
-cm,%arg1%,area
+vdele,ar26,,,1
+cm,%ARG1%,area
 
 ! Create component: lines at sliced ring
-*get,AR27,parm,arg3,type
-*if,AR27,eq,3,then
-    cmsel,s,%arg1%
-    lsla,s
-    lsel,r,loc,x,arg2
-    cm,%arg3%,line
+*get,ar27,parm,ARG3,type
+*if,ar27,eq,3,then
+  cmsel,s,%ARG1%
+  lsla,s
+  lsel,r,loc,x,ARG2
+  cm,%ARG3%,line
 *endif
 
-! Restore environment
+! Clean up
 vrestore
 csrestore
-csdele,AR21
-cmsel,a,%arg1%
+csdele,ar21
+cmsel,a,%ARG1%
 lsla,a
