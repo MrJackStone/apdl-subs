@@ -74,9 +74,11 @@ ar21 = upcase(ARG1)
   ar33 = 90
 *elseif,ar21,eq,'XZ',or,ar21,eq,'ZX',then
   ar32 = -90
+*elseif,ar21,eq,'XY',or,ar21,eq,'YX',then
+  ! Nothing to do
 *else
   *msg,error
-WPSLICE error: expected ARG1 to be a valid cartesian ar21 ('XY', 'YZ', or 'XZ').%/&
+WPSLICE error: expected ARG1 to be a valid cartesian plane ('XY', 'YZ', or 'XZ').%/&
 WPSLICE command ignored.
   *return,-1
 *endif
