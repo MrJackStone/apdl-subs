@@ -12,6 +12,7 @@
 ! ARG3: mode  -  type of solid model entity to slice:
 !                  [0] areas (default)
 !                  [1] lines
+!                  [2] volumes
 
 ! Local parameters:
 ! ar21: offset
@@ -27,6 +28,8 @@ ar22 = ARG2
   ar23 = 'A'
 *elseif,ARG3,eq,1,then
   ar23 = 'L'
+*elseif,ARG3,eq,2,then
+  ar23 = 'V'
 *endif
 
 ! Slice entities
