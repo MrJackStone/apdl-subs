@@ -76,4 +76,3 @@ vrestore
 csrestore
 csdele,ar21
 cmsel,a,%ARG1%
-lsla,a
