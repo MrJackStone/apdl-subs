@@ -1,5 +1,5 @@
-! radslice , cmInput , r    , cmOutput , smOpt
-! RADSLICE , ARG1    , ARG2 , ARG3     , ARG4
+! radslice , cmInput , r    , cmOutput
+! RADSLICE , ARG1    , ARG2 , ARG3
 
 ! Descrption:
 ! Performs circular slicing of given areas using a cylinder centered at the working plane, with
@@ -9,10 +9,9 @@
 ! ARG1: cmInput   -  name of area selection component containing areas to be sliced
 ! ARG2: r         -  slice radius
 ! ARG3: cmOutput  -  name of line selection component to be created to contain lines generated
-!                    when performing the slicing operation (defaults to 'RADSLICE_COMPL_output')
-! ARG4: smOpt     -  type of entity to slice:
-!                      [0] areas
-!                      [1] volumes
+!                    when performing the slicing operation. Defaults to:
+!                      - 'RADSLICE_COMPL_output' for area slicing
+!                      - 'RADSLICE_COMPA_output' for volume slicing
 
 ! Local parameters:
 ! ar20: parType
@@ -23,6 +22,7 @@
 ! ar25: cylinderZcenter
 ! ar26: voluNum
 ! ar27: cmInputType
+! ar28: smType
 ! ar30: maxCsys
 ! ar31: newCsys
 
@@ -41,9 +41,9 @@ RADSLICE command ignored.
 
 *get,ar27,comp,%ARG1%,type
 *if,ar27,eq,8,then
-  smType = 'AREA'
+  ar28 = 'AREA'
 *elseif,ar27,eq,9,then
-  smType = 'VOLU'
+  ar28 = 'VOLU'
 *else
   *msg,error,ar27
 RADSLICE error: expected ARG1 to be the name of an AREA (8) or VOLUME (9) component, but got %I instead.%/&
@@ -51,10 +51,13 @@ RADSLICE command ignored.
   *return,-1
 *endif
 
-ar23 = 'RADSLICE_COMPL_output'
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,3,then
   ar23 = ARG3
+*elseif,ar28,eq,'AREA',then
+  ar23 = 'RADSLICE_COMPL_output'
+*elseif,ar28,eq,'VOLU',then
+  ar23 = 'RADSLICE_COMPA_output'
 *endif
 
 ! Prepare environment
@@ -68,7 +71,7 @@ csys,ar31
 
 ! Calculate slicer cylinder height
 cmsel,s,%ARG1%
-*if,smType,eq,'VOLU',then
+*if,ar28,eq,'VOLU',then
   aslv,s
 *endif
 lsla,s
@@ -89,10 +92,10 @@ ar26 = vlnext(0)
 
 ! Slice solid model
 cmsel,s,RADSLICE_COMPA_slicer
-*if,smType,eq,'AREA',then
+*if,ar28,eq,'AREA',then
   cmsel,a,%ARG1%
   asba,%ARG1%,RADSLICE_COMPA_slicer,,delete,keep
-*elseif,smType,eq,'VOLU',then
+*elseif,ar28,eq,'VOLU',then
   cmsel,s,%ARG1%
   vsba,%ARG1%,RADSLICE_COMPA_slicer,,delete,keep
 *endif
@@ -100,19 +103,15 @@ cmsel,s,RADSLICE_COMPA_slicer
 ! Delete slicer entities
 cmdele,RADSLICE_COMPA_slicer
 vdele,ar26,,,1
-*if,smType,eq,'AREA',then
-  cm,%ARG1%,area
-*elseif,smType,eq,'VOLU',then
-  cm,%ARG1%,volu
-*endif
+cm,%ARG1%,%ar28%
 
 ! Create component: lines or areas at sliced ring
-*if,smType,eq,'AREA',then
+*if,ar28,eq,'AREA',then
   cmsel,s,%ARG1%
   lsla,s
   lsel,r,loc,x,ARG2
   cm,%ar23%,line
-*elseif,smType,eq,'VOLU',then
+*elseif,ar28,eq,'VOLU',then
   cmsel,s,%ARG1%
   aslv,s
   asel,r,loc,x,ARG2
