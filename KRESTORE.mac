@@ -1,4 +1,4 @@
-! KRESTORE
+! krestore
 ! KRESTORE
 
 ! Description:
@@ -8,11 +8,15 @@
 ! -
 
 ! Local parameters:
-! AR20: parType
+! ar20: parType
+! ar21: cmType
+! ar22: expectedType
 
 ! Global parameters:
 ! KBACKUP_
 
+
+ar22 = 6
 
 *get,ar20,parm,KBACKUP_,type
 
@@ -30,10 +34,18 @@ KRESTORE command is ignored.
   *return,-1
 *endif
 
+*get,ar21,comp,KBACKUP_CM_%KBACKUP_%,type
+*if,ar21,ne,ar22,then
+  *msg,warn
+KRESTORE warning: backed up selection component already deleted.%/&
+No selection operation performed.
+  KBACKUP_ = KBACKUP_-1
+  *return,-1
+*endif
+
 ! Select & delete last backed up named selection component
 cmsel,s,KBACKUP_CM_%KBACKUP_%
 cmdele,KBACKUP_CM_%KBACKUP_%
 
 ! Update backup counter
-KBACKUP_=KBACKUP_-1
-
+KBACKUP_ = KBACKUP_-1

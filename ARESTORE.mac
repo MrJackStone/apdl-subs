@@ -8,11 +8,15 @@
 ! -
 
 ! Local parameters:
-! AR20: parType
+! ar20: parType
+! ar21: cmType
+! ar22: expectedType
 
 ! Global parameters:
 ! ABACKUP_
 
+
+ar22 = 8
 
 *get,ar20,parm,ABACKUP_,type
 
@@ -30,9 +34,18 @@ ARESTORE command is ignored.
   *return,-1
 *endif
 
+*get,ar21,comp,ABACKUP_CM_%ABACKUP_%,type
+*if,ar21,ne,ar22,then
+  *msg,warn
+ARESTORE warning: backed up selection component already deleted.%/&
+No selection operation performed.
+  ABACKUP_ = ABACKUP_-1
+  *return,-1
+*endif
+
 ! Select & delete last backed up named selection component
 cmsel,s,ABACKUP_CM_%ABACKUP_%
 cmdele,ABACKUP_CM_%ABACKUP_%
 
 ! Update backup counter
-ABACKUP_=ABACKUP_-1
+ABACKUP_ = ABACKUP_-1

@@ -1,4 +1,4 @@
-! VRESTORE
+! vrestore
 ! VRESTORE
 
 ! Description:
@@ -8,11 +8,15 @@
 ! -
 
 ! Local parameters:
-! AR20: parType
+! ar20: parType
+! ar21: cmType
+! ar22: expectedType
 
 ! Global parameters:
 ! VBACKUP_
 
+
+ar22 = 9
 
 *get,ar20,parm,VBACKUP_,type
 
@@ -30,11 +34,18 @@ VRESTORE command is ignored.
   *return,-1
 *endif
 
+*get,ar21,comp,VBACKUP_CM_%VBACKUP_%,type
+*if,ar21,ne,ar22,then
+  *msg,warn
+VRESTORE warning: backed up selection component already deleted.%/&
+No selection operation performed.
+  VBACKUP_ = VBACKUP_-1
+  *return,-1
+*endif
+
 ! Select & delete last backed up named selection component
 cmsel,s,VBACKUP_CM_%VBACKUP_%
 cmdele,VBACKUP_CM_%VBACKUP_%
 
 ! Update backup counter
-VBACKUP_=VBACKUP_-1
-
-! TODO  handle case in which an operation deletes a backed up component
+VBACKUP_ = VBACKUP_-1

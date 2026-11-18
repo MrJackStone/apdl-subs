@@ -1,4 +1,4 @@
-! LRESTORE
+! lrestore
 ! LRESTORE
 
 ! Description:
@@ -8,11 +8,15 @@
 ! -
 
 ! Local parameters:
-! AR20: parType
+! ar20: parType
+! ar21: cmType
+! ar22: expectedType
 
 ! Global parameters:
 ! LBACKUP_
 
+
+ar22 = 7
 
 *get,ar20,parm,LBACKUP_,type
 
@@ -30,9 +34,18 @@ LRESTORE command is ignored.
   *return,-1
 *endif
 
+*get,ar21,comp,LBACKUP_CM_%LBACKUP_%,type
+*if,ar21,ne,ar22,then
+  *msg,warn
+LRESTORE warning: backed up selection component already deleted.%/&
+No selection operation performed.
+  LBACKUP_ = LBACKUP_-1
+  *return,-1
+*endif
+
 ! Select & delete last backed up named selection component
 cmsel,s,LBACKUP_CM_%LBACKUP_%
 cmdele,LBACKUP_CM_%LBACKUP_%
 
 ! Update backup counter
-LBACKUP_=LBACKUP_-1
+LBACKUP_ = LBACKUP_-1
