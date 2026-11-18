@@ -37,4 +37,4 @@ cmdele,VBACKUP_CM_%VBACKUP_%
 ! Update backup counter
 VBACKUP_=VBACKUP_-1
 
-
+! TODO  handle case in which an operation deletes a backed up component
