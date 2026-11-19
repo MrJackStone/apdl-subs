@@ -102,6 +102,7 @@ cmsel,s,RADSLICE_COMPA_slicer
 
 ! Delete slicer entities
 cmdele,RADSLICE_COMPA_slicer
+vsel,a,volu,,ar26
 vdele,ar26,,,1
 cm,%ARG1%,%ar28%
 
