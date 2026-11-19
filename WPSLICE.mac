@@ -26,7 +26,7 @@
 ! Local parameters:
 ! ar20: parType
 ! ar21: plane
-! ar23: csNum
+! ar23: useGivenCS
 ! ar24: entKey
 ! ar25: sepoOpt
 ! ar31: thetaXY
@@ -87,7 +87,7 @@ ar23 = 0
 *get,ar20,parm,ARG3,type
 *if,ar20,eq,0,then
   *if,ARG3,ge,11,then
-    ar23 = ARG3
+    ar23 = 1
   *endif
 *endif
 
@@ -100,7 +100,10 @@ ar25 = ''
 *endif
 
 ! Position working plane
-wpcsys,-1,ar23
+*if,ar23,eq,1,then
+  wpcsys,-1,ARG3
+*endif
+
 wprota,ar31,ar32,ar33
 wpoffs,,,ARG2
 
